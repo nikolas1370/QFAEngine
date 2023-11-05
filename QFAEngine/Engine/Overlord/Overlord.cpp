@@ -159,9 +159,28 @@ void QFAOverlord::ProcessTick()
 {
     if (!CurentWorld->IsValid())
         return;
-    float delta = (float)QTime::GetDeltaTime();
 
+    float delta = (float)QTime::GetDeltaTime();
     for (int i = 0; i < CurentWorld->ActorCount; i++)
+    {
         if (CurentWorld->Actors[i]->IsValid() && CurentWorld->Actors[i]->CanTick)
-            CurentWorld->Actors[i]->Tick(delta);
+        {
+            CurentWorld->Actors[i]->Tick(delta);          
+            ProcessSceneComponentTick(CurentWorld->Actors[i]->RootComponent);
+        }
+    }
+}
+
+void QFAOverlord::ProcessSceneComponentTick(QSceneComponent* component)
+{
+    if (!component->IsValid())
+        return;
+
+    float delta = (float)QTime::GetDeltaTime();
+    if (component->CanTick)
+        component->TickComponent(delta);
+
+    for (int i = 0; i < component->CountComponent; i++)
+        if (component->ListComponents[i]->IsValid())
+            ProcessSceneComponentTick(component->ListComponents[i]);
 }

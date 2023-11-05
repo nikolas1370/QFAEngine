@@ -25,6 +25,8 @@ class QFAOverlord
 	static void ProcessComponentShadow(QSceneComponent* component);
 	static void ProcessTick();
 
+	static void ProcessSceneComponentTick(QSceneComponent* component);
+
 	// call only from QWorld.Activate()
 	static void SetWorld(QWorld* world); // Activate
 	// call only from QCameraComponent.Activate()

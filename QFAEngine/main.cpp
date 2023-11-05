@@ -220,6 +220,7 @@ bool loxGlobal(Ray r, float &t, glm::vec3 lb, glm::vec3 rt)
 #include <Overlord/Overlord.h>
 #include <Object/Camera.h>
 #include "GameCode/TestActor.h"
+#include "GameCode/TestComponent.h"
 
 /*---*/
 
@@ -397,6 +398,8 @@ int main()
 
     ATestActor* TA = new ATestActor;
     mainWorld->AddActor(TA);
+    QTestComponent* TC = new QTestComponent;
+    TA->SetRootComponent(TC);
 
     mainWorld->Activate();
     camera.Activate();

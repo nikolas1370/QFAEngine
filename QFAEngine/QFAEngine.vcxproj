@@ -161,6 +161,7 @@
     <ClCompile Include="Engine\Render\Buffer\Framebuffer.cpp" />
     <ClCompile Include="Engine\Render\Time.cpp" />
     <ClCompile Include="GameCode\TestActor.cpp" />
+    <ClCompile Include="GameCode\TestComponent.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Engine\Tools\File\OBJLoader.cpp" />
     <ClCompile Include="Engine\Tools\Debug\OpenGlStuffcpp.cpp" />
@@ -197,6 +198,7 @@
     <ClInclude Include="Engine\Render\Shader\ShaderProgram.h" />
     <ClInclude Include="Engine\Object\Actor\Actor.h" />
     <ClInclude Include="GameCode\TestActor.h" />
+    <ClInclude Include="GameCode\TestComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\DirectionLightShadow\Fragment.shader" />
