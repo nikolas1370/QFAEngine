@@ -5,8 +5,8 @@
 
 
 // "", ""
-ShaderProgram* QStaticMesh::SShaderProgram = nullptr;
-ShaderProgram* QStaticMesh::SShaderShadowProgram = nullptr;
+QFAShaderProgram* QStaticMesh::SShaderProgram = nullptr;
+QFAShaderProgram* QStaticMesh::SShaderShadowProgram = nullptr;
 std::string QStaticMesh::VertexShaderPath = "Engine/Shaders/VertexShader.shader";
 std::string QStaticMesh::FragmentShaderPath = "Engine/Shaders/PixelShader.shader";
 
@@ -26,17 +26,14 @@ void QStaticMesh::SetMesh(MeshFrames* meshFrames)
 	//last MeshFrames need delete
 	if (!SShaderProgram)
 	{
-		SShaderProgram = new ShaderProgram(VertexShaderPath, FragmentShaderPath);
-		SShaderShadowProgram = new ShaderProgram(VertexShadowShaderPath, FragmentShadowShaderPath);
+		SShaderProgram = new QFAShaderProgram(VertexShaderPath, FragmentShaderPath);
+		SShaderShadowProgram = new QFAShaderProgram(VertexShadowShaderPath, FragmentShadowShaderPath);
 	}
-	if (!meshFrames)
-	{
-		__debugbreak();
-		return;
-	}
+	
 
 	MFs = meshFrames;
 
+	
 	/*    vertex Buffer    */
 //GLuint vertexBuffer; // unique id all in opengl have it
 /* buffer in gpu */
@@ -73,7 +70,11 @@ void QStaticMesh::SetMesh(MeshFrames* meshFrames)
 	here problem
 	new QStaticMesh(LoadModel(path, 0));
 	*/
-	GLCall(glBufferData(GL_ARRAY_BUFFER, MFs->GetVerticesSize(), MFs->GetVerticesDate(), GL_STATIC_DRAW));// specify what data and size
+
+	// both for debug
+	SSVertexMaterial* xc = MFs->GetVerticesDate();
+	size_t zx = MFs->GetVerticesSize();
+	GLCall(glBufferData(GL_ARRAY_BUFFER, zx, xc, GL_STATIC_DRAW));// specify what data and size
 	//  glBufferSubData,   modify data
 	/*   IndexBuffer   */ 
 

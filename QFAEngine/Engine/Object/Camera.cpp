@@ -1,4 +1,21 @@
 #include "Camera.h"
+#include <Overlord/Overlord.h>
+void Camera::Activate()
+{
+	if (!IsValid())
+		return;
+
+	QFAOverlord::SetCamera(this);
+	IsActive = true;
+}
+
+void Camera::Deactivate()
+{
+	if (!IsValid())
+		return;
+
+	IsActive = false;
+}
 
 Camera::Camera(float fov, float viewDistance)
 {

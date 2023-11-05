@@ -12,10 +12,10 @@
 
 class QMesh : public QMeshBaseComponent
 {// in destructor delete buffers
-	friend Render;
+	friend QFARender;
 
-	static ShaderProgram* SShaderProgram;
-	static ShaderProgram* SShaderShadowProgram;
+	static QFAShaderProgram* SShaderProgram;
+	static QFAShaderProgram* SShaderShadowProgram;
 	static std::string VertexShaderPath;
 	static std::string FragmentShaderPath;
 
@@ -33,12 +33,12 @@ class QMesh : public QMeshBaseComponent
 
 protected:
 
-	inline ShaderProgram* GetShaderProgram() override
+	inline QFAShaderProgram* GetShaderProgram() override
 	{
 		return SShaderProgram;
 	}
 
-	inline ShaderProgram* GetShadowShaderProgram() override
+	inline QFAShaderProgram* GetShadowShaderProgram() override
 	{
 		return SShaderShadowProgram;
 	}

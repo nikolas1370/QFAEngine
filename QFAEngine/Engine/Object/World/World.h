@@ -3,20 +3,18 @@
 #include <Object/World/DirectionLight/DirectionLight.h>
 
 class QActor;
+class QFAOverlord;
+
 
 class QWorld : public QObject
 {
+	friend QFAOverlord;
 	/*- in futere be some else  */
+	bool IsActive = false;
+	
 public:
-
-	inline static QWorld* GetCurentWorld()
-	{
-		return QWorld::CurentWord;
-	}
-	inline static void SetCurentWorld(QWorld* world)
-	{
-		QWorld::CurentWord = world;
-	}
+	void Activate();
+	void Deactivate();
 
 private:
 	static QWorld* CurentWord;

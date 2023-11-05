@@ -5,9 +5,22 @@
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
 #include <Render/Time.h>
 #include <Object/World/World.h>
+#include <Overlord/Overlord.h>
 
+int QFARender::countFarame = 0;
+double QFARender::acumulateDeltatime = 0.0;
+GLuint QFARender::color_renderbuffer;
+GLFWwindow* QFARender::Window;
+glm::mat4 QFARender::MatrixPerspective;
+Camera* QFARender::CurentCamera;
+unsigned int QFARender::framebuffer;
 
-float Render::VertexMain[] =
+QFAShaderProgram* QFARender::ProgramMain;
+unsigned int QFARender::VAOMain = 0;
+GLuint QFARender::IBOMain;
+GLuint QFARender::VBOMain; // unique id all in opengl have it
+
+float QFARender::VertexMain[] =
 {
 	-1.0f, -1.0f, 0.0f, 0.0f, 
 	-1.0f,  1.0f, 0.0f, 1.0f, 
@@ -15,14 +28,13 @@ float Render::VertexMain[] =
 	 1.0f, -1.0f, 1.0f, 0.0f, 
 };
 
-unsigned int Render::indexsMain[] =
+unsigned int QFARender::indexsMain[] =
 {
 	0,1,2,2,3,0
 };
 
-void Render::InitMainFrameBuffer()
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, 0); 
+void QFARender::InitMainFrameBuffer()
+{	
 	GLCall(glGenVertexArrays(1, &VAOMain));
 	GLCall(glBindVertexArray(VAOMain));
 	
@@ -39,10 +51,10 @@ void Render::InitMainFrameBuffer()
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBOMain));
 	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexsMain), indexsMain, GL_STATIC_DRAW));
 
-	ProgramMain = new ShaderProgram("Engine/Shaders/MainFrameBuffer/Vertex.shader", "Engine/Shaders/MainFrameBuffer/fragment.shader");
+	ProgramMain = new QFAShaderProgram("Engine/Shaders/MainFrameBuffer/Vertex.shader", "Engine/Shaders/MainFrameBuffer/fragment.shader");
 }
 
-void Render::InitSecondFrameBuffer()
+void QFARender::InitSecondFrameBuffer()
 {
 	glGenFramebuffers(1, &framebuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);//GL_FRAMEBUFFER read and write (GL_DRAW_FRAMEBUFFER only write)
@@ -67,7 +79,7 @@ void Render::InitSecondFrameBuffer()
 		std::cout << "!--------------------------------" << std::endl;
 }
 
-void Render::CopyToMain()
+void QFARender::CopyToMain()
 {	
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -76,7 +88,7 @@ void Render::CopyToMain()
 	glfwSwapBuffers(Window);
 }
 
-void Render::DrawDepthTexture(unsigned int depthMapId)
+void QFARender::DrawDepthTexture(unsigned int depthMapId)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
 	glDisable(GL_DEPTH_TEST);
@@ -102,7 +114,24 @@ void Render::DrawDepthTexture(unsigned int depthMapId)
 	glfwSwapBuffers(Window);
 }
 
-Render::Render()
+
+
+void QFARender::SetWindow(GLFWwindow* window)
+{
+	Window = window;
+}
+
+void QFARender::StartFrame(unsigned int _framebuffer)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);	
+	glViewport(0, 0, 600, 600);
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+}
+
+void QFARender::Init()
 {
 	glClearColor(0.1f, 0.1f, 0.1f, 1);
 	glEnable(GL_CULL_FACE);
@@ -116,30 +145,11 @@ Render::Render()
 	glfwSwapInterval(1);	// 0 vsync off, 1 full vsync, 2 half vsync
 }
 
-void Render::SetWindow(GLFWwindow* window)
+void QFARender::DrawMesh(QMeshBaseComponent* mesh)
 {
-	Window = window;
-}
+	
 
-void Render::StartFrame(unsigned int _framebuffer)
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);	
-	glViewport(0, 0, 600, 600);
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-}
-
-void Render::DrawMesh(QMeshBaseComponent* mesh)
-{
-	if (!CurentCamera)
-	{
-		std::cout << "Render::DrawMesh camera not set" << std::endl;
-		return;
-	}
-
-	ShaderProgram* shaderProgram = mesh->GetShaderProgram();
+	QFAShaderProgram* shaderProgram = mesh->GetShaderProgram();
 	mesh->Bind();
 	
 	// now MatrixPerspective send each drawCall in future be change when camera or window change
@@ -162,7 +172,7 @@ void Render::DrawMesh(QMeshBaseComponent* mesh)
 
 
 
-	QDirectionLight* dl = QWorld::GetCurentWorld()->GetDirectionDight();
+	QDirectionLight* dl = QFAOverlord::GetCurentWorld()->GetDirectionDight();
 	if (dl->CastShadows)
 	{		
 		dl->SetLightMatrix(CurentCamera->GetOpenGLPosition(), shaderProgram);		
@@ -178,21 +188,28 @@ void Render::DrawMesh(QMeshBaseComponent* mesh)
 	GLCall(glDrawElements(GL_TRIANGLES, mesh->GetIndexCount(), GL_UNSIGNED_INT, nullptr));	
 }
 
-void Render::DrawMeshShadow(QMeshBaseComponent* mesh)
+void QFARender::DrawMeshShadow(QMeshBaseComponent* mesh)
 {
 	mesh->Bind(true);
-	ShaderProgram* shaderProgram = mesh->GetShadowShaderProgram();
-	QWorld::GetCurentWorld()->GetDirectionDight()->SetLightMatrix(CurentCamera->GetOpenGLPosition(), shaderProgram);		
+	QFAShaderProgram* shaderProgram = mesh->GetShadowShaderProgram();
+	QFAOverlord::GetCurentWorld()->GetDirectionDight()->SetLightMatrix(CurentCamera->GetOpenGLPosition(), shaderProgram);		
 	shaderProgram->SetModelMatrix(mesh->ModelMatrix);
 
 	GLCall(glDrawElements(GL_TRIANGLES, mesh->GetIndexCount(), GL_UNSIGNED_INT, nullptr));
 }
 
-void Render::EndFrame()
+void QFARender::EndFrame(bool blankScreen)
 {
-	if (!Window)
+
+
+	if (blankScreen)
 	{
-		std::cout << "Render::EndFrame window not set" << std::endl;
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.1f, 0.1f, 0.1f, 1);
+		// glBlitFramebuffer — copy a block of pixels from the read framebuffer to the draw framebuffer
+		glBlitFramebuffer(0, 0, 600, 600, 0, 0, 600, 600, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		glfwSwapBuffers(Window);
 		return;
 	}
 
@@ -208,7 +225,7 @@ void Render::EndFrame()
 	}
 }
 
-void Render::SetCamera(Camera* camera)
+void QFARender::SetCamera(Camera* camera)
 {
 	CurentCamera = camera;
 }

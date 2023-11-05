@@ -3,7 +3,7 @@
 #include <Tools/Debug/OpenGlStuff.h>
 
 
-std::string Shader::readShader(const std::string path)
+std::string QFAShader::readShader(const std::string path)
 {
     std::ifstream stream(path);
     std::string line;
@@ -14,21 +14,21 @@ std::string Shader::readShader(const std::string path)
     return ss.str();
 }
 
-Shader::Shader()
+QFAShader::QFAShader()
 {
 }
 
-Shader::Shader(ShaderType st, const std::string& shader, bool isPath)
+QFAShader::QFAShader(ShaderType st, const std::string& shader, bool isPath)
 {
     CreateShader(st, shader, isPath);
 }
 
-unsigned int Shader::GetId() const
+unsigned int QFAShader::GetId() const
 {
     return ShaderID;
 }
 
-unsigned int Shader::CreateShader(ShaderType st, const std::string& shader, bool isPath)
+unsigned int QFAShader::CreateShader(ShaderType st, const std::string& shader, bool isPath)
 {
     if (init)
         return ShaderID;

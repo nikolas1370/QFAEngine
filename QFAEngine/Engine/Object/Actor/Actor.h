@@ -11,6 +11,7 @@ class QActor : public QObject
 	for write on position rotation scale
 	*/
 	friend QSceneComponent;
+	friend QWorld;
 
 	
 	// SceneComponent
@@ -19,7 +20,8 @@ class QActor : public QObject
 	FVector Rotation = FVector(0);
 	FVector Scale = FVector(1);
 	
-	//friend Render;
+	
+	// actor live in this world
 	QWorld* ActorWorld;
 public:
 

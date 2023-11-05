@@ -1,7 +1,7 @@
 #include "Mesh.h"
 
-ShaderProgram* QMesh::SShaderProgram = nullptr;
-ShaderProgram* QMesh::SShaderShadowProgram = nullptr;
+QFAShaderProgram* QMesh::SShaderProgram = nullptr;
+QFAShaderProgram* QMesh::SShaderShadowProgram = nullptr;
 std::string QMesh::VertexShaderPath = "Engine/Shaders/VertexShaderAnimInterpolation.shader";
 std::string QMesh::FragmentShaderPath = "Engine/Shaders/PixelShader.shader";
 
@@ -125,8 +125,8 @@ QMesh::QMesh(MeshFrames* mf)
 {
 	if (!SShaderProgram)
 	{
-		SShaderProgram = new ShaderProgram(VertexShaderPath, FragmentShaderPath);
-		SShaderShadowProgram = new ShaderProgram(VertexShaderShaderPath, FragmentShaderShaderPath);
+		SShaderProgram = new QFAShaderProgram(VertexShaderPath, FragmentShaderPath);
+		SShaderShadowProgram = new QFAShaderProgram(VertexShaderShaderPath, FragmentShaderShaderPath);
 	}
 
 	if (!mf)

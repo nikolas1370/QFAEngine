@@ -25,7 +25,7 @@ Here are just classes and example situations where you need them
     http://www.essentialmath.com/
 */
 
-#include <Render/Render.h>
+
 
 #include "Math/Vector.h"
 //#include <Object/Mesh/Mesh.h> hidden
@@ -76,7 +76,7 @@ Vector Down
 */
 
 //#include "Object.h"
-#include <Object/Camera.h>
+
 #include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
 //#include <Object/Mesh/StaticMesh.h>
  
@@ -110,6 +110,7 @@ Vector Down
 FVector moveCam;// 
 FVector rotCam;
 
+/*
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 
@@ -207,135 +208,33 @@ bool loxGlobal(Ray r, float &t, glm::vec3 lb, glm::vec3 rt)
 
 
 
-/*// https://docs.fileformat.com/3d/obj/
-v  vertex
-vt uv coordinate // texture coordinate
-vn vertex normal  // can be not normalize
-
-// face // triangle
-f 12/1/4 21/2/5 11/3/6
-12 = number vertex     -1 last vertex
-1  = number texture coord
-4  = number vertex normal
-
-f possibly be
-f 1 // only vertex
-f 1/2 // only vertex and textyre
-f 1//3 vertex and normal
-
-
-
-mtllib namefileWithMetaData.mtl // texture and 
-map_Kd texture diffuse
-map_Ks texture specular
-*/
-
+/*/
 #include <Tools/File/OBJLoader.h>
 
 #include <Tools/File/FileLoader.h>
-#include <Render/Time.h>
+//#include <Render/Time.h>
 
 #include <Object/Actor/Actor.h>
 #include <Object/World/World.h>
 
-
+#include <Overlord/Overlord.h>
+#include <Object/Camera.h>
 
 /*---*/
 
 
-Render* Ren;
-void ComponentProcess(QSceneComponent* component)
-{
-    if (!component->IsValid())
-        return;
-    
-    if (QMeshBaseComponent* mesh = dynamic_cast<QMeshBaseComponent*>(component))
-        Ren->DrawMesh(mesh);
-    
-    for (int i = 0; i < component->CountComponent; i++)
-        if (component->ListComponents[i]->IsValid())
-            ComponentProcess(component->ListComponents[i]);
-}
-
-void ComponentProcessShadow(QSceneComponent* component)
-{
-    if (!component->IsValid())
-        return;
-
-    if (QMeshBaseComponent* mesh = dynamic_cast<QMeshBaseComponent*>(component))
-        if (mesh->GetCastShadow())
-            Ren->DrawMeshShadow(mesh);
-
-    for (int i = 0; i < component->CountComponent; i++)
-        if (component->ListComponents[i]->IsValid())
-            ComponentProcess(component->ListComponents[i]);
-}
 
 
-/*
-
-*/
 
 int main()
 {    
-    if (!glfwInit()) 
-    {
-        ASSERT(false);
-        return -1;
-    }
-    QTime::Init();
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); 
-    //
-
-    /* Create a windowed mode window and its OpenGL context */
-    //window = glfwCreateWindow(1230, 640, "Hello World", NULL, NULL);
-    GLFWwindow* window = glfwCreateWindow(600, 600, "Hello World", NULL, NULL);
-
-
-    std::cout << "LoxPidor "  << std::endl;
-
-
-    if (!window)
-    {
-        glfwTerminate();
-        ASSERT(false);
-        // зробить для реліза якісб штуки шоб користувач бачив повідомлення
-        
-        return -1;
-    }
-
-
-    glfwMakeContextCurrent(window);
-
-
-    if (glewInit() != GLEW_OK)
-    {
-        glfwTerminate();
-
-        ASSERT(false);
-        return -1;
-    }
-
     
-
-    std::cout << "openGL VERSION "  <<" " << glGetString(GL_VERSION) << std::endl;
-    
-
+    QFAOverlord::Init();
     
     QMesh* MeshA = OBJLoader::LoadModelWithAnimate("NoEngineModel/anim/dore_1.obj", 30); 
     QStaticMesh* Mesh = OBJLoader::LoadModel("NoEngineModel/quad2.obj");//(vertecis, sizeof(vertecis), indices, sizeof(indices) / sizeof(unsigned int));
     QStaticMesh* Arrow = OBJLoader::LoadModel("NoEngineModel/Arrow.obj");
     Arrow->Name = "Arrow";
-
-
-    
-
-
-
-
 
     /*
     * 
@@ -344,12 +243,11 @@ int main()
     * 
     */
     //Mesh->SetMesh(MeshA->Mf);
-    Render render;
-    Ren = &render;
+//    Render render;
+
         
     QWorld* mainWorld = new QWorld();
     //mainWorld->GetDirectionDight()->SetCastShadow(false);
-    QWorld::SetCurentWorld(mainWorld);
 
     QActor* firstActor = new QActor();
     QActor* secondActor = new QActor();
@@ -359,11 +257,8 @@ int main()
     QActor* animActor = new QActor();
 
     firstActor->SetRootComponent(Arrow);
-
-
     
-    secondActor->SetRootComponent(Mesh); 
-    
+    secondActor->SetRootComponent(Mesh);   
     
 
     animActor->SetRootComponent(MeshA);
@@ -375,26 +270,6 @@ int main()
 
     mainWorld->AddActor(animActor);    
     mainWorld->AddActor(firstActor);
-  
-    
-
-     
-
-    //Arrow->SetWorldPosition(FVector(10, -7, 0));
-    //Arrow2.SetPosition(FVector(10, 0, 0));
-    //Arrow->SetScale(FVector(1, 1, 1));    
-    
-
-    //Arrow->SetRotation(FVector(97, 157, 17));
-    //Arrow->SetRotation(FVector(0 , 0, 0));
-    //Arrow->SetRotation(FVector(0, 0, 0));
-    
-    //Mesh->SetWorldPosition(FVector(10, 6, 0));
-    //Mesh->SetScale(FVector(1, 1, 1));
-    //Mesh->SetRotation(FVector(0, 0, 0));
-
-
-
     
     /* -----------*/
     
@@ -424,8 +299,7 @@ int main()
     qwd.Name = "Main na";
     thirdActor->SetRootComponent(&qwd);
 
-    // попробувать так  
-    // thirdActor->SetActorRotation(FVector(90, 0, 0));
+    
 
     QStaticMesh qwdC = *Mesh;
     
@@ -439,21 +313,6 @@ int main()
     qwdC.SetRelativePosition(FVector(0, 0, 5));
     qwdC.AttachComponent(Arrow);    
 
-    
-    /*
-    створи другого актора з такимже мешом і помісти збоку 
-        чи за частину метра зпереду або заду
-    і чогось не робить різниця між відносними величинами
-        */
-    //thirdActor->SetActorScale(1.0);
-
-
-    /*
-    
-    скрісь де юзається позиція відносна дожна і буть множення 
-    на скейл
-    */
-     
 
     
     thirdActor->SetActorRotation(FVector(90, 0, 0));
@@ -496,7 +355,7 @@ int main()
     QStaticMesh FloorF = *Mesh;
     FloorF.SetScale(FVector(1, 80, 80));
     
-    floorActor->SetActorPosition(FVector(50, 0, 0));
+    floorActor->SetActorPosition(FVector(-10, 0, 0));
 
     floorActor->SetRootComponent(&FloorF);
     mainWorld->AddActor(floorActor);
@@ -527,73 +386,34 @@ int main()
     camera.SetWorldPosition(FVector(0, 0, 0));
     //camera.SetRotation(FVector(-110, 370, 940)); //test
     camera.SetRotation(FVector(0, 0,  0));
+
+    
+    
+
+    //glfwSetKeyCallback(window, key_callback);
+    
+    //glfwSetMouseButtonCallback(window, mouse_callback);
+
+
+
+
+    // do in camera function active and in overlord active self and disactive other
+    //render.SetCamera(&camera);      
+    mainWorld->Activate();
+    camera.Activate();
+    QFAOverlord::StartLife();
+
+    
     /*
-    QStaticMesh MeshLight = *Mesh;
-    MeshLight.SetPosition(camera.GetPosition());
-    MeshLight.SetScale(FVector(0.2f, 0.2f, 0.2f));
-    */
-    //render.lightPos = glm::vec3(camera.GetPosition().X, camera.GetPosition().Y, camera.GetPosition().Z);
-    
-    /*-- shadow */
-
-    /* light shine box */
-    char VerShine[] =
-        "#version 400 core\n\
-        layout(location = 0) in vec4 LocalPosition;\n\
-        uniform mat4 projection;\n\
-        uniform mat4 model;\n\
-        uniform mat4 cameraR;\n\
-        uniform vec3 cameraP;\n\
-        void main()\n\
-        {\n\
-            vec4 worldPosition = model * LocalPosition;\n\
-            vec4 cameraPosition = worldPosition;\n\
-\n\
-            cameraPosition.x = worldPosition.x - cameraP.x;\n\
-            cameraPosition.y = worldPosition.y - cameraP.y;\n\
-            cameraPosition.z = worldPosition.z - cameraP.z;\n\
-            gl_Position = projection * cameraR * cameraPosition;\n\
-        };";
-
-    // char *
-    char FragShine[] =
-    "#version 400 core\n\
-    layout(location = 0) out vec4 FragColor;\n\
-    void main()\n\
-    {\n\
-        FragColor = vec4(1.0);\n\
-    }";
-    
-    ShaderProgram spShine(VerShine, FragShine, false);
-
-
-
-   // ShaderProgram sp("Shader/VertexShader.shader", "Shader/PixelShader.shader");
-    //ShaderProgram spA("Shader/VertexShaderAnimInterpolation.shader", "Shader/PixelShaderAnim.shader");
-
-
-    
-    //render.UseGlProgram(&sp);
-    render.SetWindow(window);
-    render.SetCamera(&camera);      
-    
-
-    glfwSetKeyCallback(window, key_callback);
-    
-    glfwSetMouseButtonCallback(window, mouse_callback);
-
-
-    
-    while (!glfwWindowShouldClose(window))
+    while ()
     {
         //std::cout << QTime::GetTime() << std::endl;
         //std::cout << QTime::GetTimeSystem() << std::endl;
 
         //render.StartFrameShadow();
         //MeshA->StartFrame();
-        /* event hendel*/
-        QTime::CalcDeltaTime();
-        glfwPollEvents();
+
+
 
 
         
@@ -617,7 +437,6 @@ int main()
         // recoment na
         camera.SetRotation(curRot);
      
-        /*---*/
 
         Ray ray;
         ray.dir = glm::vec3(0, 0, -1);
@@ -632,39 +451,13 @@ int main()
         loxGlobal(ray, len, lb, rt);
         //std::cout << len << std::endl;
 
-        /* Render here */             
-        /*FVector rot = Mesh->GetRotation();
-        rot.Z += 0.5f;*/
-        //Mesh->SetRotation(rot);
 
-        /*FVector rot2 = Mesh2.GetRotation();
-        rot2.Z += 0.5f;        
-        Mesh2.SetRotation(rot2);
-        **/
-        //MeshA->SetRotation(rot2);       
+  
 
-
-  /*----*/
-        QDirectionLight* DL = mainWorld->GetDirectionDight();
-        DL->StartFrame();
-        if (DL->GetCastShadow())
-            for (int i = 0; i < mainWorld->ActorCount; i++)
-                if (mainWorld->Actors[i]->RootComponent->IsValid())
-                    ComponentProcessShadow(mainWorld->Actors[i]->RootComponent);
-                
-        render.StartFrame();
-          
-        for (int i = 0; i < mainWorld->ActorCount; i++)
-            if (mainWorld->Actors[i]->RootComponent->IsValid())
-                ComponentProcess(mainWorld->Actors[i]->RootComponent);
-
-        //render.DrawMesh(&MeshLight, &spShine);
-        
-        render.EndFrame();
     }
+  ----*/  
+
     
-    glfwTerminate();
-    glfwDestroyWindow(window);
     return 0;
 }
 

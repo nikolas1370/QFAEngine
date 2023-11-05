@@ -5,17 +5,17 @@
 #include <iostream>
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>// for Material
 
-unsigned int ShaderProgram::CurentRunProgramId = 1234567890;
+unsigned int QFAShaderProgram::CurentRunProgramId = 1234567890;
 
-ShaderProgram::ShaderProgram(std::string vertex, std::string fragment, bool isPath, std::string geometry)
+QFAShaderProgram::QFAShaderProgram(std::string vertex, std::string fragment, bool isPath, std::string geometry)
 {
     for (int i = 0; i < 101; i++)
         LocationMaterials[i] = -2;
 
     GLCall(ShaderProgramId = glCreateProgram());
-    Shader vs(ShaderType::STVertex, vertex, isPath);
-    Shader ps(ShaderType::STFragment, fragment, isPath);    
-    Shader gs;
+    QFAShader vs(ShaderType::STVertex, vertex, isPath);
+    QFAShader ps(ShaderType::STFragment, fragment, isPath);
+    QFAShader gs;
  
     
 
@@ -54,13 +54,13 @@ ShaderProgram::ShaderProgram(std::string vertex, std::string fragment, bool isPa
 
 }
 
-ShaderProgram::~ShaderProgram()
+QFAShaderProgram::~QFAShaderProgram()
 {
 }
 
 
 
-void ShaderProgram::SetProjectionMatrix(const glm::mat4& matrix)
+void QFAShaderProgram::SetProjectionMatrix(const glm::mat4& matrix)
 {
     // remove
     //Use();
@@ -69,7 +69,7 @@ void ShaderProgram::SetProjectionMatrix(const glm::mat4& matrix)
         GLCall(LocationProjectionMatrix = glGetUniformLocation(ShaderProgramId, "projection"));
         if (LocationProjectionMatrix == -1)
         {
-            std::cout << "ShaderProgram::SetProjectionMatrix in shader problem not found uniform \"projection\"" << std::endl;
+            std::cout << "QFAShaderProgram::SetProjectionMatrix in shader problem not found uniform \"projection\"" << std::endl;
             __debugbreak();
             return;
         }
@@ -78,7 +78,7 @@ void ShaderProgram::SetProjectionMatrix(const glm::mat4& matrix)
     GLCall(glUniformMatrix4fv(LocationProjectionMatrix, 1, false, &matrix[0][0]))
 }
 
-void ShaderProgram::SetCameraRotationMatrix(const glm::mat4& matrix)
+void QFAShaderProgram::SetCameraRotationMatrix(const glm::mat4& matrix)
 {
     if (LocationCameraRotationMatrix == -2)
     {
@@ -86,7 +86,7 @@ void ShaderProgram::SetCameraRotationMatrix(const glm::mat4& matrix)
         GLCall(LocationCameraRotationMatrix = glGetUniformLocation(ShaderProgramId, "cameraR"));
         if (LocationCameraRotationMatrix == -1)
         {
-            std::cout << "ShaderProgram::SetCameraRotationMatrix in shader problem not found uniform \"cameraR\"" << std::endl;
+            std::cout << "QFAShaderProgram::SetCameraRotationMatrix in shader problem not found uniform \"cameraR\"" << std::endl;
             __debugbreak();
             return;
         }        
@@ -95,14 +95,14 @@ void ShaderProgram::SetCameraRotationMatrix(const glm::mat4& matrix)
     GLCall(glUniformMatrix4fv(LocationCameraRotationMatrix, 1, false, &matrix[0][0]));
 }
 
-void ShaderProgram::SetCameraPosition(const FVector& position)
+void QFAShaderProgram::SetCameraPosition(const FVector& position)
 {
     if (LocationCameraPosition == -2)
     {
         GLCall(LocationCameraPosition = glGetUniformLocation(ShaderProgramId, "cameraP"));
         if (LocationCameraPosition == -1)
         {
-            std::cout << "ShaderProgram::SetCameraPosition in shader problem not found uniform \"cameraP\"" << std::endl;
+            std::cout << "QFAShaderProgram::SetCameraPosition in shader problem not found uniform \"cameraP\"" << std::endl;
             __debugbreak();
             return;
         }    
@@ -111,14 +111,14 @@ void ShaderProgram::SetCameraPosition(const FVector& position)
     GLCall(glUniform3f(LocationCameraPosition, position.X, position.Y, position.Z));
 }
 
-void ShaderProgram::SetModelMatrix(const glm::mat4& matrix)
+void QFAShaderProgram::SetModelMatrix(const glm::mat4& matrix)
 {
     if (LocationModelMatrix == -2)
     {
         GLCall(LocationModelMatrix = glGetUniformLocation(ShaderProgramId, "model"));
         if (LocationModelMatrix == -1)
         {
-            std::cout << "ShaderProgram::SetModelMatrix in shader problem not found uniform \"model\"" << std::endl;
+            std::cout << "QFAShaderProgram::SetModelMatrix in shader problem not found uniform \"model\"" << std::endl;
             __debugbreak();
             return;
         }
@@ -127,7 +127,7 @@ void ShaderProgram::SetModelMatrix(const glm::mat4& matrix)
     GLCall(glUniformMatrix4fv(LocationModelMatrix, 1, false, &matrix[0][0]));
 }
 
-void ShaderProgram::Use()
+void QFAShaderProgram::Use()
 {
     
     if (ShaderProgramId == CurentRunProgramId)
@@ -138,7 +138,7 @@ void ShaderProgram::Use()
     CurentRunProgramId = ShaderProgramId;
 }
 
-void ShaderProgram::SetInterpolationTime(const float interpolationTime)
+void QFAShaderProgram::SetInterpolationTime(const float interpolationTime)
 {
 
     if (LocationInterpolationTime == -2)
@@ -146,7 +146,7 @@ void ShaderProgram::SetInterpolationTime(const float interpolationTime)
         GLCall(LocationInterpolationTime = glGetUniformLocation(ShaderProgramId, "InterTime"));
         if (LocationInterpolationTime == -1)
         {
-            std::cout << "ShaderProgram::SetModelMatrix in shader problem not found uniform \"InterTime\"" << std::endl;
+            std::cout << "QFAShaderProgram::SetModelMatrix in shader problem not found uniform \"InterTime\"" << std::endl;
             __debugbreak();
             return;
         }
@@ -155,7 +155,7 @@ void ShaderProgram::SetInterpolationTime(const float interpolationTime)
     GLCall(glUniform1f(LocationInterpolationTime, interpolationTime));
 }
 
-void ShaderProgram::SetMaterials(Material* materials, int count)
+void QFAShaderProgram::SetMaterials(Material* materials, int count)
 {
     //if (count > 101)  do error
     
@@ -173,7 +173,7 @@ void ShaderProgram::SetMaterials(Material* materials, int count)
           //  std::cout << "QFA 2" << std::endl;
             if (LocationMaterials[i] == -1)
             {                
-                std::cout << "ShaderProgram::SetMaterial in shader problem not found uniform \"materials\"" << std::endl;
+                std::cout << "QFAShaderProgram::SetMaterial in shader problem not found uniform \"materials\"" << std::endl;
                 __debugbreak();
                 return;
             }
@@ -188,7 +188,7 @@ void ShaderProgram::SetMaterials(Material* materials, int count)
     
 
 }
-void ShaderProgram::SetDirectionShadowMap(unsigned int id, int textureSlote)
+void QFAShaderProgram::SetDirectionShadowMap(unsigned int id, int textureSlote)
 {// LocationDirectionShadowMap
     if (LocationDirectionShadowMap == -2)
     {
@@ -197,7 +197,7 @@ void ShaderProgram::SetDirectionShadowMap(unsigned int id, int textureSlote)
         //  std::cout << "QFA 2" << std::endl;
         if (LocationDirectionShadowMap == -1)
         {
-            std::cout << "ShaderProgram::SetDirectionShadowMap in shader problem not found uniform \"shadowMap\"" << std::endl;
+            std::cout << "QFAShaderProgram::SetDirectionShadowMap in shader problem not found uniform \"shadowMap\"" << std::endl;
             __debugbreak();
             return;
         }
@@ -209,7 +209,7 @@ void ShaderProgram::SetDirectionShadowMap(unsigned int id, int textureSlote)
     GLCall(glBindTexture(GL_TEXTURE_2D, id)); // bind texture to GL_TEXTURE0 + textureSlote
     GLCall(glUniform1i(LocationDirectionShadowMap, textureSlote));
 }
-void ShaderProgram::SetDirectionLigthMatrix(const glm::mat4& matrix)
+void QFAShaderProgram::SetDirectionLigthMatrix(const glm::mat4& matrix)
 {
     // 
     if (LocationDirectionLigthMatrix == -2)
@@ -219,7 +219,7 @@ void ShaderProgram::SetDirectionLigthMatrix(const glm::mat4& matrix)
         //  std::cout << "QFA 2" << std::endl;
         if (LocationDirectionLigthMatrix    == -1)
         {
-            std::cout << "ShaderProgram::SetDirectionLigthMatrix in shader problem not found uniform \"directionLightMatrix\"" << std::endl;
+            std::cout << "QFAShaderProgram::SetDirectionLigthMatrix in shader problem not found uniform \"directionLightMatrix\"" << std::endl;
             __debugbreak();
             return;
         }
@@ -227,7 +227,7 @@ void ShaderProgram::SetDirectionLigthMatrix(const glm::mat4& matrix)
 
     GLCall(glUniformMatrix4fv(LocationDirectionLigthMatrix, 1, false, &matrix[0][0]));
 }
-void ShaderProgram::SetShadowOn(bool castShadow)
+void QFAShaderProgram::SetShadowOn(bool castShadow)
 {
     
     
@@ -238,7 +238,7 @@ void ShaderProgram::SetShadowOn(bool castShadow)
         //  std::cout << "QFA 2" << std::endl;
         if (LocationShadowOn == -1)
         {
-            std::cout << "ShaderProgram::SetShadowOn in shader problem not found uniform \"shadowOn\"" << std::endl;
+            std::cout << "QFAShaderProgram::SetShadowOn in shader problem not found uniform \"shadowOn\"" << std::endl;
             __debugbreak();
             return;
         }

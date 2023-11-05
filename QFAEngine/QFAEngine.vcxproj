@@ -157,6 +157,7 @@
     <ClCompile Include="Engine\Object\ActorComponent\SceneComponent\Mesh\MeshBase.cpp" />
     <ClCompile Include="Engine\Object\Object.cpp" />
     <ClCompile Include="Engine\Object\World\World.cpp" />
+    <ClCompile Include="Engine\Overlord\Overlord.cpp" />
     <ClCompile Include="Engine\Render\Buffer\Framebuffer.cpp" />
     <ClCompile Include="Engine\Render\Time.cpp" />
     <ClCompile Include="main.cpp" />
@@ -178,6 +179,7 @@
     <ClInclude Include="Engine\Object\ActorComponent\SceneComponent\Mesh\StaticMesh.h" />
     <ClInclude Include="Engine\Object\Object.h" />
     <ClInclude Include="Engine\Object\World\World.h" />
+    <ClInclude Include="Engine\Overlord\Overlord.h" />
     <ClInclude Include="Engine\Render\Time.h" />
     <ClInclude Include="Engine\Tools\File\FileLoader.h" />
     <ClInclude Include="Engine\Render\Buffer\Framebuffer.h" />

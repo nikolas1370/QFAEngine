@@ -2,12 +2,12 @@
 #include <Object/Object.h>
 #include <Math/Vector.h>
 
-class ShaderProgram;
-class Render;
+class QFAShaderProgram;
+class QFARender;
 
 class QDirectionLight : public QObject
 {
-	friend Render;
+	friend QFARender;
 	unsigned int depthMapFBO;
 	const unsigned int SHADOW_WIDTH = 1000, SHADOW_HEIGHT = 1000;
 	unsigned int depthMap;
@@ -30,8 +30,8 @@ public:
 	/*
 		calsculate Light Matrix and set in shader
 	*/
-	void SetLightMatrix(const FVector& cameraPositionOpenGL, ShaderProgram* sp);
-	void SetShadowMap(ShaderProgram* sp);
+	void SetLightMatrix(const FVector& cameraPositionOpenGL, QFAShaderProgram* sp);
+	void SetShadowMap(QFAShaderProgram* sp);
 	inline bool GetCastShadow()
 	{
 		return CastShadows;

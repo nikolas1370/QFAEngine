@@ -50,7 +50,7 @@ void QDirectionLight::StartFrame()
 }
 
 
-void QDirectionLight::SetLightMatrix(const FVector& cameraPositionOpenGL, ShaderProgram* sp)
+void QDirectionLight::SetLightMatrix(const FVector& cameraPositionOpenGL, QFAShaderProgram* sp)
 {
 
 	float near_plane = 0.1f, far_plane = 700.5f;
@@ -73,7 +73,7 @@ void QDirectionLight::SetLightMatrix(const FVector& cameraPositionOpenGL, Shader
 	sp->SetDirectionLigthMatrix(lightSpaceMatrix);
 }
 
-void QDirectionLight::SetShadowMap(ShaderProgram* sp)
+void QDirectionLight::SetShadowMap(QFAShaderProgram* sp)
 {
 	sp->SetDirectionShadowMap(depthMap, 7);
 }

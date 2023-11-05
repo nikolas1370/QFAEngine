@@ -1,23 +1,30 @@
 #pragma once
 #include <Object/ActorComponent/SceneComponent/SceneComponent.h>
-class Render;
-
+class QFARender;
+class QFAOverlord;
 class Camera : public QSceneComponent
 {
+
+
 	// Field of view 
 	float Fov = 90;
 	float ViewDistance = 1000;
 	FVector CameraRotation;
 	glm::mat4 cameraRotationMatrex;	
-	friend Render;
+	friend QFARender;
+	friend QFAOverlord;
 	/*world opengl position */
 	inline FVector GetOpenGLPosition()// 
 	{
 		
 		return WorldPosition;
 	}
+
+	bool IsActive = true;
 public:
 
+	void Activate();
+	void Deactivate();
 	Camera(){}
 	Camera(float fov, float viewDistance);
 

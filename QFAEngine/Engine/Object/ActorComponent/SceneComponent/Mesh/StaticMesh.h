@@ -5,12 +5,12 @@
 
 
 
-class Render;
+class QFARender;
 
 
 class QStaticMesh :  public QMeshBaseComponent
 {
-    friend Render;
+    friend QFARender;
     MeshFrames* MFs;
     //friend Render;
     static const int MaxTextureSlot = 32;
@@ -30,8 +30,8 @@ class QStaticMesh :  public QMeshBaseComponent
 
 
 
-    static ShaderProgram* SShaderProgram;
-    static ShaderProgram* SShaderShadowProgram;
+    static QFAShaderProgram* SShaderProgram;
+    static QFAShaderProgram* SShaderShadowProgram;
 
     static std::string VertexShaderPath;
     static std::string FragmentShaderPath;
@@ -41,12 +41,12 @@ class QStaticMesh :  public QMeshBaseComponent
         // SShaderProgram = new ShaderProgram(VertexShaderPath, FragmentShaderPath);
 
 protected:
-    inline ShaderProgram* GetShaderProgram() override
+    inline QFAShaderProgram* GetShaderProgram() override
     {
         return SShaderProgram;
     }
 
-    inline ShaderProgram* GetShadowShaderProgram() override
+    inline QFAShaderProgram* GetShadowShaderProgram() override
     {
         return SShaderShadowProgram;
     }

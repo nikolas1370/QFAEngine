@@ -135,12 +135,12 @@ public:
 
 
 
-class ShaderProgram;
-class Render;
+class QFAShaderProgram;
+class QFARender;
 
 class QMeshBaseComponent : public QSceneComponent // abstract class
 {
-	friend Render;
+	friend QFARender;
 	
 protected:
 	unsigned int VAO;
@@ -154,8 +154,8 @@ protected:
 	void UpdateModelMatrix();
 
 
-	inline virtual ShaderProgram* GetShaderProgram() = 0;
-	inline virtual ShaderProgram* GetShadowShaderProgram() = 0;
+	inline virtual QFAShaderProgram* GetShaderProgram() = 0;
+	inline virtual QFAShaderProgram* GetShadowShaderProgram() = 0;
 	
 public:
 	QMeshBaseComponent();

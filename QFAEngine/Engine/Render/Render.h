@@ -3,45 +3,47 @@
 #include <Math/Math.h>
 struct GLFWwindow;
 class Camera;
-class ShaderProgram;
+class QFAShaderProgram;
 class QMeshBaseComponent;
-/* 
-Render must be created before someone else (QStaticMesh or some else)
-*/
-class Render
+class QFAOverlord;
+
+class QFARender
 {
-	int countFarame = 0;
-	double acumulateDeltatime = 0.0;
-	GLuint color_renderbuffer;
-	GLFWwindow* Window;
-	glm::mat4 MatrixPerspective;
-	Camera* CurentCamera;
-	unsigned int framebuffer;
+	friend QFAOverlord;
+
+	static int countFarame;
+	static double acumulateDeltatime;
+	static GLuint color_renderbuffer;
+	static GLFWwindow* Window;
+	static glm::mat4 MatrixPerspective;
+	static Camera* CurentCamera;
+	static unsigned int framebuffer;
 
 	/* main*/
-	ShaderProgram* ProgramMain;
-	unsigned int VAOMain;
-	GLuint IBOMain;
-	GLuint VBOMain; // unique id all in opengl have it
+	static QFAShaderProgram* ProgramMain;
+	static unsigned int VAOMain;
+	static GLuint IBOMain;
+	static GLuint VBOMain;
 
 	static float VertexMain[];
 	static unsigned int indexsMain[];
 	/*----*/
 
-	void InitMainFrameBuffer();
-	void InitSecondFrameBuffer();	
-	void CopyToMain();
-	void DrawDepthTexture(unsigned int depthMapId);
+	static void InitMainFrameBuffer();
+	static void InitSecondFrameBuffer();	
+	static void CopyToMain();
+	static void DrawDepthTexture(unsigned int depthMapId);
 
+	static void SetWindow(GLFWwindow* window);
+	static void DrawMesh(QMeshBaseComponent* mesh);
+	static void DrawMeshShadow(QMeshBaseComponent* mesh);
+	static void EndFrame(bool blankScreen = false);
+	static void SetCamera(Camera* camera);
+	static void StartFrame(unsigned int _framebuffer = 0);
+
+	static void Init();
 public:
 
-	Render();
-	void SetWindow(GLFWwindow* window);	
-	void DrawMesh(QMeshBaseComponent* mesh);
-	void DrawMeshShadow(QMeshBaseComponent* mesh);
-	void EndFrame();
-	void SetCamera(Camera* camera);
-	void StartFrame(unsigned int _framebuffer = 0);
 };
 
 

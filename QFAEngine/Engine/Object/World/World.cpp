@@ -1,7 +1,23 @@
 #include "World.h"
 #include <Object/Actor/Actor.h>
+#include <Overlord/Overlord.h>
 
-QWorld* QWorld::CurentWord;
+void QWorld::Activate()
+{
+	if (!IsValid())
+		return;
+
+	IsActive = true;
+	QFAOverlord::SetWorld(this);
+}
+
+void QWorld::Deactivate()
+{
+	if (!IsValid())
+		return;
+
+	IsActive = false;
+}
 
 void QWorld::ForgetActor(QActor* actor)
 {
@@ -34,6 +50,10 @@ void QWorld::AddActor(QActor* actor)
 	if (!actor)
 		return;
 
+	if (actor->ActorWorld->IsValid())		
+		actor->ActorWorld->ForgetActor(actor);
+
+	actor->ActorWorld = this;
 	if (ActorCount >= ActorListLenght)
 	{
 		QActor** tem = Actors;

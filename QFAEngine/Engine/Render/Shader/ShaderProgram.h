@@ -5,7 +5,7 @@
 
 struct Material;
 
-class ShaderProgram
+class QFAShaderProgram
 { 
 	static unsigned int CurentRunProgramId;
 
@@ -25,8 +25,8 @@ public:
 	unsigned int ShaderProgramId;
 	
 
-	ShaderProgram(std::string vertex, std::string fragment, bool isPath = true, std::string geometry = "");
-	~ShaderProgram();
+	QFAShaderProgram(std::string vertex, std::string fragment, bool isPath = true, std::string geometry = "");
+	~QFAShaderProgram();
 
 	// remove no need 
 	//unsigned int GetShaderProgramId() const;

@@ -13,16 +13,16 @@ enum ShaderType
 
 };
 
-class Shader
+class QFAShader
 {
     int init = false;
 
     unsigned int ShaderID;
     std::string readShader(const std::string path);
 public:
-    Shader();
+    QFAShader();
 
-	Shader(ShaderType st, const std::string& shader, bool isPath = true);
+    QFAShader(ShaderType st, const std::string& shader, bool isPath = true);
     unsigned int GetId() const;
     
     unsigned int CreateShader(ShaderType st, const std::string& shader, bool isPath = true);
