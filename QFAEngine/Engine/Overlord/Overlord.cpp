@@ -92,6 +92,7 @@ void QFAOverlord::MainLoop()
     {
         QTime::CalcDeltaTime();
         glfwPollEvents();
+        ProcessTick();
         RenderWorld();
     }
 }
@@ -116,18 +117,18 @@ void QFAOverlord::RenderWorld()
     if (DL->GetCastShadow())
         for (int i = 0; i < CurentWorld->ActorCount; i++)
             if (CurentWorld->Actors[i]->RootComponent->IsValid())
-                ComponentProcessShadow(CurentWorld->Actors[i]->RootComponent);
+                ProcessComponentShadow(CurentWorld->Actors[i]->RootComponent);
 
     QFARender::StartFrame();
 
     for (int i = 0; i < CurentWorld->ActorCount; i++)
         if (CurentWorld->Actors[i]->RootComponent->IsValid())
-            ComponentProcess(CurentWorld->Actors[i]->RootComponent);
+            ProcessComponent(CurentWorld->Actors[i]->RootComponent);
 
     QFARender::EndFrame();
 }
 
-void QFAOverlord::ComponentProcess(QSceneComponent* component)
+void QFAOverlord::ProcessComponent(QSceneComponent* component)
 {
     if (!component->IsValid())
         return;
@@ -137,10 +138,10 @@ void QFAOverlord::ComponentProcess(QSceneComponent* component)
 
     for (int i = 0; i < component->CountComponent; i++)
         if (component->ListComponents[i]->IsValid())
-            ComponentProcess(component->ListComponents[i]);
+            ProcessComponent(component->ListComponents[i]);
 }
 
-void QFAOverlord::ComponentProcessShadow(QSceneComponent* component)
+void QFAOverlord::ProcessComponentShadow(QSceneComponent* component)
 {
     if (!component->IsValid())
         return;
@@ -151,5 +152,16 @@ void QFAOverlord::ComponentProcessShadow(QSceneComponent* component)
 
     for (int i = 0; i < component->CountComponent; i++)
         if (component->ListComponents[i]->IsValid())
-            ComponentProcess(component->ListComponents[i]);
+            ProcessComponent(component->ListComponents[i]);
+}
+
+void QFAOverlord::ProcessTick()
+{
+    if (!CurentWorld->IsValid())
+        return;
+    float delta = (float)QTime::GetDeltaTime();
+
+    for (int i = 0; i < CurentWorld->ActorCount; i++)
+        if (CurentWorld->Actors[i]->IsValid() && CurentWorld->Actors[i]->CanTick)
+            CurentWorld->Actors[i]->Tick(delta);
 }

@@ -5,6 +5,7 @@
 class Render;
 class QWorld;
 class QSceneComponent;
+class QFAOverlord;
 class QActor : public QObject
 {
 	/*
@@ -12,7 +13,7 @@ class QActor : public QObject
 	*/
 	friend QSceneComponent;
 	friend QWorld;
-
+	friend QFAOverlord;
 	
 	// SceneComponent
 
@@ -23,6 +24,10 @@ class QActor : public QObject
 	
 	// actor live in this world
 	QWorld* ActorWorld;
+
+protected:
+	bool CanTick = false;
+	virtual void Tick(float deltaTime) {};
 public:
 
 	// in private
@@ -75,6 +80,8 @@ public:
 	{
 		return ActorWorld;
 	}
+
+
 
 };
 

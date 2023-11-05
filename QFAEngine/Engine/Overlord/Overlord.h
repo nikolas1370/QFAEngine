@@ -21,8 +21,9 @@ class QFAOverlord
 
 	static void RenderWorld();
 
-	static void ComponentProcess(QSceneComponent* component);
-	static void ComponentProcessShadow(QSceneComponent* component);
+	static void ProcessComponent(QSceneComponent* component);
+	static void ProcessComponentShadow(QSceneComponent* component);
+	static void ProcessTick();
 
 	// call only from QWorld.Activate()
 	static void SetWorld(QWorld* world); // Activate

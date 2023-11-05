@@ -118,5 +118,3 @@ QSceneComponent* QActor::SetRootComponent(QSceneComponent* component)
 	return oldRootComponent;
 }
 
-
-

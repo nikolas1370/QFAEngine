@@ -219,6 +219,7 @@ bool loxGlobal(Ray r, float &t, glm::vec3 lb, glm::vec3 rt)
 
 #include <Overlord/Overlord.h>
 #include <Object/Camera.h>
+#include "GameCode/TestActor.h"
 
 /*---*/
 
@@ -227,8 +228,7 @@ bool loxGlobal(Ray r, float &t, glm::vec3 lb, glm::vec3 rt)
 
 
 int main()
-{    
-    
+{        
     QFAOverlord::Init();
     
     QMesh* MeshA = OBJLoader::LoadModelWithAnimate("NoEngineModel/anim/dore_1.obj", 30); 
@@ -390,20 +390,19 @@ int main()
     
     
 
+
     //glfwSetKeyCallback(window, key_callback);
     
     //glfwSetMouseButtonCallback(window, mouse_callback);
 
+    ATestActor* TA = new ATestActor;
+    mainWorld->AddActor(TA);
 
-
-
-    // do in camera function active and in overlord active self and disactive other
-    //render.SetCamera(&camera);      
     mainWorld->Activate();
     camera.Activate();
     QFAOverlord::StartLife();
 
-    
+    return 0;
     /*
     while ()
     {
@@ -457,8 +456,7 @@ int main()
     }
   ----*/  
 
-    
-    return 0;
+
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
