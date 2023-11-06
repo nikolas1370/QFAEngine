@@ -151,7 +151,7 @@ protected:
 
 	
 	glm::mat4 ModelMatrix = Math::DefauldMatrix4;
-	void UpdateModelMatrix();
+	void UpdateModelMatrix(bool onlyPosition) override;
 
 
 	inline virtual QFAShaderProgram* GetShaderProgram() = 0;
@@ -176,6 +176,4 @@ public:
 	// remove ShaderProgram* SP
 	virtual void Bind( bool isShadow = false) = 0;
 
-
-	
 };

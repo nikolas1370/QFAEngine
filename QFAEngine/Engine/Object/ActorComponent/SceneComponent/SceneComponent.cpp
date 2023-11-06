@@ -1,6 +1,7 @@
 #include "SceneComponent.h"
 #include <Object/Actor/Actor.h>
 
+
 QSceneComponent::QSceneComponent()
 {
 	InWorldComponent = true;
@@ -10,73 +11,28 @@ QSceneComponent::~QSceneComponent()
 {
 	if (ListLength > 0)
 	{
-		for (int i = 0; i < CountComponent; i++)
+		for (unsigned int i = 0; i < CountComponent; i++)
 			ListComponents[i]->Destroy();
 
 		delete[] ListComponents;
 	}
 }
 
-/*
-void QSceneComponent::UpdateModelMatrix()
-{	// transform from x y z to -z x y
-	
-	if (IRootComponent)
-	{
-		RotationMatrix = Math::DefauldMatrix3;
-	//	std::cout << "IRootComponent" << std::endl;
-		//ModelMatrix = Math::DefauldMatrix4;
-		
-		WorldPosition = ToOpenglCoordinate(ParentActor->Position);
-	}
-	else if (!ParentActorComponent->IsValid())
-		return;
-	else
-	{
-		RotationMatrix = Math::DefauldMatrix3;
-		FVector RelTem = ToOpenglCoordinate(GetRelativeScalePosition());
-		glm::vec3 relP(RelTem.X, RelTem.Y, RelTem.Z);
-		relP = ParentActorComponent->RotationMatrix * relP;// rotate center around parent
-		RotationMatrix = ParentActorComponent->RotationMatrix;// need in next code. if delete it parent not be rotate object 
-		WorldPosition = ParentActorComponent->WorldPosition + relP;
-	}
-	/*
-	If you do your multiplication of the matrix from right to left,
-	it will rotate around the global axis.
-	If you do it the other way,
-	it will rotate around the local axis.
-		global   z x y
-		local coordinat  x y z
-	* /	
-	RotationMatrix = Math::rotateMatrix3(RotationMatrix, glm::radians(Rotation.Z * -1), glm::vec3(0.0f, 1.0f, 0.0f));
-	RotationMatrix = Math::rotateMatrix3(RotationMatrix, glm::radians(Rotation.Y), glm::vec3(1.f, 0.f, 0.f));
-	RotationMatrix = Math::rotateMatrix3(RotationMatrix, glm::radians(Rotation.X), glm::vec3(0.0f, 0.0f, -1.0f));
-	* /
-	//ModelMatrix = glm::scale(ModelMatrix, glm::vec3(AccumulateScale.Y, AccumulateScale.Z, AccumulateScale.X));
-}*/
 
-/*
-*	calculate a reverse scale factor
-*	rv result of vector*scale operation
-* /
-float reversScale(float rv, float scale)
+
+void QSceneComponent::ChangeWorldPosition(const FVector position)
 {
-	float _floor = floor(scale);
-	return rv * (scale < 1 && scale > -1 ? scale : (_floor / scale) / _floor);	
-}
-*/
-
-void QSceneComponent::SetWorldPosition(const FVector position)
-{	
 	if (IRootComponent)
 	{
 		ParentActor->Position = position;
 		RelativePosition = 0;
-		AccumulateScale = Scale;
+		AccumulateScale = FVector(1);
 		WorldPosition = ToOpenglCoordinate(position);
-		for (size_t i = 0; i < CountComponent; i++)
+		if (ForRender)
+			UpdateModelMatrix(true);
+		for (unsigned int i = 0; i < CountComponent; i++)
 			if (ListComponents[i]->IsValid())
-				ListComponents[i]->UpdateWorldPosition();
+				ListComponents[i]->UpdateWorldPositionScale(true);
 	}
 	else if (ParentActorComponent->IsValid())
 	{
@@ -85,24 +41,26 @@ void QSceneComponent::SetWorldPosition(const FVector position)
 		RelativePosition = position - ParentActorComponent->GetWorldPosition();
 		//std::cout << "RelativePosition" << "\n";
 		//std::cout << RelativePosition << "\n";
-		
+
 		RelativePosition = RelativePosition.ReversScale(AccumulateScale);
 		//invers RotationMatrix rotate finally position to pure relative position(pure = not scale and rotate)
 		//std::cout << ParentActorComponent->AccumulateScale << "\n";
-		RelativePosition =  FromOpenglCoordinate(FVector(glm::inverse(ParentActorComponent->RotationMatrix ) * ToOpenglCoordinate(RelativePosition).GetGLMVector()));
-		      		
+		RelativePosition = FromOpenglCoordinate(FVector(glm::inverse(ParentActorComponent->RotationMatrix) * ToOpenglCoordinate(RelativePosition).GetGLMVector()));
+		if(ForRender)
+			UpdateModelMatrix(true);
+
 		for (size_t i = 0; i < CountComponent; i++)
 			if (ListComponents[i]->IsValid())
-				ListComponents[i]->UpdateWorldPosition();
-	}		
+				ListComponents[i]->UpdateWorldPositionScale(true);
+	}
 }
 
 
 
 
 
-void QSceneComponent::SetLocalPosition(const FVector position)
-{	
+void QSceneComponent::ChangeLocalPosition(const FVector position)
+{
 	if (IRootComponent || !ParentActorComponent->IsValid())
 		return;
 
@@ -116,8 +74,23 @@ void QSceneComponent::SetLocalPosition(const FVector position)
 	//invers RotationMatrix rotate finally position to pure relative position(pure = not scale and rotate)
 	RelativePosition = FromOpenglCoordinate(FVector(glm::inverse(ParentActorComponent->RotationMatrix) * ToOpenglCoordinate(RelativePosition).GetGLMVector()));
 
-	
-}// 
+	if (ForRender)
+		UpdateModelMatrix(true);
+
+	for (size_t i = 0; i < CountComponent; i++)
+		if (ListComponents[i]->IsValid())
+			ListComponents[i]->UpdateWorldPositionScale(true);
+}
+
+void QSceneComponent::ChangeRelativePosition(const FVector position)
+{
+	RelativePosition = position;
+	if (IRootComponent || !ParentActorComponent->IsValid())
+		return;
+	else
+		UpdateWorldPositionScale(true);
+}
+
 
 FVector QSceneComponent::GetLocalPosition()
 {	
@@ -128,15 +101,6 @@ FVector QSceneComponent::GetLocalPosition()
 	return GetWorldPosition() - temA->GetActorPosition();	
 }
 
-// ChangeAccumulateScale
-void QSceneComponent::SetRelativePosition(const FVector position)
-{
-	RelativePosition = position;
-	if (IRootComponent || !ParentActorComponent->IsValid())
-		return;
-	else
-		UpdateWorldPosition();
-}
 
 void QSceneComponent::ChangedParentRotation()
 {// rotate component center(relative position) around parent whit parent rotateMatrix
@@ -157,12 +121,16 @@ void QSceneComponent::ChangedParentRotation()
 	RotationMatrix = Math::rotateMatrix3(RotationMatrix, glm::radians(Rotation.Z * -1), glm::vec3(0.0f, 1.0f, 0.0f));
 	RotationMatrix = Math::rotateMatrix3(RotationMatrix, glm::radians(Rotation.Y), glm::vec3(1.f, 0.f, 0.f));
 	RotationMatrix = Math::rotateMatrix3(RotationMatrix, glm::radians(Rotation.X), glm::vec3(0.0f, 0.0f, -1.0f));
+	if (ForRender)
+		UpdateModelMatrix(false);
+
 	for (size_t i = 0; i < CountComponent; i++)
 		if(ListComponents[i]->IsValid())
 		ListComponents[i]->ChangedParentRotation();
 }
 
-void QSceneComponent::SetRotation(const FVector rotation)
+
+void QSceneComponent::ChangeRotation(const FVector rotation)
 {
 	Rotation = rotation;
 	if (IRootComponent)
@@ -172,45 +140,62 @@ void QSceneComponent::SetRotation(const FVector rotation)
 		RotationMatrix = Math::rotateMatrix3(RotationMatrix, glm::radians(Rotation.Z * -1), glm::vec3(0.0f, 1.0f, 0.0f));
 		RotationMatrix = Math::rotateMatrix3(RotationMatrix, glm::radians(Rotation.Y), glm::vec3(1.f, 0.f, 0.f));
 		RotationMatrix = Math::rotateMatrix3(RotationMatrix, glm::radians(Rotation.X), glm::vec3(0.0f, 0.0f, -1.0f));
+		if (ForRender)
+			UpdateModelMatrix(false);
+
 		for (size_t i = 0; i < CountComponent; i++)
 			if (ListComponents[i]->IsValid())
 				ListComponents[i]->ChangedParentRotation();
 	}
 	else if (ParentActorComponent->IsValid())
-		ChangedParentRotation(); 
+		ChangedParentRotation();
 }
 
-FVector QSceneComponent::GetRotation() const
+void QSceneComponent::UpdateWorldPositionScale(bool onlyPosition)
 {
-	return Rotation;
-}
-
-void QSceneComponent::UpdateWorldPosition()
-{
+	
 	AccumulateScale = ParentActorComponent->AccumulateScale * ParentActorComponent->Scale;
+	//std::cout << "UpdateWorldPosition " << Name << " " << AccumulateScale << " <-> " << RelativePosition << " " << GetRelativeScalePosition() << "\n";
 	// rotate relative location with parent matrix rotation
+	//glm::vec3 ass = ParentActorComponent->RotationMatrix * ToOpenglCoordinate(GetRelativeScalePosition()).GetGLMVector();
 	glm::vec3 ass = ParentActorComponent->RotationMatrix * ToOpenglCoordinate(GetRelativeScalePosition()).GetGLMVector();
 	WorldPosition = ParentActorComponent->WorldPosition + FVector(ass);
+	if (ForRender)
+		UpdateModelMatrix(onlyPosition);
+
 	for (size_t i = 0; i < CountComponent; i++)
 		if (ListComponents[i]->IsValid())
-			ListComponents[i]->UpdateWorldPosition();
+		{
+			
+			ListComponents[i]->UpdateWorldPositionScale(onlyPosition);
+		}
 }
 
 
-void QSceneComponent::SetScale(const FVector scale)
+
+void QSceneComponent::ChangeScale(const FVector scale)
 {
 	Scale = scale;
 	if (IRootComponent)
-	{		
+	{
+		
 		AccumulateScale = FVector(1);
 		ParentActor->Scale = scale;
+		if (ForRender)
+			UpdateModelMatrix(false);
+
 		for (size_t i = 0; i < CountComponent; i++)
 			if (ListComponents[i]->IsValid())
-				ListComponents[i]->UpdateWorldPosition();
+			{
+				
+				ListComponents[i]->UpdateWorldPositionScale(false);
+			}
 	}
 	else if (ParentActorComponent->IsValid())
-		UpdateWorldPosition();
+		UpdateWorldPositionScale(false);
 }
+
+
 
 FVector QSceneComponent::GetScale() const
 {
@@ -274,7 +259,7 @@ void QSceneComponent::AttachComponent(QSceneComponent* component)
 		ListLength *= 2;
 		QSceneComponent** tem = ListComponents;
 		ListComponents = new QSceneComponent * [ListLength];
-		for (int i = 0; i < CountComponent; i++)
+		for (unsigned int i = 0; i < CountComponent; i++)
 			ListComponents[i] = tem[i];
 
 		delete[] tem;
@@ -292,13 +277,13 @@ void QSceneComponent::AttachComponent(QSceneComponent* component)
 component->SetRelativePosition(component->RelativePosition);
 	component->SetRotation(component->Rotation);
 */
-	component->UpdateWorldPosition();
+	component->UpdateWorldPositionScale(false);
 	component->ChangedParentRotation();
 }
 
 bool QSceneComponent::ForgetComponent(QSceneComponent* component)
 {
-	for (int i = 0; i < CountComponent; i++)
+	for (unsigned int i = 0; i < CountComponent; i++)
 	{
 		if (ListComponents[i] == component)
 		{

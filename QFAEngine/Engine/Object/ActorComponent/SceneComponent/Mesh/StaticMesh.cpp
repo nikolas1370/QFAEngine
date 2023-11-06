@@ -74,6 +74,7 @@ void QStaticMesh::SetMesh(MeshFrames* meshFrames)
 	// both for debug
 	SSVertexMaterial* xc = MFs->GetVerticesDate();
 	size_t zx = MFs->GetVerticesSize();
+	1 + 1;
 	GLCall(glBufferData(GL_ARRAY_BUFFER, zx, xc, GL_STATIC_DRAW));// specify what data and size
 	//  glBufferSubData,   modify data
 	/*   IndexBuffer   */ 

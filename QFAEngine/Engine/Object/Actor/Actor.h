@@ -6,6 +6,7 @@ class Render;
 class QWorld;
 class QSceneComponent;
 class QFAOverlord;
+class QMeshBaseComponent;
 class QActor : public QObject
 {
 	/*
@@ -14,7 +15,7 @@ class QActor : public QObject
 	friend QSceneComponent;
 	friend QWorld;
 	friend QFAOverlord;
-	
+	friend QMeshBaseComponent;
 	// SceneComponent
 
 	FVector Position = FVector(0);

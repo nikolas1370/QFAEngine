@@ -160,17 +160,10 @@ void QFARender::DrawMesh(QMeshBaseComponent* mesh)
 	FVector GLCameraPos = CurentCamera->GetOpenGLPosition();
 	shaderProgram->SetCameraPosition(FVector(GLCameraPos.X, GLCameraPos.Y, GLCameraPos.Z));
 	
+
+	shaderProgram->SetModelMatrix(mesh->ModelMatrix);
 	
-
-	glm::mat4 lox(mesh->RotationMatrix);	
-	lox[3][0] = mesh->WorldPosition.X;
-	lox[3][1] = mesh->WorldPosition.Y;
-	lox[3][2] = mesh->WorldPosition.Z;
-	lox[3][3] = 1;
-	lox = glm::scale(lox, glm::vec3(mesh->AccumulateScale.Y * mesh->Scale.Y, mesh->AccumulateScale.Z * mesh->Scale.Z, mesh->AccumulateScale.X * mesh->Scale.X));
-	shaderProgram->SetModelMatrix(lox);	
-
-
+	
 
 	QDirectionLight* dl = QFAOverlord::GetCurentWorld()->GetDirectionDight();
 	if (dl->CastShadows)
@@ -178,12 +171,12 @@ void QFARender::DrawMesh(QMeshBaseComponent* mesh)
 		dl->SetLightMatrix(CurentCamera->GetOpenGLPosition(), shaderProgram);		
 		dl->SetShadowMap(shaderProgram);
 		shaderProgram->SetShadowOn(true);
-		1 + 1;
+
 	}
 	else
 		shaderProgram->SetShadowOn(false);
 
-	1 + 1;
+
 	
 	GLCall(glDrawElements(GL_TRIANGLES, mesh->GetIndexCount(), GL_UNSIGNED_INT, nullptr));	
 }

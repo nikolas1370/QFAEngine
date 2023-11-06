@@ -236,7 +236,7 @@ int main()
     QStaticMesh* Mesh = OBJLoader::LoadModel("NoEngineModel/quad2.obj");//(vertecis, sizeof(vertecis), indices, sizeof(indices) / sizeof(unsigned int));
     QStaticMesh* Arrow = OBJLoader::LoadModel("NoEngineModel/Arrow.obj");
     Arrow->Name = "Arrow";
-
+    MeshA->Name = "animation na";
     /*
     * 
     * 
@@ -269,8 +269,8 @@ int main()
     MeshA->SetRotation(FVector(0, 0, 90));
 
 
-    mainWorld->AddActor(animActor);    
-    mainWorld->AddActor(firstActor);
+    //mainWorld->AddActor(animActor);    
+    //mainWorld->AddActor(firstActor);
     
     /* -----------*/
     
@@ -285,10 +285,11 @@ int main()
     mainWorld->AddActor(floorActor);
     */
 
-    QActor* thirdActor = new QActor();
-    thirdActor->Name = "Atory";
-    mainWorld->AddActor(thirdActor);
-    thirdActor->SetActorPosition(FVector(30, 0, 0));
+    /*------------------------------*/
+    QActor* mainActor = new QActor();
+    mainActor->Name = "mainActor";
+    mainWorld->AddActor(mainActor);
+    mainActor->SetActorPosition(FVector(30, 0, 0));
 
     
     //
@@ -296,46 +297,48 @@ int main()
     not work  GetCopyMesh
     */
     //QStaticMesh* qwd = Mesh->GetCopyMesh();    
-    QStaticMesh qwd = *Mesh;
-    qwd.Name = "Main na";
-    thirdActor->SetRootComponent(&qwd);
+    QStaticMesh mainComponent = *Mesh;
+    mainComponent.Name = "mainComponent";
+    mainActor->SetRootComponent(&mainComponent);
 
     
 
-    QStaticMesh qwdC = *Mesh;
-    
+    QStaticMesh secondComponent = *Mesh;
+    secondComponent.Name = "secondComponent";
     
     Arrow->SetRelativePosition(FVector(0, 7, 0));
     
     
-    qwd.AttachComponent(&qwdC);    
+    mainComponent.AttachComponent(&secondComponent);
 
     
-    qwdC.SetRelativePosition(FVector(0, 0, 5));
-    qwdC.AttachComponent(Arrow);    
+    secondComponent.SetRelativePosition(FVector(0, 0, 5));
+    secondComponent.AttachComponent(Arrow);
 
 
     
-    thirdActor->SetActorRotation(FVector(90, 0, 0));
-    qwdC.SetRotation(FVector(45, 0, 0));
-    //qwdC.SetScale(1);
-    thirdActor->SetActorScale(1.0);
+    mainActor->SetActorRotation(FVector(90, 0, 0));
+    secondComponent.SetRotation(FVector(45, 0, 0));
+   
+    mainActor->SetActorScale(1.0);
     Arrow->SetRotation(FVector(90, 0, 0));
-    Arrow->SetScale(2); 
+   // Arrow->SetScale(2); 
 
-    //qwdC.SetWorldPosition(FVector(40, 0, 3));
-    qwdC.SetLocalPosition(FVector(10, 0, 3));
-    qwdC.Name = "after main";
-    qwdC.SetScale(2);
+    secondComponent.SetLocalPosition(FVector(10, 0, 3));
+    //secondComponent.SetWorldPosition(FVector(40, 0, 3));
+    
+    
+    secondComponent.SetScale(2);
 
     
 
 
     
     Arrow->SetWorldPosition(FVector(30, -3, 0));    
-    //row->SetLocalPosition(FVector(0, -3, 0));
-    qwd.SetScale(0.5);
-    Arrow->SetScale(2); 
+    
+    mainComponent.SetScale(1.0);
+    mainComponent.SetScale(0.5);
+    Arrow->SetScale(2.1); 
     /*-----------*/
     /*-----------*/
     /*-----------*/
@@ -359,7 +362,7 @@ int main()
     floorActor->SetActorPosition(FVector(-10, 0, 0));
 
     floorActor->SetRootComponent(&FloorF);
-    mainWorld->AddActor(floorActor);
+    //mainWorld->AddActor(floorActor);
 
 
 
@@ -388,7 +391,7 @@ int main()
     //camera.SetRotation(FVector(-110, 370, 940)); //test
     camera.SetRotation(FVector(0, 0,  0));
 
-    
+
     
 
 
@@ -396,10 +399,7 @@ int main()
     
     //glfwSetMouseButtonCallback(window, mouse_callback);
 
-    ATestActor* TA = new ATestActor;
-    mainWorld->AddActor(TA);
-    QTestComponent* TC = new QTestComponent;
-    TA->SetRootComponent(TC);
+
 
     mainWorld->Activate();
     camera.Activate();

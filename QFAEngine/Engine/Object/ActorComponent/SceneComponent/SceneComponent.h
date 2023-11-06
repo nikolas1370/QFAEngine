@@ -3,30 +3,25 @@
 #include <Math/Vector.h>
 #include <Math/Math.h>
 
-class Render;
 
+class QMeshBaseComponent;
 
 /*
 	relative position  // relative to parent
 	local position     // relative to Actore
 	world position
 */
+
+class QFARender;
 class QSceneComponent : public QActorComponent
 {
 
-	static inline  FVector ToOpenglCoordinate(FVector positon)
-	{
-		return FVector(positon.Y, positon.Z, positon.X * -1);
-	}
+	// remove
+	friend QFARender;
 
-	static inline FVector FromOpenglCoordinate(FVector positon)
-	{
-		return FVector(positon.Z * -1, positon.X, positon.Y);
-	}
-
-	friend Render;
 	friend QActor;
 	friend QSceneComponent;
+	friend QMeshBaseComponent;
 
 	//void UpdateModelMatrix();
 	QActor* ParentActor;
@@ -47,8 +42,9 @@ class QSceneComponent : public QActorComponent
 	// call from parent component when Rotation/RotationMatrix change or one of parent be attached
 	void ChangedParentRotation();
 
+	/**/
+	void UpdateWorldPositionScale(bool onlyPosition);
 	
-	void UpdateWorldPosition();
 	
 
 	inline FVector GetRelativeScalePosition()
@@ -56,6 +52,17 @@ class QSceneComponent : public QActorComponent
 		return RelativePosition * AccumulateScale;
 	}
 protected:
+
+	static inline  FVector ToOpenglCoordinate(FVector positon)
+	{
+		return FVector(positon.Y, positon.Z, positon.X * -1);
+	}
+
+	static inline FVector FromOpenglCoordinate(FVector positon)
+	{
+		return FVector(positon.Z * -1, positon.X, positon.Y);
+	}
+
 	// in opengl format
 	FVector WorldPosition = FVector(0);
 	// in opengl format
@@ -74,7 +81,21 @@ protected:
 	FVector Scale = FVector(1);
 	// before be in MeshBase
 	
+	/*
+	* call inside QSceneComponent and from some child
+	*/
+	void ChangeWorldPosition(const FVector position);
+	void ChangeLocalPosition(const FVector position);
+	void ChangeRelativePosition(const FVector position);
+	void ChangeRotation(const FVector rotation);	
+	void ChangeScale(const FVector scale);
+	/*----*/
 
+	// if component can be render
+	bool ForRender = false;
+
+
+	virtual void UpdateModelMatrix(bool onlyPosition) {};
 public:
 	QSceneComponent(); 
 
@@ -94,7 +115,10 @@ public:
 	*   if component has not parent the position not set
 	*	if component has parent but not conect to QActor tree position set incorrectly		 
 	*/
-	void SetWorldPosition(const FVector position);
+	virtual inline void SetWorldPosition(const FVector position)
+	{
+		ChangeWorldPosition(position);
+	}
 	
 	inline FVector GetWorldPosition() const
 	{
@@ -106,7 +130,10 @@ public:
 	*   if component has not parent the position not set
 	*	if component has parent but not conect to QActor tree position set incorrectly		 
 	*/
-	void SetLocalPosition(const FVector position);
+	virtual inline void SetLocalPosition(const FVector position)
+	{
+		ChangeLocalPosition(position);
+	}
 	// ned be inline
 	FVector GetLocalPosition() ;
 
@@ -114,7 +141,10 @@ public:
 	*	if component is RootComponent the position doesn't set
 	*   if component has not parent the position not set
 	*/
-	void SetRelativePosition(const FVector position);
+	virtual inline void SetRelativePosition(const FVector position)
+	{
+		ChangeRelativePosition(position);
+	}
 
 	inline FVector GetRelativePosition() const
 	{
@@ -122,13 +152,20 @@ public:
 	}
 
 	
-	virtual void SetRotation(const FVector rotation);
-	virtual FVector GetRotation() const;
+	virtual inline void SetRotation(const FVector rotation)
+	{
+		ChangeRotation(rotation);
+	}
+	virtual inline FVector GetRotation() const
+	{
+		return Rotation;
+	}
 
-	/*
-	 
-	*/
-	void SetScale(const FVector scale);
+
+	virtual inline void SetScale(const FVector scale)
+	{
+		ChangeScale(scale);
+	}
 	FVector GetScale() const;
 
 	
