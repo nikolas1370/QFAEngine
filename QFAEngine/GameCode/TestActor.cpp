@@ -14,48 +14,40 @@ ATestActor::ATestActor()
 			std::cout << "(key)\n";// <<
 		};*/
 
-	input3 = new QFAInput;
 
 	input.AddKeyPress(EKey::A, [](EKey::Key key)
 	{
 			std::cout << "A \n";
 	});
 
-	input.AddKeyRelease(EKey::T, [](EKey::Key key)
+	int aaa = input.AddKeyPress(EKey::T, [](EKey::Key key)
 		{
 			std::cout << "T \n";
 		});
 
-	input.AddKeyPress(EKey::MOUSE_4, [](EKey::Key key)
+	input.AddKeyPress(EKey::Y, [](EKey::Key key)
 		{
-			std::cout << "mouse 4\n";
-		});
+			std::cout << "Y \n";
+		}, "test");
 
-	input2.AddKeyPress(EKey::B, [](EKey::Key key)
-		{
-			std::cout << "B \n";
-		});
-
-	input2.AddKeyRelease(EKey::R, [](EKey::Key key)
-		{
-			std::cout << "R \n";
-		});
-
-	input2.AddKeyRelease(EKey::MOUSE_LEFT, [](EKey::Key key)
-		{
-			std::cout << "Left mouse \n";
-		});
-
-
-	input3->AddKeyPress(EKey::Z, [](EKey::Key key)
-		{
-			std::cout << "Z \n";
-		});
-
-	//input.RemoveKeyPress(EKey::B);
 	input.RemoveKeyPress(EKey::A);
-	input2.RemoveKeyRelease(EKey::R);
-	delete input3;
+	input.RemoveKeyPressId(aaa);
+	input.RemoveKeyPressStrId("test");
+
+
+	int aaa2 = input.AddKeyRelease(EKey::U, [](EKey::Key key)
+		{
+			std::cout << "U \n";
+		});
+
+	input.AddKeyRelease(EKey::I, [](EKey::Key key)
+		{
+			std::cout << "I \n";
+		}, "test");
+
+	input.RemoveKeyPress(EKey::A);
+	input.RemoveKeyReleaseId(aaa2);
+	input.RemoveKeyReleaseStrId("test");
 }
 
 ATestActor::~ATestActor()

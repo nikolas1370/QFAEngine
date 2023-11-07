@@ -8,8 +8,7 @@ class ATestActor : public QActor
 	void Tick(float deltaTime) override;
 
 	QFAInput input;
-	QFAInput input2;
-	QFAInput* input3;
+
 
 public:
 	ATestActor();

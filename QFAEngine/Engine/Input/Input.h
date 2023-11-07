@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <functional>
 #include <Tools/Array.h>
+#include <string>
 
 namespace EKey
 {
@@ -148,16 +149,24 @@ struct GLFWwindow;
 
 */
 
-
+/*
+	Event process before Tick
+*/
 class QFAInput
 {
 	struct SKeyFunction
 	{		
-		std::function<void(EKey::Key)> fun;
+		std::function<void(EKey::Key)> fun;		
 		EKey::Key key;
+		int id;
+		std::string string_id;
+		
 	};
 
 	friend QFAOverlord;
+
+
+	static void ProcessInput();
 	/*
 	 *  @param[in] window The window that received the event.
 	 *  @param[in] key The [keyboard key](@ref keys) that was pressed or released.
@@ -170,6 +179,7 @@ class QFAInput
 	static void Scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 	static void Init(GLFWwindow* window);
 	static void ProcessKey(int key, int scancode, int action, int mods);
+	
 	static GLFWwindow* Window;	
 	static QFAArray<QFAInput*> Inputs;
 
@@ -177,14 +187,49 @@ class QFAInput
 	QFAArray<SKeyFunction> KeyPressList;
 	QFAArray<SKeyFunction> KeyReleaseList;
 	bool BlockInput = false;
+	int EventIdCounter = 0;
 public:
 	QFAInput();
 	~QFAInput();
-	void AddKeyPress(EKey::Key key, std::function<void(EKey::Key)> fun);
+	// return id
+	int AddKeyPress(EKey::Key key, std::function<void(EKey::Key)> fun, std::string str_id = "");
+	/* remove all event with this key */
 	void RemoveKeyPress(EKey::Key key);
+	void RemoveKeyPressId(int id);
+	void RemoveKeyPressStrId(std::string str_Id);
 
-	void AddKeyRelease(EKey::Key key, std::function<void(EKey::Key)> fun);
-	void RemoveKeyRelease(EKey::Key key);;
+	//return id
+	int AddKeyRelease(EKey::Key key, std::function<void(EKey::Key)> fun, std::string str_id = "");
+	/* remove all event with this key */
+	void RemoveKeyRelease(EKey::Key key);
+	void RemoveKeyReleaseId(int id);
+	void RemoveKeyReleaseStrId(std::string str_Id);
+
 private:
 
 };
+
+
+/*
+* from my unreal input sys
+* 
+FInputEventPressed
+FInputEventReleased
+
+FInputEventHold
+	int addHold(FKey key, 
+	float holdTime = 0.5f , FString stringID = "");
+
+FInputEventPressedAnyKey
+
+
+FInputEventCombo
+int addCombo(FKey key, FInputManagerDelegatoCombo delegato, 
+	bool shift = false, bool alt = false, bool ctrl = false, FString stringID = "");
+
+
+FInputEventAxis1D
+FInputEventAxis2D
+FInputEventAxis3D
+FInputEventWheelAxis
+*/

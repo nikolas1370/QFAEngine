@@ -15,6 +15,10 @@ QFAInput::~QFAInput()
 }
 
 
+void QFAInput::ProcessInput()
+{
+}
+
 void QFAInput::Scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	if (yoffset > 0.0001 || yoffset < -0.0001)// scroll in y-axis only
@@ -44,6 +48,8 @@ void QFAInput::Init(GLFWwindow* window)
 
 void QFAInput::ProcessKey(int key, int scancode, int action, int mods)
 {
+
+	
 	if (action == GLFW_PRESS)
 	{
 		for (int i = 0; i < Inputs.Length(); i++)
@@ -71,9 +77,10 @@ void QFAInput::ProcessKey(int key, int scancode, int action, int mods)
 }
 
 
-void QFAInput::AddKeyPress(EKey::Key key, std::function<void(EKey::Key)> fun)
+int QFAInput::AddKeyPress(EKey::Key key, std::function<void(EKey::Key)> fun, std::string str_id )
 {
-	KeyPressList.Add(SKeyFunction{ fun, key });
+	KeyPressList.Add(SKeyFunction{ fun, key,  EventIdCounter++, str_id});
+	return EventIdCounter - 1;
 }
 
 void QFAInput::RemoveKeyPress(EKey::Key key)
@@ -83,14 +90,49 @@ void QFAInput::RemoveKeyPress(EKey::Key key)
 			KeyPressList.RemoveAt(i);
 }
 
-void QFAInput::AddKeyRelease(EKey::Key key, std::function<void(EKey::Key)> fun)
+void QFAInput::RemoveKeyPressId(int id)
 {
-	KeyReleaseList.Add(SKeyFunction{ fun, key });
+	for (int i = KeyPressList.Length() - 1; i >= 0; i--)
+		if (KeyPressList[i].id == id)
+			KeyPressList.RemoveAt(i);
+}
+
+void QFAInput::RemoveKeyPressStrId(std::string str_id)
+{
+	if (str_id == "")
+		return;
+
+	for (int i = KeyPressList.Length() - 1; i >= 0; i--)
+		if (KeyPressList[i].string_id == str_id)
+			KeyPressList.RemoveAt(i);
+}
+
+int QFAInput::AddKeyRelease(EKey::Key key, std::function<void(EKey::Key)> fun, std::string str_id )
+{
+	KeyReleaseList.Add(SKeyFunction{ fun, key, EventIdCounter++, str_id });
+	return EventIdCounter - 1;
 }
 
 void QFAInput::RemoveKeyRelease(EKey::Key key)
 {
 	for (int i = KeyReleaseList.Length() - 1; i >= 0; i--)
 		if (KeyReleaseList[i].key == (EKey::Key)key)
+			KeyReleaseList.RemoveAt(i);
+}
+
+void QFAInput::RemoveKeyReleaseId(int id)
+{
+	for (int i = KeyReleaseList.Length() - 1; i >= 0; i--)
+		if (KeyReleaseList[i].id == id)
+			KeyReleaseList.RemoveAt(i);
+}
+
+void QFAInput::RemoveKeyReleaseStrId(std::string str_Id)
+{
+	if (str_Id == "")
+		return;
+
+	for (int i = KeyReleaseList.Length() - 1; i >= 0; i--)
+		if (KeyReleaseList[i].string_id == str_Id)
 			KeyReleaseList.RemoveAt(i);
 }
