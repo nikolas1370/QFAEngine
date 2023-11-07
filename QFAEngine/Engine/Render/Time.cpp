@@ -4,11 +4,6 @@ uint64_t QTime::WorkTime = 0;
 double QTime::DeltaTime = 0.0;
 uint64_t QTime::LastTime = 0;
 
-
-
-
-#include <iostream>
-
 void  QTime::Init()
 {
 	StartTime = glfwGetTimerValue();

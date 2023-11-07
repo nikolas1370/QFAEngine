@@ -1,42 +1,11 @@
 ﻿ // https://learnopengl.com/Introduction
-
-
-/*
-
-
-
-Linear Algebra! Lots of lots of Linear Algebra!
-
-Here are just classes and example situations where you need them
-
-    Vector - position, velocity, normals
-    Matrix - transformations
-    Quaternion - rotations (great for bone animations)
-    Ray - projectile collision detection
-    Plane - projectile collision detection
-    Frustum - render culling
-    Sphere - render culling, fast collision test
-    Axis-Align Bounding Box - culling, collision tests, spacial partitioning
-    Oriented Bounding Box - collision tests
-    Convex Hull - collision, spacial partitioning
-    etc.
-
-
-    http://www.essentialmath.com/
-*/
-
+// 1896
 
 
 #include "Math/Vector.h"
-//#include <Object/Mesh/Mesh.h> hidden
 
 #pragma comment(lib, "opengl32.lib") 
-
-
-
 #pragma comment(lib, "glfw3.lib")
-
-
 #pragma comment(lib, "User32.lib") // for glfw
 #pragma comment(lib, "Gdi32.lib") // for glfw
 #pragma comment(lib, "Shell32.lib") // for glfw
@@ -44,71 +13,14 @@ Here are just classes and example situations where you need them
 #pragma comment(lib, "glew32s.lib") // for glfw 
 //glew32s 's' mean static
 
-/*
 
-якшо против часової стрілки закручені вершини то це лицем а наобороо т то це дупой і так растеризатор робить culing
-
-
-glEnable(GL_depth_test))
-glDepthFun(GL_LESS)
-
-
-glPolygonMode(GL_FRONT_AND_BACK, LineMode ? GL_LINE : GL_FILL)// GL_LINE draw line not triangle : GL_FILL  fill triangle
-if(LineMode)
-{
-    glDisable(GL_depth_test);
-    glDisable(GL_CULL_FACE);// виключить шоб буро видно ребра за тими полігонами які перед ним
-}
-else 
-{
-    glEnable(GL_CULL_FACE)
-    glEnable(GL_depth_test)) draw box without артифактів
-}
-
-uniform object buffer  ната ця концепція
-*/
-
-/*
-
-Vector Down
-
-3D vector Unreal down direction constant (0,0,-1)
-*/
-
-//#include "Object.h"
-
-#include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
 //#include <Object/Mesh/StaticMesh.h>
  
 //#include "Texture.h"
 
 
-#include <stdio.h>
 
-#include <Math/Vector2D.h>
 
-/*
-#define 	GLFW_MOD_SHIFT   0x0001
-    If this bit is set one or more Shift keys were held down. More...
-
-#define 	GLFW_MOD_CONTROL   0x0002
-    If this bit is set one or more Control keys were held down. More...
-
-#define 	GLFW_MOD_ALT   0x0004
-    If this bit is set one or more Alt keys were held down. More...
-
-#define 	GLFW_MOD_SUPER   0x0008
-    If this bit is set one or more Super keys were held down. More...
-
-#define 	GLFW_MOD_CAPS_LOCK   0x0010
-    If this bit is set the Caps Lock key is enabled. More...
-
-#define 	GLFW_MOD_NUM_LOCK   0x0020
-    If this bit is set the Num Lock key is enabled. More...
-*/
-
-FVector moveCam;// 
-FVector rotCam;
 
 /*
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -131,107 +43,41 @@ void mouse_callback(GLFWwindow* window, int button, int action, int mods)
         lastMousePos.Y = (float)ypos;
     }
     else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
-        mousePressed = 0;
-
-
-    
+        mousePressed = 0;   
 }
-
-
-float sphere_ray_intersect(FVector ray_start, FVector ray_direction, FVector sphere_centr, float soher_radius)
-{// https://www.youtube.com/watch?v=ebzlMOw79Yw
-    // 5:55
-    glm::vec3 s = (ray_start - sphere_centr).GetGLMVector();
-    float b = glm::dot(ray_start.GetGLMVector(), ray_direction.GetGLMVector());
-    float c = glm::dot(s, s) - soher_radius * soher_radius;
-    float h = b * b - c;
-    if (h < 0.00001)
-        return 1000; // no intersection
-
-    h = sqrtf(h);
-    float t = -b - h;// t is length ray
-    return std::max(t, 0.0f);
-}
-
-
-struct Ray
-{
-    glm::vec3 dir;
-    glm::vec3 org;
-};
-
-
-// t = ray len
-bool loxGlobal(Ray r, float &t, glm::vec3 lb, glm::vec3 rt)
-{
-    glm::vec3 dirfrac; // move in Ray
-    // r.dir is unit direction vector of ray
-    dirfrac.x = 1.0f / r.dir.x;
-    dirfrac.y = 1.0f / r.dir.y;
-    dirfrac.z = 1.0f / r.dir.z;
-    // lb is the corner of AABB with minimal coordinates - left bottom, rt is maximal corner
-    // r.org is origin of ray
-    float t1 = (lb.x - r.org.x) * dirfrac.x;
-    float t2 = (rt.x - r.org.x) * dirfrac.x;
-    float t3 = (lb.y - r.org.y) * dirfrac.y;
-    float t4 = (rt.y - r.org.y) * dirfrac.y;
-    float t5 = (lb.z - r.org.z) * dirfrac.z;
-    float t6 = (rt.z - r.org.z) * dirfrac.z;
-    
-    float tmin = fmaxf(fmaxf(fminf(t1, t2), fminf(t3, t4)), fminf(t5, t6));
-    float tmax = fminf(fminf(fmaxf(t1, t2), fmaxf(t3, t4)), fmaxf(t5, t6));
-
-    // if tmax < 0, ray (line) is intersecting AABB, but the whole AABB is behind us
-    if (tmax < 0)
-    {
-        std::cout << "false 1" << std::endl;
-        t = tmax;
-        return false;
-    }
-
-    // if tmin > tmax, ray doesn't intersect AABB
-    if (tmin > tmax)
-    {
-        std::cout << "false 2" << std::endl;
-        t = tmax;
-        return false;
-    }
-
-    //t = tmin;  whit out in box check
-    // whit check
-    //I have added to @zacharmarz answer to handle when the ray origin is inside of the AABB. In this case tmin will be negative and behind the ray so tmax is the first intersection between the ray and AABB.
-    // if tmin < 0 then the ray origin is inside of the AABB and tmin is behind the start of the ray so tmax is the first intersection
-    
-    tmin < 0 ? t = tmax : t = tmin;//  add  bool insideHit = true return tru when ray stay in box
-    return true;
-}
-
-
-
 /*/
+
+#include <Overlord/Overlord.h>
+#include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
+#include <Math/Vector2D.h>
+#include <Object/Actor/Actor.h>
 #include <Tools/File/OBJLoader.h>
 
 #include <Tools/File/FileLoader.h>
-//#include <Render/Time.h>
 
-#include <Object/Actor/Actor.h>
-#include <Object/World/World.h>
-
-#include <Overlord/Overlord.h>
-#include <Object/Camera.h>
 #include "GameCode/TestActor.h"
-#include "GameCode/TestComponent.h"
-
-/*---*/
-
-
-
 
 
 int main()
-{        
-    QFAOverlord::Init();
+{     
+
+    /*
+    MyClass* kiopu = new MyClass;
+    QObject* zx = kiopu;
+
     
+    
+    std::function<void(int) > ass = [&kiopu](int l)
+        {
+            std::cout << l << " " << kiopu << " <-\n";
+        };
+    ass(1);
+    */
+    
+
+    QFAOverlord::Init();
+
+
     QMesh* MeshA = OBJLoader::LoadModelWithAnimate("NoEngineModel/anim/dore_1.obj", 30); 
     QStaticMesh* Mesh = OBJLoader::LoadModel("NoEngineModel/quad2.obj");//(vertecis, sizeof(vertecis), indices, sizeof(indices) / sizeof(unsigned int));
     QStaticMesh* Arrow = OBJLoader::LoadModel("NoEngineModel/Arrow.obj");
@@ -248,6 +94,7 @@ int main()
 
         
     QWorld* mainWorld = new QWorld();
+    mainWorld->AddActor(new ATestActor);
     //mainWorld->GetDirectionDight()->SetCastShadow(false);
 
     QActor* firstActor = new QActor();
@@ -395,9 +242,7 @@ int main()
     
 
 
-    //glfwSetKeyCallback(window, key_callback);
     
-    //glfwSetMouseButtonCallback(window, mouse_callback);
 
 
 
@@ -461,7 +306,9 @@ int main()
 
 
 }
-
+FVector moveCam;
+FVector rotCam;
+/*
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     if (key == GLFW_KEY_W && action == GLFW_PRESS)
@@ -535,10 +382,12 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         std::cout << "lox \n";
     }
     std::cout << "lox \n";
-    */
-    /*
+    
+    
     GLFW_MOUSE_BUTTON_LEFT
     GLFW_MOUSE_BUTTON_RIGHT
     GLFW_MOUSE_BUTTON_MIDDLE
-    */
+    
 }
+*/
+

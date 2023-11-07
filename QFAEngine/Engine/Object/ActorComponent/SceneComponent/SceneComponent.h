@@ -2,9 +2,10 @@
 #include <Object/ActorComponent/ActorComponent.h>
 #include <Math/Vector.h>
 #include <Math/Math.h>
-
+#include <Tools/Array.h>
 
 class QMeshBaseComponent;
+class QFAOverlord;
 
 /*
 	relative position  // relative to parent
@@ -12,25 +13,24 @@ class QMeshBaseComponent;
 	world position
 */
 
-class QFARender;
+
 class QSceneComponent : public QActorComponent
 {
 
-	// remove
-	friend QFARender;
 
 	friend QActor;
 	friend QSceneComponent;
 	friend QMeshBaseComponent;
+	friend QFAOverlord;
 
 	//void UpdateModelMatrix();
 	QActor* ParentActor;
 	QSceneComponent* ParentActorComponent;
 	bool IRootComponent = false;
 
+	QFAArray<QSceneComponent*> ListComponents;
 
 
-	unsigned int ListLength = 0;
 	
 	
 
@@ -100,10 +100,7 @@ public:
 	QSceneComponent(); 
 
 
-	// in private
-	unsigned int CountComponent = 0;
-	// in private
-	QSceneComponent** ListComponents;
+	
 
 	/*
 	do delete all child component

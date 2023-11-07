@@ -1,9 +1,8 @@
 #include "ShaderProgram.h"
 #include <Tools/Debug/OpenGlStuff.h>
 
-
 #include <iostream>
-#include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>// for Material
+#include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
 
 unsigned int QFAShaderProgram::CurentRunProgramId = 1234567890;
 
@@ -17,24 +16,16 @@ QFAShaderProgram::QFAShaderProgram(std::string vertex, std::string fragment, boo
     QFAShader ps(ShaderType::STFragment, fragment, isPath);
     QFAShader gs;
  
-    
-
-    
-
-
     GLCall(glAttachShader(ShaderProgramId, vs.GetId()));
     GLCall(glAttachShader(ShaderProgramId, ps.GetId()));
     if (geometry != "")
     {
-
         GLCall(glAttachShader(ShaderProgramId, gs.CreateShader(ShaderType::STGeometry, geometry, isPath)));
     }
-
 
     GLCall(glLinkProgram(ShaderProgramId));
     GLCall(glValidateProgram(ShaderProgramId));
     // glValidateProgram learn more  it's interesting
-
 
     int program_linked;
     glGetProgramiv(ShaderProgramId, GL_LINK_STATUS, &program_linked);
@@ -50,15 +41,11 @@ QFAShaderProgram::QFAShaderProgram(std::string vertex, std::string fragment, boo
         }
         ASSERT(false);
     }
-
-
 }
 
 QFAShaderProgram::~QFAShaderProgram()
 {
 }
-
-
 
 void QFAShaderProgram::SetProjectionMatrix(const glm::mat4& matrix)
 {
@@ -157,15 +144,8 @@ void QFAShaderProgram::SetInterpolationTime(const float interpolationTime)
 
 void QFAShaderProgram::SetMaterials(Material* materials, int count)
 {
-    //if (count > 101)  do error
-    
-   // std::cout << LocationMaterials[0] << LocationMaterials[1]<< LocationMaterials[2] << std::endl;
-
     for (int i = 0; i < count; i++)
     {
-        //std::string uniformName = std::string("materials[1].Color");
-        
-        //std::cout << "QFA 1 " << LocationMaterials[i] << std::endl;
         if (LocationMaterials[i] == -2)
         {
             std::string uniformName = std::string("materials[").append(std::to_string(i)).append(std::string("].Color"));            
@@ -178,23 +158,18 @@ void QFAShaderProgram::SetMaterials(Material* materials, int count)
                 return;
             }
         }
-
-        
-        //GLCall(LocationMaterials[i] = glGetUniformLocation(ShaderProgramId, uniformName.c_str()));
-        //GL_INVALID_OPERATION
-        //std::cout << i << " " << materials[i].Color << std::endl;
         GLCall(glUniform3f(LocationMaterials[i], materials[i].Color.X, materials[i].Color.Y, materials[i].Color.Z));
     }
     
 
 }
 void QFAShaderProgram::SetDirectionShadowMap(unsigned int id, int textureSlote)
-{// LocationDirectionShadowMap
+{
     if (LocationDirectionShadowMap == -2)
     {
         
         GLCall(LocationDirectionShadowMap = glGetUniformLocation(ShaderProgramId, "shadowMap"));
-        //  std::cout << "QFA 2" << std::endl;
+
         if (LocationDirectionShadowMap == -1)
         {
             std::cout << "QFAShaderProgram::SetDirectionShadowMap in shader problem not found uniform \"shadowMap\"" << std::endl;

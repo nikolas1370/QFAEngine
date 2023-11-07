@@ -30,13 +30,8 @@ void QStaticMesh::SetMesh(MeshFrames* meshFrames)
 		SShaderShadowProgram = new QFAShaderProgram(VertexShadowShaderPath, FragmentShadowShaderPath);
 	}
 	
-
 	MFs = meshFrames;
 
-	
-	/*    vertex Buffer    */
-//GLuint vertexBuffer; // unique id all in opengl have it
-/* buffer in gpu */
 	if (!Init)
 	{
 		Init = true;
@@ -73,15 +68,15 @@ void QStaticMesh::SetMesh(MeshFrames* meshFrames)
 
 	// both for debug
 	SSVertexMaterial* xc = MFs->GetVerticesDate();
+	if (!xc)
+		__debugbreak();
+
 	size_t zx = MFs->GetVerticesSize();
 	1 + 1;
-	GLCall(glBufferData(GL_ARRAY_BUFFER, zx, xc, GL_STATIC_DRAW));// specify what data and size
+	GLCall(glBufferData(GL_ARRAY_BUFFER, zx, xc, GL_STATIC_DRAW));
 	//  glBufferSubData,   modify data
 	/*   IndexBuffer   */ 
 
-	
-	
-	// можливо це нада коли малюєш  в бінд
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, MFs->GetIndexCount() * sizeof(unsigned int), MFs->GetIndexData(), GL_STATIC_DRAW);// DYNAMIC
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

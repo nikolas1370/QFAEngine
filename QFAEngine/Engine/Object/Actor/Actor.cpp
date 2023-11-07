@@ -40,16 +40,10 @@ void QActor::SetActorScale(const FVector& scale)
 
 
 FVector QActor::GetActorForwardVector() const
-{	// в обєкті не провіряв на правельну роботу
-
+{
 	FVector fv = FVector::ForwardVector;
-	//RotationRelativeGlobal = true
-
-	// Rotation Relative to global coordinat  
 	fv = fv.RotateAngleAxis(Rotation.Y * -1, FVector::RightVector);
 	fv = fv.RotateAngleAxis(Rotation.Z, FVector::UpVector);
-
-	//
 
 	return fv;
 }
@@ -67,8 +61,6 @@ FVector QActor::GetActorRightVector() const
 
 FVector QActor::GetActorUpVector() const
 {
-
-
 	FVector fv = FVector::UpVector;
 	fv = fv.RotateAngleAxis(Rotation.X * -1, FVector::ForwardVector);
 	fv = fv.RotateAngleAxis(Rotation.Y * -1, FVector::RightVector);
@@ -77,8 +69,6 @@ FVector QActor::GetActorUpVector() const
 	return fv;
 }
 
-
-
 QSceneComponent* QActor::SetRootComponent(QSceneComponent* component)
 {	
 	
@@ -86,13 +76,11 @@ QSceneComponent* QActor::SetRootComponent(QSceneComponent* component)
 	if (RootComponent)
 	{
 		RootComponent->IRootComponent = false;
-		RootComponent->ParentActor = nullptr;	
-		
+		RootComponent->ParentActor = nullptr;			
 	}
 
 	if (!component)
-	{
-		
+	{		
 		RootComponent = nullptr;
 		return oldRootComponent;
 	}
@@ -104,10 +92,8 @@ QSceneComponent* QActor::SetRootComponent(QSceneComponent* component)
 	}
 	else if (component->ParentActorComponent->IsValid())
 	{
-		component->ParentActorComponent->ForgetComponent(component);
-		
-	}
-	
+		component->ParentActorComponent->ForgetComponent(component);		
+	}	
 	
 	RootComponent = component;	
 	RootComponent->IRootComponent = true;
@@ -117,4 +103,3 @@ QSceneComponent* QActor::SetRootComponent(QSceneComponent* component)
 	RootComponent->SetScale(Scale);
 	return oldRootComponent;
 }
-

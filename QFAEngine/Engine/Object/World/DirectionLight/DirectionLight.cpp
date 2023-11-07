@@ -10,13 +10,6 @@ QDirectionLight::QDirectionLight()
 	GLCall(glGenVertexArrays(1, &VAOSuper));
 	GLCall(glBindVertexArray(VAOSuper));
 
-
-	/*
-	Depth is a scalar value. Scalar is interpreted by OpenGL as a
-	single component texture. Single component texture means that
-	only the .x or .r element (whatever you use) gets nonzero.
-
-	*/
 	glGenTextures(1, &depthMap);
 	glBindTexture(GL_TEXTURE_2D, depthMap);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,

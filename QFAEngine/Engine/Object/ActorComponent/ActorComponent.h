@@ -12,6 +12,7 @@ class QActorComponent : public QObject
 	friend QActor;
 
 protected:
+	// remove and see what happens
 	bool InWorldComponent = false;
 
 

@@ -1,7 +1,7 @@
 #pragma once
 #include <Object/Object.h>
 #include <Object/World/DirectionLight/DirectionLight.h>
-
+#include <Tools/Array.h>
 class QActor;
 class QFAOverlord;
 
@@ -32,10 +32,12 @@ private:
 public:
 	
 	/*--in private */
-
+	/*
 	QActor** Actors;
 	unsigned int ActorListLenght = 100;
 	unsigned int ActorCount = 0;
+	*/
+	QFAArray<QActor*> Actors;
 
 	/*--*/
 

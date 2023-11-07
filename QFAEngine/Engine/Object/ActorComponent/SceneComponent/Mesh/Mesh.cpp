@@ -14,8 +14,6 @@ void QMesh::StartFrame()
 {
 	if (!Played)
 		return;
-	//csacsa
-
 
 	double deltaTime = QTime::GetDeltaTime() ;
 
@@ -83,34 +81,22 @@ void QMesh::Stop()
 
 void QMesh::Bind( bool isShadow)//  isShadow пока нема
 {	
-	// be in other plase
 	StartFrame();
 
-	// remove
 	if (isShadow)
-	{
 		SShaderShadowProgram->Use();
-	}
 	else
 	{
 		SShaderProgram->Use();
 		SShaderProgram->SetMaterials(Mf->GetMaterialData(), Mf->GetMaterialCount());
 	}
 
-
 	GLCall(glBindVertexArray(VAO));
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO));
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO));
 
-
-
-	
-
 	GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, Mf->GetFrameSize() * 2, Mf->GetFrameData(curentFrame == Mf->GetFrameCount() ? curentFrame - 1 : curentFrame)));
-	//SShaderProgram->SetInterpolationTime(curentFrame == Mf->FrameCount ? 1 : InterpolationTime);
-	SShaderProgram->SetInterpolationTime(InterpolationTime);
-	//	std::cout << InterpolationTime << std::endl;
-	
+	SShaderProgram->SetInterpolationTime(InterpolationTime);	
 }
 	
 
@@ -161,9 +147,6 @@ QMesh::QMesh(MeshFrames* mf)
 	GLCall(glBufferData(GL_ARRAY_BUFFER, Mf->GetFrameSize() * 2, Mf->GetFrameData(1), GL_STATIC_DRAW));// specify what data and size
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
 
-
-
-	//  glBufferSubData,   modify data
 	/*   IndexBuffer   */
 
 	glGenBuffers(1, &IBO); // gen index buffer

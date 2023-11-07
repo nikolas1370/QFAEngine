@@ -1,20 +1,8 @@
 ﻿#include "Object.h"
 
-
-
-// remove
-//#include <iostream>
-
 QObject::QObject()
 {
-    /*
-    // __func__
 
-       #include <typeinfo>
-    // typeid(this).name()
-    */
-    
-    //std::cout << typeid(this).name() << std::endl;
 }
 
 QObject::~QObject()

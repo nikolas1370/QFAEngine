@@ -9,16 +9,9 @@ QSceneComponent::QSceneComponent()
 
 QSceneComponent::~QSceneComponent()
 {
-	if (ListLength > 0)
-	{
-		for (unsigned int i = 0; i < CountComponent; i++)
-			ListComponents[i]->Destroy();
-
-		delete[] ListComponents;
-	}
+	for (unsigned int i = 0; i < ListComponents.Length(); i++)
+		ListComponents[i]->Destroy();
 }
-
-
 
 void QSceneComponent::ChangeWorldPosition(const FVector position)
 {
@@ -30,7 +23,7 @@ void QSceneComponent::ChangeWorldPosition(const FVector position)
 		WorldPosition = ToOpenglCoordinate(position);
 		if (ForRender)
 			UpdateModelMatrix(true);
-		for (unsigned int i = 0; i < CountComponent; i++)
+		for (unsigned int i = 0; i < ListComponents.Length(); i++)
 			if (ListComponents[i]->IsValid())
 				ListComponents[i]->UpdateWorldPositionScale(true);
 	}
@@ -39,25 +32,17 @@ void QSceneComponent::ChangeWorldPosition(const FVector position)
 
 		WorldPosition = ToOpenglCoordinate(position);
 		RelativePosition = position - ParentActorComponent->GetWorldPosition();
-		//std::cout << "RelativePosition" << "\n";
-		//std::cout << RelativePosition << "\n";
-
 		RelativePosition = RelativePosition.ReversScale(AccumulateScale);
 		//invers RotationMatrix rotate finally position to pure relative position(pure = not scale and rotate)
-		//std::cout << ParentActorComponent->AccumulateScale << "\n";
 		RelativePosition = FromOpenglCoordinate(FVector(glm::inverse(ParentActorComponent->RotationMatrix) * ToOpenglCoordinate(RelativePosition).GetGLMVector()));
 		if(ForRender)
 			UpdateModelMatrix(true);
 
-		for (size_t i = 0; i < CountComponent; i++)
+		for (size_t i = 0; i < ListComponents.Length(); i++)
 			if (ListComponents[i]->IsValid())
 				ListComponents[i]->UpdateWorldPositionScale(true);
 	}
 }
-
-
-
-
 
 void QSceneComponent::ChangeLocalPosition(const FVector position)
 {
@@ -77,7 +62,7 @@ void QSceneComponent::ChangeLocalPosition(const FVector position)
 	if (ForRender)
 		UpdateModelMatrix(true);
 
-	for (size_t i = 0; i < CountComponent; i++)
+	for (size_t i = 0; i < ListComponents.Length(); i++)
 		if (ListComponents[i]->IsValid())
 			ListComponents[i]->UpdateWorldPositionScale(true);
 }
@@ -124,7 +109,7 @@ void QSceneComponent::ChangedParentRotation()
 	if (ForRender)
 		UpdateModelMatrix(false);
 
-	for (size_t i = 0; i < CountComponent; i++)
+	for (size_t i = 0; i < ListComponents.Length(); i++)
 		if(ListComponents[i]->IsValid())
 		ListComponents[i]->ChangedParentRotation();
 }
@@ -143,7 +128,7 @@ void QSceneComponent::ChangeRotation(const FVector rotation)
 		if (ForRender)
 			UpdateModelMatrix(false);
 
-		for (size_t i = 0; i < CountComponent; i++)
+		for (size_t i = 0; i < ListComponents.Length(); i++)
 			if (ListComponents[i]->IsValid())
 				ListComponents[i]->ChangedParentRotation();
 	}
@@ -153,22 +138,15 @@ void QSceneComponent::ChangeRotation(const FVector rotation)
 
 void QSceneComponent::UpdateWorldPositionScale(bool onlyPosition)
 {
-	
 	AccumulateScale = ParentActorComponent->AccumulateScale * ParentActorComponent->Scale;
-	//std::cout << "UpdateWorldPosition " << Name << " " << AccumulateScale << " <-> " << RelativePosition << " " << GetRelativeScalePosition() << "\n";
-	// rotate relative location with parent matrix rotation
-	//glm::vec3 ass = ParentActorComponent->RotationMatrix * ToOpenglCoordinate(GetRelativeScalePosition()).GetGLMVector();
 	glm::vec3 ass = ParentActorComponent->RotationMatrix * ToOpenglCoordinate(GetRelativeScalePosition()).GetGLMVector();
 	WorldPosition = ParentActorComponent->WorldPosition + FVector(ass);
 	if (ForRender)
 		UpdateModelMatrix(onlyPosition);
 
-	for (size_t i = 0; i < CountComponent; i++)
+	for (size_t i = 0; i < ListComponents.Length(); i++)
 		if (ListComponents[i]->IsValid())
-		{
-			
 			ListComponents[i]->UpdateWorldPositionScale(onlyPosition);
-		}
 }
 
 
@@ -177,19 +155,15 @@ void QSceneComponent::ChangeScale(const FVector scale)
 {
 	Scale = scale;
 	if (IRootComponent)
-	{
-		
+	{		
 		AccumulateScale = FVector(1);
 		ParentActor->Scale = scale;
 		if (ForRender)
 			UpdateModelMatrix(false);
 
-		for (size_t i = 0; i < CountComponent; i++)
+		for (size_t i = 0; i < ListComponents.Length(); i++)
 			if (ListComponents[i]->IsValid())
-			{
-				
 				ListComponents[i]->UpdateWorldPositionScale(false);
-			}
 	}
 	else if (ParentActorComponent->IsValid())
 		UpdateWorldPositionScale(false);
@@ -217,8 +191,6 @@ FVector QSceneComponent::GetUpVector() const
 	return FVector::UpVector;
 }
 
-
-
 bool QSceneComponent::ItsMyFather(QSceneComponent* component)
 {
 	QSceneComponent* parent = ParentActorComponent;
@@ -233,10 +205,6 @@ bool QSceneComponent::ItsMyFather(QSceneComponent* component)
 	}
 }
 
-
-
-//перенести в scen component
-
 void QSceneComponent::AttachComponent(QSceneComponent* component)
 {
 	if (!component)
@@ -249,52 +217,27 @@ void QSceneComponent::AttachComponent(QSceneComponent* component)
 		return;
 	}
 
-	if (ListLength == 0)
-	{
-		ListLength = 10;
-		ListComponents = new QSceneComponent * [ListLength];
-	}
-	else if (CountComponent >= ListLength)
-	{
-		ListLength *= 2;
-		QSceneComponent** tem = ListComponents;
-		ListComponents = new QSceneComponent * [ListLength];
-		for (unsigned int i = 0; i < CountComponent; i++)
-			ListComponents[i] = tem[i];
-
-		delete[] tem;
-	}
-
 	if (component->ParentActor->IsValid())
 		component->ParentActor->SetRootComponent(nullptr);
 	else if (component->ParentActorComponent->IsValid())
 		component->ParentActorComponent->ForgetComponent(component);
 
 	component->ParentActorComponent = this;
-	ListComponents[CountComponent] = component;
-	CountComponent++;
-/*
-component->SetRelativePosition(component->RelativePosition);
-	component->SetRotation(component->Rotation);
-*/
+	ListComponents.Add(component);	
+
 	component->UpdateWorldPositionScale(false);
 	component->ChangedParentRotation();
 }
 
 bool QSceneComponent::ForgetComponent(QSceneComponent* component)
 {
-	for (unsigned int i = 0; i < CountComponent; i++)
+	if (ListComponents.Remove(component))
 	{
-		if (ListComponents[i] == component)
-		{
-			CountComponent--;
-			component->ParentActorComponent = nullptr;
-			ListComponents[i] = ListComponents[CountComponent];
-			return true;
-		}
+		component->ParentActorComponent = nullptr;
+		return true;
 	}
-
-	return false;
+	else
+		return false;
 }
 
 QActor* QSceneComponent::GetActor(QSceneComponent* component)

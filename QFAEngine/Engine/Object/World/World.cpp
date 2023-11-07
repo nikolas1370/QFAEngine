@@ -21,28 +21,21 @@ void QWorld::Deactivate()
 
 void QWorld::ForgetActor(QActor* actor)
 {
-	for (int i = 0; i < ActorCount; i++)
-	{
-		if (Actors[i] == actor)
-		{
-			ActorCount--;
-			Actors[i] = Actors[ActorCount];
-			break;
-		}
-	}
+	if (!actor->IsValid())
+		return;
+
+	actor->ActorWorld = nullptr;
+	Actors.Remove(actor);
 }
 
 QWorld::QWorld()
 {
-	Actors = new QActor*[ActorListLenght];// ActorListLenght
 }
 
 QWorld::~QWorld()
 {
-	for (size_t i = 0; i < ActorCount; i++)
+	for (size_t i = 0; i < Actors.Length(); i++)
 		Actors[i]->Destroy();
-
-	delete[] Actors;
 }
 
 void QWorld::AddActor(QActor* actor)
@@ -54,18 +47,7 @@ void QWorld::AddActor(QActor* actor)
 		actor->ActorWorld->ForgetActor(actor);
 
 	actor->ActorWorld = this;
-	if (ActorCount >= ActorListLenght)
-	{
-		QActor** tem = Actors;
-		ActorListLenght *= 2;
-		Actors = new QActor*[ActorListLenght];
 
-		for (int i = 0; i < ActorCount; i++)
-			Actors[i] = tem[i];
-		
-		delete[] tem;
-	}
 
-	Actors[ActorCount] = actor;
-	ActorCount++;
+	Actors.Add(actor);
 }
