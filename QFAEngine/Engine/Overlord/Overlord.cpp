@@ -92,8 +92,9 @@ void QFAOverlord::MainLoop()
 {
     while (!glfwWindowShouldClose(Window))
     {
-        QTime::CalcDeltaTime();
+        QTime::CalcDeltaTime();        
         glfwPollEvents();
+        QFAInput::NewFrame((float)QTime::GetDeltaTime());
         ProcessTick();
         RenderWorld();
     }

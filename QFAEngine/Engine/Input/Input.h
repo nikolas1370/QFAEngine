@@ -156,17 +156,36 @@ class QFAInput
 {
 	struct SKeyFunction
 	{		
-		std::function<void(EKey::Key)> fun;		
+		std::function<void(EKey::Key)> fun;
 		EKey::Key key;
 		int id;
 		std::string string_id;
-		
+	};
+
+	struct SKeyHold 
+	{		
+		std::function<void(EKey::Key)> fun;
+		EKey::Key key;
+		int id;
+		std::string string_id;
+		float HoldTime;
+		float timeButtonPressed = 0.0f;
+		bool pressed = false;
+	};
+
+	struct SPressedAnyKey
+	{
+		std::function<void(EKey::Key)> fun;
+		bool active = true;
 	};
 
 	friend QFAOverlord;
 
-
-	static void ProcessInput();
+	/*
+		GLFW_REPEAT not match with count frame in game
+		call after glfwPollEvents
+	*/
+	static void NewFrame(float delta);
 	/*
 	 *  @param[in] window The window that received the event.
 	 *  @param[in] key The [keyboard key](@ref keys) that was pressed or released.
@@ -186,8 +205,12 @@ class QFAInput
 	
 	QFAArray<SKeyFunction> KeyPressList;
 	QFAArray<SKeyFunction> KeyReleaseList;
+	QFAArray<SKeyHold> KeyHoldList;
+	
 	bool BlockInput = false;
 	int EventIdCounter = 0;
+
+	SPressedAnyKey Any;
 public:
 	QFAInput();
 	~QFAInput();
@@ -205,6 +228,17 @@ public:
 	void RemoveKeyReleaseId(int id);
 	void RemoveKeyReleaseStrId(std::string str_Id);
 
+	/*
+		rewrite last active AddPressedAnyKey
+		after call fun event off
+	*/
+	void SetPressedAnyKey(std::function<void(EKey::Key)> fun);
+	void ShutOffPressedAnyKey();
+
+	int AddKeyHold(EKey::Key key, std::function<void(EKey::Key)> fun, std::string str_id = "", float holdTime = 0.5f);
+	void RemoveKeyHold(EKey::Key key);
+	void RemoveKeyHoldId(int id);
+	void RemoveKeyHoldStrId(std::string strId);
 private:
 
 };
@@ -212,24 +246,9 @@ private:
 
 /*
 * from my unreal input sys
-* 
-FInputEventPressed
-FInputEventReleased
-
-FInputEventHold
-	int addHold(FKey key, 
-	float holdTime = 0.5f , FString stringID = "");
-
-FInputEventPressedAnyKey
-
-
-FInputEventCombo
-int addCombo(FKey key, FInputManagerDelegatoCombo delegato, 
-	bool shift = false, bool alt = false, bool ctrl = false, FString stringID = "");
-
-
 FInputEventAxis1D
 FInputEventAxis2D
 FInputEventAxis3D
+
 FInputEventWheelAxis
 */
