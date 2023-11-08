@@ -37,6 +37,39 @@ void QFAInput::NewFrame(float delta)
 				}
 			}
 		}
+
+		for (int j = 0; j < Inputs[i]->AxisList.Length(); j++)
+		{
+			float axisValue = 0.0f;
+			for (int k = 0; k < Inputs[i]->AxisList[j].Keys.Length(); k++)
+				if (Inputs[i]->AxisList[j].Keys[k].pressed)
+					axisValue += Inputs[i]->AxisList[j].Keys[k].AxisValue;
+			
+			if (Inputs[i]->AxisList[j].fun)
+				Inputs[i]->AxisList[j].fun(axisValue);			
+		}
+
+		for (int j = 0; j < Inputs[i]->Axis2DList.Length(); j++)
+		{
+			FVector2D axisValue = FVector2D(0.0f);
+			for (int k = 0; k < Inputs[i]->Axis2DList[j].Keys.Length(); k++)
+				if (Inputs[i]->Axis2DList[j].Keys[k].pressed)
+					axisValue += Inputs[i]->Axis2DList[j].Keys[k].AxisValue;
+
+			if (Inputs[i]->Axis2DList[j].fun)
+				Inputs[i]->Axis2DList[j].fun(axisValue);
+		}
+
+		for (int j = 0; j < Inputs[i]->Axis3DList.Length(); j++)
+		{
+			FVector axisValue = FVector(0.0f);
+			for (int k = 0; k < Inputs[i]->Axis3DList[j].Keys.Length(); k++)
+				if (Inputs[i]->Axis3DList[j].Keys[k].pressed)
+					axisValue += Inputs[i]->Axis3DList[j].Keys[k].AxisValue;
+
+			if (Inputs[i]->Axis3DList[j].fun)
+				Inputs[i]->Axis3DList[j].fun(axisValue);
+		}
 	}
 
 }
@@ -45,7 +78,14 @@ void QFAInput::Scroll_callback(GLFWwindow* window, double xoffset, double yoffse
 {
 	if (yoffset > 0.0001 || yoffset < -0.0001)// scroll in y-axis only
 	{
+		for (int i = 0; i < Inputs.Length(); i++)
+		{
+			if (Inputs[i]->BlockInput || !Inputs[i]->WheelAxis.active)
+				continue;
 
+			if (Inputs[i]->WheelAxis.fun)
+				Inputs[i]->WheelAxis.fun((float)yoffset);
+		}
 	}
 }
 
@@ -99,6 +139,21 @@ void QFAInput::ProcessKey(int key, int scancode, int action, int mods)
 					Inputs[i]->KeyHoldList[j].timeButtonPressed = 0;
 				}
 			}
+			
+			for (int j = 0; j < Inputs[i]->AxisList.Length(); j++)
+				for (int k = 0; k < Inputs[i]->AxisList[j].Keys.Length(); k++)
+					if (Inputs[i]->AxisList[j].Keys[k].key == key)
+						Inputs[i]->AxisList[j].Keys[k].pressed = true;
+
+			for (int j = 0; j < Inputs[i]->Axis2DList.Length(); j++)
+				for (int k = 0; k < Inputs[i]->Axis2DList[j].Keys.Length(); k++)
+					if (Inputs[i]->Axis2DList[j].Keys[k].key == key)
+						Inputs[i]->Axis2DList[j].Keys[k].pressed = true;
+
+			for (int j = 0; j < Inputs[i]->Axis3DList.Length(); j++)
+				for (int k = 0; k < Inputs[i]->Axis3DList[j].Keys.Length(); k++)
+					if (Inputs[i]->Axis3DList[j].Keys[k].key == key)
+						Inputs[i]->Axis3DList[j].Keys[k].pressed = true;
 		}
 	}
 	else if (action == GLFW_RELEASE)
@@ -115,69 +170,76 @@ void QFAInput::ProcessKey(int key, int scancode, int action, int mods)
 			for (int j = 0; j < Inputs[i]->KeyHoldList.Length(); j++)
 				if (Inputs[i]->KeyHoldList[j].key == (EKey::Key)key)
 					Inputs[i]->KeyHoldList[j].pressed = false;
+
+			for (int j = 0; j < Inputs[i]->AxisList.Length(); j++)
+				for (int k = 0; k < Inputs[i]->AxisList[j].Keys.Length(); k++)
+					if (Inputs[i]->AxisList[j].Keys[k].key == key)
+						Inputs[i]->AxisList[j].Keys[k].pressed = false;
+
+			for (int j = 0; j < Inputs[i]->Axis2DList.Length(); j++)
+				for (int k = 0; k < Inputs[i]->Axis2DList[j].Keys.Length(); k++)
+					if (Inputs[i]->Axis2DList[j].Keys[k].key == key)
+						Inputs[i]->Axis2DList[j].Keys[k].pressed = false;
+
+			for (int j = 0; j < Inputs[i]->Axis3DList.Length(); j++)
+				for (int k = 0; k < Inputs[i]->Axis3DList[j].Keys.Length(); k++)
+					if (Inputs[i]->Axis3DList[j].Keys[k].key == key)
+						Inputs[i]->Axis3DList[j].Keys[k].pressed = false;
 		}
 	}
 }
 
 
-int QFAInput::AddKeyPress(EKey::Key key, std::function<void(EKey::Key)> fun, std::string str_id )
+void QFAInput::AddKeyPress(EKey::Key key, std::string id, std::function<void(EKey::Key)> fun)
 {
-	KeyPressList.Add(SKeyFunction{ fun, key,  EventIdCounter++, str_id});
-	return EventIdCounter - 1;
-}
-
-void QFAInput::RemoveKeyPress(EKey::Key key)
-{
-	for (int i = KeyPressList.Length() - 1; i >= 0; i--)
-		if(KeyPressList[i].key == (EKey::Key)key)
-			KeyPressList.RemoveAt(i);
-}
-
-void QFAInput::RemoveKeyPressId(int id)
-{
-	for (int i = KeyPressList.Length() - 1; i >= 0; i--)
+	for (size_t i = 0; i < KeyPressList.Length(); i++)
+	{
 		if (KeyPressList[i].id == id)
+		{
+			KeyPressList[i].key = key;
+			return;
+		}
+	}
+
+	KeyPressList.Add(SKeyFunction{ fun, key, id});
+}
+
+void QFAInput::RemoveKeyPress(std::string id)
+{
+	for (size_t i = 0; i < KeyPressList.Length(); i++)
+	{
+		if (KeyPressList[i].id == id)
+		{
 			KeyPressList.RemoveAt(i);
+			return;
+		}
+	}
 }
 
-void QFAInput::RemoveKeyPressStrId(std::string str_id)
+void QFAInput::AddKeyRelease(EKey::Key key, std::string id, std::function<void(EKey::Key)> fun)
 {
-	if (str_id == "")
-		return;
-
-	for (int i = KeyPressList.Length() - 1; i >= 0; i--)
-		if (KeyPressList[i].string_id == str_id)
-			KeyPressList.RemoveAt(i);
-}
-
-int QFAInput::AddKeyRelease(EKey::Key key, std::function<void(EKey::Key)> fun, std::string str_id )
-{
-	KeyReleaseList.Add(SKeyFunction{ fun, key, EventIdCounter++, str_id });
-	return EventIdCounter - 1;
-}
-
-void QFAInput::RemoveKeyRelease(EKey::Key key)
-{
-	for (int i = KeyReleaseList.Length() - 1; i >= 0; i--)
-		if (KeyReleaseList[i].key == (EKey::Key)key)
-			KeyReleaseList.RemoveAt(i);
-}
-
-void QFAInput::RemoveKeyReleaseId(int id)
-{
-	for (int i = KeyReleaseList.Length() - 1; i >= 0; i--)
+	for (size_t i = 0; i < KeyReleaseList.Length(); i++)
+	{
 		if (KeyReleaseList[i].id == id)
-			KeyReleaseList.RemoveAt(i);
+		{
+			KeyReleaseList[i].key = key;
+			return;
+		}
+	}
+
+	KeyReleaseList.Add(SKeyFunction{ fun, key, id });
 }
 
-void QFAInput::RemoveKeyReleaseStrId(std::string str_Id)
+void QFAInput::RemoveKeyRelease(std::string Id)
 {
-	if (str_Id == "")
-		return;
-
-	for (int i = KeyReleaseList.Length() - 1; i >= 0; i--)
-		if (KeyReleaseList[i].string_id == str_Id)
+	for (size_t i = 0; i < KeyReleaseList.Length(); i++)
+	{
+		if (KeyReleaseList[i].id == Id)
+		{
 			KeyReleaseList.RemoveAt(i);
+			break;
+		}
+	}
 }
 
 
@@ -194,32 +256,253 @@ void QFAInput::ShutOffPressedAnyKey()
 	Any.active = false;
 }
 
-
-int QFAInput::AddKeyHold(EKey::Key key, std::function<void(EKey::Key)> fun, std::string str_id, float holdTime)
+void QFAInput::SetWheelAxis(std::function<void(float)> fun)
 {
-	KeyHoldList.Add(SKeyHold{ fun, key, EventIdCounter++, str_id, holdTime});
-	return EventIdCounter - 1;	
+	WheelAxis.active = true;
+	WheelAxis.fun = fun;
 }
 
-void QFAInput::RemoveKeyHold(EKey::Key key)
+void QFAInput::ShutOffWheelAxis()
 {
-	for (int i = KeyHoldList.Length() - 1; i >= 0; i--)
-		if (KeyHoldList[i].key == (EKey::Key)key)
-			KeyHoldList.RemoveAt(i);
+	WheelAxis.active = false;
 }
-void QFAInput::RemoveKeyHoldId(int id)
+
+
+void QFAInput::AddKeyHold(EKey::Key key, std::string id, float holdTime, std::function<void(EKey::Key)> fun)
 {
-	for (int i = KeyHoldList.Length() - 1; i >= 0; i--)
+	for (size_t i = 0; i < KeyHoldList.Length(); i++)
+	{
 		if (KeyHoldList[i].id == id)
-			KeyHoldList.RemoveAt(i);
+		{
+			KeyHoldList[i].key = key;
+			return;
+		}
+	}
+
+	KeyHoldList.Add(SKeyHold{ fun, key, id, holdTime});
 }
 
-void QFAInput::RemoveKeyHoldStrId(std::string strId)
-{
-	if (strId == "")
-		return;
 
-	for (int i = KeyHoldList.Length() - 1; i >= 0; i--)
-		if (KeyHoldList[i].string_id == strId)
+void QFAInput::RemoveKeyHold(std::string id)
+{
+	for (size_t i = 0; i < KeyHoldList.Length(); i++)
+	{
+		if (KeyHoldList[i].id == id)
+		{
 			KeyHoldList.RemoveAt(i);
+			break;
+		}
+	}
+}
+
+QFAInputAxis1D QFAInput::CreateAxis1D(std::string id, std::function<void(float)> fun)
+{	
+	for (int i = 0; i < AxisList.Length(); i++)
+		if (AxisList[i].id == id)
+			return QFAInputAxis1D();
+	
+	AxisList.Add(SAxis1D{ id, fun });
+	return QFAInputAxis1D(id);
+}
+
+QFAInputAxis2D QFAInput::CreateAxis2D(std::string id, std::function<void(FVector2D)> fun)
+{
+	for (int i = 0; i < Axis2DList.Length(); i++)
+		if (Axis2DList[i].id == id)
+			return QFAInputAxis2D();
+
+	Axis2DList.Add(SAxis2D{ id, fun });
+	return QFAInputAxis2D(id);
+}
+
+
+QFAInputAxis3D QFAInput::CreateAxis3D(std::string id, std::function<void(FVector)> fun)
+{
+	for (int i = 0; i < Axis3DList.Length(); i++)
+		if (Axis3DList[i].id == id)
+			return QFAInputAxis3D();
+
+	Axis3DList.Add(SAxis3D{ id, fun });
+	return QFAInputAxis3D(id);
+}
+
+
+void QFAInput::RemoveAxis1D(std::string id)
+{
+	for (int i = 0; i < AxisList.Length(); i++)
+	{
+		if (AxisList[i].id == id)
+		{
+			AxisList.RemoveAt(i);
+			break;
+		}
+	}
+}
+
+void QFAInput::RemoveAxis2D(std::string id)
+{
+	for (int i = 0; i < Axis2DList.Length(); i++)
+	{
+		if (Axis2DList[i].id == id)
+		{
+			Axis2DList.RemoveAt(i);
+			break;
+		}
+	}
+}
+
+
+
+void QFAInput::RemoveAxis3D(std::string id)
+{
+	for (int i = 0; i < Axis3DList.Length(); i++)
+	{
+		if (Axis3DList[i].id == id)
+		{
+			Axis3DList.RemoveAt(i);
+			break;
+		}
+	}
+}
+
+
+
+
+void QFAInput::AddKeyToAxis1D(std::string axisId, EKey::Key key, float axisValue, std::string keyId)
+{// AxisList
+	for (int i = 0; i < Inputs.Length(); i++)
+	{
+		for (int j = 0; j < Inputs[i]->AxisList.Length(); j++)
+		{
+			if (Inputs[i]->AxisList[j].id == axisId)
+			{
+				for (int k = 0; k < Inputs[i]->AxisList[j].Keys.Length(); k++)
+				{
+					if (Inputs[i]->AxisList[j].Keys[k].id == keyId)
+					{
+						Inputs[i]->AxisList[j].Keys[k].key = key;
+						return;
+					}
+				}
+
+				Inputs[i]->AxisList[j].Keys.Add(SKeyAxis1D{ key, keyId, axisValue });
+				return;
+			}
+		}
+	}
+}
+
+void QFAInput::AddKeyToAxis2D(std::string axisId, EKey::Key key, FVector2D axisValue, std::string keyId)
+{
+	for (int i = 0; i < Inputs.Length(); i++)
+	{
+		for (int j = 0; j < Inputs[i]->Axis2DList.Length(); j++)
+		{
+			if (Inputs[i]->Axis2DList[j].id == axisId)
+			{
+				for (int k = 0; k < Inputs[i]->Axis2DList[j].Keys.Length(); k++)
+				{
+					if (Inputs[i]->Axis2DList[j].Keys[k].id == keyId)
+					{
+						Inputs[i]->Axis2DList[j].Keys[k].key = key;
+						return;
+					}
+				}
+
+				Inputs[i]->Axis2DList[j].Keys.Add(SKeyAxis2D{ key, keyId, axisValue });
+				return;
+			}
+		}
+	}
+}
+
+void QFAInput::AddKeyToAxis3D(std::string axisId, EKey::Key key, FVector axisValue, std::string keyId)
+{
+	for (int i = 0; i < Inputs.Length(); i++)
+	{
+		for (int j = 0; j < Inputs[i]->Axis3DList.Length(); j++)
+		{
+			if (Inputs[i]->Axis3DList[j].id == axisId)
+			{
+				for (int k = 0; k < Inputs[i]->Axis3DList[j].Keys.Length(); k++)
+				{
+					if (Inputs[i]->Axis3DList[j].Keys[k].id == keyId)
+					{
+						Inputs[i]->Axis3DList[j].Keys[k].key = key;
+						return;
+					}
+				}
+
+				Inputs[i]->Axis3DList[j].Keys.Add(SKeyAxis3D{ key, keyId, axisValue });
+				return;
+			}
+		}
+	}
+}
+
+
+void QFAInput::RemoveKeyFromAxis1D(std::string axisId, std::string keyId)
+{
+	for (int i = 0; i < Inputs.Length(); i++)
+	{
+		for (int j = 0; j < Inputs[i]->AxisList.Length(); j++)
+		{
+			if (Inputs[i]->AxisList[j].id == axisId)
+			{
+				for (int k = 0; k < Inputs[i]->AxisList[j].Keys.Length(); k++)
+				{
+					if (Inputs[i]->AxisList[j].Keys[k].id == keyId)
+					{
+						Inputs[i]->AxisList[j].Keys.RemoveAt(k);
+						return;
+					}
+				}
+			}
+		}
+	}
+}
+
+
+
+void QFAInput::RemoveKeyFromAxis2D(std::string axisId, std::string keyId)
+{
+	for (int i = 0; i < Inputs.Length(); i++)
+	{
+		for (int j = 0; j < Inputs[i]->Axis2DList.Length(); j++)
+		{
+			if (Inputs[i]->Axis2DList[j].id == axisId)
+			{
+				for (int k = 0; k < Inputs[i]->Axis2DList[j].Keys.Length(); k++)
+				{
+					if (Inputs[i]->Axis2DList[j].Keys[k].id == keyId)
+					{
+						Inputs[i]->Axis2DList[j].Keys.RemoveAt(k);
+						return;
+					}
+				}
+			}
+		}
+	}
+}
+
+
+void QFAInput::RemoveKeyFromAxis3D(std::string axisId, std::string keyId)
+{
+	for (int i = 0; i < Inputs.Length(); i++)
+	{
+		for (int j = 0; j < Inputs[i]->Axis3DList.Length(); j++)
+		{
+			if (Inputs[i]->Axis3DList[j].id == axisId)
+			{
+				for (int k = 0; k < Inputs[i]->Axis3DList[j].Keys.Length(); k++)
+				{
+					if (Inputs[i]->Axis3DList[j].Keys[k].id == keyId)
+					{
+						Inputs[i]->Axis3DList[j].Keys.RemoveAt(k);
+						return;
+					}
+				}
+			}
+		}
+	}
 }

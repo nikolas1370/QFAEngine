@@ -1,10 +1,21 @@
 #pragma once
 /* create for pointer and enum */
+#include <iostream>
+
 template <typename T>
 class QFAArray
 {
-    int MaxAmount = 0;
+    int MaxAmount = 10;
     int Amount = 0;
+
+    /*
+        if call delete[] not allocate memory be error.
+        if create QFAArray<SAxis1D>
+            and delete after be error.
+        SAxis1D hawe inside QFAArray<SKeyAxis1D> and after call
+            ~QFAArray<SKeyAxis1D> delete[] give errror.
+    */
+    bool Alloc = false;          
     T* Data;
 
 public:
@@ -12,14 +23,15 @@ public:
 
     ~QFAArray()
     {
-        delete[] Data;
+        if(Alloc)
+            delete[] Data;
     }
 
-    void Add(T t)
+    void Add(T some)
     {
-        if (MaxAmount == 0)
+        if (!Alloc)
         {
-            MaxAmount = 10;
+            Alloc = true;
             Data = new T[MaxAmount];
         }
         else if(Amount >= MaxAmount)
@@ -30,10 +42,10 @@ public:
             for (int i = 0; i < Amount; i++)
                 Data[i] = tem[i];
 
-            delete[] tem;
+            delete[] tem;            
         }
 
-        Data[Amount++] = t;
+        Data[Amount++] = some;
     }
 
     bool Remove(T t)

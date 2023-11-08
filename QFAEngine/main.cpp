@@ -61,6 +61,7 @@ void mouse_callback(GLFWwindow* window, int button, int action, int mods)
 int main()
 {     
 
+
     /*
     MyClass* kiopu = new MyClass;
     QObject* zx = kiopu;
