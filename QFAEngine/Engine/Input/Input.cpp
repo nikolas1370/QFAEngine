@@ -85,6 +85,18 @@ void QFAInput::Scroll_callback(GLFWwindow* window, double xoffset, double yoffse
 	}
 }
 
+void QFAInput::MouseMove_callback(GLFWwindow* window, float xoffset, float yoffset)
+{
+	for (int i = 0; i < Inputs.Length(); i++)
+	{
+		if (Inputs[i]->BlockInput || !Inputs[i]->MouseMove.active)
+			continue;
+
+		if (Inputs[i]->MouseMove.fun)
+			Inputs[i]->MouseMove.fun(FVector2D(xoffset, yoffset));
+	}
+}
+
 void QFAInput::Init(GLFWwindow* window)
 {
 	Window = window;
@@ -101,6 +113,11 @@ void QFAInput::Init(GLFWwindow* window)
 	glfwSetScrollCallback(Window, [](GLFWwindow* window, double xoffset, double yoffset)
 		{
 			QFAInput::Scroll_callback(window, xoffset, yoffset);
+		});
+
+	glfwSetCursorPosCallback(Window, [](GLFWwindow* window, double xpos, double ypos)
+		{
+			QFAInput::MouseMove_callback(window, (float)xpos, (float)ypos);
 		});
 }
 
@@ -257,6 +274,17 @@ void QFAInput::SetWheelAxis(std::function<void(float)> fun)
 void QFAInput::ShutOffWheelAxis()
 {
 	WheelAxis.active = false;
+}
+
+void QFAInput::SetMouseMove(std::function<void(FVector2D)> fun)
+{
+	MouseMove.active = true;
+	MouseMove.fun = fun;
+}
+
+void QFAInput::ShutOffMouseMove()
+{
+	MouseMove.active = false;
 }
 
 void QFAInput::AddKeyHold(EKey::Key key, std::string id, float holdTime, std::function<void(EKey::Key)> fun)

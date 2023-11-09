@@ -167,14 +167,22 @@ class QFAInput
 	struct SPressedAnyKey
 	{
 		std::function<void(EKey::Key)> fun;
-		bool active = true;
+		bool active = false;
 	};
 
 	struct SWheelAxis
 	{
 		std::function<void(float)> fun;
-		bool active = true;
+		bool active = false;
 	};
+
+	struct SMouseMove
+	{
+		std::function<void(FVector2D)> fun;
+		bool active = false;
+	};
+	
+
 	
 	struct SKeyHold
 	{
@@ -255,6 +263,7 @@ class QFAInput
 	 *  held down.
 	*/
 	static void Scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+	static void MouseMove_callback(GLFWwindow* window, float xoffset, float yoffset);
 	static void Init(GLFWwindow* window);
 	static void ProcessKey(int key, int scancode, int action, int mods);
 	
@@ -271,6 +280,7 @@ class QFAInput
 
 	SPressedAnyKey Any;
 	SWheelAxis WheelAxis;
+	SMouseMove MouseMove;
 public:
 	/*
 		Event process before Tick
@@ -295,6 +305,9 @@ public:
 
 	void SetWheelAxis(std::function<void(float)> fun);
 	void ShutOffWheelAxis();
+
+	void SetMouseMove(std::function<void(FVector2D)> fun);
+	void ShutOffMouseMove();
 
 	/*
 	if id exis Ekey::key be changed

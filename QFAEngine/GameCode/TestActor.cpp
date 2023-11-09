@@ -4,6 +4,10 @@
 ATestActor::ATestActor()
 {
 	CanTick = false;
+	input.SetMouseMove([](FVector2D axis)
+		{
+			std::cout << axis.X << " " << axis.Y << std::endl;
+		});
 
 }
 
