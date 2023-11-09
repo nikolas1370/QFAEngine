@@ -1,7 +1,7 @@
 ﻿#include "Render.h"
 #include <Render/Shader/ShaderProgram.h>
 #include <iostream>
-#include <Object/Camera.h>
+#include <Object/ActorComponent/SceneComponent/Camera/Camera.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
 #include <Render/Time.h>
 #include <Object/World/World.h>
@@ -14,7 +14,7 @@ double QFARender::acumulateDeltatime = 0.0;
 
 GLFWwindow* QFARender::Window;
 glm::mat4 QFARender::MatrixPerspective;
-Camera* QFARender::CurentCamera;
+QCameraComponent* QFARender::CurentCamera;
 QFAFrameBuffer* QFARender::secondFrameBuffer;
 
 int QFARender::Width = 1;
@@ -49,21 +49,20 @@ void QFARender::Init(GLFWwindow* window, int width, int height)
 
 void QFARender::StartFrame()
 {
+	glViewport(0, 0, Width, Height);
 	if (WindowSizeChanched)
 	{
 		Width = NewWidth;
 		Height = NewHeight;
-		glViewport(0, 0, Width, Height);
+		
 		WindowSizeChanched = false;
 		secondFrameBuffer->StartFrame(true, Width, Height);
 		MatrixPerspective = glm::perspective(glm::radians(CurentCamera->Fov),
 			(float) Width/ (float)Height, 0.1f, CurentCamera->ViewDistance); // (near) not Less than 0.1f	
 	}
 	else
-	{
-		glViewport(0, 0, Width, Height);
 		secondFrameBuffer->StartFrame();
-	}	
+	
 }
 
 void QFARender::DrawMesh(QMeshBaseComponent* mesh)
@@ -121,7 +120,7 @@ void QFARender::EndFrame(bool blankScreen)
 	}
 }
 
-void QFARender::SetCamera(Camera* camera)
+void QFARender::SetCamera(QCameraComponent* camera)
 {	
 	CurentCamera = camera;
 	MatrixPerspective = glm::perspective(glm::radians(CurentCamera->Fov), 

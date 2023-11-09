@@ -183,7 +183,7 @@ int main()
 
     
     QActor* cameraActor = new QActor();
-    Camera camera(45, 1000);
+    QCameraComponent camera(45, 1000);
     cameraActor->SetRootComponent(&camera);
 
     camera.SetWorldPosition(FVector(0, 0, 0));

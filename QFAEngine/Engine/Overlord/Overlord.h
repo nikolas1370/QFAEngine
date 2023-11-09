@@ -1,18 +1,18 @@
 #pragma once
 #include <Object/World/World.h>
-#include <Object/Camera.h>
+#include <Object/ActorComponent/SceneComponent/Camera/Camera.h>
 class QSceneComponent;
 struct GLFWwindow;
 
 class QFAOverlord 
 {
 	friend void QWorld::Activate();
-	friend void Camera::Activate();
+	friend void QCameraComponent::Activate();
 
 	
 
 	static QWorld* CurentWorld;
-	static Camera* CurentCamera;
+	static QCameraComponent* CurentCamera;
 	static bool Life;
 	static bool isInit;
 
@@ -32,7 +32,7 @@ class QFAOverlord
 	// call only from QWorld.Activate()
 	static void SetWorld(QWorld* world); // Activate
 	// call only from QCameraComponent.Activate()
-	static void SetCamera(Camera* camera);
+	static void SetCamera(QCameraComponent* camera);
 public:
 	/*
 		start processing world 

@@ -1,7 +1,7 @@
 #include "Overlord.h"
 #include <Object/World/World.h>
 #include <Render/Render.h>
-#include <Object/Camera.h>
+#include <Object/ActorComponent/SceneComponent/Camera/Camera.h>
 #include <Render/Time.h> // remove in Overlord folder
 #include <Render/Render.h> 
 #include <Object/Actor/Actor.h>
@@ -13,7 +13,7 @@ QWorld* QFAOverlord::CurentWorld = nullptr;
 bool QFAOverlord::Life = false;
 bool QFAOverlord::isInit = false; 
 GLFWwindow* QFAOverlord::Window = nullptr;
-Camera* QFAOverlord::CurentCamera = nullptr;
+QCameraComponent* QFAOverlord::CurentCamera = nullptr;
 
 int QFAOverlord::DefaultWidth = 600;
 int QFAOverlord::DefaultHeight = 600;
@@ -80,7 +80,7 @@ void QFAOverlord::SetWorld(QWorld* world)
 		
     CurentWorld = world;
 }
-void QFAOverlord::SetCamera(Camera* camera)
+void QFAOverlord::SetCamera(QCameraComponent* camera)
 {
     QFARender::SetCamera(camera);
     CurentCamera = camera;

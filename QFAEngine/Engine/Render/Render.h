@@ -2,7 +2,7 @@
 #include <Tools/Debug/OpenGlStuff.h>
 #include <Math/Math.h>
 struct GLFWwindow;
-class Camera;
+class QCameraComponent;
 class QFAShaderProgram;
 class QMeshBaseComponent;
 class QFAOverlord;
@@ -16,7 +16,7 @@ class QFARender
 	static double acumulateDeltatime;
 	static GLFWwindow* Window;
 	static glm::mat4 MatrixPerspective;
-	static Camera* CurentCamera;
+	static QCameraComponent* CurentCamera;
 
 	static QFAFrameBuffer* secondFrameBuffer;
 
@@ -30,7 +30,7 @@ class QFARender
 	static void DrawMesh(QMeshBaseComponent* mesh);
 	static void DrawMeshShadow(QMeshBaseComponent* mesh);
 	static void EndFrame(bool blankScreen = false);
-	static void SetCamera(Camera* camera);
+	static void SetCamera(QCameraComponent* camera);
 	static void StartFrame();
 
 	static void Init(GLFWwindow* window,int width, int height);

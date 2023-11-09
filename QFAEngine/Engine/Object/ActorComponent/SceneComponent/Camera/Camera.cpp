@@ -1,6 +1,6 @@
 #include "Camera.h"
 #include <Overlord/Overlord.h>
-void Camera::Activate()
+void QCameraComponent::Activate()
 {
 	if (!IsValid())
 		return;
@@ -9,7 +9,7 @@ void Camera::Activate()
 	IsActive = true;
 }
 
-void Camera::Deactivate()
+void QCameraComponent::Deactivate()
 {
 	if (!IsValid())
 		return;
@@ -17,13 +17,13 @@ void Camera::Deactivate()
 	IsActive = false;
 }
 
-Camera::Camera(float fov, float viewDistance)
+QCameraComponent::QCameraComponent(float fov, float viewDistance)
 {
 	Fov = fov;
 	ViewDistance = viewDistance;
 }
 
-void Camera::SetRotation(const FVector rotation)
+void QCameraComponent::SetRotation(const FVector rotation)
 {
 	CameraRotation = rotation;	
 	cameraRotationMatrex = glm::translate(glm::mat4(1), glm::vec3(0)); 
@@ -34,12 +34,12 @@ void Camera::SetRotation(const FVector rotation)
 
 }
 
-FVector Camera::GetRotation() const
+FVector QCameraComponent::GetRotation() const
 {
 	return CameraRotation;
 }
 
-FVector Camera::GetForwardVector() const
+FVector QCameraComponent::GetForwardVector() const
 {
 	FVector fv = FVector::ForwardVector;
 
@@ -49,7 +49,7 @@ FVector Camera::GetForwardVector() const
 	return fv;
 }
 
-FVector Camera::GetRightVector() const
+FVector QCameraComponent::GetRightVector() const
 {
 	FVector fv = FVector::RightVector;
 
@@ -60,7 +60,7 @@ FVector Camera::GetRightVector() const
 	return fv;
 }
 
-FVector Camera::GetUpVector() const
+FVector QCameraComponent::GetUpVector() const
 {
 	FVector fv = FVector::UpVector;
 
@@ -72,12 +72,12 @@ FVector Camera::GetUpVector() const
 	return fv;
 }
 
-void Camera::SetFov(float fov)
+void QCameraComponent::SetFov(float fov)
 {
 	Fov = fov;
 }
 
-void Camera::SetViewDistance(float viewDistance)
+void QCameraComponent::SetViewDistance(float viewDistance)
 {
 	ViewDistance = viewDistance;
 }

@@ -151,7 +151,7 @@
     <ClCompile Include="Engine\Object\ActorComponent\ActorComponent.cpp" />
     <ClCompile Include="Engine\Object\World\DirectionLight\DirectionLight.cpp" />
     <ClCompile Include="Engine\Object\ActorComponent\SceneComponent\SceneComponent.cpp" />
-    <ClCompile Include="Engine\Object\Camera.cpp" />
+    <ClCompile Include="Engine\Object\ActorComponent\SceneComponent\Camera\Camera.cpp" />
     <ClCompile Include="Engine\Object\ActorComponent\SceneComponent\Mesh\Mesh.cpp" />
     <ClCompile Include="Engine\Object\ActorComponent\SceneComponent\Mesh\StaticMesh.cpp" />
     <ClCompile Include="Engine\Object\ActorComponent\SceneComponent\Mesh\MeshBase.cpp" />
@@ -177,7 +177,7 @@
     <ClInclude Include="Engine\Object\ActorComponent\ActorComponent.h" />
     <ClInclude Include="Engine\Object\World\DirectionLight\DirectionLight.h" />
     <ClInclude Include="Engine\Object\ActorComponent\SceneComponent\SceneComponent.h" />
-    <ClInclude Include="Engine\Object\Camera.h" />
+    <ClInclude Include="Engine\Object\ActorComponent\SceneComponent\Camera\Camera.h" />
     <ClInclude Include="Engine\Object\ActorComponent\SceneComponent\Mesh\Mesh.h" />
     <ClInclude Include="Engine\Object\ActorComponent\SceneComponent\Mesh\MeshBase.h" />
     <ClInclude Include="Engine\Object\ActorComponent\SceneComponent\Mesh\StaticMesh.h" />

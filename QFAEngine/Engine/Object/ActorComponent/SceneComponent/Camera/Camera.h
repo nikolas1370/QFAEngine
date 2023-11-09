@@ -2,7 +2,7 @@
 #include <Object/ActorComponent/SceneComponent/SceneComponent.h>
 class QFARender;
 class QFAOverlord;
-class Camera : public QSceneComponent
+class QCameraComponent : public QSceneComponent
 {
 
 
@@ -25,8 +25,8 @@ public:
 
 	void Activate();
 	void Deactivate();
-	Camera(){}
-	Camera(float fov, float viewDistance);
+	QCameraComponent(){}
+	QCameraComponent(float fov, float viewDistance);
 
 	void SetRotation(const FVector rotation) final;
 	FVector GetRotation() const final;
