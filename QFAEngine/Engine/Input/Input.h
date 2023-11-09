@@ -281,6 +281,8 @@ class QFAInput
 	SPressedAnyKey Any;
 	SWheelAxis WheelAxis;
 	SMouseMove MouseMove;
+	SMouseMove MouseMoveAxis;
+	static FVector2D LastMousePosition;
 public:
 	/*
 		Event process before Tick
@@ -308,6 +310,10 @@ public:
 
 	void SetMouseMove(std::function<void(FVector2D)> fun);
 	void ShutOffMouseMove();
+
+	/* FVector2D content offset after last move*/
+	void SetMouseMoveAxis(std::function<void(FVector2D)> fun);
+	void ShutOffMouseMoveAxis();
 
 	/*
 	if id exis Ekey::key be changed
