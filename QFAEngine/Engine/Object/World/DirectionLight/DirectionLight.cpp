@@ -42,15 +42,11 @@ void QDirectionLight::StartFrame()
 	glEnable(GL_CULL_FACE);
 }
 
-
 void QDirectionLight::SetLightMatrix(const FVector& cameraPositionOpenGL, QFAShaderProgram* sp)
 {
-
 	float near_plane = 0.1f, far_plane = 700.5f;
 	// more value more shadow camera be see
 	glm::mat4 lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
-
-
 	glm::mat4 lightView = glm::lookAt(glm::vec3(0),
 		glm::vec3(Direction.Y, Direction.Z, Direction.X),
 		glm::vec3(0.0f, 1.0f, 0.0f));
@@ -58,11 +54,7 @@ void QDirectionLight::SetLightMatrix(const FVector& cameraPositionOpenGL, QFASha
 	lightView[3][0] = cameraPositionOpenGL.X * -1;
 	lightView[3][1] = cameraPositionOpenGL.Y * -1;
 	lightView[3][2] = cameraPositionOpenGL.Z * -1;
-
-
 	glm::mat4 lightSpaceMatrix = lightProjection * lightView;
-
-
 	sp->SetDirectionLigthMatrix(lightSpaceMatrix);
 }
 

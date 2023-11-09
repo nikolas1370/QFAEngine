@@ -9,7 +9,7 @@ QSceneComponent::QSceneComponent()
 
 QSceneComponent::~QSceneComponent()
 {
-	for (unsigned int i = 0; i < ListComponents.Length(); i++)
+	for (unsigned int i = 0; i < (unsigned int)ListComponents.Length(); i++)
 		ListComponents[i]->Destroy();
 }
 
@@ -23,13 +23,12 @@ void QSceneComponent::ChangeWorldPosition(const FVector position)
 		WorldPosition = ToOpenglCoordinate(position);
 		if (ForRender)
 			UpdateModelMatrix(true);
-		for (unsigned int i = 0; i < ListComponents.Length(); i++)
+		for (unsigned int i = 0; i < (unsigned int)ListComponents.Length(); i++)
 			if (ListComponents[i]->IsValid())
 				ListComponents[i]->UpdateWorldPositionScale(true);
 	}
 	else if (ParentActorComponent->IsValid())
 	{
-
 		WorldPosition = ToOpenglCoordinate(position);
 		RelativePosition = position - ParentActorComponent->GetWorldPosition();
 		RelativePosition = RelativePosition.ReversScale(AccumulateScale);
@@ -38,7 +37,7 @@ void QSceneComponent::ChangeWorldPosition(const FVector position)
 		if(ForRender)
 			UpdateModelMatrix(true);
 
-		for (size_t i = 0; i < ListComponents.Length(); i++)
+		for (int i = 0; i < ListComponents.Length(); i++)
 			if (ListComponents[i]->IsValid())
 				ListComponents[i]->UpdateWorldPositionScale(true);
 	}
@@ -62,7 +61,7 @@ void QSceneComponent::ChangeLocalPosition(const FVector position)
 	if (ForRender)
 		UpdateModelMatrix(true);
 
-	for (size_t i = 0; i < ListComponents.Length(); i++)
+	for (int i = 0; i < ListComponents.Length(); i++)
 		if (ListComponents[i]->IsValid())
 			ListComponents[i]->UpdateWorldPositionScale(true);
 }
@@ -109,7 +108,7 @@ void QSceneComponent::ChangedParentRotation()
 	if (ForRender)
 		UpdateModelMatrix(false);
 
-	for (size_t i = 0; i < ListComponents.Length(); i++)
+	for (int i = 0; i < ListComponents.Length(); i++)
 		if(ListComponents[i]->IsValid())
 		ListComponents[i]->ChangedParentRotation();
 }
@@ -128,7 +127,7 @@ void QSceneComponent::ChangeRotation(const FVector rotation)
 		if (ForRender)
 			UpdateModelMatrix(false);
 
-		for (size_t i = 0; i < ListComponents.Length(); i++)
+		for (int i = 0; i < ListComponents.Length(); i++)
 			if (ListComponents[i]->IsValid())
 				ListComponents[i]->ChangedParentRotation();
 	}
@@ -144,12 +143,10 @@ void QSceneComponent::UpdateWorldPositionScale(bool onlyPosition)
 	if (ForRender)
 		UpdateModelMatrix(onlyPosition);
 
-	for (size_t i = 0; i < ListComponents.Length(); i++)
+	for (int i = 0; i < ListComponents.Length(); i++)
 		if (ListComponents[i]->IsValid())
 			ListComponents[i]->UpdateWorldPositionScale(onlyPosition);
 }
-
-
 
 void QSceneComponent::ChangeScale(const FVector scale)
 {
@@ -161,15 +158,13 @@ void QSceneComponent::ChangeScale(const FVector scale)
 		if (ForRender)
 			UpdateModelMatrix(false);
 
-		for (size_t i = 0; i < ListComponents.Length(); i++)
+		for (int i = 0; i < ListComponents.Length(); i++)
 			if (ListComponents[i]->IsValid())
 				ListComponents[i]->UpdateWorldPositionScale(false);
 	}
 	else if (ParentActorComponent->IsValid())
 		UpdateWorldPositionScale(false);
 }
-
-
 
 FVector QSceneComponent::GetScale() const
 {
@@ -255,5 +250,3 @@ QActor* QSceneComponent::GetActor(QSceneComponent* component)
 			tem = tem->ParentActorComponent;
 	}
 }
-
-

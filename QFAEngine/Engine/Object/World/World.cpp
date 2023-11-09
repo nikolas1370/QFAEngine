@@ -34,7 +34,7 @@ QWorld::QWorld()
 
 QWorld::~QWorld()
 {
-	for (size_t i = 0; i < Actors.Length(); i++)
+	for (int i = 0; i < Actors.Length(); i++)
 		Actors[i]->Destroy();
 }
 

@@ -1,5 +1,5 @@
 ﻿ // https://learnopengl.com/Introduction
-// 1896
+// 2005
 
 
 #include "Math/Vector.h"
@@ -184,9 +184,9 @@ int main()
     
     Arrow->SetWorldPosition(FVector(30, -3, 0));    
     
-    mainComponent.SetScale(1.0);
-    mainComponent.SetScale(0.5);
-    Arrow->SetScale(2.1); 
+    mainComponent.SetScale(1.0f);
+    mainComponent.SetScale(0.5f);
+    Arrow->SetScale(2.1f); 
     /*-----------*/
     /*-----------*/
     /*-----------*/

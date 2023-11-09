@@ -1,10 +1,6 @@
 #include "StaticMesh.h"
 #include <Tools/Debug/OpenGlStuff.h>
 
-// delete
-
-
-// "", ""
 QFAShaderProgram* QStaticMesh::SShaderProgram = nullptr;
 QFAShaderProgram* QStaticMesh::SShaderShadowProgram = nullptr;
 std::string QStaticMesh::VertexShaderPath = "Engine/Shaders/VertexShader.shader";
@@ -19,8 +15,6 @@ QStaticMesh::QStaticMesh(MeshFrames* meshFrames)
 	SetMesh(meshFrames);
 }
 
-
-// VertexMaterial* vertexs, int vertexBufferSize, unsigned int* indixes, int indicesCount
 void QStaticMesh::SetMesh(MeshFrames* meshFrames) 
 {
 	//last MeshFrames need delete

@@ -107,7 +107,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
@@ -160,6 +160,7 @@
     <ClCompile Include="Engine\Input\Input.cpp" />
     <ClCompile Include="Engine\Overlord\Overlord.cpp" />
     <ClCompile Include="Engine\Render\Buffer\Framebuffer.cpp" />
+    <ClCompile Include="Engine\Render\Buffer\FramebufferMain.cpp" />
     <ClCompile Include="Engine\Render\Time.cpp" />
     <ClCompile Include="GameCode\TestActor.cpp" />
     <ClCompile Include="GameCode\TestComponent.cpp" />
@@ -184,10 +185,11 @@
     <ClInclude Include="Engine\Object\World\World.h" />
     <ClInclude Include="Engine\Input\Input.h" />
     <ClInclude Include="Engine\Overlord\Overlord.h" />
+    <ClInclude Include="Engine\Render\Buffer\Framebuffer.h" />
     <ClInclude Include="Engine\Render\Time.h" />
     <ClInclude Include="Engine\Tools\Array.h" />
     <ClInclude Include="Engine\Tools\File\FileLoader.h" />
-    <ClInclude Include="Engine\Render\Buffer\Framebuffer.h" />
+    <ClInclude Include="Engine\Render\Buffer\FramebufferMain.h" />
     <ClInclude Include="Engine\Math\Math.h" />
     <ClInclude Include="Engine\Math\Matrix.h" />
     <ClInclude Include="Engine\Math\Vector.h" />

@@ -1,15 +1,22 @@
 #pragma once
-#include <Tools/Debug/OpenGlStuff.h>
 
-class FrameBuffer
+class QFARender;
+class QFAFrameBufferMain;
+class QFAFrameBuffer
 {
-	unsigned int framebuffer;
+	friend QFARender;
+	friend QFAFrameBufferMain;
+	unsigned int frameBuffer;
+	unsigned int colorBuffer;
+	unsigned int rbo;
 
 public:
-	FrameBuffer();
-	~FrameBuffer();
+	void StartFrame();
+
+
+	QFAFrameBuffer();
+	~QFAFrameBuffer();
 
 private:
 
 };
-

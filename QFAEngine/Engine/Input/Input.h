@@ -150,9 +150,6 @@ struct GLFWwindow;
 class QFAInputAxis1D;
 class QFAInputAxis2D;
 class QFAInputAxis3D;
-/*
-
-*/
 
 /*
 	Event process before Tick
@@ -179,7 +176,6 @@ class QFAInput
 		bool active = true;
 	};
 	
-
 	struct SKeyHold
 	{
 		std::function<void(EKey::Key)> fun;
@@ -190,7 +186,6 @@ class QFAInput
 		float timeButtonPressed = 0.0f;
 		bool pressed = false;
 	};
-
 
 	struct SKeyAxis1D
 	{		
@@ -265,7 +260,6 @@ class QFAInput
 	
 	static GLFWwindow* Window;	
 	static QFAArray<QFAInput*> Inputs;
-
 	
 	QFAArray<SKeyFunction> KeyPressList;
 	QFAArray<SKeyFunction> KeyReleaseList;
@@ -274,7 +268,6 @@ class QFAInput
 	QFAArray<SAxis2D> Axis2DList;
 	QFAArray<SAxis3D> Axis3DList;
 	bool BlockInput = false;
-
 
 	SPressedAnyKey Any;
 	SWheelAxis WheelAxis;
@@ -297,14 +290,11 @@ public:
 	void AddKeyRelease(EKey::Key key, std::string id, std::function<void(EKey::Key)> fun);
 	void RemoveKeyRelease(std::string Id);
 
-
 	void SetPressedAnyKey(std::function<void(EKey::Key)> fun);
 	void ShutOffPressedAnyKey();
 
 	void SetWheelAxis(std::function<void(float)> fun);
 	void ShutOffWheelAxis();
-
-	
 
 	/*
 	if id exis Ekey::key be changed

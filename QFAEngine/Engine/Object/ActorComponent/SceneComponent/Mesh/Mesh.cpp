@@ -5,11 +5,9 @@ QFAShaderProgram* QMesh::SShaderShadowProgram = nullptr;
 std::string QMesh::VertexShaderPath = "Engine/Shaders/VertexShaderAnimInterpolation.shader";
 std::string QMesh::FragmentShaderPath = "Engine/Shaders/PixelShader.shader";
 
-
 std::string QMesh::VertexShaderShaderPath = "Engine/Shaders/DirectionLightShadow/VertexInterpolation.shader";
 std::string QMesh::FragmentShaderShaderPath = "Engine/Shaders/DirectionLightShadow/Fragment.shader";
 
-/*-----*/
 void QMesh::StartFrame()
 {
 	if (!Played)
@@ -75,9 +73,7 @@ void QMesh::Play()
 void QMesh::Stop()
 {
 	Played = false;
-// size_t
 }
-
 
 void QMesh::Bind( bool isShadow)//  isShadow пока нема
 {	
@@ -99,9 +95,6 @@ void QMesh::Bind( bool isShadow)//  isShadow пока нема
 	SShaderProgram->SetInterpolationTime(InterpolationTime);	
 }
 	
-
-
-
 int QMesh::GetIndexCount()
 {
 	return (Mf ? Mf->GetIndexCount() : -1);

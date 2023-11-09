@@ -1,6 +1,5 @@
 #include "ShaderProgram.h"
 #include <Tools/Debug/OpenGlStuff.h>
-
 #include <iostream>
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
 
@@ -25,7 +24,6 @@ QFAShaderProgram::QFAShaderProgram(std::string vertex, std::string fragment, boo
 
     GLCall(glLinkProgram(ShaderProgramId));
     GLCall(glValidateProgram(ShaderProgramId));
-    // glValidateProgram learn more  it's interesting
 
     int program_linked;
     glGetProgramiv(ShaderProgramId, GL_LINK_STATUS, &program_linked);
@@ -49,8 +47,6 @@ QFAShaderProgram::~QFAShaderProgram()
 
 void QFAShaderProgram::SetProjectionMatrix(const glm::mat4& matrix)
 {
-    // remove
-    //Use();
     if (LocationProjectionMatrix == -2)
     {        
         GLCall(LocationProjectionMatrix = glGetUniformLocation(ShaderProgramId, "projection"));
@@ -115,19 +111,16 @@ void QFAShaderProgram::SetModelMatrix(const glm::mat4& matrix)
 }
 
 void QFAShaderProgram::Use()
-{
-    
+{    
     if (ShaderProgramId == CurentRunProgramId)
         return;
-    
-    
+        
     GLCall( glUseProgram(ShaderProgramId));
     CurentRunProgramId = ShaderProgramId;
 }
 
 void QFAShaderProgram::SetInterpolationTime(const float interpolationTime)
 {
-
     if (LocationInterpolationTime == -2)
     {
         GLCall(LocationInterpolationTime = glGetUniformLocation(ShaderProgramId, "InterTime"));
@@ -150,7 +143,6 @@ void QFAShaderProgram::SetMaterials(Material* materials, int count)
         {
             std::string uniformName = std::string("materials[").append(std::to_string(i)).append(std::string("].Color"));            
             GLCall( LocationMaterials[i] = glGetUniformLocation(ShaderProgramId, uniformName.c_str()));
-          //  std::cout << "QFA 2" << std::endl;
             if (LocationMaterials[i] == -1)
             {                
                 std::cout << "QFAShaderProgram::SetMaterial in shader problem not found uniform \"materials\"" << std::endl;
@@ -158,18 +150,16 @@ void QFAShaderProgram::SetMaterials(Material* materials, int count)
                 return;
             }
         }
+
         GLCall(glUniform3f(LocationMaterials[i], materials[i].Color.X, materials[i].Color.Y, materials[i].Color.Z));
     }
-    
-
 }
+
 void QFAShaderProgram::SetDirectionShadowMap(unsigned int id, int textureSlote)
 {
     if (LocationDirectionShadowMap == -2)
-    {
-        
+    {        
         GLCall(LocationDirectionShadowMap = glGetUniformLocation(ShaderProgramId, "shadowMap"));
-
         if (LocationDirectionShadowMap == -1)
         {
             std::cout << "QFAShaderProgram::SetDirectionShadowMap in shader problem not found uniform \"shadowMap\"" << std::endl;
@@ -178,20 +168,16 @@ void QFAShaderProgram::SetDirectionShadowMap(unsigned int id, int textureSlote)
         }
     }
 
-
-
     GLCall(glActiveTexture(GL_TEXTURE0 + textureSlote));
     GLCall(glBindTexture(GL_TEXTURE_2D, id)); // bind texture to GL_TEXTURE0 + textureSlote
     GLCall(glUniform1i(LocationDirectionShadowMap, textureSlote));
 }
+
 void QFAShaderProgram::SetDirectionLigthMatrix(const glm::mat4& matrix)
 {
-    // 
     if (LocationDirectionLigthMatrix == -2)
     {
-
         GLCall(LocationDirectionLigthMatrix = glGetUniformLocation(ShaderProgramId, "directionLightMatrix"));
-        //  std::cout << "QFA 2" << std::endl;
         if (LocationDirectionLigthMatrix    == -1)
         {
             std::cout << "QFAShaderProgram::SetDirectionLigthMatrix in shader problem not found uniform \"directionLightMatrix\"" << std::endl;
@@ -202,15 +188,12 @@ void QFAShaderProgram::SetDirectionLigthMatrix(const glm::mat4& matrix)
 
     GLCall(glUniformMatrix4fv(LocationDirectionLigthMatrix, 1, false, &matrix[0][0]));
 }
+
 void QFAShaderProgram::SetShadowOn(bool castShadow)
 {
-    
-    
     if (LocationShadowOn == -2)
     {
-
         GLCall(LocationShadowOn = glGetUniformLocation(ShaderProgramId, "shadowOn"));
-        //  std::cout << "QFA 2" << std::endl;
         if (LocationShadowOn == -1)
         {
             std::cout << "QFAShaderProgram::SetShadowOn in shader problem not found uniform \"shadowOn\"" << std::endl;

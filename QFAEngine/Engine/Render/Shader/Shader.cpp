@@ -31,9 +31,7 @@ unsigned int QFAShader::GetId() const
 unsigned int QFAShader::CreateShader(ShaderType st, const std::string& shader, bool isPath)
 {
     if (init)
-        return ShaderID;
-
-    
+        return ShaderID;    
 
     std::string shader_;
     if (isPath)

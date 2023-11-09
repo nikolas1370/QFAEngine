@@ -3,7 +3,7 @@
 #include <Render/Render.h>
 #include <Object/Camera.h>
 #include <Render/Time.h> // remove in Overlord folder
-#include <Render/Render.h> // remove in Overlord folder
+#include <Render/Render.h> 
 #include <Object/Actor/Actor.h>
 #include <Tools/Debug/OpenGlStuff.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
@@ -15,16 +15,13 @@ bool QFAOverlord::isInit = false;
 GLFWwindow* QFAOverlord::Window = nullptr;
 Camera* QFAOverlord::CurentCamera = nullptr;
 
-
 bool QFAOverlord::StartLife()
 {
 	if (Life || !isInit)
 		return false;	
 
 	Life = true;
-
 	QFAOverlord::MainLoop();
-
 	return true;
 }
 
@@ -42,8 +39,7 @@ bool QFAOverlord::Init()
         ASSERT(false);
         return false;
     }
-    QTime::Init();
-    
+    QTime::Init();    
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
@@ -87,7 +83,7 @@ void QFAOverlord::SetCamera(Camera* camera)
     QFARender::SetCamera(camera);
     CurentCamera = camera;
 }
-// Active
+
 void QFAOverlord::MainLoop()
 {
     while (!glfwWindowShouldClose(Window))
@@ -99,7 +95,6 @@ void QFAOverlord::MainLoop()
         RenderWorld();
     }
 }
-
 
 void QFAOverlord::RenderWorld()
 {
@@ -118,13 +113,13 @@ void QFAOverlord::RenderWorld()
     QDirectionLight* DL = CurentWorld->GetDirectionDight();
     DL->StartFrame();
     if (DL->GetCastShadow())
-        for (unsigned int i = 0; i < CurentWorld->Actors.Length(); i++)
+        for (int i = 0; i < CurentWorld->Actors.Length(); i++)
             if (CurentWorld->Actors[i]->RootComponent->IsValid())
                 ProcessComponentShadow(CurentWorld->Actors[i]->RootComponent);
 
     QFARender::StartFrame();
 
-    for (unsigned int i = 0; i < CurentWorld->Actors.Length(); i++)
+    for (int i = 0; i < CurentWorld->Actors.Length(); i++)
         if (CurentWorld->Actors[i]->RootComponent->IsValid())
             ProcessComponent(CurentWorld->Actors[i]->RootComponent);
 
@@ -139,7 +134,7 @@ void QFAOverlord::ProcessComponent(QSceneComponent* component)
     if (QMeshBaseComponent* mesh = dynamic_cast<QMeshBaseComponent*>(component))
         QFARender::DrawMesh(mesh);
 
-    for (unsigned int i = 0; i < component->ListComponents.Length(); i++)
+    for (int i = 0; i < component->ListComponents.Length(); i++)
         if (component->ListComponents[i]->IsValid())
             ProcessComponent(component->ListComponents[i]);
 }
@@ -153,7 +148,7 @@ void QFAOverlord::ProcessComponentShadow(QSceneComponent* component)
         if (mesh->GetCastShadow())
             QFARender::DrawMeshShadow(mesh);
 
-    for (unsigned int i = 0; i < component->ListComponents.Length(); i++)
+    for (int i = 0; i < component->ListComponents.Length(); i++)
         if (component->ListComponents[i]->IsValid())
             ProcessComponent(component->ListComponents[i]);
 }
@@ -164,7 +159,7 @@ void QFAOverlord::ProcessTick()
         return;
 
     float delta = (float)QTime::GetDeltaTime();
-    for (unsigned int i = 0; i < CurentWorld->Actors.Length(); i++)
+    for (int i = 0; i < CurentWorld->Actors.Length(); i++)
     {
         if (CurentWorld->Actors[i]->IsValid() && CurentWorld->Actors[i]->CanTick)
         {
@@ -183,7 +178,7 @@ void QFAOverlord::ProcessSceneComponentTick(QSceneComponent* component)
     if (component->CanTick)
         component->TickComponent(delta);
 
-    for (unsigned int i = 0; i < component->ListComponents.Length(); i++)
+    for (int i = 0; i < component->ListComponents.Length(); i++)
         if (component->ListComponents[i]->IsValid())
             ProcessSceneComponentTick(component->ListComponents[i]);
 }
