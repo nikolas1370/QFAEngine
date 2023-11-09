@@ -17,21 +17,53 @@ glm::mat4 QFARender::MatrixPerspective;
 Camera* QFARender::CurentCamera;
 QFAFrameBuffer* QFARender::secondFrameBuffer;
 
+int QFARender::Width = 1;
+int QFARender::Height = 1;
+bool QFARender::WindowSizeChanched = false;
+int QFARender::NewWidth;
+int QFARender::NewHeight;
+
 void QFARender::SetWindow(GLFWwindow* window)
 {
 	Window = window;
 }
 
-void QFARender::StartFrame()
+void QFARender::Init(GLFWwindow* window, int width, int height)
 {
-	secondFrameBuffer->StartFrame();
+	Window = window;
+	Width = width;
+	Height = height;
+	QFAFrameBufferMain::Init(width, height);
+	secondFrameBuffer = new QFAFrameBuffer(width, height);
+	glfwSwapInterval(1);	// 0 vsync off, 1 full vsync, 2 half vsync
+	// GLFWwindow* window, int width, int height
+
+	glfwSetWindowSizeCallback(Window, [](GLFWwindow* win, int w, int h)
+		{
+			/* check if 0*/
+			QFARender::NewHeight = h;
+			QFARender::NewWidth = w;
+			QFARender::WindowSizeChanched = true;
+		});	
 }
 
-void QFARender::Init()
+void QFARender::StartFrame()
 {
-	QFAFrameBufferMain::Init();
-	secondFrameBuffer = new QFAFrameBuffer;
-	glfwSwapInterval(1);	// 0 vsync off, 1 full vsync, 2 half vsync
+	if (WindowSizeChanched)
+	{
+		Width = NewWidth;
+		Height = NewHeight;
+		glViewport(0, 0, Width, Height);
+		WindowSizeChanched = false;
+		secondFrameBuffer->StartFrame(true, Width, Height);
+		MatrixPerspective = glm::perspective(glm::radians(CurentCamera->Fov),
+			(float) Width/ (float)Height, 0.1f, CurentCamera->ViewDistance); // (near) not Less than 0.1f	
+	}
+	else
+	{
+		glViewport(0, 0, Width, Height);
+		secondFrameBuffer->StartFrame();
+	}	
 }
 
 void QFARender::DrawMesh(QMeshBaseComponent* mesh)
@@ -39,7 +71,7 @@ void QFARender::DrawMesh(QMeshBaseComponent* mesh)
 	QFAShaderProgram* shaderProgram = mesh->GetShaderProgram();
 	mesh->Bind();	
 	// now MatrixPerspective send each drawCall in future be change when camera or window change
-	MatrixPerspective = glm::perspective(glm::radians(CurentCamera->Fov), (float)600 / (float)600, 0.1f, CurentCamera->ViewDistance); // (near) not Less than 0.1f	
+	
 	shaderProgram->SetProjectionMatrix(MatrixPerspective);
 	shaderProgram->SetCameraRotationMatrix(CurentCamera->cameraRotationMatrex);
 	FVector GLCameraPos = CurentCamera->GetOpenGLPosition();
@@ -73,12 +105,12 @@ void QFARender::EndFrame(bool blankScreen)
 {
 	if (blankScreen)
 	{
-		QFAFrameBufferMain::BlankScreen();
+		QFAFrameBufferMain::BlankScreen(Width, Height);
 		glfwSwapBuffers(Window);
 		return;
 	}
 
-	QFAFrameBufferMain::CopyFrameBuffer(secondFrameBuffer);
+	QFAFrameBufferMain::CopyFrameBuffer(secondFrameBuffer, Width, Height);
 	glfwSwapBuffers(Window);
 	countFarame++;
 	acumulateDeltatime += QTime::GetDeltaTime();
@@ -90,6 +122,8 @@ void QFARender::EndFrame(bool blankScreen)
 }
 
 void QFARender::SetCamera(Camera* camera)
-{
+{	
 	CurentCamera = camera;
+	MatrixPerspective = glm::perspective(glm::radians(CurentCamera->Fov), 
+		(float)Height / (float)Width, 0.1f, CurentCamera->ViewDistance); // (near) not Less than 0.1f	
 }

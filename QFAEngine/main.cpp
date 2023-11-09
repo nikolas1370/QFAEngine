@@ -13,40 +13,6 @@
 #pragma comment(lib, "glew32s.lib") // for glfw 
 //glew32s 's' mean static
 
-
-//#include <Object/Mesh/StaticMesh.h>
- 
-//#include "Texture.h"
-
-
-
-
-
-/*
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-
-
-char mousePressed = 0;
-FVector2D lastMousePos;
-FVector2D mouseOffset;
-void mouse_callback(GLFWwindow* window, int button, int action, int mods)
-{
-    
-
-    
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-    {
-        mousePressed = 1;
-        double xpos, ypos;
-        glfwGetCursorPos(window, &xpos, &ypos);
-        lastMousePos.X = (float)xpos;
-        lastMousePos.Y = (float)ypos;
-    }
-    else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
-        mousePressed = 0;   
-}
-/*/
-
 #include <Overlord/Overlord.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
 #include <Math/Vector2D.h>
@@ -60,21 +26,6 @@ void mouse_callback(GLFWwindow* window, int button, int action, int mods)
 
 int main()
 {     
-
-
-    /*
-    MyClass* kiopu = new MyClass;
-    QObject* zx = kiopu;
-
-    
-    
-    std::function<void(int) > ass = [&kiopu](int l)
-        {
-            std::cout << l << " " << kiopu << " <-\n";
-        };
-    ass(1);
-    */
-    
 
     QFAOverlord::Init();
 
@@ -239,156 +190,9 @@ int main()
     //camera.SetRotation(FVector(-110, 370, 940)); //test
     camera.SetRotation(FVector(0, 0,  0));
 
-
-    
-
-
-    
-
-
-
     mainWorld->Activate();
     camera.Activate();
     QFAOverlord::StartLife();
 
     return 0;
-    /*
-    while ()
-    {
-        //std::cout << QTime::GetTime() << std::endl;
-        //std::cout << QTime::GetTimeSystem() << std::endl;
-
-        //render.StartFrameShadow();
-        //MeshA->StartFrame();
-
-
-
-
-        
-        FVector curRot = camera.GetRotation();
-        if (mousePressed == 1)
-        {
-            double xpos, ypos;
-            glfwGetCursorPos(window, &xpos, &ypos);
-
-            mouseOffset.X = (float)xpos - lastMousePos.X;
-            mouseOffset.Y = (float)ypos - lastMousePos.Y;
-            lastMousePos.X = (float)xpos;
-            lastMousePos.Y = (float)ypos;
-
-            curRot.Y -= mouseOffset.Y * 0.07f;
-            curRot.Z += mouseOffset.X * 0.07f;
-
-        }
-
-        camera.SetWorldPosition(camera.GetWorldPosition() + (camera.GetForwardVector() * moveCam.X + camera.GetRightVector() * moveCam.Y + camera.GetUpVector() * moveCam.Z) * 0.1f);
-        // recoment na
-        camera.SetRotation(curRot);
-     
-
-        Ray ray;
-        ray.dir = glm::vec3(0, 0, -1);
-        ray.org = glm::vec3(0, 0, -10);
-
-        glm::vec3 rt = glm::vec3(-0.5f, -0.5f, -9.5f);
-
-        glm::vec3 lb = glm::vec3(0.5f, 0.5f, -10.5f);
-        float len;
-
-        //std::cout << (lox(ray, len, lb, rt) ? "true" : "false") << std::endl;
-        loxGlobal(ray, len, lb, rt);
-        //std::cout << len << std::endl;
-
-
-  
-
-    }
-  ----*/  
-
-
 }
-FVector moveCam;
-FVector rotCam;
-/*
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    if (key == GLFW_KEY_W && action == GLFW_PRESS)
-    {
-        moveCam.X += 1;
-    }
-    else if (key == GLFW_KEY_W && action == GLFW_RELEASE)
-    {
-        moveCam.X -= 1;
-    }
-    else if (key == GLFW_KEY_S && action == GLFW_PRESS)
-    {
-        moveCam.X -= 1;
-    }
-    else if (key == GLFW_KEY_S && action == GLFW_RELEASE)
-    {
-        moveCam.X += 1;
-    }
-    else if (key == GLFW_KEY_A && action == GLFW_PRESS)
-    {
-        moveCam.Y -= 1;
-    }
-    else if (key == GLFW_KEY_A && action == GLFW_RELEASE)
-    {
-        moveCam.Y += 1;
-    }
-    else if (key == GLFW_KEY_D && action == GLFW_PRESS)
-    {
-        moveCam.Y += 1;
-    }
-    else if (key == GLFW_KEY_D && action == GLFW_RELEASE)
-    {
-        moveCam.Y -= 1;
-    }
-    else if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
-    {
-        moveCam.Z += 1;
-    }
-    else if (key == GLFW_KEY_SPACE && action == GLFW_RELEASE)
-    {
-        moveCam.Z -= 1;
-    }
-    else if (key == GLFW_KEY_LEFT_CONTROL && action == GLFW_PRESS)
-    {
-        moveCam.Z -= 1;
-    }
-    else if (key == GLFW_KEY_LEFT_CONTROL && action == GLFW_RELEASE)
-    {
-        moveCam.Z += 1;
-    }
-    else if (key == GLFW_KEY_Q && action == GLFW_PRESS)
-    {
-        rotCam.Z -= 1;
-    }
-    else if (key == GLFW_KEY_Q && action == GLFW_RELEASE)
-    {
-        rotCam.Z += 1;
-    }
-    else if (key == GLFW_KEY_E && action == GLFW_PRESS)
-    {
-        rotCam.Z += 1;
-    }
-    else if (key == GLFW_KEY_E && action == GLFW_RELEASE)
-    {
-        rotCam.Z -= 1;
-    }
-    /*
-    else if (key == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-    {
-        //rotCam.Z -= 1;
-        std::cout << "lox \n";
-    }
-    std::cout << "lox \n";
-    
-    
-    GLFW_MOUSE_BUTTON_LEFT
-    GLFW_MOUSE_BUTTON_RIGHT
-    GLFW_MOUSE_BUTTON_MIDDLE
-    
-}
-*/
-

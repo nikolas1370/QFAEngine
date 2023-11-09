@@ -20,6 +20,12 @@ class QFARender
 
 	static QFAFrameBuffer* secondFrameBuffer;
 
+	static int Width;
+	static int Height;
+	static bool WindowSizeChanched ;
+	static int NewWidth;
+	static int NewHeight;
+
 	static void SetWindow(GLFWwindow* window);
 	static void DrawMesh(QMeshBaseComponent* mesh);
 	static void DrawMeshShadow(QMeshBaseComponent* mesh);
@@ -27,7 +33,9 @@ class QFARender
 	static void SetCamera(Camera* camera);
 	static void StartFrame();
 
-	static void Init();
+	static void Init(GLFWwindow* window,int width, int height);
+
+
 public:
 
 };

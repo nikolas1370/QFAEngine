@@ -14,9 +14,9 @@ class QFAFrameBufferMain
 	static GLuint VBOMain;
 	static QFAShaderProgram* ProgramMain;
 
-	static void Init();
-	static void CopyFrameBuffer(QFAFrameBuffer* frameBuffer);
-	static void BlankScreen();
+	static void Init(int width, int height);
+	static void CopyFrameBuffer(QFAFrameBuffer* frameBuffer, int w, int h);
+	static void BlankScreen(int w, int h);
 public:
 	
 

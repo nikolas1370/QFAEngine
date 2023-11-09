@@ -20,9 +20,10 @@ GLuint QFAFrameBufferMain::VBOMain;
 unsigned int QFAFrameBufferMain::VAOMain;
 QFAShaderProgram* QFAFrameBufferMain::ProgramMain ;
 
-void QFAFrameBufferMain::Init()
-{
+void QFAFrameBufferMain::Init(int width, int height)
+{	
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, width, height);
 	GLCall(glGenVertexArrays(1, &VAOMain));
 	GLCall(glBindVertexArray(VAOMain));
 
@@ -42,19 +43,23 @@ void QFAFrameBufferMain::Init()
 	ProgramMain = new QFAShaderProgram("Engine/Shaders/MainFrameBuffer/Vertex.shader", "Engine/Shaders/MainFrameBuffer/fragment.shader");
 }
 
-void QFAFrameBufferMain::CopyFrameBuffer(QFAFrameBuffer* frameBuffer)
-{	
+void QFAFrameBufferMain::CopyFrameBuffer(QFAFrameBuffer* frameBuffer, int w, int h)
+{
+	//glViewport(0, 0, w, h);
+	
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, frameBuffer->frameBuffer);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	// glBlitFramebuffer — copy a block of pixels from the read framebuffer to the draw framebuffer
-	glBlitFramebuffer(0, 0, 600, 600, 0, 0, 600, 600, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 }
 
-void QFAFrameBufferMain::BlankScreen()
+void QFAFrameBufferMain::BlankScreen(int w, int h)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.1f, 0.1f, 0.1f, 1);
 	// glBlitFramebuffer — copy a block of pixels from the read framebuffer to the draw framebuffer
-	glBlitFramebuffer(0, 0, 600, 600, 0, 0, 600, 600, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 }

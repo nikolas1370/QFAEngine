@@ -15,6 +15,9 @@ bool QFAOverlord::isInit = false;
 GLFWwindow* QFAOverlord::Window = nullptr;
 Camera* QFAOverlord::CurentCamera = nullptr;
 
+int QFAOverlord::DefaultWidth = 600;
+int QFAOverlord::DefaultHeight = 600;
+
 bool QFAOverlord::StartLife()
 {
 	if (Life || !isInit)
@@ -45,7 +48,7 @@ bool QFAOverlord::Init()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    Window = glfwCreateWindow(600, 600, "Hello World", NULL, NULL);
+    Window = glfwCreateWindow(DefaultWidth, DefaultHeight, "Hello World", NULL, NULL);
     QFAInput::Init(Window);
     if (!Window)
     {
@@ -64,8 +67,7 @@ bool QFAOverlord::Init()
         return false;
     }
 
-    QFARender::Init();
-    QFARender::SetWindow(Window);
+    QFARender::Init(Window, DefaultWidth, DefaultHeight);
     std::cout << "openGL VERSION " << " " << glGetString(GL_VERSION) << std::endl;
     isInit = true;
     return true;

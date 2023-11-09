@@ -18,6 +18,8 @@ class QFAOverlord
 
 	static GLFWwindow* Window;
 
+	static int DefaultWidth;
+	static int DefaultHeight;
 
 	static void RenderWorld();
 
