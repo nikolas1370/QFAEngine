@@ -9,30 +9,32 @@ class QCameraComponent : public QSceneComponent
 	// Field of view 
 	float Fov = 90;
 	float ViewDistance = 1000;
-	FVector CameraRotation;
-	glm::mat4 cameraRotationMatrex;	
+
+	glm::mat3 cameraRotationMatrex;	
+	// parents rotation + rotation
+	FVector FinallyRotation;
 	friend QFARender;
 	friend QFAOverlord;
 	/*world opengl position */
-	inline FVector GetOpenGLPosition()// 
-	{
-		
-		return WorldPosition;
-	}
-
+	
 	bool IsActive = true;
 public:
 
 	void Activate();
 	void Deactivate();
-	QCameraComponent(){}
+	QCameraComponent()
+	{
+		Fov = 45.0f;
+		ViewDistance = 1000.0f;
+	}
 	QCameraComponent(float fov, float viewDistance);
 
-	void SetRotation(const FVector rotation) final;
-	FVector GetRotation() const final;
 
-	 
 
+
+	void UpdateModelMatrix(bool onlyPosition) override;
+
+	
 	/* 
 	
 	rewrite because it is now child node

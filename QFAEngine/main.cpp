@@ -1,5 +1,8 @@
 ﻿ // https://learnopengl.com/Introduction
 // 2005
+/*
+Q swith control between camera and some actor whit mehes
+*/
 
 
 #include "Math/Vector.h"
@@ -23,6 +26,7 @@
 
 #include "GameCode/TestActor.h"
 
+#include <Object/Actor/Camera/CameraActor.h>
 
 int main()
 {     
@@ -46,7 +50,7 @@ int main()
 
         
     QWorld* mainWorld = new QWorld();
-    mainWorld->AddActor(new ATestActor);
+    //mainWorld->AddActor(new ATestActor);
     //mainWorld->GetDirectionDight()->SetCastShadow(false);
 
     QActor* firstActor = new QActor();
@@ -85,7 +89,7 @@ int main()
     */
 
     /*------------------------------*/
-    QActor* mainActor = new QActor();
+    ATestActor* mainActor = new ATestActor();
     mainActor->Name = "mainActor";
     mainWorld->AddActor(mainActor);
     mainActor->SetActorPosition(FVector(30, 0, 0));
@@ -116,18 +120,18 @@ int main()
 
 
     
-    mainActor->SetActorRotation(FVector(90, 0, 0));
-    secondComponent.SetRotation(FVector(45, 0, 0));
+    //mainActor->SetActorRotation(FVector(90, 0, 0));
+    //secondComponent.SetRotation(FVector(45, 0, 0));
    
     mainActor->SetActorScale(1.0);
-    Arrow->SetRotation(FVector(90, 0, 0));
+    //Arrow->SetRotation(FVector(90, 0, 0));
    // Arrow->SetScale(2); 
 
     secondComponent.SetLocalPosition(FVector(10, 0, 3));
     //secondComponent.SetWorldPosition(FVector(40, 0, 3));
     
     
-    secondComponent.SetScale(2);
+
 
     
 
@@ -135,9 +139,15 @@ int main()
     
     Arrow->SetWorldPosition(FVector(30, -3, 0));    
     
-    mainComponent.SetScale(1.0f);
+    //mainComponent.SetScale(1.0f);
     mainComponent.SetScale(0.5f);
-    Arrow->SetScale(2.1f); 
+    secondComponent.SetScale(2);
+    Arrow->SetScale(2.0f); 
+
+    secondComponent.SetRelativePosition(FVector(0, 0, 10));
+    Arrow->SetRelativePosition(FVector(0, 0, -10));
+    
+    secondComponent.SetRotation(FVector(-14, 480, 750));
     /*-----------*/
     /*-----------*/
     /*-----------*/
@@ -181,17 +191,48 @@ int main()
     /*-----------*/
 
 
-    
+    /*
     QActor* cameraActor = new QActor();
     QCameraComponent camera(45, 1000);
     cameraActor->SetRootComponent(&camera);
-
     camera.SetWorldPosition(FVector(0, 0, 0));
     //camera.SetRotation(FVector(-110, 370, 940)); //test
     camera.SetRotation(FVector(0, 0,  0));
+    camera.Activate();
+    */
+    
+    ACameraActor Camera;
+    Camera.ActivateCamera();
+    //Camera.SetActorPosition(0);
+    //Camera.SetActorRotation(FVector(0, 0, 0));
+
+
+    
+    //Camera.SetActorRotation(FVector(90, 90, 90));
+    //mainActor->SetActorPosition(FVector(0, 0, 30));
+    
+    //Camera.SetActorRotation(FVector(0, 0, 0));
+    mainActor->SetActorPosition(FVector(30, 0, 0));
+    
+
+    //Camera.SetActorRotation(FVector(0, 90, 0)); 
+    //Camera.SetActorRotation(FVector(0, 0, 0)); 
+
+    
+
+
+    //mainActor->SetActorPosition(FVector(-30, 0, 0));
+
+
+    mainWorld->AddActor(&Camera);
 
     mainWorld->Activate();
-    camera.Activate();
+    
+
+    
+
+    
+
     QFAOverlord::StartLife();
 
     return 0;

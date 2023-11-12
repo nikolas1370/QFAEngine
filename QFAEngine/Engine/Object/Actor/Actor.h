@@ -18,15 +18,17 @@ class QActor : public QObject
 	friend QMeshBaseComponent;
 	// SceneComponent
 
-	FVector Position = FVector(0);
-	FVector Rotation = FVector(0);
-	FVector Scale = FVector(1);
+	
 	
 	
 	// actor live in this world
 	QWorld* ActorWorld;
 
 protected:
+	FVector Position = FVector(0);
+	FVector Rotation = FVector(0);
+	FVector Scale = FVector(1);
+
 	bool CanTick = false;
 	virtual void Tick(float deltaTime) {};
 public:
@@ -59,10 +61,9 @@ public:
 		return Scale;
 	}
 
-
-	virtual FVector GetActorForwardVector() const; 
-	virtual FVector GetActorRightVector() const;
-	virtual FVector GetActorUpVector() const;
+	FVector GetActorForwardVector() const; 
+	FVector GetActorRightVector() const;
+	FVector GetActorUpVector() const;
 
 	inline QSceneComponent* GetRootComponent()
 	{
@@ -70,10 +71,11 @@ public:
 	}
 	/*
 		if component == null. RootComponent = null
-		якшо компонент являється власністю другого актора чи компонента то актор/компонент забуде про нього
 		return old RootComponent
+
+		if component Inseparable return nullptr
 	*/
-	QSceneComponent* SetRootComponent(QSceneComponent* component);
+	QSceneComponent* SetRootComponent(QSceneComponent* component, bool inseparable = false);
 
 
 	//will return null if the actor is not actually spawned in a level

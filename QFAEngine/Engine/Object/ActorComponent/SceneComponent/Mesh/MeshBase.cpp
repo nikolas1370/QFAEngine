@@ -37,7 +37,7 @@ SSVertexMaterial* MeshFrames::GetFrameData(int frame) const
 
 QMeshBaseComponent::QMeshBaseComponent()	
 {	
-	ForRender = true;
+	NeedUpdateMatrix = true;
 }
 
 

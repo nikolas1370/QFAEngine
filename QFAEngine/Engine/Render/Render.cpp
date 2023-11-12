@@ -73,14 +73,13 @@ void QFARender::DrawMesh(QMeshBaseComponent* mesh)
 	
 	shaderProgram->SetProjectionMatrix(MatrixPerspective);
 	shaderProgram->SetCameraRotationMatrix(CurentCamera->cameraRotationMatrex);
-	FVector GLCameraPos = CurentCamera->GetOpenGLPosition();
-	shaderProgram->SetCameraPosition(FVector(GLCameraPos.X, GLCameraPos.Y, GLCameraPos.Z));
+	shaderProgram->SetCameraPosition(FVector(CurentCamera->WorldPosition.X, CurentCamera->WorldPosition.Y, CurentCamera->WorldPosition.Z));
 	shaderProgram->SetModelMatrix(mesh->ModelMatrix);
 	
 	QDirectionLight* dl = QFAOverlord::GetCurentWorld()->GetDirectionDight();
 	if (dl->CastShadows)
 	{		
-		dl->SetLightMatrix(CurentCamera->GetOpenGLPosition(), shaderProgram);		
+		dl->SetLightMatrix(CurentCamera->WorldPosition, shaderProgram);		
 		dl->SetShadowMap(shaderProgram);
 		shaderProgram->SetShadowOn(true);
 	}
@@ -94,7 +93,7 @@ void QFARender::DrawMeshShadow(QMeshBaseComponent* mesh)
 {
 	mesh->Bind(true);
 	QFAShaderProgram* shaderProgram = mesh->GetShadowShaderProgram();
-	QFAOverlord::GetCurentWorld()->GetDirectionDight()->SetLightMatrix(CurentCamera->GetOpenGLPosition(), shaderProgram);		
+	QFAOverlord::GetCurentWorld()->GetDirectionDight()->SetLightMatrix(CurentCamera->WorldPosition, shaderProgram);
 	shaderProgram->SetModelMatrix(mesh->ModelMatrix);
 
 	GLCall(glDrawElements(GL_TRIANGLES, mesh->GetIndexCount(), GL_UNSIGNED_INT, nullptr));

@@ -290,6 +290,10 @@ public:
 	QFAInput();
 	~QFAInput();
 
+	void ActiveInput(bool activate)
+	{
+		BlockInput = !activate;
+	}
 	/*
 		if id exis Ekey::key be changed
 	*/
@@ -302,7 +306,14 @@ public:
 	void AddKeyRelease(EKey::Key key, std::string id, std::function<void(EKey::Key)> fun);
 	void RemoveKeyRelease(std::string Id);
 
+	/*
+		fun call one time
+	*/
 	void SetPressedAnyKey(std::function<void(EKey::Key)> fun);
+	/*
+		if PressedAnyKey fun set call one time
+	*/
+	void ActivePressedAnyKey();
 	void ShutOffPressedAnyKey();
 
 	void SetWheelAxis(std::function<void(float)> fun);
@@ -322,15 +333,23 @@ public:
 	void RemoveKeyHold(std::string Id);
 
 	/*
-	if id exis Axis return not valid QFAInputAxis1D
+	if id exis return last created QFAInputAxis1D
 	fun call every frame
 	*/
 	QFAInputAxis1D CreateAxis1D(std::string id, std::function<void(float)> fun);
 	void RemoveAxis1D(std::string id);
 
+	/*
+	if id exis return last created QFAInputAxis2D
+	fun call every frame
+	*/
 	QFAInputAxis2D CreateAxis2D(std::string id, std::function<void(FVector2D)> fun);
 	void RemoveAxis2D(std::string id);
 
+	/*
+	if id exis return last created QFAInputAxis3D
+	fun call every frame
+	*/
 	QFAInputAxis3D CreateAxis3D(std::string id, std::function<void(FVector)> fun);
 	void RemoveAxis3D(std::string id);
 
@@ -338,20 +357,20 @@ private:
 	/*
 		fun be call every frame even when button not push
 	*/
-	static void AddKeyToAxis1D(std::string axisId, EKey::Key key, float axisValue, std::string keyId);
-	static void RemoveKeyFromAxis1D(std::string axisId, std::string keyId);
+	static void AddKeyToAxis1D(QFAInput* input, std::string axisId, EKey::Key key, float axisValue, std::string keyId);
+	static void RemoveKeyFromAxis1D(QFAInput* input, std::string axisId, std::string keyId);
 
 	/*
 		fun be call every frame even when button not push
 	*/
-	static void AddKeyToAxis2D(std::string axisId, EKey::Key key, FVector2D axisValue, std::string keyId);
-	static void RemoveKeyFromAxis2D(std::string axisId, std::string keyId);
+	static void AddKeyToAxis2D(QFAInput* input, std::string axisId, EKey::Key key, FVector2D axisValue, std::string keyId);
+	static void RemoveKeyFromAxis2D(QFAInput* input, std::string axisId, std::string keyId);
 
 	/*
 		fun be call every frame even when button not push
 	*/
-	static void AddKeyToAxis3D(std::string axisId, EKey::Key key, FVector axisValue, std::string keyId);
-	static void RemoveKeyFromAxis3D(std::string axisId, std::string keyId);
+	static void AddKeyToAxis3D(QFAInput* input, std::string axisId, EKey::Key key, FVector axisValue, std::string keyId);
+	static void RemoveKeyFromAxis3D(QFAInput* input, std::string axisId, std::string keyId);
 };
 
 
@@ -359,26 +378,24 @@ class QFAInputAxis1D
 {
 	friend QFAInput;
 	std::string Id;
-	bool Valid = false;
+	QFAInput* Input;
 public:
 	QFAInputAxis1D() {};
-	QFAInputAxis1D(std::string id)
+	QFAInputAxis1D(QFAInput* input, std::string id)
 	{
-		Valid = true;
 		Id = id;
+		Input = input;
 	}
 
 	// if id exis Ekey::key be changed
 	inline void AddKey(EKey::Key key, float axisValue, std::string id)
 	{
-		if(Valid)
-			QFAInput::AddKeyToAxis1D(Id, key, axisValue, id);
+		QFAInput::AddKeyToAxis1D(Input ,Id, key, axisValue, id);
 	}
 
 	inline void RemoveKey(std::string id)
 	{
-		if (Valid)
-			QFAInput::RemoveKeyFromAxis1D(Id, id);
+		QFAInput::RemoveKeyFromAxis1D(Input, Id, id);
 	}
 };
 
@@ -386,26 +403,24 @@ class QFAInputAxis2D
 {
 	friend QFAInput;
 	std::string Id;
-	bool Valid = false;
+	QFAInput* Input;
 public:
 	QFAInputAxis2D() {};
-	QFAInputAxis2D(std::string id)
+	QFAInputAxis2D(QFAInput* input, std::string id)
 	{
-		Valid = true;
 		Id = id;
+		Input = input;
 	}
 
 	// if id exis Ekey::key be changed
 	inline void AddKey(EKey::Key key, FVector2D axisValue, std::string id)
 	{
-		if (Valid)
-			QFAInput::AddKeyToAxis2D(Id, key, axisValue, id);
+		QFAInput::AddKeyToAxis2D(Input,Id, key, axisValue, id);
 	}
 
 	inline void RemoveKey(std::string id)
 	{
-		if (Valid)
-			QFAInput::RemoveKeyFromAxis2D(Id, id);
+		QFAInput::RemoveKeyFromAxis2D(Input, Id, id);
 	}
 };
 
@@ -413,25 +428,25 @@ class QFAInputAxis3D
 {
 	friend QFAInput;
 	std::string Id;
-	bool Valid = false;
+	QFAInput* Input;
 public:
 	QFAInputAxis3D() {};
-	QFAInputAxis3D(std::string id)
+	QFAInputAxis3D(QFAInput* input, std::string id)
 	{
-		Valid = true;
 		Id = id;
+		Input = input;
 	}
+	
 
 	// if id exis Ekey::key be changed
 	inline void AddKey(EKey::Key key, FVector axisValue, std::string id)
 	{
-		if (Valid)
-			QFAInput::AddKeyToAxis3D(Id, key, axisValue, id);
+		
+		QFAInput::AddKeyToAxis3D(Input,  Id, key, axisValue, id);
 	}
 
 	inline void RemoveKey(std::string id)
 	{
-		if (Valid)
-			QFAInput::RemoveKeyFromAxis3D(Id, id);
+		QFAInput::RemoveKeyFromAxis3D(Input, Id, id);
 	}
 };

@@ -7,10 +7,17 @@ class ATestActor : public QActor
 {
 	void Tick(float deltaTime) override;
 
-	QFAInput input;
-
+	
+	
 
 public:
+
+	FVector inputAxis;
+	FVector2D mouseAxis;
+	bool mosePress;
+
+	bool activeControl = false;
+
 	ATestActor();
 	~ATestActor();
 

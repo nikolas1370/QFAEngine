@@ -55,9 +55,7 @@ public:
     TVector<T> operator*(T V) const
     {
         return TVector<T> { X * V, Y * V, Z * V };
-    }
-
-    
+    }    
 
     TVector<T> operator/(T V) const
     {

@@ -21,30 +21,42 @@ QCameraComponent::QCameraComponent(float fov, float viewDistance)
 {
 	Fov = fov;
 	ViewDistance = viewDistance;
+	NeedUpdateMatrix = true;
 }
 
-void QCameraComponent::SetRotation(const FVector rotation)
-{
-	CameraRotation = rotation;	
-	cameraRotationMatrex = glm::translate(glm::mat4(1), glm::vec3(0)); 
-	
-	cameraRotationMatrex = glm::rotate(cameraRotationMatrex, glm::radians(rotation.X), glm::vec3(0.0f, 0.0f, -1.0f));
-	cameraRotationMatrex = glm::rotate(cameraRotationMatrex, glm::radians(rotation.Y * -1), glm::vec3(1.f, 0.f, 0.f));
-	cameraRotationMatrex = glm::rotate(cameraRotationMatrex, glm::radians(rotation.Z), glm::vec3(0.0f, 1.0f, 0.0f));
 
-}
 
-FVector QCameraComponent::GetRotation() const
+void QCameraComponent::UpdateModelMatrix(bool onlyPosition)
 {
-	return CameraRotation;
+	if (onlyPosition)
+		return;
+
+	FinallyRotation = Rotation;
+	if (!IsRootComponent())
+	{
+		QSceneComponent* parent = GetParentComponent();		
+		while (true)
+		{
+			if (!parent->IsValid())
+				break;
+
+			FinallyRotation -= parent->GetRotation();
+			parent = parent->GetParentComponent();
+		}
+	}
+
+	cameraRotationMatrex = Math::DefauldMatrix3;
+	cameraRotationMatrex = Math::rotateMatrix3(cameraRotationMatrex, glm::radians(FinallyRotation.X), glm::vec3(0.0f, 0.0f, -1.0f));
+	cameraRotationMatrex = Math::rotateMatrix3(cameraRotationMatrex, glm::radians((FinallyRotation.Y) * -1), glm::vec3(1.f, 0.f, 0.f));
+	cameraRotationMatrex = Math::rotateMatrix3(cameraRotationMatrex, glm::radians((FinallyRotation.Z)), glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 FVector QCameraComponent::GetForwardVector() const
 {
 	FVector fv = FVector::ForwardVector;
-
-	fv = fv.RotateAngleAxis(CameraRotation.Y * -1 , FVector::RightVector);
-	fv = fv.RotateAngleAxis(CameraRotation.Z, FVector::UpVector);
+	
+	fv = fv.RotateAngleAxis(FinallyRotation.Y * -1 , FVector::RightVector);
+	fv = fv.RotateAngleAxis(FinallyRotation.Z, FVector::UpVector);
 	
 	return fv;
 }
@@ -53,9 +65,9 @@ FVector QCameraComponent::GetRightVector() const
 {
 	FVector fv = FVector::RightVector;
 
-	fv = fv.RotateAngleAxis(CameraRotation.X, FVector::ForwardVector);	
-	fv = fv.RotateAngleAxis(CameraRotation.Y * -1, FVector::RightVector);
-	fv = fv.RotateAngleAxis(CameraRotation.Z, FVector::UpVector);
+	fv = fv.RotateAngleAxis(FinallyRotation.X, FVector::ForwardVector);
+	fv = fv.RotateAngleAxis(FinallyRotation.Y * -1, FVector::RightVector);
+	fv = fv.RotateAngleAxis(FinallyRotation.Z, FVector::UpVector);
 	
 	return fv;
 }
@@ -65,9 +77,9 @@ FVector QCameraComponent::GetUpVector() const
 	FVector fv = FVector::UpVector;
 
 	
-	fv = fv.RotateAngleAxis(CameraRotation.X, FVector::ForwardVector);
-	fv = fv.RotateAngleAxis(CameraRotation.Y * -1, FVector::RightVector);	
-	fv = fv.RotateAngleAxis(CameraRotation.Z, FVector::UpVector);
+	fv = fv.RotateAngleAxis(FinallyRotation.X, FVector::ForwardVector);
+	fv = fv.RotateAngleAxis(FinallyRotation.Y * -1, FVector::RightVector);
+	fv = fv.RotateAngleAxis(FinallyRotation.Z, FVector::UpVector);
 
 	return fv;
 }

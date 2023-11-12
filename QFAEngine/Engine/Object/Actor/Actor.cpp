@@ -41,21 +41,20 @@ void QActor::SetActorScale(const FVector& scale)
 
 FVector QActor::GetActorForwardVector() const
 {
+	/* work for camera  */
 	FVector fv = FVector::ForwardVector;
+	
 	fv = fv.RotateAngleAxis(Rotation.Y * -1, FVector::RightVector);
 	fv = fv.RotateAngleAxis(Rotation.Z, FVector::UpVector);
-
 	return fv;
 }
 
 FVector QActor::GetActorRightVector() const
 {
 	FVector fv = FVector::RightVector;
-
 	fv = fv.RotateAngleAxis(Rotation.X * -1, FVector::ForwardVector);
 	fv = fv.RotateAngleAxis(Rotation.Y * -1, FVector::RightVector);
 	fv = fv.RotateAngleAxis(Rotation.Z, FVector::UpVector);
-
 	return fv;
 }
 
@@ -69,9 +68,13 @@ FVector QActor::GetActorUpVector() const
 	return fv;
 }
 
-QSceneComponent* QActor::SetRootComponent(QSceneComponent* component)
+QSceneComponent* QActor::SetRootComponent(QSceneComponent* component, bool inseparable)
 {	
-	
+	bool componentValide = component->IsValid();
+	if (componentValide && component->Inseparable)
+		return nullptr;
+
+
 	QSceneComponent* oldRootComponent = RootComponent;
 	if (RootComponent)
 	{
@@ -79,7 +82,7 @@ QSceneComponent* QActor::SetRootComponent(QSceneComponent* component)
 		RootComponent->ParentActor = nullptr;			
 	}
 
-	if (!component)
+	if (!componentValide )
 	{		
 		RootComponent = nullptr;
 		return oldRootComponent;
@@ -97,6 +100,7 @@ QSceneComponent* QActor::SetRootComponent(QSceneComponent* component)
 	
 	RootComponent = component;	
 	RootComponent->IRootComponent = true;
+	RootComponent->Inseparable = inseparable;
 	RootComponent->ParentActor = this;
 	RootComponent->SetWorldPosition(Position);
 	RootComponent->SetRotation(Rotation);
