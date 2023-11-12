@@ -17,8 +17,6 @@ QFAInput::~QFAInput()
 
 void QFAInput::NewFrame(float delta)
 {
-	std::cout << "/*-----------------" << "\n";
-	std::cout << "not enter" << "\n";
 	for (int i = 0; i < Inputs.Length(); i++)
 	{
 		if (Inputs[i]->BlockInput)
@@ -60,19 +58,12 @@ void QFAInput::NewFrame(float delta)
 				Inputs[i]->Axis2DList[j].fun(axisValue);
 		}
 
-
-
 		for (int j = 0; j < Inputs[i]->Axis3DList.Length(); j++)
 		{
 			FVector axisValue = FVector(0.0f);
 			for (int k = 0; k < Inputs[i]->Axis3DList[j].Keys.Length(); k++)
 				if (Inputs[i]->Axis3DList[j].Keys[k].pressed)
-				{
-					axisValue += Inputs[i]->Axis3DList[j].Keys[k].AxisValue;
-					std::cout << "inside" << "\n";
-				}
-
-			
+					axisValue += Inputs[i]->Axis3DList[j].Keys[k].AxisValue;			
 			
 			if (Inputs[i]->Axis3DList[j].fun)
 				Inputs[i]->Axis3DList[j].fun(axisValue);
@@ -190,16 +181,9 @@ void QFAInput::ProcessKey(int key, int scancode, int action, int mods)
 
 			
 			for (int j = 0; j < Inputs[i]->Axis3DList.Length(); j++)
-			{
 				for (int k = 0; k < Inputs[i]->Axis3DList[j].Keys.Length(); k++)
-				{
 					if (Inputs[i]->Axis3DList[j].Keys[k].key == key)
-					{
 						Inputs[i]->Axis3DList[j].Keys[k].pressed = true;
-						
-					}
-				}
-			}
 		}
 	}
 	else if (action == GLFW_RELEASE)

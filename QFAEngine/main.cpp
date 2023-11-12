@@ -26,7 +26,7 @@ Q swith control between camera and some actor whit mehes
 
 #include "GameCode/TestActor.h"
 
-#include <Object/Actor/Camera/CameraActor.h>
+#include <Object/Actor/Camera/CameraEditor.h>
 
 int main()
 {     
@@ -89,7 +89,7 @@ int main()
     */
 
     /*------------------------------*/
-    ATestActor* mainActor = new ATestActor();
+    QActor* mainActor = new QActor();
     mainActor->Name = "mainActor";
     mainWorld->AddActor(mainActor);
     mainActor->SetActorPosition(FVector(30, 0, 0));
@@ -201,7 +201,7 @@ int main()
     camera.Activate();
     */
     
-    ACameraActor Camera;
+    ACameraEditor Camera;
     Camera.ActivateCamera();
     //Camera.SetActorPosition(0);
     //Camera.SetActorRotation(FVector(0, 0, 0));

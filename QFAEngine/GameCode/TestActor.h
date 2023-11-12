@@ -11,13 +11,6 @@ class ATestActor : public QActor
 	
 
 public:
-
-	FVector inputAxis;
-	FVector2D mouseAxis;
-	bool mosePress;
-
-	bool activeControl = false;
-
 	ATestActor();
 	~ATestActor();
 

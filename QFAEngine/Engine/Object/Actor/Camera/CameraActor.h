@@ -6,26 +6,16 @@
 
 class ACameraActor : public QActor
 {
-	QCameraComponent Camera = QCameraComponent(45.0f, 1000.0f);
+	
 protected:
-
+	QCameraComponent Camera = QCameraComponent(45.0f, 1000.0f);
 public:
 	ACameraActor();
 	~ACameraActor();
 
 	void ActivateCamera();
 
-	/* remove */
-	FVector inputAxis;
-	FVector2D mouseAxis;
-	bool mosePress;
-
-
-	/*--*/
-
-	bool activeControl = true;
-
-	void Tick(float delta) override;
+	
 private:
 
 };

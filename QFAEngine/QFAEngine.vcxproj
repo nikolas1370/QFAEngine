@@ -150,6 +150,7 @@
     <ClCompile Include="Engine\Math\Math.cpp" />
     <ClCompile Include="Engine\Object\ActorComponent\ActorComponent.cpp" />
     <ClCompile Include="Engine\Object\Actor\Camera\CameraActor.cpp" />
+    <ClCompile Include="Engine\Object\Actor\Camera\CameraEditor.cpp" />
     <ClCompile Include="Engine\Object\World\DirectionLight\DirectionLight.cpp" />
     <ClCompile Include="Engine\Object\ActorComponent\SceneComponent\SceneComponent.cpp" />
     <ClCompile Include="Engine\Object\ActorComponent\SceneComponent\Camera\Camera.cpp" />
@@ -177,6 +178,7 @@
   <ItemGroup>
     <ClInclude Include="Engine\Object\ActorComponent\ActorComponent.h" />
     <ClInclude Include="Engine\Object\Actor\Camera\CameraActor.h" />
+    <ClInclude Include="Engine\Object\Actor\Camera\CameraEditor.h" />
     <ClInclude Include="Engine\Object\World\DirectionLight\DirectionLight.h" />
     <ClInclude Include="Engine\Object\ActorComponent\SceneComponent\SceneComponent.h" />
     <ClInclude Include="Engine\Object\ActorComponent\SceneComponent\Camera\Camera.h" />
