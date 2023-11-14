@@ -3,11 +3,11 @@
 #include <Math/Vector.h>
 
 class QFAShaderProgram;
-class QFARender;
+class QFAViewport;
 
 class QDirectionLight : public QObject
 {
-	friend QFARender;
+	friend QFAViewport;
 	unsigned int depthMapFBO;
 	const unsigned int SHADOW_WIDTH = 1000, SHADOW_HEIGHT = 1000;
 	unsigned int depthMap;

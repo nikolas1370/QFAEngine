@@ -136,13 +136,14 @@ public:
 
 
 class QFAShaderProgram;
-class QFARender;
+class QFAViewport;
 
 class QMeshBaseComponent : public QSceneComponent // abstract class
 {
-	friend QFARender;
 	
+	friend QFAViewport;
 protected:
+	
 	unsigned int VAO;
 	unsigned int VBO;
 	unsigned int IBO;

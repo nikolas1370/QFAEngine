@@ -4,39 +4,38 @@
 #include <Tools/Array.h>
 class QActor;
 class QFAOverlord;
+class QFAViewport;
+class QSceneComponent;
 
 
 class QWorld : public QObject
 {
 	friend QFAOverlord;
-	/*- in futere be some else  */
-	bool IsActive = false;
+
 	
 public:
-	void Activate();
-	void Deactivate();
+
 
 private:
-	static QWorld* CurentWord;
-
-	/*---*/
+	
+	
 
 
 	friend QActor;
+	friend QFAViewport;
 	QDirectionLight DirectionLight;
 
-	
+	static QFAArray<QWorld*> Worlds;
 
 	// call only from QActor Destructor
 	void ForgetActor(QActor* actor);
+
+	bool IsActive = true;
+	static void ProcessTicks();
+	static void ProcessSceneComponentTick(QSceneComponent* component);
 public:
 	
-	/*--in private */
-	/*
-	QActor** Actors;
-	unsigned int ActorListLenght = 100;
-	unsigned int ActorCount = 0;
-	*/
+
 	QFAArray<QActor*> Actors;
 
 	/*--*/

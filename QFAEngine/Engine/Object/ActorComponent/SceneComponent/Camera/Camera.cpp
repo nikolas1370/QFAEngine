@@ -1,12 +1,22 @@
 #include "Camera.h"
 #include <Overlord/Overlord.h>
-void QCameraComponent::Activate()
+#include <Render/Window/Viewport.h>
+#include <Object/World/World.h>
+#include <Object/Actor/Actor.h>
+void QCameraComponent::Activate(QFAViewport* viewport)
 {
 	if (!IsValid())
 		return;
 
-	QFAOverlord::SetCamera(this);
-	IsActive = true;
+	if (viewport)
+		viewport->ChangeCamera(this);
+	else if (Viewport = QFAViewport::GetDefaultViewport())
+	{
+		
+		Viewport->ChangeCamera(this);
+	}
+
+	IsActive = true;	
 }
 
 void QCameraComponent::Deactivate()
@@ -92,4 +102,13 @@ void QCameraComponent::SetFov(float fov)
 void QCameraComponent::SetViewDistance(float viewDistance)
 {
 	ViewDistance = viewDistance;
+}
+
+QWorld* QCameraComponent::GetWorld()
+{
+	QActor* actor = GetActor();
+	if (actor->IsValid())
+		return actor->GetWorld();
+	else
+		return nullptr;
 }

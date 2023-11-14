@@ -1,17 +1,21 @@
 #pragma once
 
-class QFARender;
+class QFAViewport;
+class QFAFrameBufferMain;
 class QFAFrameBufferMain;
 class QFAFrameBuffer
 {
-	friend QFARender;
+	friend QFAViewport;
+	friend QFAFrameBufferMain;
 	friend QFAFrameBufferMain;
 	unsigned int frameBuffer;
 	unsigned int colorBuffer;
 	unsigned int rbo;
 
+	void UpdateSize(int w, int h);
+	void StartFrame();
 public:
-	void StartFrame(bool newParameter = false, int w = 0, int h = 0);
+	
 
 
 	QFAFrameBuffer();

@@ -43,20 +43,23 @@ void QFAFrameBuffer::Init(int w, int h)
 		std::cout << "!--------------------------------" << std::endl;
 }
 
-void QFAFrameBuffer::StartFrame(bool newParameter, int w, int h)
+void QFAFrameBuffer::StartFrame()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-	if (newParameter)
-	{		
-		glBindRenderbuffer(GL_RENDERBUFFER, colorBuffer);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, w, h);
-		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
-	}	
+	
 
 	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));// settup how opengl by with alpha
 	GLCall(glEnable(GL_BLEND));
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
+}
+
+void QFAFrameBuffer::UpdateSize(int w, int h)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, colorBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, w, h);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
 }

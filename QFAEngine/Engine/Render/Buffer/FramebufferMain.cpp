@@ -2,6 +2,7 @@
 #include <Render/Shader/ShaderProgram.h>
 #include <Render/Buffer/Framebuffer.h>
 #include <Tools/Debug/OpenGlStuff.h>
+#include <Render/Window/Viewport.h>
 
 float QFAFrameBufferMain::VertexMain[] =
 {
@@ -43,14 +44,14 @@ void QFAFrameBufferMain::Init(int width, int height)
 	ProgramMain = new QFAShaderProgram("Engine/Shaders/MainFrameBuffer/Vertex.shader", "Engine/Shaders/MainFrameBuffer/fragment.shader");
 }
 
-void QFAFrameBufferMain::CopyFrameBuffer(QFAFrameBuffer* frameBuffer, int w, int h)
+void QFAFrameBufferMain::CopyFrameBuffer(QFAViewport* view)
 {
 	//glViewport(0, 0, w, h);
 	
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, frameBuffer->frameBuffer);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, view->secondFrameBuffer->frameBuffer);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	// glBlitFramebuffer — copy a block of pixels from the read framebuffer to the draw framebuffer
-	glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glBlitFramebuffer(0, 0, view->Width, view->Height, view->X, view->Y, view->Width, view->Height, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 }
 
 void QFAFrameBufferMain::BlankScreen(int w, int h)

@@ -1,5 +1,4 @@
 #pragma once
-//#include <Object/ActorComponent/SceneComponent/SceneComponent.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
 #include <Tools/Debug/OpenGlStuff.h>
 #include <Render/Time.h>
@@ -12,7 +11,7 @@
 
 class QMesh : public QMeshBaseComponent
 {// in destructor delete buffers
-	friend QFARender;
+	
 
 	static QFAShaderProgram* SShaderProgram;
 	static QFAShaderProgram* SShaderShadowProgram;

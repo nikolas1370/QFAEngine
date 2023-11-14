@@ -30,28 +30,15 @@ Q swith control between camera and some actor whit mehes
 
 int main()
 {     
-
     QFAOverlord::Init();
-
 
     QMesh* MeshA = OBJLoader::LoadModelWithAnimate("NoEngineModel/anim/dore_1.obj", 30); 
     QStaticMesh* Mesh = OBJLoader::LoadModel("NoEngineModel/quad2.obj");//(vertecis, sizeof(vertecis), indices, sizeof(indices) / sizeof(unsigned int));
     QStaticMesh* Arrow = OBJLoader::LoadModel("NoEngineModel/Arrow.obj");
     Arrow->Name = "Arrow";
     MeshA->Name = "animation na";
-    /*
-    * 
-    * 
-    * remove after re du loader for it
-    * 
-    */
-    //Mesh->SetMesh(MeshA->Mf);
-//    Render render;
 
-        
     QWorld* mainWorld = new QWorld();
-    //mainWorld->AddActor(new ATestActor);
-    //mainWorld->GetDirectionDight()->SetCastShadow(false);
 
     QActor* firstActor = new QActor();
     QActor* secondActor = new QActor();
@@ -71,29 +58,11 @@ int main()
     MeshA->SetScale(FVector(1, 1, 1));
     MeshA->SetRotation(FVector(0, 0, 90));
 
-
-    //mainWorld->AddActor(animActor);    
-    //mainWorld->AddActor(firstActor);
-    
-    /* -----------*/
-    
-    /*
-    
-        QStaticMesh FloorF = *Mesh;
-    FloorF.SetScale(FVector(1, 80, 80));
-    FloorF.SetPosition(FVector(30, 0, 0));
-    //floorActor->SetActorPosition(FVector(30, 0, 0));
-
-    floorActor->SetRootComponent(&FloorF);
-    mainWorld->AddActor(floorActor);
-    */
-
     /*------------------------------*/
     QActor* mainActor = new QActor();
     mainActor->Name = "mainActor";
     mainWorld->AddActor(mainActor);
     mainActor->SetActorPosition(FVector(30, 0, 0));
-
     
     //
     /*
@@ -104,42 +73,23 @@ int main()
     mainComponent.Name = "mainComponent";
     mainActor->SetRootComponent(&mainComponent);
 
-    
-
     QStaticMesh secondComponent = *Mesh;
     secondComponent.Name = "secondComponent";
     
     Arrow->SetRelativePosition(FVector(0, 7, 0));
-    
-    
+        
     mainComponent.AttachComponent(&secondComponent);
-
     
     secondComponent.SetRelativePosition(FVector(0, 0, 5));
     secondComponent.AttachComponent(Arrow);
-
-
-    
-    //mainActor->SetActorRotation(FVector(90, 0, 0));
-    //secondComponent.SetRotation(FVector(45, 0, 0));
    
     mainActor->SetActorScale(1.0);
-    //Arrow->SetRotation(FVector(90, 0, 0));
-   // Arrow->SetScale(2); 
 
     secondComponent.SetLocalPosition(FVector(10, 0, 3));
-    //secondComponent.SetWorldPosition(FVector(40, 0, 3));
     
-    
-
-
-    
-
-
     
     Arrow->SetWorldPosition(FVector(30, -3, 0));    
     
-    //mainComponent.SetScale(1.0f);
     mainComponent.SetScale(0.5f);
     secondComponent.SetScale(2);
     Arrow->SetScale(2.0f); 
@@ -153,86 +103,12 @@ int main()
     /*-----------*/
     /*-----------*/
     /*-----------*/
+   
     
-    QStaticMesh Floor = *Mesh;// bottom
-    //Floor.SetScale(FVector(80, 80, 1));
-    //Floor.SetWorldPosition(FVector(0, 0, -10));
-
-    
-
-    QStaticMesh FloorT = *Mesh;
-    //FloorT.SetScale(FVector(80, 80, 1));
-    //FloorT.SetWorldPosition(FVector(0, 0, 80));
-    
-
-    QStaticMesh FloorF = *Mesh;
-    FloorF.SetScale(FVector(1, 80, 80));
-    
-    floorActor->SetActorPosition(FVector(-10, 0, 0));
-
-    floorActor->SetRootComponent(&FloorF);
-    //mainWorld->AddActor(floorActor);
-
-
-
-    QStaticMesh FloorBa = *Mesh;
-    //FloorBa.SetScale(FVector(1, 80, 80));
-    //FloorBa.SetWorldPosition(FVector(-80, 0, 0));
-
-
-    QStaticMesh FloorR = *Mesh;
-    //FloorR.SetScale(FVector(80, 1, 80));
-    //FloorR.SetWorldPosition(FVector(0, 80, 0));
-
-    QStaticMesh FloorL = *Mesh;
-    //FloorL.SetScale(FVector(80, 1, 80));
-    //FloorL.SetWorldPosition(FVector(0, -80, 0));
-
-    /*-----------*/
-
-
-    /*
-    QActor* cameraActor = new QActor();
-    QCameraComponent camera(45, 1000);
-    cameraActor->SetRootComponent(&camera);
-    camera.SetWorldPosition(FVector(0, 0, 0));
-    //camera.SetRotation(FVector(-110, 370, 940)); //test
-    camera.SetRotation(FVector(0, 0,  0));
-    camera.Activate();
-    */
-    
-    ACameraEditor Camera;
-    Camera.ActivateCamera();
-    //Camera.SetActorPosition(0);
-    //Camera.SetActorRotation(FVector(0, 0, 0));
-
-
-    
-    //Camera.SetActorRotation(FVector(90, 90, 90));
-    //mainActor->SetActorPosition(FVector(0, 0, 30));
-    
-    //Camera.SetActorRotation(FVector(0, 0, 0));
+    ACameraEditor Camera;    
+    mainWorld->AddActor(&Camera);
     mainActor->SetActorPosition(FVector(30, 0, 0));
     
-
-    //Camera.SetActorRotation(FVector(0, 90, 0)); 
-    //Camera.SetActorRotation(FVector(0, 0, 0)); 
-
-    
-
-
-    //mainActor->SetActorPosition(FVector(-30, 0, 0));
-
-
-    mainWorld->AddActor(&Camera);
-
-    mainWorld->Activate();
-    
-
-    
-
-    
-
     QFAOverlord::StartLife();
 
     return 0;

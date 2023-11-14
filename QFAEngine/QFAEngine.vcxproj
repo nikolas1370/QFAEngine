@@ -164,13 +164,14 @@
     <ClCompile Include="Engine\Render\Buffer\Framebuffer.cpp" />
     <ClCompile Include="Engine\Render\Buffer\FramebufferMain.cpp" />
     <ClCompile Include="Engine\Render\Time.cpp" />
+    <ClCompile Include="Engine\Render\Window\Viewport.cpp" />
+    <ClCompile Include="Engine\Render\Window\Window.cpp" />
     <ClCompile Include="GameCode\TestActor.cpp" />
     <ClCompile Include="GameCode\TestComponent.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Engine\Tools\File\OBJLoader.cpp" />
     <ClCompile Include="Engine\Tools\Debug\OpenGlStuffcpp.cpp" />
     <ClCompile Include="Engine\Tools\File\Parser.cpp" />
-    <ClCompile Include="Engine\Render\Render.cpp" />
     <ClCompile Include="Engine\Render\Shader\Shader.cpp" />
     <ClCompile Include="Engine\Render\Shader\ShaderProgram.cpp" />
     <ClCompile Include="Engine\Object\Actor\Actor.cpp" />
@@ -191,6 +192,8 @@
     <ClInclude Include="Engine\Overlord\Overlord.h" />
     <ClInclude Include="Engine\Render\Buffer\Framebuffer.h" />
     <ClInclude Include="Engine\Render\Time.h" />
+    <ClInclude Include="Engine\Render\Window\Viewport.h" />
+    <ClInclude Include="Engine\Render\Window\Window.h" />
     <ClInclude Include="Engine\Tools\Array.h" />
     <ClInclude Include="Engine\Tools\File\FileLoader.h" />
     <ClInclude Include="Engine\Render\Buffer\FramebufferMain.h" />
@@ -202,7 +205,6 @@
     <ClInclude Include="Engine\Tools\File\OBJLoader.h" />
     <ClInclude Include="Engine\Tools\Debug\OpenGlStuff.h" />
     <ClInclude Include="Engine\Tools\File\Parser.h" />
-    <ClInclude Include="Engine\Render\Render.h" />
     <ClInclude Include="Engine\Render\Shader\Shader.h" />
     <ClInclude Include="Engine\Render\Shader\ShaderProgram.h" />
     <ClInclude Include="Engine\Object\Actor\Actor.h" />

@@ -28,7 +28,7 @@ ACameraEditor::ACameraEditor()
 	ax.AddKey(EKey::D, FVector(0, 1, 0), "right");
 	ax.AddKey(EKey::SPACE, FVector(0, 0, 1), "up");
 	ax.AddKey(EKey::LEFT_CONTROL, FVector(0, 0, -1), "down");
-
+	Camera.Activate();
 }
 
 ACameraEditor::~ACameraEditor()

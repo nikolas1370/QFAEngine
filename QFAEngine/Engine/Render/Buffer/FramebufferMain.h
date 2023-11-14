@@ -1,12 +1,14 @@
 #pragma once
 #include <Tools/Debug/OpenGlStuff.h>
 
-class QFARender;
+class QFAWindow;
+class QFAViewport;
 class QFAFrameBuffer;
 class QFAShaderProgram;
+
 class QFAFrameBufferMain
 {
-	friend QFARender;
+	friend QFAWindow;
 	static unsigned int VAOMain;
 	static float VertexMain[];
 	static unsigned int indexsMain[];
@@ -15,7 +17,7 @@ class QFAFrameBufferMain
 	static QFAShaderProgram* ProgramMain;
 
 	static void Init(int width, int height);
-	static void CopyFrameBuffer(QFAFrameBuffer* frameBuffer, int w, int h);
+	static void CopyFrameBuffer(QFAViewport* view);
 	static void BlankScreen(int w, int h);
 public:
 	

@@ -1,18 +1,19 @@
 #include "Overlord.h"
+#include <Render/Window/Window.h>
 #include <Object/World/World.h>
-#include <Render/Render.h>
 #include <Object/ActorComponent/SceneComponent/Camera/Camera.h>
 #include <Render/Time.h> // remove in Overlord folder
-#include <Render/Render.h> 
 #include <Object/Actor/Actor.h>
-#include <Tools/Debug/OpenGlStuff.h>
+
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
+
 #include <Input/Input.h>
 
-QWorld* QFAOverlord::CurentWorld = nullptr;
+
+
 bool QFAOverlord::Life = false;
 bool QFAOverlord::isInit = false; 
-GLFWwindow* QFAOverlord::Window = nullptr;
+QFAWindow* QFAOverlord::Window = nullptr;
 QCameraComponent* QFAOverlord::CurentCamera = nullptr;
 
 int QFAOverlord::DefaultWidth = 600;
@@ -30,8 +31,7 @@ bool QFAOverlord::StartLife()
 
 void QFAOverlord::EndLife()
 {
-    Life = false;
-    glfwDestroyWindow(Window);
+    Life = false;    
     glfwTerminate();
 }
 
@@ -48,139 +48,28 @@ bool QFAOverlord::Init()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    Window = glfwCreateWindow(DefaultWidth, DefaultHeight, "Hello World", NULL, NULL);
-    QFAInput::Init(Window);
-    if (!Window)
-    {
-        glfwTerminate();
-        ASSERT(false);
-        
-        return false;
-    }
+    glfwSwapInterval(1);	
+    Window = new QFAWindow(DefaultWidth, DefaultHeight, "QFA");    
+    QFAInput::Init(Window->Window);
 
-    glfwMakeContextCurrent(Window);
-
-    if (glewInit() != GLEW_OK)
-    {
-        glfwTerminate();
-        ASSERT(false);
-        return false;
-    }
-
-    QFARender::Init(Window, DefaultWidth, DefaultHeight);
     std::cout << "openGL VERSION " << " " << glGetString(GL_VERSION) << std::endl;
     isInit = true;
     return true;
 }
 
-void QFAOverlord::SetWorld(QWorld* world)
-{
-	if (CurentWorld == world)
-		return;
-		
-    CurentWorld = world;
-}
-void QFAOverlord::SetCamera(QCameraComponent* camera)
-{
-    QFARender::SetCamera(camera);
-    CurentCamera = camera;
-}
 
 void QFAOverlord::MainLoop()
 {
-    while (!glfwWindowShouldClose(Window))
+    while (!Window->ShouldClose() && Life)
     {
         QTime::CalcDeltaTime();        
         glfwPollEvents();
-        QFAInput::NewFrame((float)QTime::GetDeltaTime());
-        ProcessTick();
-        RenderWorld();
-    }
-}
-
-void QFAOverlord::RenderWorld()
-{
-    if (!CurentWorld->IsValid() || !CurentCamera->IsValid())
-    {
-        std::cout << "QFAOverlord::MainLoop camera/world not set" << std::endl;
-        QFARender::EndFrame(true);
-        return;
-    }
-    else if (!CurentWorld->IsActive || !CurentCamera->IsActive)
-    {
-        QFARender::EndFrame(true);
-        return;
+        QFAInput::NewFrame((float)QTime::GetDeltaTime());        
+        QWorld::ProcessTicks();
+        QFAWindow::RenderWindows();
     }
 
-    QDirectionLight* DL = CurentWorld->GetDirectionDight();
-    DL->StartFrame();
-    if (DL->GetCastShadow())
-        for (int i = 0; i < CurentWorld->Actors.Length(); i++)
-            if (CurentWorld->Actors[i]->RootComponent->IsValid())
-                ProcessComponentShadow(CurentWorld->Actors[i]->RootComponent);
-
-    QFARender::StartFrame();
-
-    for (int i = 0; i < CurentWorld->Actors.Length(); i++)
-        if (CurentWorld->Actors[i]->RootComponent->IsValid())
-            ProcessComponent(CurentWorld->Actors[i]->RootComponent);
-
-    QFARender::EndFrame();
+    if (Life)
+        QFAOverlord::EndLife();
 }
 
-void QFAOverlord::ProcessComponent(QSceneComponent* component)
-{
-    if (!component->IsValid())
-        return;
-
-    if (QMeshBaseComponent* mesh = dynamic_cast<QMeshBaseComponent*>(component))
-        QFARender::DrawMesh(mesh);
-
-    for (int i = 0; i < component->ListComponents.Length(); i++)
-        if (component->ListComponents[i]->IsValid())
-            ProcessComponent(component->ListComponents[i]);
-}
-
-void QFAOverlord::ProcessComponentShadow(QSceneComponent* component)
-{
-    if (!component->IsValid())
-        return;
-
-    if (QMeshBaseComponent* mesh = dynamic_cast<QMeshBaseComponent*>(component))
-        if (mesh->GetCastShadow())
-            QFARender::DrawMeshShadow(mesh);
-
-    for (int i = 0; i < component->ListComponents.Length(); i++)
-        if (component->ListComponents[i]->IsValid())
-            ProcessComponent(component->ListComponents[i]);
-}
-
-void QFAOverlord::ProcessTick()
-{
-    if (!CurentWorld->IsValid())
-        return;
-
-    float delta = (float)QTime::GetDeltaTime();
-    for (int i = 0; i < CurentWorld->Actors.Length(); i++)
-    {
-        if (CurentWorld->Actors[i]->IsValid() && CurentWorld->Actors[i]->CanTick)
-        {
-            CurentWorld->Actors[i]->Tick(delta);          
-            ProcessSceneComponentTick(CurentWorld->Actors[i]->RootComponent);
-        }
-    }
-}
-
-void QFAOverlord::ProcessSceneComponentTick(QSceneComponent* component)
-{
-    if (!component->IsValid())
-        return;
-
-    float delta = (float)QTime::GetDeltaTime();
-    if (component->CanTick)
-        component->TickComponent(delta);
-
-    for (int i = 0; i < component->ListComponents.Length(); i++)
-        if (component->ListComponents[i]->IsValid())
-            ProcessSceneComponentTick(component->ListComponents[i]);
-}

@@ -1,11 +1,16 @@
 #pragma once
 #include <Object/ActorComponent/SceneComponent/SceneComponent.h>
-class QFARender;
+class QFAWindow;
 class QFAOverlord;
+class QFAViewport;
+class QWorld;
 class QCameraComponent : public QSceneComponent
 {
 
-
+	
+	friend QFAWindow;
+	friend QFAOverlord;
+	friend QFAViewport;
 	// Field of view 
 	float Fov = 90;
 	float ViewDistance = 1000;
@@ -13,14 +18,15 @@ class QCameraComponent : public QSceneComponent
 	glm::mat3 cameraRotationMatrex;	
 	// parents rotation + rotation
 	FVector FinallyRotation;
-	friend QFARender;
-	friend QFAOverlord;
-	/*world opengl position */
 	
+	
+	QFAViewport* Viewport = nullptr;
+
 	bool IsActive = true;
 public:
 
-	void Activate();
+	// if viewport == nullptr camera attach to default viewport
+	void Activate(QFAViewport* viewport = nullptr);
 	void Deactivate();
 	QCameraComponent()
 	{
@@ -49,6 +55,8 @@ public:
 
 	void SetFov(float fov);
 	void SetViewDistance(float viewDistance);
+
+	QWorld* GetWorld();
 private:
 
 };

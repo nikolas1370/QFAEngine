@@ -78,7 +78,7 @@ public:
 	QSceneComponent* SetRootComponent(QSceneComponent* component, bool inseparable = false);
 
 
-	//will return null if the actor is not actually spawned in a level
+	//will return null if the actor is not actually spawned in world
 	inline QWorld* GetWorld()
 	{
 		return ActorWorld;

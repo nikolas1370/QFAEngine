@@ -2,37 +2,28 @@
 #include <Object/World/World.h>
 #include <Object/ActorComponent/SceneComponent/Camera/Camera.h>
 class QSceneComponent;
-struct GLFWwindow;
+class QFAWindow;
 
 class QFAOverlord 
 {
-	friend void QWorld::Activate();
-	friend void QCameraComponent::Activate();
 
-	
 
-	static QWorld* CurentWorld;
+
 	static QCameraComponent* CurentCamera;
 	static bool Life;
 	static bool isInit;
 
-	static GLFWwindow* Window;
+	static QFAWindow* Window;
 
 	static int DefaultWidth;
 	static int DefaultHeight;
 
-	static void RenderWorld();
 
-	static void ProcessComponent(QSceneComponent* component);
-	static void ProcessComponentShadow(QSceneComponent* component);
-	static void ProcessTick();
-
-	static void ProcessSceneComponentTick(QSceneComponent* component);
-
-	// call only from QWorld.Activate()
-	static void SetWorld(QWorld* world); // Activate
+	
+	
+	
 	// call only from QCameraComponent.Activate()
-	static void SetCamera(QCameraComponent* camera);
+	//static void SetCamera(QCameraComponent* camera);
 public:
 	/*
 		start processing world 
@@ -50,11 +41,6 @@ public:
 
 
 
-	inline static QWorld* GetCurentWorld()
-	{
-		return QFAOverlord::CurentWorld;
-	}
-	
 
 private:
 

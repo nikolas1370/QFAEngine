@@ -5,8 +5,8 @@
 template <typename T>
 class QFAArray
 {
-    int MaxAmount = 10;
-    int Amount = 0;
+    size_t MaxAmount = 10;
+    size_t Amount = 0;
 
     /*
         if call delete[] not allocate memory be error.
@@ -62,7 +62,7 @@ public:
         return false;
     }
 
-    void RemoveAt(int index)
+    void RemoveAt(size_t index)
     {
         if (index < 0 || index >= Amount)
             return;
@@ -71,12 +71,12 @@ public:
     }
     
 
-    T& operator[](int i)
+    T& operator[](size_t i)
     {
         return Data[i];
     }
 
-    inline int Length()
+    inline size_t Length()
     {
         return Amount;
     }

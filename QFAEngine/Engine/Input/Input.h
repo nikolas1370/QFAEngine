@@ -9,7 +9,7 @@
 namespace EKey
 {
 	enum Key : int
-	{
+	{// add ANY =,
 		UNKNOWN			= GLFW_KEY_UNKNOWN,
 		/*-- mouse */
 		MOUSE_LEFT		= GLFW_MOUSE_BUTTON_1,
