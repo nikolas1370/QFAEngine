@@ -24,7 +24,6 @@ QFAShaderProgram* QFAFrameBufferMain::ProgramMain ;
 void QFAFrameBufferMain::Init(int width, int height)
 {	
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, width, height);
 	GLCall(glGenVertexArrays(1, &VAOMain));
 	GLCall(glBindVertexArray(VAOMain));
 
@@ -46,8 +45,6 @@ void QFAFrameBufferMain::Init(int width, int height)
 
 void QFAFrameBufferMain::CopyFrameBuffer(QFAViewport* view)
 {
-	//glViewport(0, 0, w, h);
-	
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, view->secondFrameBuffer->frameBuffer);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	// glBlitFramebuffer — copy a block of pixels from the read framebuffer to the draw framebuffer

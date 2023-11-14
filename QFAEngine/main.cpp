@@ -1,5 +1,5 @@
 ﻿ // https://learnopengl.com/Introduction
-// 2005
+// 2638
 /*
 Q swith control between camera and some actor whit mehes
 */
@@ -106,9 +106,15 @@ int main()
    
     
     ACameraEditor Camera;    
+    //Camera.SetActorPosition(FVector(0, -2, 0));
     mainWorld->AddActor(&Camera);
     mainActor->SetActorPosition(FVector(30, 0, 0));
     
+  
+
+
+
+
     QFAOverlord::StartLife();
 
     return 0;

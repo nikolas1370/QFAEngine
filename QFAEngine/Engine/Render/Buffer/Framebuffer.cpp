@@ -20,6 +20,8 @@ QFAFrameBuffer::~QFAFrameBuffer()
 
 void QFAFrameBuffer::Init(int w, int h)
 {
+	Width = w;
+	Height = h;
 	glGenFramebuffers(1, &frameBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);//GL_FRAMEBUFFER read and write (GL_DRAW_FRAMEBUFFER only write)
 
@@ -46,7 +48,7 @@ void QFAFrameBuffer::Init(int w, int h)
 void QFAFrameBuffer::StartFrame()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-	
+	glViewport(0, 0, Width, Height);
 
 	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));// settup how opengl by with alpha
 	GLCall(glEnable(GL_BLEND));
@@ -57,7 +59,10 @@ void QFAFrameBuffer::StartFrame()
 
 void QFAFrameBuffer::UpdateSize(int w, int h)
 {
+	Width = w;
+	Height = h;
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+	
 	glBindRenderbuffer(GL_RENDERBUFFER, colorBuffer);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, w, h);
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo);

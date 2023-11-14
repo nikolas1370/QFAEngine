@@ -12,6 +12,9 @@ class QFAFrameBuffer
 	unsigned int colorBuffer;
 	unsigned int rbo;
 
+	int Width = 1;
+	int Height = 1;
+
 	void UpdateSize(int w, int h);
 	void StartFrame();
 public:

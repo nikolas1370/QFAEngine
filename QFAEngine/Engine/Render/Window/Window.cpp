@@ -41,10 +41,7 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 	QFAViewport* vp = new QFAViewport;
 	Viewports.Add(vp);
 	vp->Settup(0, 0, width, height);
-	/*
 	
-	Viewports[j]->Settup(0, 0, Width, Height);
-	*/
 	if (!QFAWindow::Init)
 	{		
 		QFAWindow::Init = true;
@@ -66,8 +63,6 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 	}
 }
 
-
-
 QFAWindow::~QFAWindow()
 {
     glfwDestroyWindow(Window);    
@@ -80,15 +75,11 @@ void QFAWindow::AddViewport(QFAViewport* viewport)
 }
 
 void QFAWindow::StartFrame()
-{
-	// in if(WindowSizeChanched)
-	glViewport(0, 0, Width, Height);
-
+{	
 	if (WindowSizeChanched)
 	{
 		Width = NewWidth;
-		Height = NewHeight;
-
+		Height = NewHeight;		
 		WindowSizeChanched = false;
 		for (int j = 0; j < Viewports.Length(); j++)
 			Viewports[j]->Settup(0, 0, Width, Height);

@@ -17,10 +17,10 @@ void QFAViewport::Settup(int x, int y, int width, int height)
 	Height = height;
 	if (CurentCamera)
 		MatrixPerspective = glm::perspective(glm::radians(CurentCamera->Fov),
-			(float)Height / (float)Width, 0.1f, CurentCamera->ViewDistance); // (near) not Less than 0.1f		
+			(float)Width / (float)Height, 0.1f, CurentCamera->ViewDistance); // (near) not Less than 0.1f	
 	else
 		std::cout << "QFAViewport::Settup Camera not set\n";
-	
+		
 	if (!secondFrameBuffer)
 		secondFrameBuffer = new QFAFrameBuffer(width, height);
 	else
@@ -46,8 +46,9 @@ void QFAViewport::ProcessFrame()
 			if (CurentFrameWorld->Actors[i]->RootComponent->IsValid())
 				ProcessComponentShadow(CurentFrameWorld->Actors[i]->RootComponent);
 
+	
 	secondFrameBuffer->StartFrame();
-
+	
 	for (int i = 0; i < CurentFrameWorld->Actors.Length(); i++)
 		if (CurentFrameWorld->Actors[i]->RootComponent->IsValid())
 			ProcessComponent(CurentFrameWorld->Actors[i]->RootComponent);
@@ -102,7 +103,6 @@ void QFAViewport::DrawMesh(QMeshBaseComponent* mesh)
 		shaderProgram->SetShadowOn(false);
 
 	GLCall(glDrawElements(GL_TRIANGLES, mesh->GetIndexCount(), GL_UNSIGNED_INT, nullptr));
-
 }
 
 void QFAViewport::DrawMeshShadow(QMeshBaseComponent* mesh)
@@ -147,6 +147,6 @@ void QFAViewport::ChangeCamera(QCameraComponent* camera)
 		CurentCamera->IsActive = true;
 		CurentCamera->Viewport = this;
 		MatrixPerspective = glm::perspective(glm::radians(CurentCamera->Fov),
-			(float)Height / (float)Width, 0.1f, CurentCamera->ViewDistance); // (near) not Less than 0.1f	
+			(float)Width / (float)Height, 0.1f, CurentCamera->ViewDistance); // (near) not Less than 0.1f	
 	}
 }
