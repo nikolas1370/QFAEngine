@@ -13,7 +13,7 @@ public:
 	ACameraActor();
 	~ACameraActor();
 
-	void ActivateCamera();
+	void ActivateCamera(QFAViewport* viewport = nullptr);
 
 	
 private:

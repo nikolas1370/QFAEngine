@@ -11,7 +11,7 @@ ACameraActor::~ACameraActor()
 
 }
 
-void ACameraActor::ActivateCamera()
+void ACameraActor::ActivateCamera(QFAViewport* viewport)
 {
-	Camera.Activate();
+	Camera.Activate(viewport);
 }

@@ -45,10 +45,10 @@ void QFAFrameBufferMain::Init(int width, int height)
 
 void QFAFrameBufferMain::CopyFrameBuffer(QFAViewport* view)
 {
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, view->secondFrameBuffer->frameBuffer);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, view->secondFrameBuffer.frameBuffer);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	// glBlitFramebuffer — copy a block of pixels from the read framebuffer to the draw framebuffer
-	glBlitFramebuffer(0, 0, view->Width, view->Height, view->X, view->Y, view->Width, view->Height, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glBlitFramebuffer(0, 0, view->Width, view->Height, view->X, view->Y, view->Width + view->X, view->Height + view->Y, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 }
 
 void QFAFrameBufferMain::BlankScreen(int w, int h)

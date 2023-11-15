@@ -27,6 +27,8 @@ Q swith control between camera and some actor whit mehes
 #include "GameCode/TestActor.h"
 
 #include <Object/Actor/Camera/CameraEditor.h>
+#include <Render/Window/Window.h>
+#include <Render/Window/Viewport.h>
 
 int main()
 {     
@@ -110,11 +112,46 @@ int main()
     mainWorld->AddActor(&Camera);
     mainActor->SetActorPosition(FVector(30, 0, 0));
     
-  
+    QFAWindow* mainWindow = QFAWindow::GetMainWindow();
+    QFAViewport* firstdViewPort = mainWindow->GetViewport(0);
+    QFAViewport* secondViewPort = new QFAViewport;
+    QFAViewport* thirdViewPort = new QFAViewport;
+    QFAViewport* fourthViewPort = new QFAViewport;
+    mainWindow->AddViewport(secondViewPort);
+    mainWindow->AddViewport(thirdViewPort);
+    mainWindow->AddViewport(fourthViewPort);
+
+    firstdViewPort->SetParameters(0,0, 0.5f, 0.5f);
+    secondViewPort->SetParameters(0.5f, 0, 0.5f, 0.5f);
+    thirdViewPort->SetParameters(0, 0.5f, 0.5f, 0.5f);
+    fourthViewPort->SetParameters(0.5f, 0.5f, 0.5f, 0.5f);
+
+    ACameraActor* secondCamera = new ACameraActor();
+    ACameraActor* thirdCamera = new  ACameraActor();
+    ACameraActor* fourthCamera = new ACameraActor();
+    secondCamera->ActivateCamera(secondViewPort);
+    thirdCamera->ActivateCamera(thirdViewPort);
+    fourthCamera->ActivateCamera(fourthViewPort);
+
+    mainWorld->AddActor(secondCamera);
+    mainWorld->AddActor(thirdCamera);
+    mainWorld->AddActor(fourthCamera);
+
+    secondCamera->SetActorPosition(FVector(30, 30, 5));
+    secondCamera->SetActorRotation(FVector(0, 0, -90));
 
 
+    thirdCamera->SetActorPosition(FVector(60, 0, 5));
+    thirdCamera->SetActorRotation(FVector(0, 0, 180));
 
+    
+    fourthCamera->SetActorPosition(FVector(16.2079, 1.94214, -3.84775));
+    fourthCamera->SetActorRotation(FVector(0, 35.9, -10));
+    /*
+        render same scene(QWorld) in 4 viewports
 
+        in left bottom viewport can fly around
+    */
     QFAOverlord::StartLife();
 
     return 0;

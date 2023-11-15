@@ -4,10 +4,9 @@ class QFAWindow;
 class QFAOverlord;
 class QFAViewport;
 class QWorld;
+class ACameraEditor;
 class QCameraComponent : public QSceneComponent
 {
-
-	
 	friend QFAWindow;
 	friend QFAOverlord;
 	friend QFAViewport;
@@ -57,6 +56,11 @@ public:
 	void SetViewDistance(float viewDistance);
 
 	QWorld* GetWorld();
+
+	inline bool GetStatus()
+	{
+		return IsActive;
+	}
 private:
 
 };

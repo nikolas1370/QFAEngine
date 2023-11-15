@@ -1,7 +1,7 @@
 #include "Viewport.h"
 #include <Object/ActorComponent/SceneComponent/Camera/Camera.h>
 #include <Math/Math.h>
-#include <Render/Buffer/Framebuffer.h>
+
 #include <Object/World/World.h>
 #include <Object/Actor/Actor.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
@@ -9,33 +9,35 @@
 
 QFAViewport* QFAViewport::DefaultViewPort = nullptr;
 
-void QFAViewport::Settup(int x, int y, int width, int height)
+void QFAViewport::Settup(int windowWidth, int windowHeight)
 {
-	X = x;
-	Y = y;
-	Width = width;
-	Height = height;
+	WindowWidth = windowWidth;
+	WindowHeight = windowHeight;
+	X = (int)((float)WindowWidth * XP);
+	Y = (int)((float)windowHeight * YP);
+	Width = (int)((float)WindowWidth * WidthP);
+	Height = (int)((float)WindowHeight * HeightP);
+	if (Height == 0)
+		Height = 1;
+
 	if (CurentCamera)
 		MatrixPerspective = glm::perspective(glm::radians(CurentCamera->Fov),
 			(float)Width / (float)Height, 0.1f, CurentCamera->ViewDistance); // (near) not Less than 0.1f	
 	else
 		std::cout << "QFAViewport::Settup Camera not set\n";
 		
-	if (!secondFrameBuffer)
-		secondFrameBuffer = new QFAFrameBuffer(width, height);
-	else
-		secondFrameBuffer->UpdateSize(width, height);
+	secondFrameBuffer.UpdateSize(Width, Height);
 }
 
 void QFAViewport::ProcessFrame()
 {
 	if (!IsActive || !CurentCamera->IsValid() || !CurentCamera->IsActive)
-		return secondFrameBuffer->StartFrame();// blank viewport
+		return secondFrameBuffer.StartFrame();// blank viewport
 
 	
 	CurentFrameWorld = CurentCamera->GetWorld();;
 	if (!CurentFrameWorld->IsValid() || !CurentFrameWorld->IsActive)
-		return secondFrameBuffer->StartFrame();;// blank viewport
+		return secondFrameBuffer.StartFrame();;// blank viewport
 
 	QDirectionLight* DL = CurentFrameWorld->GetDirectionDight();
 	
@@ -45,9 +47,8 @@ void QFAViewport::ProcessFrame()
 		for (int i = 0; i < CurentFrameWorld->Actors.Length(); i++)
 			if (CurentFrameWorld->Actors[i]->RootComponent->IsValid())
 				ProcessComponentShadow(CurentFrameWorld->Actors[i]->RootComponent);
-
 	
-	secondFrameBuffer->StartFrame();
+	secondFrameBuffer.StartFrame();
 	
 	for (int i = 0; i < CurentFrameWorld->Actors.Length(); i++)
 		if (CurentFrameWorld->Actors[i]->RootComponent->IsValid())
@@ -125,6 +126,7 @@ QFAViewport::QFAViewport()
 
 QFAViewport::~QFAViewport()
 {
+	 
 }
 
 inline void QFAViewport::ActivateCamera()
@@ -145,8 +147,26 @@ void QFAViewport::ChangeCamera(QCameraComponent* camera)
 	if (CurentCamera->IsValid())
 	{
 		CurentCamera->IsActive = true;
-		CurentCamera->Viewport = this;
+		CurentCamera->Viewport = this;		
 		MatrixPerspective = glm::perspective(glm::radians(CurentCamera->Fov),
-			(float)Width / (float)Height, 0.1f, CurentCamera->ViewDistance); // (near) not Less than 0.1f	
+			(float)Width / (float)Height, 0.1f, CurentCamera->ViewDistance);
 	}
 }
+
+void QFAViewport::SetParameters(float xP, float  yP, float widthP, float heightP)
+{
+	XP = xP;
+	YP = yP;
+	WidthP = widthP;
+	HeightP = heightP;
+	X = (int)((float)WindowWidth * XP);
+	Y = (int)((float)WindowHeight * YP);
+	Width = (int)((float)WindowWidth * WidthP);
+	Height = (int)((float)WindowHeight * HeightP);
+	if (Height == 0)
+		Height = 1;
+
+	secondFrameBuffer.UpdateSize(Width, Height);
+}
+
+

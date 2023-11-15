@@ -9,12 +9,15 @@
 #include <Render/Window/Viewport.h>
 
 QFAArray<QFAWindow*> QFAWindow::Windows;
+QFAWindow* QFAWindow::MainWindow = nullptr;
 
 bool QFAWindow::Init = false;
 
 QFAWindow::QFAWindow(int width, int height, std::string name)
 {
-    
+	if (!QFAWindow::MainWindow)
+		QFAWindow::MainWindow = this;
+
 	Width = width;
 	Height = height;
 	Window = glfwCreateWindow(width, height, name.c_str(), NULL, NULL);
@@ -40,7 +43,7 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 	QFAFrameBufferMain::Init(width, height);
 	QFAViewport* vp = new QFAViewport;
 	Viewports.Add(vp);
-	vp->Settup(0, 0, width, height);
+	vp->Settup( width, height);
 	
 	if (!QFAWindow::Init)
 	{		
@@ -72,6 +75,15 @@ QFAWindow::~QFAWindow()
 void QFAWindow::AddViewport(QFAViewport* viewport)
 {
 	Viewports.Add(viewport);
+	viewport->Settup(Width, Height);
+}
+
+QFAViewport* QFAWindow::GetViewport(size_t index)
+{
+	if (index < 0 || index >= Viewports.Length())
+		return nullptr;
+	else
+		return Viewports[index];		
 }
 
 void QFAWindow::StartFrame()
@@ -82,7 +94,7 @@ void QFAWindow::StartFrame()
 		Height = NewHeight;		
 		WindowSizeChanched = false;
 		for (int j = 0; j < Viewports.Length(); j++)
-			Viewports[j]->Settup(0, 0, Width, Height);
+			Viewports[j]->Settup(Width, Height);
 	}
 	
 	for (int i = 0; i < Viewports.Length(); i++)
@@ -102,9 +114,7 @@ void QFAWindow::RenderWindows()
 void QFAWindow::EndFrame()
 {
 	for (int i = 0; i < Viewports.Length(); i++)
-	{
 		QFAFrameBufferMain::CopyFrameBuffer(Viewports[i]);
-	}
 
 	glfwSwapBuffers(Window);
 	countFarame++;

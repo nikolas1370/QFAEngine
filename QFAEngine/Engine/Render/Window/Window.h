@@ -15,6 +15,7 @@ class QFAWindow
 	friend QFAOverlord;
 	//friend QFAWindow;
 	static QFAArray<QFAWindow*> Windows;
+	static QFAWindow* MainWindow;
 	GLFWwindow* Window;
 	static bool Init;
 	int Width;
@@ -26,7 +27,7 @@ class QFAWindow
 	int countFarame;
 	double acumulateDeltatime;
 	//glm::mat4 MatrixPerspective;
-	QCameraComponent* CurentCamera;
+	
 	
 
 	QFAArray<QFAViewport*> Viewports;
@@ -34,18 +35,26 @@ class QFAWindow
 	void StartFrame();
 	void EndFrame();
 	
-	static void RenderWindows();
+	static void RenderWindows();	
 public:
 	QFAWindow(int width, int height, std::string name);
 	~QFAWindow();
 
 	void AddViewport(QFAViewport* viewport);
+	QFAViewport* GetViewport(size_t index);
+	inline size_t GetViewportCount()
+	{
+		return Viewports.Length();
+	}
 	inline bool ShouldClose()
 	{
 		return glfwWindowShouldClose(Window);
 	}
 
-
+	inline static QFAWindow* GetMainWindow()
+	{
+		return MainWindow;
+	}
 private:
 
 };
