@@ -77,7 +77,7 @@ void QStaticMesh::SetMesh(MeshFrames* meshFrames)
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
 }
 
-void QStaticMesh::Bind( bool isShadow )
+void QStaticMesh::Bind(uint64_t startFrameTime, bool isShadow )
 {
 	if (isShadow)
 	{

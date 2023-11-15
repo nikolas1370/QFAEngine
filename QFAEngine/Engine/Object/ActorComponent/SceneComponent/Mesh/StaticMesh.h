@@ -69,7 +69,7 @@ public:
 
     //void SetTexture(int index, Texture* texture);
 
-    void Bind(bool isShadow = false) override;
+    void Bind(uint64_t startFrameTime, bool isShadow) override;
 
     int GetIndexCount() override;
 

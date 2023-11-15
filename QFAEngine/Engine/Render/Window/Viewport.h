@@ -27,10 +27,12 @@ class QFAViewport
 	float WidthP = 1;
 	float HeightP = 1;
 
+	uint64_t StartFrameTime;
+
 	QWorld* CurentFrameWorld;
 
 	void Settup(int windowWidth, int windowHeight);
-	void ProcessFrame();
+	void ProcessFrame(uint64_t startFrameTime);
 	bool IsActive = true;
 	void ProcessComponent(QSceneComponent* component);
 	void ProcessComponentShadow(QSceneComponent* component);

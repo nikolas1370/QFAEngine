@@ -87,7 +87,8 @@ QFAViewport* QFAWindow::GetViewport(size_t index)
 }
 
 void QFAWindow::StartFrame()
-{	
+{		
+	uint64_t sft = QTime::GetWorkTime();
 	if (WindowSizeChanched)
 	{
 		Width = NewWidth;
@@ -98,7 +99,7 @@ void QFAWindow::StartFrame()
 	}
 	
 	for (int i = 0; i < Viewports.Length(); i++)
-		Viewports[i]->ProcessFrame();
+		Viewports[i]->ProcessFrame(sft);
 
 	EndFrame();
 }
@@ -121,6 +122,7 @@ void QFAWindow::EndFrame()
 	acumulateDeltatime += QTime::GetDeltaTime();
 	if (acumulateDeltatime >= 1.0)
 	{
+		std::cout << "Frame time " << acumulateDeltatime / countFarame << " count " << countFarame << "\n";
 		countFarame = 0;
 		acumulateDeltatime = 0.0;
 	}

@@ -11,7 +11,7 @@ std::string QMesh::FragmentShaderShaderPath = "Engine/Shaders/DirectionLightShad
 void QMesh::StartFrame()
 {
 	if (!Played)
-		return;
+		return;	
 
 	double deltaTime = QTime::GetDeltaTime() ;
 
@@ -75,9 +75,13 @@ void QMesh::Stop()
 	Played = false;
 }
 
-void QMesh::Bind( bool isShadow)//  isShadow пока нема
+void QMesh::Bind(uint64_t startFrameTime, bool isShadow)//  isShadow пока нема
 {	
-	StartFrame();
+	if (StartFrameTime != startFrameTime)
+	{
+		StartFrameTime = startFrameTime;
+		StartFrame();
+	}
 
 	if (isShadow)
 		SShaderShadowProgram->Use();

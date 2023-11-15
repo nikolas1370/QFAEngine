@@ -29,7 +29,7 @@ class QMesh : public QMeshBaseComponent
 	bool Played = true;
 	bool Repeat = true;
 
-
+	uint64_t StartFrameTime;
 protected:
 
 	inline QFAShaderProgram* GetShaderProgram() override
@@ -48,7 +48,7 @@ public:
 	MeshFrames* Mf;// rename MF
 
 	QMesh(MeshFrames* mf);
-	void Bind(bool isShadow = false) override;
+	void Bind(uint64_t startFrameTime, bool isShadow ) override;
 
 	int GetIndexCount() override;
 

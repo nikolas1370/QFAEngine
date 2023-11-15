@@ -175,6 +175,6 @@ public:
 	virtual int GetIndexCount() = 0;// pure virtual method
 
 	// remove ShaderProgram* SP
-	virtual void Bind( bool isShadow = false) = 0;
+	virtual void Bind(uint64_t startFrameTime, bool isShadow ) = 0;
 
 };

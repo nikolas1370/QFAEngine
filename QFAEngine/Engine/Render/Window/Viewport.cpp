@@ -29,16 +29,16 @@ void QFAViewport::Settup(int windowWidth, int windowHeight)
 	secondFrameBuffer.UpdateSize(Width, Height);
 }
 
-void QFAViewport::ProcessFrame()
-{
+void QFAViewport::ProcessFrame(uint64_t startFrameTime)
+{	
 	if (!IsActive || !CurentCamera->IsValid() || !CurentCamera->IsActive)
 		return secondFrameBuffer.StartFrame();// blank viewport
-
 	
 	CurentFrameWorld = CurentCamera->GetWorld();;
 	if (!CurentFrameWorld->IsValid() || !CurentFrameWorld->IsActive)
 		return secondFrameBuffer.StartFrame();;// blank viewport
 
+	StartFrameTime = startFrameTime;
 	QDirectionLight* DL = CurentFrameWorld->GetDirectionDight();
 	
 	DL->StartFrame();
@@ -85,7 +85,7 @@ void QFAViewport::ProcessComponentShadow(QSceneComponent* component)
 void QFAViewport::DrawMesh(QMeshBaseComponent* mesh)
 {
 	QFAShaderProgram* shaderProgram = mesh->GetShaderProgram();
-	mesh->Bind();
+	mesh->Bind(StartFrameTime, false);
 	// now MatrixPerspective send each drawCall in future be change when camera or window change
 
 	shaderProgram->SetProjectionMatrix(MatrixPerspective);
@@ -108,7 +108,7 @@ void QFAViewport::DrawMesh(QMeshBaseComponent* mesh)
 
 void QFAViewport::DrawMeshShadow(QMeshBaseComponent* mesh)
 {
-	mesh->Bind(true);
+	mesh->Bind(StartFrameTime, true);
 	QFAShaderProgram* shaderProgram = mesh->GetShadowShaderProgram();
 	CurentFrameWorld->GetDirectionDight()->SetLightMatrix(CurentCamera->WorldPosition, shaderProgram);
 	shaderProgram->SetModelMatrix(mesh->ModelMatrix);

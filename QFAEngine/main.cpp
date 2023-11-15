@@ -55,15 +55,14 @@ int main()
     
 
     animActor->SetRootComponent(MeshA);
-
-    MeshA->SetWorldPosition(FVector(-17, 0, -2));
-    MeshA->SetScale(FVector(1, 1, 1));
-    MeshA->SetRotation(FVector(0, 0, 90));
+    animActor->SetActorPosition(FVector(30, 0, 0));
+    
 
     /*------------------------------*/
     QActor* mainActor = new QActor();
     mainActor->Name = "mainActor";
-    mainWorld->AddActor(mainActor);
+    //mainWorld->AddActor(mainActor);
+    mainWorld->AddActor(animActor);    
     mainActor->SetActorPosition(FVector(30, 0, 0));
     
     //
