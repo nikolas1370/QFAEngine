@@ -8,7 +8,6 @@
 #include <Overlord/Overlord.h>
 #include <Render/Window/Viewport.h>
 
-QFAArray<QFAWindow*> QFAWindow::Windows;
 QFAWindow* QFAWindow::MainWindow = nullptr;
 
 bool QFAWindow::Init = false;
@@ -20,15 +19,15 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 
 	Width = width;
 	Height = height;
-	Window = glfwCreateWindow(width, height, name.c_str(), NULL, NULL);
-    if (!Window)	
+	glfWindow = glfwCreateWindow(width, height, name.c_str(), NULL, NULL);
+    if (!glfWindow)
     {
         glfwTerminate();
         ASSERT(false);
         return;
     }
 
-    glfwMakeContextCurrent(Window);
+    glfwMakeContextCurrent(glfWindow);
 
 	if (glewInit() != GLEW_OK) 	// before glfwMakeContextCurrent
 	{
@@ -37,9 +36,6 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 		return ;
 	}
 
-    QFAWindow::Windows.Add(this);
-
-	/* be until not be support multi windows */
 	QFAFrameBufferMain::Init(width, height);
 	QFAViewport* vp = new QFAViewport;
 	Viewports.Add(vp);
@@ -48,28 +44,23 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 	if (!QFAWindow::Init)
 	{		
 		QFAWindow::Init = true;
-		glfwSetWindowSizeCallback(Window, [](GLFWwindow* win, int w, int h)
-		{
-			for (int i = 0; i < Windows.Length(); i++)
+		glfwSetWindowSizeCallback(glfWindow, [](GLFWwindow* win, int w, int h)
+		{			
+				
+			if (QFAWindow::GetMainWindow()->glfWindow == win)
 			{
-				if (Windows[i]->Window == win)
-				{
-					// check if 0
-					Windows[i]->NewWidth = w;
-					Windows[i]->NewHeight = h;
-					Windows[i]->WindowSizeChanched = true;			
-					break;
-				}
-
-			}
+				// check if 0
+				QFAWindow::GetMainWindow()->NewWidth = w;
+				QFAWindow::GetMainWindow()->NewHeight = h;
+				QFAWindow::GetMainWindow()->WindowSizeChanched = true;
+			}		
 		});
 	}
 }
 
 QFAWindow::~QFAWindow()
 {
-    glfwDestroyWindow(Window);    
-    QFAWindow::Windows.Remove(this);
+    glfwDestroyWindow(glfWindow);
 }
 
 void QFAWindow::AddViewport(QFAViewport* viewport)
@@ -104,12 +95,9 @@ void QFAWindow::StartFrame()
 	EndFrame();
 }
 
-void QFAWindow::RenderWindows()
+void QFAWindow::RenderWindow()
 {
-	for (int i = 0; i < QFAWindow::Windows.Length(); i++)
-	{
-		QFAWindow::Windows[i]->StartFrame();
-	}	
+	MainWindow->StartFrame();
 }
 
 void QFAWindow::EndFrame()
@@ -117,7 +105,7 @@ void QFAWindow::EndFrame()
 	for (int i = 0; i < Viewports.Length(); i++)
 		QFAFrameBufferMain::CopyFrameBuffer(Viewports[i]);
 
-	glfwSwapBuffers(Window);
+	glfwSwapBuffers(glfWindow);
 	countFarame++;
 	acumulateDeltatime += QTime::GetDeltaTime();
 	if (acumulateDeltatime >= 1.0)

@@ -50,7 +50,7 @@ bool QFAOverlord::Init()
 
     glfwSwapInterval(1);	
     Window = new QFAWindow(DefaultWidth, DefaultHeight, "QFA");    
-    QFAInput::Init(Window->Window);
+    QFAInput::Init(Window->glfWindow);
 
     std::cout << "openGL VERSION " << " " << glGetString(GL_VERSION) << std::endl;
     isInit = true;
@@ -66,7 +66,7 @@ void QFAOverlord::MainLoop()
         glfwPollEvents();
         QFAInput::NewFrame((float)QTime::GetDeltaTime());        
         QWorld::ProcessTicks();
-        QFAWindow::RenderWindows();
+        QFAWindow::RenderWindow();
     }
 
     if (Life)

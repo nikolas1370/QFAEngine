@@ -13,10 +13,8 @@ class QCameraComponent;
 class QFAWindow
 {
 	friend QFAOverlord;
-	//friend QFAWindow;
-	static QFAArray<QFAWindow*> Windows;
 	static QFAWindow* MainWindow;
-	GLFWwindow* Window;
+	GLFWwindow* glfWindow;
 	static bool Init;
 	int Width;
 	int Height;
@@ -35,7 +33,7 @@ class QFAWindow
 	void StartFrame();
 	void EndFrame();
 	
-	static void RenderWindows();	
+	static void RenderWindow();	
 public:
 	QFAWindow(int width, int height, std::string name);
 	~QFAWindow();
@@ -48,7 +46,7 @@ public:
 	}
 	inline bool ShouldClose()
 	{
-		return glfwWindowShouldClose(Window);
+		return glfwWindowShouldClose(glfWindow);
 	}
 
 	inline static QFAWindow* GetMainWindow()
