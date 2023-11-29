@@ -30,7 +30,7 @@ void QStaticMesh::SetMesh(MeshFrames* meshFrames)
 	{
 		Init = true;
 
-		GLCall(glGenVertexArrays(1, &VAO)); // for othe glVertexAttribPointer need create new vertex array object
+		GLCall(glGenVertexArrays(1, &VAO));
 		GLCall(glBindVertexArray(VAO));
 
 		GLCall(glGenBuffers(1, &VBO));

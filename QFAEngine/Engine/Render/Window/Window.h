@@ -2,6 +2,7 @@
 #include <Tools/Array.h>
 #include <Tools/Debug/OpenGlStuff.h>
 #include <Math/Math.h>
+#include <string>
 
 struct GLFWwindow;
 class QFAViewport;
@@ -24,8 +25,7 @@ class QFAWindow
 
 	int countFarame;
 	double acumulateDeltatime;
-	//glm::mat4 MatrixPerspective;
-	
+
 	
 
 	QFAArray<QFAViewport*> Viewports;

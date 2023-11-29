@@ -49,6 +49,7 @@ void QFAFrameBuffer::StartFrame()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 	glViewport(0, 0, Width, Height);
+	
 
 	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));// settup how opengl by with alpha
 	GLCall(glEnable(GL_BLEND));

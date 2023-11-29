@@ -2,6 +2,7 @@
 #include <Tools/Debug/OpenGlStuff.h>
 #include <iostream>
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
+#include <string>
 
 unsigned int QFAShaderProgram::CurentRunProgramId = 1234567890;
 
@@ -9,6 +10,9 @@ QFAShaderProgram::QFAShaderProgram(std::string vertex, std::string fragment, boo
 {
     for (int i = 0; i < 101; i++)
         LocationMaterials[i] = -2;
+
+    for (int i = 0; i < LocationGlyphTextureCount; i++)
+        LocationGlyphTexture[i] = -2;
 
     GLCall(ShaderProgramId = glCreateProgram());
     QFAShader vs(ShaderType::STVertex, vertex, isPath);
@@ -188,6 +192,33 @@ void QFAShaderProgram::SetDirectionLigthMatrix(const glm::mat4& matrix)
 
     GLCall(glUniformMatrix4fv(LocationDirectionLigthMatrix, 1, false, &matrix[0][0]));
 }
+
+void QFAShaderProgram::SetGlyphsTestureUnit(int indexTexture)
+{
+    if (indexTexture >= LocationGlyphTextureCount)
+    {
+        std::cout << "QFAShaderProgram::SetGlyphsTestureUnit indexTexture >= LocationGlyphTextureCount" << std::endl;
+        __debugbreak();
+        return;
+    }
+
+        if (LocationGlyphTexture[indexTexture] == -2)
+        {
+            std::string tem = std::string("glyphTexture[").append(std::to_string(indexTexture)).append("]");                        
+            GLCall(LocationGlyphTexture[indexTexture] = glGetUniformLocation(ShaderProgramId, tem.c_str()));
+            if (LocationGlyphTexture[indexTexture] == -1)
+            {
+                std::cout << "QFAShaderProgram::SetGlyphsTestureUnit in shader problem not found uniform \"glyphTexture\"" << std::endl;
+                __debugbreak();
+                return;
+            }
+            
+        }
+
+         GLCall(glUniform1i(LocationGlyphTexture[indexTexture], indexTexture));
+}
+
+
 
 void QFAShaderProgram::SetShadowOn(bool castShadow)
 {

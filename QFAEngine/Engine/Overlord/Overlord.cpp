@@ -48,7 +48,7 @@ bool QFAOverlord::Init()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    glfwSwapInterval(1);	
+    
     Window = new QFAWindow(DefaultWidth, DefaultHeight, "QFA");    
     QFAInput::Init(Window->glfWindow);
 

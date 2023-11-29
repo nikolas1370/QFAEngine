@@ -1,5 +1,6 @@
 #pragma once
 #include "Math.h"
+#include "iostream"
 
 template<typename T> class TVector2D;
 using DVector2D = TVector2D<double>;

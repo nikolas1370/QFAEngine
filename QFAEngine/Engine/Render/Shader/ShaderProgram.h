@@ -8,7 +8,7 @@ struct Material;
 class QFAShaderProgram
 { 
 	static unsigned int CurentRunProgramId;
-
+	static const int LocationGlyphTextureCount = 8;
 
 	int LocationProjectionMatrix = -2;
 	int LocationCameraRotationMatrix = -2;
@@ -19,7 +19,10 @@ class QFAShaderProgram
 	int LocationDirectionShadowMap = -2;
 	int LocationDirectionLigthMatrix = -2;
 	int LocationShadowOn = -2;
+	int LocationGlyphTexture[LocationGlyphTextureCount];
+
 	
+
 public:
 	// in private
 	unsigned int ShaderProgramId;
@@ -41,6 +44,10 @@ public:
 	void SetMaterials(Material* materials, int count);
 	void SetDirectionShadowMap(unsigned int id, int textureSlote);
 	void SetDirectionLigthMatrix(const glm::mat4& matrix);
+	void SetGlyphsTestureUnit(int indexTexture);
+
+
+
 
 	/*
 		now suport only direction light

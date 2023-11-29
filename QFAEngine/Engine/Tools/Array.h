@@ -1,60 +1,47 @@
 #pragma once
-/* create for pointer and enum */
-#include <iostream>
 
+#include <vector>
+/* */
 template <typename T>
 class QFAArray
 {
-    size_t MaxAmount = 10;
-    size_t Amount = 0;
-
-    /*
-        if call delete[] not allocate memory be error.
-        if create QFAArray<SAxis1D>
-            and delete after be error.
-        SAxis1D hawe inside QFAArray<SKeyAxis1D> and after call
-            ~QFAArray<SKeyAxis1D> delete[] give errror.
-    */
-    bool Alloc = false;          
-    T* Data;
-
+    friend QFAArray;
+    std::vector<T> vector;
 public:
-    QFAArray() {}
+    QFAArray() 
+    {
+        
+    }
+
+    QFAArray(const QFAArray& copy) 
+    {
+        vector = copy.vector;
+    }
+    
+    
+    void operator=(const QFAArray<T>& copy)
+    {
+        vector = copy.vector;
+    }
 
     ~QFAArray()
-    {
-        if(Alloc)
-            delete[] Data;
+    {        
+
     }
 
-    void Add(T some)
+    inline void Add(const T& some)
     {
-        if (!Alloc)
-        {
-            Alloc = true;
-            Data = new T[MaxAmount];
-        }
-        else if(Amount >= MaxAmount)
-        {
-            MaxAmount *= 2;
-            T* tem = Data;
-            Data = new T[MaxAmount];
-            for (int i = 0; i < Amount; i++)
-                Data[i] = tem[i];
-
-            delete[] tem;            
-        }
-
-        Data[Amount++] = some;
+        vector.push_back(some);
     }
 
-    bool Remove(T t)
+    bool Remove(const T& t)
     {
-        for (int i = 0; i < Amount; i++)
+        for (int i = 0; i < vector.size(); i++)
         {
-            if (Data[i] == t)
-            {
-                Data[i] = Data[--Amount];
+            if (vector[i] == t)
+            {                
+                vector[i] = vector[vector.size() - 1];
+                vector.pop_back();
                 return true;
             }
         }
@@ -64,22 +51,31 @@ public:
 
     void RemoveAt(size_t index)
     {
-        if (index < 0 || index >= Amount)
+        if (index < 0 || index >= vector.size())
             return;
 
-        Data[index] = Data[--Amount];
+        vector[index] = vector[vector.size() - 1];
+        vector.pop_back();
     }
     
 
     T& operator[](size_t i)
     {
-        return Data[i];
+        return vector[i];
+    }
+
+    
+    T& Last()
+    {
+        return vector.back();
     }
 
     inline size_t Length()
     {
-        return Amount;
+        return vector.size();
     }
+
+    
 private:
 
 };

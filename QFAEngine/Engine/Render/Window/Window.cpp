@@ -8,6 +8,7 @@
 #include <Overlord/Overlord.h>
 #include <Render/Window/Viewport.h>
 
+
 QFAWindow* QFAWindow::MainWindow = nullptr;
 
 bool QFAWindow::Init = false;
@@ -28,6 +29,7 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
     }
 
     glfwMakeContextCurrent(glfWindow);
+	glfwSwapInterval(1);
 
 	if (glewInit() != GLEW_OK) 	// before glfwMakeContextCurrent
 	{
@@ -110,7 +112,7 @@ void QFAWindow::EndFrame()
 	acumulateDeltatime += QTime::GetDeltaTime();
 	if (acumulateDeltatime >= 1.0)
 	{
-		std::cout << "Frame time " << acumulateDeltatime / countFarame << " count " << countFarame << "\n";
+	//	std::cout << "Frame time " << acumulateDeltatime / countFarame << " count " << countFarame << "\n";
 		countFarame = 0;
 		acumulateDeltatime = 0.0;
 	}

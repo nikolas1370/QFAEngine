@@ -6,8 +6,24 @@
 #include <Object/Actor/Actor.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
 #include <Tools/Debug/OpenGlStuff.h>
+#include <Render/Text/Text.h>
+
 
 QFAViewport* QFAViewport::DefaultViewPort = nullptr;
+
+void QFAViewport::AddText(QFARenderText* text)
+{
+	if (!text)
+		return;
+
+	Texts.Add(text);
+	text->ChangeProjection((unsigned int)Width, (unsigned int)Height);
+}
+
+void QFAViewport::RemoveText(QFARenderText* text)
+{
+	Texts.Remove(text);
+}
 
 void QFAViewport::Settup(int windowWidth, int windowHeight)
 {
@@ -19,6 +35,9 @@ void QFAViewport::Settup(int windowWidth, int windowHeight)
 	Height = (int)((float)WindowHeight * HeightP);
 	if (Height == 0)
 		Height = 1;
+
+	for (size_t i = 0; i < Texts.Length(); i++)
+		Texts[i]->ChangeProjection(Width, Height);
 
 	if (CurentCamera)
 		MatrixPerspective = glm::perspective(glm::radians(CurentCamera->Fov),
@@ -48,11 +67,19 @@ void QFAViewport::ProcessFrame(uint64_t startFrameTime)
 			if (CurentFrameWorld->Actors[i]->RootComponent->IsValid())
 				ProcessComponentShadow(CurentFrameWorld->Actors[i]->RootComponent);
 	
+
 	secondFrameBuffer.StartFrame();
 	
 	for (int i = 0; i < CurentFrameWorld->Actors.Length(); i++)
 		if (CurentFrameWorld->Actors[i]->RootComponent->IsValid())
 			ProcessComponent(CurentFrameWorld->Actors[i]->RootComponent);
+
+
+	QFARenderText::StartTextRender();
+	for (size_t i = 0; i < Texts.Length(); i++)
+		Texts[i]->Render();	
+
+	QFARenderText::EndTextRender();
 }
 
 void QFAViewport::ProcessComponent(QSceneComponent* component)
@@ -66,6 +93,8 @@ void QFAViewport::ProcessComponent(QSceneComponent* component)
 	for (int i = 0; i < component->ListComponents.Length(); i++)
 		if (component->ListComponents[i]->IsValid())
 			ProcessComponent(component->ListComponents[i]);
+
+	
 }
 
 void QFAViewport::ProcessComponentShadow(QSceneComponent* component)
@@ -79,7 +108,7 @@ void QFAViewport::ProcessComponentShadow(QSceneComponent* component)
 
 	for (int i = 0; i < component->ListComponents.Length(); i++)
 		if (component->ListComponents[i]->IsValid())
-			ProcessComponent(component->ListComponents[i]);
+			ProcessComponent(component->ListComponents[i]);	
 }
 
 void QFAViewport::DrawMesh(QMeshBaseComponent* mesh)
@@ -104,6 +133,7 @@ void QFAViewport::DrawMesh(QMeshBaseComponent* mesh)
 		shaderProgram->SetShadowOn(false);
 
 	GLCall(glDrawElements(GL_TRIANGLES, mesh->GetIndexCount(), GL_UNSIGNED_INT, nullptr));
+
 }
 
 void QFAViewport::DrawMeshShadow(QMeshBaseComponent* mesh)
@@ -120,8 +150,14 @@ void QFAViewport::DrawMeshShadow(QMeshBaseComponent* mesh)
 
 QFAViewport::QFAViewport()
 {
-	if (!QFAViewport::DefaultViewPort)
+	if (!QFAViewport::DefaultViewPort)		
+	{
 		QFAViewport::DefaultViewPort = this;
+
+		
+	}
+
+	
 }
 
 QFAViewport::~QFAViewport()

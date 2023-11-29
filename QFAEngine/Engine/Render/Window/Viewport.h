@@ -1,14 +1,21 @@
 #pragma once
 #include <Math/Math.h>
 #include <Render/Buffer/Framebuffer.h>
+#include <Tools/Array.h>
 class QCameraComponent;
 class QFAWindow;
 class QFAFrameBufferMain;
 class QSceneComponent;
 class QWorld;
 class QMeshBaseComponent;
+class QFARenderText;
+
+//#include <Render/Text/Text.h>
+
 class QFAViewport
 {
+	
+
 	friend QFAWindow;
 	friend QFAFrameBufferMain;
 	// first create ViewPort
@@ -28,8 +35,12 @@ class QFAViewport
 	float HeightP = 1;
 
 	uint64_t StartFrameTime;
-
+	
 	QWorld* CurentFrameWorld;
+
+
+	QFAArray<QFARenderText*> Texts;
+	
 
 	void Settup(int windowWidth, int windowHeight);
 	void ProcessFrame(uint64_t startFrameTime);
@@ -60,6 +71,9 @@ public:
 		widthP width viewport in persent window width
 	*/
 	void SetParameters(float xP, float  yP, float widthP, float heightP);
+
+	void AddText(QFARenderText* text);
+	void RemoveText(QFARenderText* text);
 private:
 
 };
