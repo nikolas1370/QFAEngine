@@ -121,7 +121,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\Juni\Desktop\QFAEngine Root\freetype-master 2.13.2\objs\x64\Debug;$(SolutionDir)..\glew-2.1.0\lib\Release\x64;$(SolutionDir)..\glfw-3.3.8\glfw-3.3.8.bin.WIN64\lib-vc2022;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug;$(SolutionDir)..\glew-2.1.0\lib\Release\x64;$(SolutionDir)..\glfw-3.3.8\glfw-3.3.8.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -200,7 +200,6 @@
     <ClInclude Include="Engine\Tools\File\FileLoader.h" />
     <ClInclude Include="Engine\Render\Buffer\FramebufferMain.h" />
     <ClInclude Include="Engine\Math\Math.h" />
-    <ClInclude Include="Engine\Math\Matrix.h" />
     <ClInclude Include="Engine\Math\Vector.h" />
     <ClInclude Include="Engine\Math\Vector2D.h" />
     <ClInclude Include="Engine\Math\Vector4D.h" />

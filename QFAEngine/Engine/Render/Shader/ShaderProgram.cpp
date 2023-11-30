@@ -218,8 +218,6 @@ void QFAShaderProgram::SetGlyphsTestureUnit(int indexTexture)
          GLCall(glUniform1i(LocationGlyphTexture[indexTexture], indexTexture));
 }
 
-
-
 void QFAShaderProgram::SetShadowOn(bool castShadow)
 {
     if (LocationShadowOn == -2)
@@ -235,4 +233,73 @@ void QFAShaderProgram::SetShadowOn(bool castShadow)
 
     GLCall(glUniform1i(LocationShadowOn, (int)castShadow));
 }
-// 
+
+
+void QFAShaderProgram::SetTextColor(FVector indexTexture)
+{
+    
+    if (LocationTextColor == -2)
+    {
+        GLCall(LocationTextColor = glGetUniformLocation(ShaderProgramId, "textColor"));
+        if (LocationTextColor == -1)
+        {
+            std::cout << "QFAShaderProgram::SetTextColor in shader problem not found uniform \"textColor\"" << std::endl;
+            __debugbreak();
+            return;
+        }
+    }
+
+    GLCall(glUniform3f(LocationTextColor, indexTexture.X, indexTexture.Y, indexTexture.Z));
+}
+
+
+void QFAShaderProgram::SetOutlineColor(FVector colorindexTexture)
+{
+    if (LocationOutlineColor == -2)
+    {
+        GLCall(LocationOutlineColor = glGetUniformLocation(ShaderProgramId, "outlineColor"));
+        if (LocationOutlineColor == -1)
+        {
+            std::cout << "QFAShaderProgram::SetOutlineColor in shader problem not found uniform \"outlineColor\"" << std::endl;
+            __debugbreak();
+            return;
+        }
+    }
+
+    GLCall(glUniform3f(LocationOutlineColor, colorindexTexture.X, colorindexTexture.Y, colorindexTexture.Z));
+}
+
+void QFAShaderProgram::SetOutlineStatus(bool outline)
+{
+    if (LocationOutline == -2)
+    {
+        GLCall(LocationOutline = glGetUniformLocation(ShaderProgramId, "outline"));
+        if (LocationOutline == -1)
+        {
+            std::cout << "QFAShaderProgram::SetActivateOutline in shader problem not found uniform \"outline\"" << std::endl;
+            __debugbreak();
+            return;
+        }
+    }
+
+    GLCall(glUniform1i(LocationOutline, (int)outline));
+}
+
+void QFAShaderProgram::SetOpacity(float Opacity)
+{
+    if (LocationOpacity == -2)
+    {
+        GLCall(LocationOpacity = glGetUniformLocation(ShaderProgramId, "opacity"));
+        if (LocationOpacity == -1)
+        {
+            std::cout << "QFAShaderProgram::SetActivateOutline in shader problem not found uniform \"outline\"" << std::endl;
+            __debugbreak();
+            return;
+        }
+    }
+
+    GLCall(glUniform1f(LocationOpacity, Opacity));
+    
+}
+
+

@@ -1,7 +1,6 @@
 #pragma once
 #include <iostream>
 #include "Vector.h"
-#include "Matrix.h"
 
 template<typename T> class TVector4D;
 using DVector4D = TVector4D<double>;

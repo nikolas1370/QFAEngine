@@ -74,7 +74,7 @@ QFARenderText::GlyphInfo QFARenderText::AddGlyph(FT_ULong symbol)
     if (GlyphAtlasList.Length() == 0)
         CreateAtlas();    
     
-    FT_Set_Pixel_Sizes(face, 0, FontHeight);
+    FT_Set_Pixel_Sizes(face, 0, FontLoadCharHeight);
     if (FT_Load_Char(face, symbol, FT_LOAD_RENDER))
     {
         std::cout << "QFARenderText::AddGlyph FT_Load_Char error" << std::endl;
@@ -82,6 +82,14 @@ QFARenderText::GlyphInfo QFARenderText::AddGlyph(FT_ULong symbol)
         return gi;
         /* do some magic*/
     }   
+    // 
+    //std::cout <<  << " <----\n";
+    //std::cout << face->max_advance_width << " <----\n";
+
+    if (FT_Render_Glyph(face->glyph, FT_RENDER_MODE_SDF))
+    {
+        std::cout << "ERORRRRRRR" << std::endl;
+    }
     
     SGlyphAtlas* atlas = nullptr;;
     SGlyphAtlasListRow* row = nullptr;
@@ -90,9 +98,8 @@ QFARenderText::GlyphInfo QFARenderText::AddGlyph(FT_ULong symbol)
     {        
         for (size_t j = 0; j < GlyphAtlasList[i].Rows.Length() ; j++)
         {
-            if (GlyphAtlasList[i].Rows[j].Glyphs[0].FontHeight == FontHeight && face->glyph->bitmap.width + GlyphAtlasList[i].Rows[j].x <= GlyphAtlasWidth)
-            {
-                
+            if (face->glyph->bitmap.width + GlyphAtlasList[i].Rows[j].x <= GlyphAtlasWidth)
+            {                
                 atlas = &GlyphAtlasList[i];
                 row = &GlyphAtlasList[i].Rows[j];
                 find = true;
@@ -105,7 +112,7 @@ QFARenderText::GlyphInfo QFARenderText::AddGlyph(FT_ULong symbol)
     {
         for (size_t i = 0; i < GlyphAtlasList.Length(); i++)
         {
-            if (GlyphAtlasList[i].y + FontHeight <= GlyphAtlasHeight)
+            if (GlyphAtlasList[i].y + AtlasRowHeight <= GlyphAtlasHeight)
             {
                 GlyphAtlasList[i].Rows.Add(SGlyphAtlasListRow{});
                 atlas = &GlyphAtlasList[i];                
@@ -123,10 +130,9 @@ QFARenderText::GlyphInfo QFARenderText::AddGlyph(FT_ULong symbol)
         }
 
         row->y = atlas->y;
-        atlas->y += FontHeight + OffsetBetweenGlyph;
+        atlas->y += AtlasRowHeight + OffsetBetweenGlyph;
     }
 
-    gi.FontHeight = FontHeight;
     gi.height = face->glyph->bitmap.rows;
     gi.width = face->glyph->bitmap.width;
     gi.x = (float)row->x / (float)GlyphAtlasWidth;
@@ -139,40 +145,28 @@ QFARenderText::GlyphInfo QFARenderText::AddGlyph(FT_ULong symbol)
     gi.bitmap_bottom = gi.height - gi.bitmap_top;    
     gi.atlasIndex = atlas->atlasIndex;
 
+    gi.HeightMultiplier = (float)(face->ascender - face->descender) / (float)face->units_per_EM;
     float maxH = (float)(face->ascender - face->descender);// descender < 0
+    gi.MaxAscender = (int)round(((float)FontLoadCharHeight * ((float)face->ascender / maxH)));
+    gi.MaxDescender = (int)round(((float)FontLoadCharHeight * ((float)face->descender / maxH)));
+    /* 
     gi.MaxAscender = (int)round(((float)FontHeight * ((float)face->ascender / maxH)));
     gi.MaxDescender = (int)round(((float)FontHeight * ((float)face->descender / maxH)));
-
+    **/
     CopyGlyph(face->glyph);// RawTexture
     glBindTexture(GL_TEXTURE_2D, atlas->atlasId);
     glTexSubImage2D(GL_TEXTURE_2D, 0, row->x, row->y, gi.width, gi.height, GL_RED, GL_UNSIGNED_BYTE, RawTexture);
 
     row->x += face->glyph->bitmap.width + OffsetBetweenGlyph;
     
-    find = false;
-    for (size_t i = 0; i < Symbols.Length(); i++)
-    {
-        if (Symbols[i].symbol == symbol)
-        {
-            Symbols[i].GlyphList.Add(gi);
-            find = true;
-            break;
-        }
-    }
-    
-    if (!find)
-    {
-        Symbols.Add(Symbol{ symbol });
-        Symbol* sP = &Symbols.Last();
-        sP->GlyphList.Add(gi);
-    }
-
+    Symbols.Add(Symbol{ symbol, gi });
     row->Glyphs.Add(gi);
     return gi;
 }
 
 unsigned int QFARenderText::CreateAtlas()
 {
+    std::cout <<  "CreateAtlas\n";
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction
     unsigned int texture;
     glGenTextures(1, &texture);
@@ -203,35 +197,35 @@ void QFARenderText::ProcessText()
     GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO));
 
     int w = 0;
-    int start_y = ViewPortHeight -  Position_y - FontHeight;
+    
     for (size_t i = 0; i < Text.size(); i++)
     { 
+
         bool find = false;
         GlyphInfo gi;        
-        for (size_t j = 0; j < Symbols.Length() && !find; j++)
+        for (size_t j = 0; j < Symbols.Length(); j++)
         {
-            if (Symbols[j].symbol == (FT_ULong)Text[i])// OK
+            if (Symbols[j].symbol == (FT_ULong)Text[i])
             {
-                for (size_t k = 0; k < Symbols[j].GlyphList.Length(); k++)
-                {
-                    if (Symbols[j].GlyphList[k].FontHeight == FontHeight)
-                    {
-                        gi = Symbols[j].GlyphList[k];
-                        find = true;
-                        break;
-                    }
-                }
+                gi = Symbols[j].Glyph;
+                find = true;
+                break;
             }
         }
         
         if (!find)
             gi = AddGlyph(Text[i]);
-                
-        float temX = (float)(Position_x + w + gi.bitmap_left);
-        float temXEnd = temX + (float) gi.width;
 
-        float temY = (float)start_y - (float)gi.MaxDescender - (float)gi.bitmap_bottom ;
-        float temYEnd = temY + (float)gi.height;
+        
+
+        float tem = ((float)FontHeight  / (float)FontLoadCharHeight);
+                
+        float temX = ((float)Position_x + (float)w + (float)gi.bitmap_left * tem);
+        float temXEnd = temX + (float)gi.width * tem;
+        
+        float start_y = (float)ViewPortHeight - (float)Position_y - (float)FontHeight * gi.HeightMultiplier;// remove gi.HeightMultiplier if need less spase above base line
+        float temY = start_y - ((float)gi.MaxDescender + (float)gi.bitmap_bottom) * tem ;
+        float temYEnd = temY + (float)gi.height * tem ;
 
         GlyphInfoData[i].leftBottom_1 = { temX, temY ,   gi.x, gi.y, (int)gi.atlasIndex };
         GlyphInfoData[i].rightBottom_1 ={ temX, temYEnd,   gi.x, gi.yEnd, (int)gi.atlasIndex };
@@ -240,7 +234,8 @@ void QFARenderText::ProcessText()
         GlyphInfoData[i].leftBottom_2 = GlyphInfoData[i].leftBottom_1;
         GlyphInfoData[i].rightTop_2 = GlyphInfoData[i].rightTop_1;
         GlyphInfoData[i].leftTop_2 = GlyphShaderVertex{temXEnd, temY,   gi.xEnd, gi.y, (int)gi.atlasIndex };
-        w += gi.advance_x;
+        
+        w += (int)((float)gi.advance_x * tem );
     }
     
     if (Text.length() > CountGlyphInGUP)
@@ -272,15 +267,21 @@ void QFARenderText::StartTextRender()
         GLCall(glBindTexture(GL_TEXTURE_2D, GlyphAtlasList[i].atlasId));
     }
 }
+#include <Render/Time.h>
 
 void QFARenderText::Render()
-{        
+{   
     if (TextChange)
         ProcessText();
 
     GLCall(glBindVertexArray(VAO));
     GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO));
-        
+    
+    shader->SetTextColor(Color);
+    shader->SetOutlineColor(OutlineColor);
+    shader->SetOutlineStatus(Outline);
+    shader->SetOpacity(Opacity);
+
     GLCall(glDrawArrays(GL_TRIANGLES, 0, 6 * (int)Text.length()));// 6 * Text.length()    
 }
 
@@ -319,7 +320,7 @@ void QFARenderText::ChangeProjection(unsigned int viewportWidth, unsigned int vi
 }
 
 
-void QFARenderText::SetText(std::string text)
+void QFARenderText::SetText(std::wstring  text)
 {
     if (text.length() > CountGlyphInBuffer)
     {

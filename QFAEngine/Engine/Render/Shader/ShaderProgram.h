@@ -20,8 +20,10 @@ class QFAShaderProgram
 	int LocationDirectionLigthMatrix = -2;
 	int LocationShadowOn = -2;
 	int LocationGlyphTexture[LocationGlyphTextureCount];
-
-	
+	int LocationTextColor = -2;
+	int LocationOutlineColor = -2;
+	int LocationOutline = -2;
+	int LocationOpacity = -2;
 
 public:
 	// in private
@@ -45,7 +47,7 @@ public:
 	void SetDirectionShadowMap(unsigned int id, int textureSlote);
 	void SetDirectionLigthMatrix(const glm::mat4& matrix);
 	void SetGlyphsTestureUnit(int indexTexture);
-
+	
 
 
 
@@ -53,8 +55,11 @@ public:
 		now suport only direction light
 
 	*/
-	void SetShadowOn(bool castShadow);
-
+	void SetShadowOn(bool color);
+	void SetTextColor(FVector indexTexture);
+	void SetOutlineColor(FVector colorindexTexture);
+	void SetOutlineStatus(bool outline);
+	void SetOpacity(float Opacity);
 };
 
 

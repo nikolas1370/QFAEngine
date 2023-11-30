@@ -5,6 +5,7 @@
 
 #include <ft2build.h>
 #include <Math/Vector2D.h>
+#include <Math/Vector4D.h>
 #include FT_FREETYPE_H  
 
 class QFAShaderProgram;
@@ -60,7 +61,7 @@ class QFARenderText
     struct GlyphInfo
     {
         // add size between base line searsh in ttf lib and add it
-        unsigned int FontHeight; // value in FT_Set_Pixel_Sizes
+//unsigned int FontHeight; // value in FT_Set_Pixel_Sizes
         //unsigned int symbol;// now only ascii
         float x; // start in atlass persent
         float y; // start in atlass persent
@@ -75,12 +76,18 @@ class QFARenderText
         int MaxAscender; // uper baseline
         int MaxDescender;// under baselin
         unsigned int atlasIndex;
+        /*
+            need for calculate max row Height(FontHeight)
+            for some symbol in ukrainian need more spase above base line('¥'(U+0490) and '¯'(U+0407))
+            exclude from code if need less spase above base line (row be bawe less Height)
+        */
+        float HeightMultiplier; 
     };
     
     struct Symbol
     {
         FT_ULong symbol;// FT_Load_Char
-        QFAArray<GlyphInfo> GlyphList;// store Glyph for different Height
+        GlyphInfo Glyph;// store Glyph for different Height
     };
 
     QFAArray<Symbol> Symbols;
@@ -92,23 +99,25 @@ class QFARenderText
     unsigned int ViewPortWidth;
     unsigned int ViewPortHeight;
 
-	int Width;
+	int Width; 
     int Height;
     int Position_x = 0;
     // 0 == top 
     int Position_y = 0;
     
+    const unsigned int FontLoadCharHeight = 50;// 'j' == 47/50(Height) after render 62
+    const unsigned int AtlasRowHeight = (unsigned int)((float)FontLoadCharHeight * 1.4f); // after call FT_Render_Glyph Glyph becomes bigger
+
     unsigned int FontHeight = -1;// curent text height
     static const int OffsetBetweenGlyph = 5;// 
 
 	
-
 	static FT_Library ft;
 	static FT_Face face;
 
-	std::string text = "";
+	std::wstring text;
 
-    static const unsigned int defaultTextSize = 50;
+    static const unsigned int defaultTextSize = 30;
     
 	static QFAShaderProgram* shader;
 	static bool ISInit;
@@ -117,8 +126,8 @@ class QFARenderText
     unsigned int CountGlyphInGUP = 100;
 
 	static unsigned char* RawTexture;
-	static const int GlyphAtlasHeight = 320;//1000;
-    static const int GlyphAtlasWidth = 300;//1000;
+	static const int GlyphAtlasHeight = 1000;//1000;
+    static const int GlyphAtlasWidth = 1000;//1000;
 
 
     static unsigned int CountGlyphInBuffer;
@@ -127,7 +136,7 @@ class QFARenderText
     static glm::mat4 projection;
     /*------*/
 
-    std::string Text;
+    std::wstring  Text;
     bool TextChange;
 
     /* put in  result */
@@ -155,7 +164,7 @@ public:
     ~QFARenderText();
     
     
-    void SetText(std::string text);
+    void SetText(std::wstring  text);
 
     
     
@@ -166,4 +175,9 @@ public:
 
 //    FT_Face face2;
     void Destroy();
+
+    FVector Color = FVector(1);
+    FVector OutlineColor = FVector(1, 0, 0);
+    bool Outline = false;
+    float Opacity = 1;
 };

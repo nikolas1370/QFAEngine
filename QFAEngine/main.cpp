@@ -5,6 +5,10 @@ Q swith control between camera and some actor whit mehes
 */
 
 
+
+
+
+
 #include "Math/Vector.h"
 
 #pragma comment(lib, "opengl32.lib") 
@@ -31,8 +35,16 @@ Q swith control between camera and some actor whit mehes
 #include <Render/Window/Viewport.h>
 #include <Render/Text/Text.h>
 
+
+
+
+
+
 int main()
 {    
+
+
+
     QFAOverlord::Init();
 
     QMesh* MeshA = OBJLoader::LoadModelWithAnimate("NoEngineModel/anim/dore_1.obj", 30); 
@@ -115,38 +127,39 @@ int main()
     
     QFAWindow* mainWindow = QFAWindow::GetMainWindow();
     QFAViewport* firstdViewPort = mainWindow->GetViewport(0);
-    /*
+    
     QFAViewport* secondViewPort = new QFAViewport;
     QFAViewport* thirdViewPort = new QFAViewport;
     QFAViewport* fourthViewPort = new QFAViewport;
-    */
+    
     ACameraActor* secondCamera = new ACameraActor();
     ACameraActor* thirdCamera = new  ACameraActor();
     ACameraActor* fourthCamera = new ACameraActor();
     Camera.ActivateCamera(firstdViewPort);
-    /*
+    
     secondCamera->ActivateCamera(secondViewPort);
     thirdCamera->ActivateCamera(thirdViewPort);
     fourthCamera->ActivateCamera(fourthViewPort);
-    */
-    /*
+    
+    
     mainWindow->AddViewport(secondViewPort);
     mainWindow->AddViewport(thirdViewPort);
     mainWindow->AddViewport(fourthViewPort);
-    */
+    
 
     firstdViewPort->SetParameters(0,0, 0.5f, 0.5f);
-    /*
+    
+    
     secondViewPort->SetParameters(0.5f, 0, 0.5f, 0.5f);
     thirdViewPort->SetParameters(0, 0.5f, 0.5f, 0.5f);
     fourthViewPort->SetParameters(0.5f, 0.5f, 0.5f, 0.5f);
-    */
     
-
+    
+    
     mainWorld->AddActor(secondCamera);
     mainWorld->AddActor(thirdCamera);
     mainWorld->AddActor(fourthCamera);
-
+    
     secondCamera->SetActorPosition(FVector(30, 30, 5));
     secondCamera->SetActorRotation(FVector(0, 0, -90));
 
@@ -159,12 +172,40 @@ int main()
     fourthCamera->SetActorRotation(FVector(0.f, 35.9f, -10.f));
     
     QFARenderText* text = new QFARenderText();
+    QFARenderText* text_2 = new QFARenderText();
+    text_2->SetText(L"Viewport 1");
+    QFARenderText* text2 = new QFARenderText();
+    text2->SetText(L"Viewport 2");
+    QFARenderText* text3 = new QFARenderText();
+    text3->SetText(L"Viewport 3");
+    QFARenderText* text4 = new QFARenderText();
+    text4->SetText(L"Viewport 4");
+    text_2->SetPosition(0,0);
+    text2->SetPosition(0,0);
+    text3->SetPosition(0,0);
+    text4->SetPosition(0,0);
+    text_2->SetTextSize(16);
+    text2->SetTextSize(20);
+    text3->SetTextSize(25);
+    text4->SetTextSize(12);
+
     
 
-    text->SetPosition(-1500, 200);
-    text->SetText("AajBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz.,:;'\"\`~/|\=+-_");
+    text->SetPosition(0, 16);
+    text->SetTextSize(50);
+    text->SetText(L"ҐЇї  З'їли їжака AajBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz.,:;'\"`~/|\\=+-_");
+    text->Color = FVector(1, 0, 0.3f);
+    text->Outline = false;
+    text->OutlineColor = FVector(0.5f, 0.4f, 0.3f);
+    text->Opacity = 0.9f;
     firstdViewPort->AddText(text);
+    firstdViewPort->AddText(text_2);
+
     
+    secondViewPort->AddText(text2);
+    thirdViewPort->AddText(text3);
+    fourthViewPort->AddText(text4);
+
 
     QFAOverlord::StartLife();
 
