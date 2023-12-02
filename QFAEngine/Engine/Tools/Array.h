@@ -7,6 +7,7 @@ class QFAArray
 {
     friend QFAArray;
     std::vector<T> vector;
+    size_t size = 0;
 public:
     QFAArray() 
     {
@@ -16,12 +17,14 @@ public:
     QFAArray(const QFAArray& copy) 
     {
         vector = copy.vector;
+        size = copy.size;
     }
     
     
     void operator=(const QFAArray<T>& copy)
     {
         vector = copy.vector;
+        size = copy.size;
     }
 
     ~QFAArray()
@@ -31,17 +34,21 @@ public:
 
     inline void Add(const T& some)
     {
-        vector.push_back(some);
+        if (size == vector.size())
+            vector.push_back(some);
+        else
+            vector[size] = some;
+
+        size++;
     }
 
     bool Remove(const T& t)
     {
-        for (int i = 0; i < vector.size(); i++)
+        for (int i = 0; i < size; i++)
         {
             if (vector[i] == t)
             {                
-                vector[i] = vector[vector.size() - 1];
-                vector.pop_back();
+                vector[i] = vector[--size];
                 return true;
             }
         }
@@ -51,11 +58,10 @@ public:
 
     void RemoveAt(size_t index)
     {
-        if (index < 0 || index >= vector.size())
+        if (index >= vector.size())
             return;
 
-        vector[index] = vector[vector.size() - 1];
-        vector.pop_back();
+        vector[index] = vector[--size];        
     }
     
 
@@ -67,15 +73,18 @@ public:
     
     T& Last()
     {
-        return vector.back();
+        return vector[size - 1];
     }
 
     inline size_t Length()
     {
-        return vector.size();
+        return size;
     }
 
-    
+    inline void Clear()
+    {
+        size = 0;
+    }    
 private:
 
 };

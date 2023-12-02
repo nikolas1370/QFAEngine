@@ -8,7 +8,7 @@ class QFAFrameBufferMain;
 class QSceneComponent;
 class QWorld;
 class QMeshBaseComponent;
-class QFARenderText;
+class QFAText;
 
 //#include <Render/Text/Text.h>
 
@@ -39,8 +39,10 @@ class QFAViewport
 	QWorld* CurentFrameWorld;
 
 
-	QFAArray<QFARenderText*> Texts;
-	
+	QFAArray<QFAText*> Texts;
+	glm::mat4 UIProjection;
+
+
 
 	void Settup(int windowWidth, int windowHeight);
 	void ProcessFrame(uint64_t startFrameTime);
@@ -72,8 +74,8 @@ public:
 	*/
 	void SetParameters(float xP, float  yP, float widthP, float heightP);
 
-	void AddText(QFARenderText* text);
-	void RemoveText(QFARenderText* text);
+	void AddText(QFAText* text);
+	void RemoveText(QFAText* text);
 private:
 
 };

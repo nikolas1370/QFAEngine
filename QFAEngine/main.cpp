@@ -1,5 +1,5 @@
 ﻿ // https://learnopengl.com/Introduction
-// 2638
+// 2615
 /*
 Q swith control between camera and some actor whit mehes
 */
@@ -146,16 +146,14 @@ int main()
     mainWindow->AddViewport(thirdViewPort);
     mainWindow->AddViewport(fourthViewPort);
     
+    
 
-    firstdViewPort->SetParameters(0,0, 0.5f, 0.5f);
+    firstdViewPort->SetParameters(0, 0, 0.5f, 1);
     
-    
-    secondViewPort->SetParameters(0.5f, 0, 0.5f, 0.5f);
-    thirdViewPort->SetParameters(0, 0.5f, 0.5f, 0.5f);
-    fourthViewPort->SetParameters(0.5f, 0.5f, 0.5f, 0.5f);
-    
-    
-    
+    secondViewPort->SetParameters(0.5f, 0.66666f,    0.5f, 0.33333f);
+    thirdViewPort->SetParameters(0.5f,  0.33333f, 0.5f, 0.33333f);
+    fourthViewPort->SetParameters(0.5f, 0.0f, 0.5f, 0.33333f);
+        
     mainWorld->AddActor(secondCamera);
     mainWorld->AddActor(thirdCamera);
     mainWorld->AddActor(fourthCamera);
@@ -171,14 +169,16 @@ int main()
     fourthCamera->SetActorPosition(FVector(16.2079f, 1.94214f, -3.84775f));
     fourthCamera->SetActorRotation(FVector(0.f, 35.9f, -10.f));
     
-    QFARenderText* text = new QFARenderText();
-    QFARenderText* text_2 = new QFARenderText();
-    text_2->SetText(L"Viewport 1");
-    QFARenderText* text2 = new QFARenderText();
+    QFAText* text = new QFAText();
+    
+    
+    QFAText* text_2 = new QFAText();
+    text_2->SetText(L"Viewport 1");    
+    QFAText* text2 = new QFAText();
     text2->SetText(L"Viewport 2");
-    QFARenderText* text3 = new QFARenderText();
+    QFAText* text3 = new QFAText();
     text3->SetText(L"Viewport 3");
-    QFARenderText* text4 = new QFARenderText();
+    QFAText* text4 = new QFAText();
     text4->SetText(L"Viewport 4");
     text_2->SetPosition(0,0);
     text2->SetPosition(0,0);
@@ -190,22 +190,25 @@ int main()
     text4->SetTextSize(12);
 
     
-
-    text->SetPosition(0, 16);
-    text->SetTextSize(50);
-    text->SetText(L"ҐЇї  З'їли їжака AajBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz.,:;'\"`~/|\\=+-_");
+    text->SetPosition(0, 16);    
+    text->SetTextSize(48);
+    text->SetText(L"З'їли їжака Their could can widen ten she any. As so we smart those money in. Am wrote up whole so tears sense oh. Absolute required of reserved in offering no. How sense found our those gay again taken the. Had mrs outweigh desirous sex overcame. Improved property reserved disposal do offering me.");
+    
     text->Color = FVector(1, 0, 0.3f);
     text->Outline = false;
     text->OutlineColor = FVector(0.5f, 0.4f, 0.3f);
     text->Opacity = 0.9f;
     firstdViewPort->AddText(text);
+    
+    
     firstdViewPort->AddText(text_2);
+    
 
     
     secondViewPort->AddText(text2);
     thirdViewPort->AddText(text3);
     fourthViewPort->AddText(text4);
-
+    
 
     QFAOverlord::StartLife();
 

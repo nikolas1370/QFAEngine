@@ -1,4 +1,3 @@
-#pragma once
 #include <Tools/Debug/OpenGlStuff.h>
 #include <Tools/Array.h>
 
@@ -10,10 +9,12 @@
 
 class QFAShaderProgram;
 class QFAViewport;
+class QFAOverlord;
 
-class QFARenderText
+class QFAText
 {
     friend QFAViewport;
+    friend QFAOverlord;
     struct GlyphInfo;
 
     QFAViewport* Viewport = nullptr;
@@ -46,8 +47,7 @@ class QFARenderText
     struct SGlyphAtlasListRow
     {
         unsigned int x = 0;// when start new Glyph in pixel
-        unsigned int y = 0;// when row start/ Glyph be have y position
-        QFAArray<QFARenderText::GlyphInfo> Glyphs;
+        unsigned int y = 0;// when row start/ Glyph be have y position      
     };
 
     struct SGlyphAtlas
@@ -82,6 +82,10 @@ class QFARenderText
             exclude from code if need less spase above base line (row be bawe less Height)
         */
         float HeightMultiplier; 
+
+
+        
+        float ratio; // Width / Height
     };
     
     struct Symbol
@@ -99,8 +103,8 @@ class QFARenderText
     unsigned int ViewPortWidth;
     unsigned int ViewPortHeight;
 
-	int Width; 
-    int Height;
+
+
     int Position_x = 0;
     // 0 == top 
     int Position_y = 0;
@@ -130,10 +134,9 @@ class QFARenderText
     static const int GlyphAtlasWidth = 1000;//1000;
 
 
-    static unsigned int CountGlyphInBuffer;
-    static GlyphShader* GlyphInfoData;
 
-    static glm::mat4 projection;
+
+    //glm::mat4 projection;
     /*------*/
 
     std::wstring  Text;
@@ -142,11 +145,11 @@ class QFARenderText
     /* put in  result */
     void ProcessText();
 
-    GlyphInfo AddGlyph(FT_ULong symbol);
+    void AddGlyph(FT_ULong symbol);
     unsigned int CreateAtlas();
 
     /* call only in window thread call before Render*/
-    static void StartTextRender();
+    static void StartTextRender(const glm::mat4& proj);
     /* call only in window thread */
     void Render();
     /* call only in window thread call after Render*/
@@ -154,14 +157,14 @@ class QFARenderText
 
     
     
-    // call if viewport changed size or QFARenderText add in QFAViewport
-    void ChangeProjection(unsigned int viewportWidth, unsigned int viewportHeight);
+    
+    void ChangeViewportSize(unsigned int viewportWidth, unsigned int viewportHeight);
     void SetSize(unsigned int w, unsigned int h);
 
     
 public:
-	QFARenderText();
-    ~QFARenderText();
+    QFAText();
+    ~QFAText();
     
     
     void SetText(std::wstring  text);
@@ -180,4 +183,57 @@ public:
     FVector OutlineColor = FVector(1, 0, 0);
     bool Outline = false;
     float Opacity = 1;
+
+    
+
+    /*
+    text-overflow
+        clip 
+        ellipsis
+    */
+    /*
+    text-align
+        left Ч по левому краю. »спользуетс€ по умолчанию
+        center Ч по центру
+        right Ч по правому краю
+    */
+    enum EOverflowWrap
+    {
+        OWNone,
+        OWSymbol, 
+        OWWord// if word bigger than Width word will go out of bounds
+    };
+    
+    void SetOverflowWrap(EOverflowWrap wrap);
+
+    
+    
+private: 
+    unsigned int Width = 300;
+    unsigned int Height = 120;
+    
+
+
+    
+    EOverflowWrap OverflowWrap = EOverflowWrap::OWWord;
+    //EOverflowWrap OverflowWrap = EOverflowWrap::OWSymbol;
+    
+
+    struct PrepareData
+    {
+        
+        unsigned int symbolIndex;
+        // row( row at screen) where be symbol
+        unsigned int row;
+        
+    };
+    static unsigned int CountGlyphInBuffer;
+    // send in gpu 
+    static GlyphShader* GlyphInfoData;
+    // need for PrepareSymbolsToGpu, it symbol be process in GlyphShader
+    static QFAArray<PrepareData> SymbolsForRender;
+    unsigned int CountSymbolForRender = 0;
+    void PrepareSymbolsToGpu();
+
+    static void EndLife();
 };

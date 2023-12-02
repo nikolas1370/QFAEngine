@@ -8,7 +8,7 @@
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
 
 #include <Input/Input.h>
-
+#include <Render/Text/Text.h>
 
 
 bool QFAOverlord::Life = false;
@@ -17,7 +17,7 @@ QFAWindow* QFAOverlord::Window = nullptr;
 QCameraComponent* QFAOverlord::CurentCamera = nullptr;
 
 int QFAOverlord::DefaultWidth = 600;
-int QFAOverlord::DefaultHeight = 600;
+int QFAOverlord::DefaultHeight = 800;
 
 bool QFAOverlord::StartLife()
 {
@@ -29,10 +29,17 @@ bool QFAOverlord::StartLife()
 	return true;
 }
 
+
+
 void QFAOverlord::EndLife()
 {
     Life = false;    
-    glfwTerminate();
+    
+
+    QFAText::EndLife();
+
+    glfwTerminate(); 
+    
 }
 
 bool QFAOverlord::Init()
@@ -42,13 +49,12 @@ bool QFAOverlord::Init()
         ASSERT(false);
         return false;
     }
-    QTime::Init();    
 
+    QTime::Init();    
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    
     Window = new QFAWindow(DefaultWidth, DefaultHeight, "QFA");    
     QFAInput::Init(Window->glfWindow);
 

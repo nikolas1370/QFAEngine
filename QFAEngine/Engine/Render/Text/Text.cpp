@@ -3,21 +3,21 @@
 #include <Render/Shader/ShaderProgram.h>
 #include "Render/Window/Viewport.h"
 
-bool QFARenderText::ISInit = false;
-unsigned char* QFARenderText::RawTexture;
-QFAShaderProgram* QFARenderText::shader;
-FT_Library QFARenderText::ft;
-FT_Face QFARenderText::face;
-unsigned int QFARenderText::CountGlyphInBuffer = 100;
-QFARenderText::GlyphShader* QFARenderText::GlyphInfoData;
-QFAArray<QFARenderText::SGlyphAtlas> QFARenderText::GlyphAtlasList;
-glm::mat4 QFARenderText::projection;
+bool QFAText::ISInit = false;
+unsigned char* QFAText::RawTexture;
+QFAShaderProgram* QFAText::shader;
+FT_Library QFAText::ft;
+FT_Face QFAText::face;
+unsigned int QFAText::CountGlyphInBuffer = 100;
+QFAText::GlyphShader* QFAText::GlyphInfoData;
+QFAArray<QFAText::SGlyphAtlas> QFAText::GlyphAtlasList;
+QFAArray<QFAText::PrepareData> QFAText::SymbolsForRender;
 /*----*/
 
 #pragma comment(lib, "freetype.lib")
 /*----*/
 
-void QFARenderText::CopyGlyph(const FT_GlyphSlot gl)
+void QFAText::CopyGlyph(const FT_GlyphSlot gl)
 {
     int ic = gl->bitmap.rows - 1;
     for (int i = ic; i >= 0 ; i--)
@@ -25,28 +25,28 @@ void QFARenderText::CopyGlyph(const FT_GlyphSlot gl)
             RawTexture[(ic - i) * gl->bitmap.pitch + j] = gl->bitmap.buffer[i * gl->bitmap.pitch + j];
 }
 
-QFARenderText::QFARenderText()
+QFAText::QFAText()
 {
     if (!ISInit)
     {        
-        QFARenderText::RawTexture = (unsigned char*)malloc(90000);//  300 300
+        QFAText::RawTexture = (unsigned char*)malloc(90000);//  300 300
 
         shader = new QFAShaderProgram("Engine/Shaders/Font/Vertex.shader", "Engine/Shaders/Font/Fragment.shader");
         
-        if (FT_Init_FreeType(&QFARenderText::ft))
+        if (FT_Init_FreeType(&QFAText::ft))
         {
             std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
             return;
         }
 
-        if (FT_New_Face(QFARenderText::ft, "Editor/Font/Roboto-Regular.ttf", 0, &face))
+        if (FT_New_Face(QFAText::ft, "Editor/Font/Roboto-Regular.ttf", 0, &face))
         {
             std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
             return;
         }
 
         ISInit = true;
-        QFARenderText::GlyphInfoData = (GlyphShader*)malloc(sizeof(GlyphShader) * QFARenderText::CountGlyphInBuffer);
+        QFAText::GlyphInfoData = (GlyphShader*)malloc(sizeof(GlyphShader) * QFAText::CountGlyphInBuffer);
     }
     
     glGenVertexArrays(1, &VAO);
@@ -60,7 +60,7 @@ QFARenderText::QFARenderText()
     glVertexAttribIPointer(1, 1, GL_INT, sizeof(GlyphShaderVertex), (void*)offsetof(GlyphShaderVertex, AtlasNum));
 }
 
-QFARenderText::~QFARenderText()
+QFAText ::~QFAText()
 {
     // delete VBO and other
 
@@ -68,7 +68,7 @@ QFARenderText::~QFARenderText()
         Viewport->RemoveText(this);
 }
 
-QFARenderText::GlyphInfo QFARenderText::AddGlyph(FT_ULong symbol)
+void QFAText::AddGlyph(FT_ULong symbol)
 {
     GlyphInfo gi;
     if (GlyphAtlasList.Length() == 0)
@@ -77,14 +77,19 @@ QFARenderText::GlyphInfo QFARenderText::AddGlyph(FT_ULong symbol)
     FT_Set_Pixel_Sizes(face, 0, FontLoadCharHeight);
     if (FT_Load_Char(face, symbol, FT_LOAD_RENDER))
     {
-        std::cout << "QFARenderText::AddGlyph FT_Load_Char error" << std::endl;
+        std::cout << "QFAText ::AddGlyph FT_Load_Char error" << std::endl;
         __debugbreak();
-        return gi;
-        /* do some magic*/
     }   
-    // 
-    //std::cout <<  << " <----\n";
-    //std::cout << face->max_advance_width << " <----\n";
+
+    if (face->glyph->bitmap.rows > 0)
+    {   
+        if (face->glyph->bitmap.rows >= face->glyph->bitmap.width)
+            gi.ratio = (float)face->glyph->bitmap.width / (float)face->glyph->bitmap.rows;
+        else
+            gi.ratio = (float)face->glyph->bitmap.rows / (float)face->glyph->bitmap.width;
+    }
+    else //space(' ')
+        gi.ratio = (float)face->glyph->bitmap.width / (float)FontLoadCharHeight;
 
     if (FT_Render_Glyph(face->glyph, FT_RENDER_MODE_SDF))
     {
@@ -143,28 +148,23 @@ QFARenderText::GlyphInfo QFARenderText::AddGlyph(FT_ULong symbol)
     gi.bitmap_left = face->glyph->bitmap_left;
     gi.bitmap_top = face->glyph->bitmap_top;
     gi.bitmap_bottom = gi.height - gi.bitmap_top;    
-    gi.atlasIndex = atlas->atlasIndex;
+    gi.atlasIndex = atlas->atlasIndex;    
 
     gi.HeightMultiplier = (float)(face->ascender - face->descender) / (float)face->units_per_EM;
     float maxH = (float)(face->ascender - face->descender);// descender < 0
     gi.MaxAscender = (int)round(((float)FontLoadCharHeight * ((float)face->ascender / maxH)));
     gi.MaxDescender = (int)round(((float)FontLoadCharHeight * ((float)face->descender / maxH)));
-    /* 
-    gi.MaxAscender = (int)round(((float)FontHeight * ((float)face->ascender / maxH)));
-    gi.MaxDescender = (int)round(((float)FontHeight * ((float)face->descender / maxH)));
-    **/
-    CopyGlyph(face->glyph);// RawTexture
+    
+    CopyGlyph(face->glyph);
     glBindTexture(GL_TEXTURE_2D, atlas->atlasId);
     glTexSubImage2D(GL_TEXTURE_2D, 0, row->x, row->y, gi.width, gi.height, GL_RED, GL_UNSIGNED_BYTE, RawTexture);
 
     row->x += face->glyph->bitmap.width + OffsetBetweenGlyph;
     
-    Symbols.Add(Symbol{ symbol, gi });
-    row->Glyphs.Add(gi);
-    return gi;
+    Symbols.Add(Symbol{ symbol, gi });    
 }
 
-unsigned int QFARenderText::CreateAtlas()
+unsigned int QFAText::CreateAtlas()
 {
     std::cout <<  "CreateAtlas\n";
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction
@@ -191,65 +191,168 @@ unsigned int QFARenderText::CreateAtlas()
     return texture;
 }
 
-void QFARenderText::ProcessText()
+void QFAText::ProcessText()
 {
     GLCall(glBindVertexArray(VAO));
     GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO));
-
-    int w = 0;
-    
+    QFAText::SymbolsForRender.Clear();
+        
+    unsigned int numRow = 0;
+    int x = 0;
+    float tem = ((float)FontHeight / (float)FontLoadCharHeight);
+    unsigned int wordLen = 0;
+    unsigned int wordStart = 0;
+    unsigned int wordW = 0;
     for (size_t i = 0; i < Text.size(); i++)
     { 
-
-        bool find = false;
-        GlyphInfo gi;        
+        bool find = false;     
+        unsigned int symI;
         for (size_t j = 0; j < Symbols.Length(); j++)
         {
             if (Symbols[j].symbol == (FT_ULong)Text[i])
             {
-                gi = Symbols[j].Glyph;
                 find = true;
+                symI = (unsigned int)j;
                 break;
             }
         }
         
         if (!find)
-            gi = AddGlyph(Text[i]);
+        {
+            symI = (unsigned int)Symbols.Length();
+            AddGlyph(Text[i]);           
+        }
 
-        
+        unsigned int glyphWidth = (unsigned int)((float)FontHeight * Symbols[symI].Glyph.ratio);
+        int glyphBitmap_left = (int)((float)Symbols[symI].Glyph.bitmap_left * tem);
 
-        float tem = ((float)FontHeight  / (float)FontLoadCharHeight);
+        if (OverflowWrap == EOverflowWrap::OWSymbol)
+        {                  
+            if (Width < glyphWidth)
+            {                
+                QFAText::SymbolsForRender.Add(PrepareData{ (unsigned int)symI, numRow });
+                numRow++;
+                x = 0;
+            }
+            else if(x + glyphBitmap_left + glyphWidth >= Width)
+            {
+                numRow++;
+                x = 0;
+                QFAText::SymbolsForRender.Add(PrepareData{ (unsigned int)symI, numRow });                
+                x += (int)((float)Symbols[symI].Glyph.advance_x * tem);
+            }
+            else
+            {
+                QFAText::SymbolsForRender.Add(PrepareData{ (unsigned int)symI, numRow });                
+                x += (int)((float)Symbols[symI].Glyph.advance_x * tem);
+            }            
+        }        
+        else if(OverflowWrap == EOverflowWrap::OWWord)
+        {       
+            wordW += (int)((float)Symbols[symI].Glyph.advance_x * tem);
+            if (wordLen++ == 0)
+                wordStart = (unsigned int)i;// in current time  all symbol in Text be presend in SymbolsForRender                         
+
+            QFAText::SymbolsForRender.Add(PrepareData{ (unsigned int)symI});
+            if (Text[i] == L' ' || i == Text.size() - 1)
+            {
+                int spaceS = 0;
+                if (Text[i] == L' ')
+                {
+                    spaceS = (int)((float)Symbols[symI].Glyph.advance_x * tem);
+                    wordW -= spaceS;
+                }
+
+                if (Width < wordW)
+                {
+                    if (x != 0)
+                        numRow++;
+
+                    for (size_t j = wordStart; j < wordStart + wordLen; j++)
+                        QFAText::SymbolsForRender[j].row = numRow;
+                    
+                    numRow++;
+                    x = 0;                    
+                }
+                else if(x + wordW <= Width)
+                {
+                    for (size_t j = wordStart; j < wordStart + wordLen; j++)
+                        QFAText::SymbolsForRender[j].row = numRow;
+
+                    x += wordW + spaceS;
+                }
+                else
+                {
+                    x = wordW + spaceS;
+                    numRow++;
+                    
+                    for (size_t j = wordStart; j < wordStart + wordLen; j++)
+                        QFAText::SymbolsForRender[j].row = numRow;        
+                }                
                 
-        float temX = ((float)Position_x + (float)w + (float)gi.bitmap_left * tem);
-        float temXEnd = temX + (float)gi.width * tem;
-        
-        float start_y = (float)ViewPortHeight - (float)Position_y - (float)FontHeight * gi.HeightMultiplier;// remove gi.HeightMultiplier if need less spase above base line
-        float temY = start_y - ((float)gi.MaxDescender + (float)gi.bitmap_bottom) * tem ;
-        float temYEnd = temY + (float)gi.height * tem ;
+                wordW = 0;
+                wordLen = 0;
+                wordStart = 0;
+            }
+        }
+        else
+            QFAText::SymbolsForRender.Add(PrepareData{ (unsigned int)symI, 0 });
 
-        GlyphInfoData[i].leftBottom_1 = { temX, temY ,   gi.x, gi.y, (int)gi.atlasIndex };
-        GlyphInfoData[i].rightBottom_1 ={ temX, temYEnd,   gi.x, gi.yEnd, (int)gi.atlasIndex };
-        GlyphInfoData[i].rightTop_1 = {temXEnd, temYEnd,   gi.xEnd, gi.yEnd, (int)gi.atlasIndex };
+    }    
 
-        GlyphInfoData[i].leftBottom_2 = GlyphInfoData[i].leftBottom_1;
-        GlyphInfoData[i].rightTop_2 = GlyphInfoData[i].rightTop_1;
-        GlyphInfoData[i].leftTop_2 = GlyphShaderVertex{temXEnd, temY,   gi.xEnd, gi.y, (int)gi.atlasIndex };
-        
-        w += (int)((float)gi.advance_x * tem );
-    }
+    CountSymbolForRender = (unsigned int)SymbolsForRender.Length();
+    PrepareSymbolsToGpu();
     
-    if (Text.length() > CountGlyphInGUP)
+
+
+    if (CountSymbolForRender > CountGlyphInGUP)
     {
-        CountGlyphInGUP = (unsigned int)((float)Text.length() * 1.5f);
+        CountGlyphInGUP = (unsigned int)((float)CountSymbolForRender * 1.5f);
         glBufferData(GL_ARRAY_BUFFER, sizeof(GlyphShader) * CountGlyphInGUP, GlyphInfoData, GL_DYNAMIC_DRAW);
     }
     else
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GlyphShader) * Text.length(), GlyphInfoData);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GlyphShader) * CountSymbolForRender, GlyphInfoData);
    
     TextChange = false;
 }
 
-void QFARenderText::StartTextRender()
+void QFAText::PrepareSymbolsToGpu()
+{    
+    int w = 0;
+    unsigned int row = 0;
+    float tem = ((float)FontHeight / (float)FontLoadCharHeight);
+    for (size_t i = 0; i < CountSymbolForRender; i++)
+    {    
+        // for text-align. last ' ' in row not calculate in w
+        if (row != QFAText::SymbolsForRender[i].row)
+        {
+            row = QFAText::SymbolsForRender[i].row;
+            w = 0;
+        }
+        
+        GlyphInfo* gi = &Symbols[QFAText::SymbolsForRender[i].symbolIndex].Glyph;
+
+        float temX = ((float)Position_x + (float)w + (float)gi->bitmap_left * tem);
+        float temXEnd = temX + (float)gi->width * tem;
+
+        float start_y = (float)ViewPortHeight - (float)Position_y - (float)FontHeight * gi->HeightMultiplier - ((float)row *  ((float)FontHeight * gi->HeightMultiplier));// remove gi.HeightMultiplier if need less spase above base line
+        float temY = start_y - ((float)gi->MaxDescender + (float)gi->bitmap_bottom) * tem;
+        float temYEnd = temY + (float)gi->height * tem;
+        
+        QFAText::GlyphInfoData[i].leftBottom_1 = GlyphShaderVertex{ temX, temY ,   gi->x, gi->y, (int)gi->atlasIndex };       
+        GlyphInfoData[i].rightBottom_1 = { temX, temYEnd,   gi->x, gi->yEnd, (int)gi->atlasIndex };
+        GlyphInfoData[i].rightTop_1 = { temXEnd, temYEnd,   gi->xEnd, gi->yEnd, (int)gi->atlasIndex };
+        
+        GlyphInfoData[i].leftBottom_2 = GlyphInfoData[i].leftBottom_1;
+        GlyphInfoData[i].rightTop_2 = GlyphInfoData[i].rightTop_1;
+        GlyphInfoData[i].leftTop_2 = GlyphShaderVertex{ temXEnd, temY,   gi->xEnd, gi->y, (int)gi->atlasIndex };
+
+        w += (int)((float)gi->advance_x * tem);
+    }
+}
+
+
+void QFAText::StartTextRender(const glm::mat4& proj)
 {
     shader->Use();
     glDisable(GL_CULL_FACE);
@@ -258,7 +361,7 @@ void QFARenderText::StartTextRender()
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    shader->SetProjectionMatrix(QFARenderText::projection);
+    shader->SetProjectionMatrix(proj);
     
     for (size_t i = 0; i < GlyphAtlasList.Length(); i++)
     {
@@ -267,13 +370,12 @@ void QFARenderText::StartTextRender()
         GLCall(glBindTexture(GL_TEXTURE_2D, GlyphAtlasList[i].atlasId));
     }
 }
-#include <Render/Time.h>
 
-void QFARenderText::Render()
-{   
+void QFAText::Render()
+{         
     if (TextChange)
         ProcessText();
-
+    
     GLCall(glBindVertexArray(VAO));
     GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO));
     
@@ -282,52 +384,51 @@ void QFARenderText::Render()
     shader->SetOutlineStatus(Outline);
     shader->SetOpacity(Opacity);
 
-    GLCall(glDrawArrays(GL_TRIANGLES, 0, 6 * (int)Text.length()));// 6 * Text.length()    
+    GLCall(glDrawArrays(GL_TRIANGLES, 0, 6 * (int)CountSymbolForRender));// 6 * Text.length()    
 }
 
-void QFARenderText::EndTextRender()
-{
-    glDepthMask(GL_TRUE); // Re-enable writing to the depth buffer
+void QFAText::EndTextRender()
+{    
+    glDepthMask(GL_TRUE); 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
+    
 }
 
-void QFARenderText::SetPosition(unsigned int x, unsigned int y)
+void QFAText::SetPosition(unsigned int x, unsigned int y)
 {
     TextChange = true;
     Position_x = x;
     Position_y = y;
 }
 
-void QFARenderText::SetSize(unsigned int w, unsigned int h)
+void QFAText::SetSize(unsigned int w, unsigned int h)
 {
     TextChange = true;
     Width = w;
     Height = h;
 }
 
-void QFARenderText::Destroy()
+void QFAText::Destroy()
 {
     delete this;
 }
 
-void QFARenderText::ChangeProjection(unsigned int viewportWidth, unsigned int viewportHeight)
+void QFAText::ChangeViewportSize(unsigned int viewportWidth, unsigned int viewportHeight)
 {
     TextChange = true;
     ViewPortWidth = viewportWidth;
-    ViewPortHeight = viewportHeight;
-    QFARenderText::projection = glm::ortho(0.0f, (float)viewportWidth, 0.0f, (float)viewportHeight);
+    ViewPortHeight = viewportHeight;    
 }
 
 
-void QFARenderText::SetText(std::wstring  text)
+void QFAText::SetText(std::wstring  text)
 {
     if (text.length() > CountGlyphInBuffer)
-    {
-        
-        free(QFARenderText::GlyphInfoData);
-        QFARenderText::CountGlyphInBuffer *= 2;
-        QFARenderText::GlyphInfoData = (GlyphShader*)malloc(sizeof(GlyphShader) * QFARenderText::CountGlyphInBuffer);
+    {        
+        free(QFAText::GlyphInfoData);
+        QFAText::CountGlyphInBuffer = (unsigned int)((float)text.length() * 1.5);
+        QFAText::GlyphInfoData = (GlyphShader*)malloc(sizeof(GlyphShader) * QFAText::CountGlyphInBuffer);
     }
 
     Text = text;
@@ -336,11 +437,32 @@ void QFARenderText::SetText(std::wstring  text)
         SetTextSize(defaultTextSize);
 }
 
-void QFARenderText::SetTextSize(unsigned int height)
+void QFAText::SetTextSize(unsigned int height)
 {
+    if (height == 0)
+        height = 1;
+
     TextChange = true;
     FontHeight = height;
 }
+
+void QFAText::SetOverflowWrap(EOverflowWrap wrap)
+{
+    TextChange = true;
+    OverflowWrap = wrap;
+}
+
+void QFAText::EndLife()
+{
+    free(QFAText::GlyphInfoData);
+
+    if(face)
+        FT_Done_Face(face);
+
+    if(ft)
+        FT_Done_FreeType(ft);
+}
+
 
 /*
 int lop = 0;

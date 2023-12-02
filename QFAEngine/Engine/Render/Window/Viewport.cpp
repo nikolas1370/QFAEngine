@@ -11,16 +11,16 @@
 
 QFAViewport* QFAViewport::DefaultViewPort = nullptr;
 
-void QFAViewport::AddText(QFARenderText* text)
+void QFAViewport::AddText(QFAText* text)
 {
 	if (!text)
 		return;
 
 	Texts.Add(text);
-	text->ChangeProjection((unsigned int)Width, (unsigned int)Height);
+	text->ChangeViewportSize((unsigned int)Width, (unsigned int)Height);
 }
 
-void QFAViewport::RemoveText(QFARenderText* text)
+void QFAViewport::RemoveText(QFAText* text)
 {
 	Texts.Remove(text);
 }
@@ -35,9 +35,12 @@ void QFAViewport::Settup(int windowWidth, int windowHeight)
 	Height = (int)((float)WindowHeight * HeightP);
 	if (Height == 0)
 		Height = 1;
+	
+	UIProjection = glm::ortho(0.0f, (float)Width, 0.0f, (float)Height);
 
 	for (size_t i = 0; i < Texts.Length(); i++)
-		Texts[i]->ChangeProjection(Width, Height);
+		Texts[i]->ChangeViewportSize(Width, Height);
+
 
 	if (CurentCamera)
 		MatrixPerspective = glm::perspective(glm::radians(CurentCamera->Fov),
@@ -67,19 +70,17 @@ void QFAViewport::ProcessFrame(uint64_t startFrameTime)
 			if (CurentFrameWorld->Actors[i]->RootComponent->IsValid())
 				ProcessComponentShadow(CurentFrameWorld->Actors[i]->RootComponent);
 	
-
 	secondFrameBuffer.StartFrame();
 	
 	for (int i = 0; i < CurentFrameWorld->Actors.Length(); i++)
 		if (CurentFrameWorld->Actors[i]->RootComponent->IsValid())
 			ProcessComponent(CurentFrameWorld->Actors[i]->RootComponent);
 
-
-	QFARenderText::StartTextRender();
+	QFAText::StartTextRender(UIProjection);
 	for (size_t i = 0; i < Texts.Length(); i++)
 		Texts[i]->Render();	
 
-	QFARenderText::EndTextRender();
+	QFAText::EndTextRender();
 }
 
 void QFAViewport::ProcessComponent(QSceneComponent* component)
@@ -92,9 +93,7 @@ void QFAViewport::ProcessComponent(QSceneComponent* component)
 
 	for (int i = 0; i < component->ListComponents.Length(); i++)
 		if (component->ListComponents[i]->IsValid())
-			ProcessComponent(component->ListComponents[i]);
-
-	
+			ProcessComponent(component->ListComponents[i]);	
 }
 
 void QFAViewport::ProcessComponentShadow(QSceneComponent* component)
@@ -115,7 +114,6 @@ void QFAViewport::DrawMesh(QMeshBaseComponent* mesh)
 {
 	QFAShaderProgram* shaderProgram = mesh->GetShaderProgram();
 	mesh->Bind(StartFrameTime, false);
-	// now MatrixPerspective send each drawCall in future be change when camera or window change
 
 	shaderProgram->SetProjectionMatrix(MatrixPerspective);
 	shaderProgram->SetCameraRotationMatrix(CurentCamera->cameraRotationMatrex);
@@ -133,7 +131,6 @@ void QFAViewport::DrawMesh(QMeshBaseComponent* mesh)
 		shaderProgram->SetShadowOn(false);
 
 	GLCall(glDrawElements(GL_TRIANGLES, mesh->GetIndexCount(), GL_UNSIGNED_INT, nullptr));
-
 }
 
 void QFAViewport::DrawMeshShadow(QMeshBaseComponent* mesh)
@@ -146,18 +143,12 @@ void QFAViewport::DrawMeshShadow(QMeshBaseComponent* mesh)
 	GLCall(glDrawElements(GL_TRIANGLES, mesh->GetIndexCount(), GL_UNSIGNED_INT, nullptr));
 }
 
-
-
 QFAViewport::QFAViewport()
 {
 	if (!QFAViewport::DefaultViewPort)		
 	{
-		QFAViewport::DefaultViewPort = this;
-
-		
-	}
-
-	
+		QFAViewport::DefaultViewPort = this;	
+	}	
 }
 
 QFAViewport::~QFAViewport()
@@ -203,6 +194,9 @@ void QFAViewport::SetParameters(float xP, float  yP, float widthP, float heightP
 		Height = 1;
 
 	secondFrameBuffer.UpdateSize(Width, Height);
+	UIProjection = glm::ortho(0.0f, (float)Width, 0.0f, (float)Height);
+	MatrixPerspective = glm::perspective(glm::radians(CurentCamera->Fov),
+		(float)Width / (float)Height, 0.1f, CurentCamera->ViewDistance);
 }
 
 
