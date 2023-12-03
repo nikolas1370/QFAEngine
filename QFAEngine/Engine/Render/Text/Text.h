@@ -191,33 +191,30 @@ public:
         clip 
         ellipsis
     */
-    /*
-    text-align
-        left Ч по левому краю. »спользуетс€ по умолчанию
-        center Ч по центру
-        right Ч по правому краю
-    */
     enum EOverflowWrap
     {
         OWNone,
         OWSymbol, 
         OWWord// if word bigger than Width word will go out of bounds
     };
+
+    enum ETextAlign
+    {
+        TALeft,
+        TACenter,
+        TARight
+    };
     
     void SetOverflowWrap(EOverflowWrap wrap);
-
-    
-    
+    void SetTextAlign(ETextAlign aligh);
+        
 private: 
     unsigned int Width = 300;
     unsigned int Height = 120;
-    
-
-
-    
+        
     EOverflowWrap OverflowWrap = EOverflowWrap::OWWord;
-    //EOverflowWrap OverflowWrap = EOverflowWrap::OWSymbol;
-    
+    //ETextAlign TextAlign = ETextAlign::TALeft;
+    ETextAlign TextAlign = ETextAlign::TACenter;
 
     struct PrepareData
     {

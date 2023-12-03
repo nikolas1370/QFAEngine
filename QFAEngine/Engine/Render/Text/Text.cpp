@@ -303,8 +303,6 @@ void QFAText::ProcessText()
     CountSymbolForRender = (unsigned int)SymbolsForRender.Length();
     PrepareSymbolsToGpu();
     
-
-
     if (CountSymbolForRender > CountGlyphInGUP)
     {
         CountGlyphInGUP = (unsigned int)((float)CountSymbolForRender * 1.5f);
@@ -318,39 +316,138 @@ void QFAText::ProcessText()
 
 void QFAText::PrepareSymbolsToGpu()
 {    
+    if (CountSymbolForRender == 0)
+        return;
+
     int w = 0;
     unsigned int row = 0;
     float tem = ((float)FontHeight / (float)FontLoadCharHeight);
-    for (size_t i = 0; i < CountSymbolForRender; i++)
-    {    
-        // for text-align. last ' ' in row not calculate in w
-        if (row != QFAText::SymbolsForRender[i].row)
+    if (TextAlign == ETextAlign::TALeft)
+    {
+        for (size_t i = 0; i < CountSymbolForRender; i++)
         {
-            row = QFAText::SymbolsForRender[i].row;
-            w = 0;
+            if (row != QFAText::SymbolsForRender[i].row)
+            {
+                row = QFAText::SymbolsForRender[i].row;
+                w = 0;
+            }
+
+            GlyphInfo* gi = &Symbols[QFAText::SymbolsForRender[i].symbolIndex].Glyph;
+
+            float temX = ((float)Position_x + (float)w + (float)gi->bitmap_left * tem);
+            float temXEnd = temX + (float)gi->width * tem;
+
+            float start_y = (float)ViewPortHeight - (float)Position_y - (float)FontHeight * gi->HeightMultiplier - ((float)row * ((float)FontHeight * gi->HeightMultiplier));// remove gi.HeightMultiplier if need less spase above base line
+            float temY = start_y - ((float)gi->MaxDescender + (float)gi->bitmap_bottom) * tem;
+            float temYEnd = temY + (float)gi->height * tem;
+
+            QFAText::GlyphInfoData[i].leftBottom_1 = GlyphShaderVertex{ temX, temY ,   gi->x, gi->y, (int)gi->atlasIndex };
+            GlyphInfoData[i].rightBottom_1 = { temX, temYEnd,   gi->x, gi->yEnd, (int)gi->atlasIndex };
+            GlyphInfoData[i].rightTop_1 = { temXEnd, temYEnd,   gi->xEnd, gi->yEnd, (int)gi->atlasIndex };
+
+            GlyphInfoData[i].leftBottom_2 = GlyphInfoData[i].leftBottom_1;
+            GlyphInfoData[i].rightTop_2 = GlyphInfoData[i].rightTop_1;
+            GlyphInfoData[i].leftTop_2 = GlyphShaderVertex{ temXEnd, temY,   gi->xEnd, gi->y, (int)gi->atlasIndex };
+
+            w += (int)((float)gi->advance_x * tem);
         }
-        
-        GlyphInfo* gi = &Symbols[QFAText::SymbolsForRender[i].symbolIndex].Glyph;
+    }
+    else if (TextAlign == ETextAlign::TACenter)
+    {           
+        int rowLen = 0;
+        for (size_t startRow = 0; startRow < CountSymbolForRender; startRow += rowLen)
+        {
+            int row = QFAText::SymbolsForRender[startRow].row;
+            int rowW = 0;
+            rowLen = 0;
+            for (size_t i = startRow; i < CountSymbolForRender; i++)
+            {
+                if (QFAText::SymbolsForRender[i].row != row)
+                {
+                    if ((Symbols[QFAText::SymbolsForRender[i - 1].symbolIndex].symbol == L' '))
+                        rowW -= (int)((float)Symbols[QFAText::SymbolsForRender[i - 1].symbolIndex].Glyph.advance_x * tem) - 1;
 
-        float temX = ((float)Position_x + (float)w + (float)gi->bitmap_left * tem);
-        float temXEnd = temX + (float)gi->width * tem;
+                    break;
+                }                    
 
-        float start_y = (float)ViewPortHeight - (float)Position_y - (float)FontHeight * gi->HeightMultiplier - ((float)row *  ((float)FontHeight * gi->HeightMultiplier));// remove gi.HeightMultiplier if need less spase above base line
-        float temY = start_y - ((float)gi->MaxDescender + (float)gi->bitmap_bottom) * tem;
-        float temYEnd = temY + (float)gi->height * tem;
-        
-        QFAText::GlyphInfoData[i].leftBottom_1 = GlyphShaderVertex{ temX, temY ,   gi->x, gi->y, (int)gi->atlasIndex };       
-        GlyphInfoData[i].rightBottom_1 = { temX, temYEnd,   gi->x, gi->yEnd, (int)gi->atlasIndex };
-        GlyphInfoData[i].rightTop_1 = { temXEnd, temYEnd,   gi->xEnd, gi->yEnd, (int)gi->atlasIndex };
-        
-        GlyphInfoData[i].leftBottom_2 = GlyphInfoData[i].leftBottom_1;
-        GlyphInfoData[i].rightTop_2 = GlyphInfoData[i].rightTop_1;
-        GlyphInfoData[i].leftTop_2 = GlyphShaderVertex{ temXEnd, temY,   gi->xEnd, gi->y, (int)gi->atlasIndex };
+                rowLen++;
+                rowW += (int)((float)Symbols[QFAText::SymbolsForRender[i].symbolIndex].Glyph.advance_x * tem);
+            }
 
-        w += (int)((float)gi->advance_x * tem);
+            w = ((int)Width - rowW) / 2;// rowW can be larger Width
+            for (size_t i = startRow; i < startRow + rowLen; i++)            
+            {                
+                GlyphInfo* gi = &Symbols[QFAText::SymbolsForRender[i].symbolIndex].Glyph;
+
+                float temX = ((float)Position_x + (float)w + (float)gi->bitmap_left * tem);
+                float temXEnd = temX + (float)gi->width * tem;
+
+                float start_y = (float)ViewPortHeight - (float)Position_y - (float)FontHeight * gi->HeightMultiplier - ((float)row * ((float)FontHeight * gi->HeightMultiplier));// remove gi.HeightMultiplier if need less spase above base line
+                float temY = start_y - ((float)gi->MaxDescender + (float)gi->bitmap_bottom) * tem;
+                float temYEnd = temY + (float)gi->height * tem;
+
+                QFAText::GlyphInfoData[i].leftBottom_1 = GlyphShaderVertex{ temX, temY ,   gi->x, gi->y, (int)gi->atlasIndex };
+                GlyphInfoData[i].rightBottom_1 = { temX, temYEnd,   gi->x, gi->yEnd, (int)gi->atlasIndex };
+                GlyphInfoData[i].rightTop_1 = { temXEnd, temYEnd,   gi->xEnd, gi->yEnd, (int)gi->atlasIndex };
+
+                GlyphInfoData[i].leftBottom_2 = GlyphInfoData[i].leftBottom_1;
+                GlyphInfoData[i].rightTop_2 = GlyphInfoData[i].rightTop_1;
+                GlyphInfoData[i].leftTop_2 = GlyphShaderVertex{ temXEnd, temY,   gi->xEnd, gi->y, (int)gi->atlasIndex };
+
+                w += (int)((float)gi->advance_x * tem);
+            }
+        }
+    }
+    else if (TextAlign == ETextAlign::TARight)
+    {// do revers
+        int statrtFor;
+        if (Symbols[QFAText::SymbolsForRender[CountSymbolForRender - 1].symbolIndex].symbol == L' ')
+            CountSymbolForRender--;// if last symbol space(' ') symbol past
+        
+        row = QFAText::SymbolsForRender[CountSymbolForRender - 1].row;        
+        for (int i = CountSymbolForRender - 1; i >= 0; i--)
+        {            
+            if (row != QFAText::SymbolsForRender[i].row)
+            {
+                row = QFAText::SymbolsForRender[i].row;
+                w = Width;
+            }
+            
+            if (Symbols[QFAText::SymbolsForRender[i].symbolIndex].symbol == L' ' && QFAText::SymbolsForRender[i].row != QFAText::SymbolsForRender[i + 1].row)
+            {// if last symbol in row be space(' ') symbol have all parameters 0
+                QFAText::GlyphInfoData[i].leftBottom_1 = GlyphShaderVertex{ 0, 0,   0, 0, 0 };
+                GlyphInfoData[i].rightBottom_1 = { 0, 0,   0, 0, 0 };
+                GlyphInfoData[i].rightTop_1 = { 0, 0,   0, 0, 0 };
+
+                GlyphInfoData[i].leftBottom_2 = GlyphInfoData[i].leftBottom_1;
+                GlyphInfoData[i].rightTop_2 = GlyphInfoData[i].rightTop_1;
+                GlyphInfoData[i].leftTop_2 = GlyphShaderVertex{ 0, 0,   0, 0, 0 };
+                GlyphInfo* temGi = &Symbols[QFAText::SymbolsForRender[i].symbolIndex].Glyph;
+                w +=  (float)temGi->width * tem - 1;
+                continue;
+            }                       
+
+            GlyphInfo* gi = &Symbols[QFAText::SymbolsForRender[i].symbolIndex].Glyph;
+
+            float temX = ((float)Position_x + (float)w - (float)gi->advance_x * tem + (float)gi->bitmap_left * tem);
+            float temXEnd = temX + (float)gi->width * tem;
+
+            float start_y = (float)ViewPortHeight - (float)Position_y - (float)FontHeight * gi->HeightMultiplier - ((float)row * ((float)FontHeight * gi->HeightMultiplier));// remove gi.HeightMultiplier if need less spase above base line
+            float temY = start_y - ((float)gi->MaxDescender + (float)gi->bitmap_bottom) * tem;
+            float temYEnd = temY + (float)gi->height * tem;
+
+            QFAText::GlyphInfoData[i].leftBottom_1 = GlyphShaderVertex{ temX, temY ,   gi->x, gi->y, (int)gi->atlasIndex };
+            GlyphInfoData[i].rightBottom_1 = { temX, temYEnd,   gi->x, gi->yEnd, (int)gi->atlasIndex };
+            GlyphInfoData[i].rightTop_1 = { temXEnd, temYEnd,   gi->xEnd, gi->yEnd, (int)gi->atlasIndex };
+
+            GlyphInfoData[i].leftBottom_2 = GlyphInfoData[i].leftBottom_1;
+            GlyphInfoData[i].rightTop_2 = GlyphInfoData[i].rightTop_1;
+            GlyphInfoData[i].leftTop_2 = GlyphShaderVertex{ temXEnd, temY,   gi->xEnd, gi->y, (int)gi->atlasIndex };
+
+            w -= (int)((float)gi->advance_x * tem);
+        }
     }
 }
-
 
 void QFAText::StartTextRender(const glm::mat4& proj)
 {
@@ -450,6 +547,13 @@ void QFAText::SetOverflowWrap(EOverflowWrap wrap)
 {
     TextChange = true;
     OverflowWrap = wrap;
+}
+
+
+void QFAText::SetTextAlign(ETextAlign aligh)
+{
+    TextChange = true;
+    TextAlign = aligh;
 }
 
 void QFAText::EndLife()

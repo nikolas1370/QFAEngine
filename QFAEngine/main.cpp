@@ -141,11 +141,11 @@ int main()
     thirdCamera->ActivateCamera(thirdViewPort);
     fourthCamera->ActivateCamera(fourthViewPort);
     
-    
+    /*
     mainWindow->AddViewport(secondViewPort);
     mainWindow->AddViewport(thirdViewPort);
     mainWindow->AddViewport(fourthViewPort);
-    
+    */
     
 
     firstdViewPort->SetParameters(0, 0, 0.5f, 1);
@@ -192,8 +192,7 @@ int main()
     
     text->SetPosition(0, 16);    
     text->SetTextSize(48);
-    text->SetText(L"З'їли їжака Their could can widen ten she any. As so we smart those money in. Am wrote up whole so tears sense oh. Absolute required of reserved in offering no. How sense found our those gay again taken the. Had mrs outweigh desirous sex overcame. Improved property reserved disposal do offering me.");
-    
+    text->SetText(L"З'їли їжака Their could can widen ten she any. As so we smart those money in. Am wrote up whole so tears sense oh. Absolute required of reserved in offering no. How sense found our those gay again taken the. Had mrs outweigh desirous sex overcame. Improved property reserved disposal do offering me.");    
     text->Color = FVector(1, 0, 0.3f);
     text->Outline = false;
     text->OutlineColor = FVector(0.5f, 0.4f, 0.3f);
