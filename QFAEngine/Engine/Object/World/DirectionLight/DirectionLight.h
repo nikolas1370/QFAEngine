@@ -4,38 +4,43 @@
 
 class QFAShaderProgram;
 class QFAViewport;
+class QFAWindow;
 
 class QDirectionLight : public QObject
 {
 	friend QFAViewport;
+	friend QFAWindow;
 	unsigned int depthMapFBO;
-	const unsigned int SHADOW_WIDTH = 1000, SHADOW_HEIGHT = 1000;
+	//const unsigned int SHADOW_WIDTH = 1000, SHADOW_HEIGHT = 1000;
 	unsigned int depthMap;
 	unsigned int VAOSuper;
 
-	
-	FVector Direction = FVector(-1,0,0);	
+	// in vulkan coordinate
+	FVector Direction = FVector(0,0,1);	
+	FVector Ambient = FVector(0.1);
+	FVector Diffuse = FVector(1);
+	FVector Specular = FVector(1);
 	bool CastShadows = true;
 
 	
 public:
-	// in private
-	void StartFrame();
+
 
 
 
 	QDirectionLight();
 	~QDirectionLight();
 
-	/*
-		calsculate Light Matrix and set in shader
-	*/
-	void SetLightMatrix(const FVector& cameraPositionOpenGL, QFAShaderProgram* sp);
-	void SetShadowMap(QFAShaderProgram* sp);
+
+
+	glm::mat4 GetLightMatrix(const FVector& cameraPositionVulkan);
+
 	inline bool GetCastShadow()
 	{
 		return CastShadows;
 	}
+
+
 
 	inline void SetCastShadow(bool castShadow)
 	{

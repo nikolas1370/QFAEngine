@@ -1,6 +1,5 @@
 #pragma once
 #include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
-#include <Object/ActorComponent/SceneComponent/Mesh/Mesh.h>
 #include "FileLoader.h"
 #include "Parser.h"
 #include <Math/Math.h>
@@ -28,7 +27,7 @@ class OBJLoader
 //	static bool SomeFun(const FVector& previousFrameVertex, const FVector& curentFrameVertex, const FVector& nextFrameVertex);
 
 
-	static MeshFrames* LoadModel(std::string path, unsigned int framePerSecond);
+	static MeshData* LoadModel(std::string path, unsigned int framePerSecond);
 public:
 	/* 
 		load only triangulate mesh
@@ -36,16 +35,6 @@ public:
 		model Forward vector -Z
 	*/
 	static QStaticMesh* LoadModel(std::string path);
-	/*
-		load only triangulate mesh
-		model Up vector		  Y
-		model Forward vector -Z
-
-		path == "nameModel_1.obj" after name always be '_' and start from first(1) frame
-			in name only one '_' and '.'
-
-	*/
-	static QMesh* LoadModelWithAnimate(std::string path, unsigned int framePerSecond);
 
 	
 };

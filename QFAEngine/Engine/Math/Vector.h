@@ -178,6 +178,16 @@ public:
         return glm::vec3(X, Y, Z);
     }
 
+    inline TVector<T> ConvertToVulkanCoordinate() const
+    {
+        return TVector<T>(Y, Z * -1, X);
+    }
+
+    inline TVector<T> ConvertFromVulkanCoordinate() const
+    {
+        return TVector<T>(Z, X, Y * -1);
+    }
+
     inline bool equel(const TVector<T>& v, T around = 0.00001) const
     {
         return (v.X - X < around && v.Y - Y < around && v.Z - Z < around);

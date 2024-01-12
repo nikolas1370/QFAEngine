@@ -27,10 +27,6 @@ class QSceneComponent : public QActorComponent
 	QSceneComponent* ParentActorComponent;
 	bool IRootComponent = false;
 
-
-
-
-	
 	/*
 	can't be detached
 	will not detach
@@ -57,15 +53,6 @@ class QSceneComponent : public QActorComponent
 protected:
 
 
-	static inline  FVector ToOpenglCoordinate(FVector positon)
-	{
-		return FVector(positon.Y, positon.Z, positon.X * -1);
-	}
-
-	static inline FVector FromOpenglCoordinate(FVector positon)
-	{
-		return FVector(positon.Z * -1, positon.X, positon.Y);
-	}
 
 	// in opengl format
 	FVector WorldPosition = FVector(0);
@@ -124,7 +111,7 @@ public:
 	/*
 	*	if component is RootComponent position set in QActor
 	*   if component has not parent the position not set
-	*	if component has parent but not conect to QActor tree position set incorrectly		 
+	*	if component has parent but not conect to QActorTree position set incorrectly		 
 	*/
 	 inline void SetWorldPosition(const FVector position)
 	{
@@ -132,8 +119,8 @@ public:
 	}
 	
 	inline FVector GetWorldPosition() const
-	{
-		return FromOpenglCoordinate(WorldPosition);// FVector(ModelMatrix[3][2] * -1, ModelMatrix[3][0], ModelMatrix[3][1]);
+	{		
+		return WorldPosition.ConvertFromVulkanCoordinate();
 	}
 
 	/*

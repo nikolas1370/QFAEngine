@@ -8,6 +8,7 @@ Q swith control between camera and some actor whit mehes
 
 
 
+#pragma comment(lib, "vulkan-1.lib")
 
 #include "Math/Vector.h"
 
@@ -18,7 +19,6 @@ Q swith control between camera and some actor whit mehes
 #pragma comment(lib, "Shell32.lib") // for glfw
 
 #pragma comment(lib, "glew32s.lib") // for glfw 
-//glew32s 's' mean static
 
 #include <Overlord/Overlord.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
@@ -33,7 +33,7 @@ Q swith control between camera and some actor whit mehes
 #include <Object/Actor/Camera/CameraEditor.h>
 #include <Render/Window/Window.h>
 #include <Render/Window/Viewport.h>
-#include <Render/Text/Text.h>
+#include <Render/UI/Text.h>
 
 
 
@@ -47,11 +47,14 @@ int main()
 
     QFAOverlord::Init();
 
-    QMesh* MeshA = OBJLoader::LoadModelWithAnimate("NoEngineModel/anim/dore_1.obj", 30); 
-    //QStaticMesh* Mesh = OBJLoader::LoadModel("NoEngineModel/quad2.obj");//(vertecis, sizeof(vertecis), indices, sizeof(indices) / sizeof(unsigned int));
-    //QStaticMesh* Arrow = OBJLoader::LoadModel("NoEngineModel/Arrow.obj");
-    //Arrow->Name = "Arrow";
-    MeshA->Name = "animation na";
+
+    QStaticMesh* Mesh = OBJLoader::LoadModel("NoEngineModel/Arrow.obj");
+    QStaticMesh* Mesh2 = OBJLoader::LoadModel("NoEngineModel/quad2.obj");
+    QStaticMesh* Mesh3 = OBJLoader::LoadModel("NoEngineModel/anim/dore_1.obj");
+    
+    
+    
+    
 
     QWorld* mainWorld = new QWorld();
 
@@ -62,68 +65,30 @@ int main()
     QActor* floorActor = new QActor();
     QActor* animActor = new QActor();
 
-    //firstActor->SetRootComponent(Arrow);
+    firstActor->SetRootComponent(Mesh2);
+    Mesh->AttachComponent(Mesh3);
+    Mesh3->SetRelativePosition(FVector(0, 0, -1));
     
-    //secondActor->SetRootComponent(Mesh);   
+    secondActor->SetRootComponent(Mesh);   
+    secondActor->SetActorPosition(FVector(0, 0, -0.5));
+    firstActor->SetActorPosition(FVector(0, 0, 1));
+    secondActor->SetActorRotation(FVector(0, 0, 0));
     
 
-    animActor->SetRootComponent(MeshA);
-    animActor->SetActorPosition(FVector(30, 0, 0));
     
 
-    /*------------------------------*/
-    QActor* mainActor = new QActor();
-    mainActor->Name = "mainActor";
-    //mainWorld->AddActor(mainActor);
-    mainWorld->AddActor(animActor);    
-    mainActor->SetActorPosition(FVector(30, 0, 0));
-    
-    //
-    /*
-    not work  GetCopyMesh
-    */
-    //QStaticMesh* qwd = Mesh->GetCopyMesh();    
-    //QStaticMesh mainComponent = *Mesh;
-    //mainComponent.Name = "mainComponent";
-    //mainActor->SetRootComponent(&mainComponent);
 
-    //QStaticMesh secondComponent = *Mesh;
-    //secondComponent.Name = "secondComponent";
-    
-    //Arrow->SetRelativePosition(FVector(0, 7, 0));
-        
-    //mainComponent.AttachComponent(&secondComponent);
-    /*
-    secondComponent.SetRelativePosition(FVector(0, 0, 5));
-    secondComponent.AttachComponent(Arrow);
-   
-    mainActor->SetActorScale(1.0);
+    mainWorld->AddActor(firstActor);
+    mainWorld->AddActor(secondActor);
+    secondActor->Name = "mainactor";
 
-    secondComponent.SetLocalPosition(FVector(10, 0, 3));
-    
-    
-    Arrow->SetWorldPosition(FVector(30, -3, 0));    
-    
-    mainComponent.SetScale(0.5f);
-    secondComponent.SetScale(2);
-    Arrow->SetScale(2.0f); 
 
-    secondComponent.SetRelativePosition(FVector(0, 0, 10));
-    Arrow->SetRelativePosition(FVector(0, 0, -10));
-    
-    secondComponent.SetRotation(FVector(-14, 480, 750));
-
-    /*-----------*/
-    /*-----------*/
-    /*-----------*/
-    /*-----------*/
-    /*-----------*/
-   
     
     ACameraEditor Camera;    
-    //Camera.SetActorPosition(FVector(0, -2, 0));
+    Camera.SetActorPosition(FVector(-10, 0, 0));
     mainWorld->AddActor(&Camera);
-    mainActor->SetActorPosition(FVector(30, 0, 0));
+    Camera.SetActorRotation(FVector(0, 0, 0));
+    //mainActor->SetActorPosition(FVector(30, 0, 0));
     
     QFAWindow* mainWindow = QFAWindow::GetMainWindow();
     QFAViewport* firstdViewPort = mainWindow->GetViewport(0);
@@ -141,14 +106,15 @@ int main()
     thirdCamera->ActivateCamera(thirdViewPort);
     fourthCamera->ActivateCamera(fourthViewPort);
     
-    /*
+    
     mainWindow->AddViewport(secondViewPort);
     mainWindow->AddViewport(thirdViewPort);
     mainWindow->AddViewport(fourthViewPort);
-    */
+    
     
 
-    firstdViewPort->SetParameters(0, 0, 0.5f, 1);
+    //firstdViewPort->SetParameters(0, 0, 0.5f, 1);
+    firstdViewPort->SetParameters(0, 0, 0.5, 1);
     
     secondViewPort->SetParameters(0.5f, 0.66666f,    0.5f, 0.33333f);
     thirdViewPort->SetParameters(0.5f,  0.33333f, 0.5f, 0.33333f);
@@ -158,56 +124,101 @@ int main()
     mainWorld->AddActor(thirdCamera);
     mainWorld->AddActor(fourthCamera);
     
-    secondCamera->SetActorPosition(FVector(30, 30, 5));
-    secondCamera->SetActorRotation(FVector(0, 0, -90));
-
-
-    thirdCamera->SetActorPosition(FVector(60, 0, 5));
-    thirdCamera->SetActorRotation(FVector(0, 0, 180));
+    
+    secondCamera->SetActorPosition(FVector(-6.09397, -7.52392, -0.0468553));
+    secondCamera->SetActorRotation(FVector(0, -1.8, 49.5));
 
     
-    fourthCamera->SetActorPosition(FVector(16.2079f, 1.94214f, -3.84775f));
-    fourthCamera->SetActorRotation(FVector(0.f, 35.9f, -10.f));
+    thirdCamera->SetActorPosition(FVector(-6.45376, 6.17212, -0.0468553));
+    thirdCamera->SetActorRotation(FVector(0, -4.4, -51.5));
+
+    
+    fourthCamera->SetActorPosition(FVector(-9.09311, -0.381247, 6.01103));
+    fourthCamera->SetActorRotation(FVector(0, -23.7998, -0.000142425));
+    
     
     QFAText* text = new QFAText();
-    
-    
     QFAText* text_2 = new QFAText();
-    text_2->SetText(L"Viewport 1");    
+    text_2->SetText(L"Viewport 1");
+
+    /*
+    
+    остані букви неті
+
+    
+    */
+    
+
+    text_2->SetPosition(0, 0);
+    text_2->SetTextSize(16);
+    text_2->Color = FVector(1, 0.5, 0);
+    /*-----*/
+
+    
+    
     QFAText* text2 = new QFAText();
     text2->SetText(L"Viewport 2");
     QFAText* text3 = new QFAText();
     text3->SetText(L"Viewport 3");
     QFAText* text4 = new QFAText();
     text4->SetText(L"Viewport 4");
-    text_2->SetPosition(0,0);
+    
+    text2->Color = FVector(0, 0, 1);
+    text3->Color = FVector(0, 0.5, 0);
+    text4->Color = FVector(1, 0, 0);
+
     text2->SetPosition(0,0);
     text3->SetPosition(0,0);
     text4->SetPosition(0,0);
-    text_2->SetTextSize(16);
+    
     text2->SetTextSize(20);
     text3->SetTextSize(25);
     text4->SetTextSize(12);
 
     
-    text->SetPosition(0, 16);    
-    text->SetTextSize(48);
-    text->SetText(L"З'їли їжака Their could can widen ten she any. As so we smart those money in. Am wrote up whole so tears sense oh. Absolute required of reserved in offering no. How sense found our those gay again taken the. Had mrs outweigh desirous sex overcame. Improved property reserved disposal do offering me.");    
-    text->Color = FVector(1, 0, 0.3f);
-    text->Outline = false;
-    text->OutlineColor = FVector(0.5f, 0.4f, 0.3f);
-    text->Opacity = 0.9f;
-    firstdViewPort->AddText(text);
     
     
-    firstdViewPort->AddText(text_2);
+    
+    
     
 
     
     secondViewPort->AddText(text2);
     thirdViewPort->AddText(text3);
     fourthViewPort->AddText(text4);
+    /*----*/
+
+
+    /*
+
+
+
+ create more text with almost identical text large text
+
+
+
+
+ */
+
+    text->SetPosition(0, 16);
+    //text->SetTextSize(19);  doo and day
+    text->SetText(L"З'їли Їжака This tutorial will teach you the basics of using the Vulkan graphics and compute API. Vulkan is a new API by the Khronos group (known for OpenGL) that provides a much better abstraction of modern graphics cards. This new interface allows you to better describe what your application intends to do, which can lead to better performance and less surprising driver behavior compared to existing APIs like OpenGL and Direct3D. The ideas behind Vulkan are similar to those of Direct3D 12 and Metal, but Vulkan has the advantage of being fully cross-platform and allows you to develop for Windows, Linux and Android at the same time.");
+                                
+    //text->SetText(L"З'їли Їїжака їжака AaBb");
+    text->Color = FVector(1, 0, 0.3f);
+    text->Outline = false;
+    text->OutlineColor = FVector(0.5f, 0.4f, 0.3f);
+    text->Opacity = 0.9f;
+    text->SetTextAlign(QFAText::ETextAlign::TACenter);
+
+    firstdViewPort->AddText(text);
+
+
+
     
+    firstdViewPort->AddText(text_2);
+    text->SetSize(600, 300);
+    text_2->SetSize(600, 300);
 
     QFAOverlord::StartLife();
 

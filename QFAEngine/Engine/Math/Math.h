@@ -5,8 +5,18 @@
 
 #define EqualFloats(value1, value2) (value1 - value2 < 0.00001)
 #define EqualToZero(value) (value < 0.00001)
+
+//#define GLM_FORCE_RADIANS
+//#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+
+/*
 #include <mat4x4.hpp>
 #include <gtc/matrix_transform.hpp>
+*/
 
 class Math
 {
@@ -60,6 +70,9 @@ public:
 		dmm[2][2] = 1;
 		return dmm;
 	}
+
+
+	
 };
 
 

@@ -5,14 +5,10 @@ QStaticMesh* OBJLoader::LoadModel(std::string path)
 	return new QStaticMesh(LoadModel(path, 0));
 }
 
-QMesh* OBJLoader::LoadModelWithAnimate(std::string path, unsigned int framePerSecond)
-{
-	return new QMesh(LoadModel(path, framePerSecond));
-}
 
-MeshFrames* OBJLoader::LoadModel(std::string path, unsigned int framePerSecond)
+MeshData* OBJLoader::LoadModel(std::string path, unsigned int framePerSecond)
 {
-	MeshFrames* meshFrame = nullptr;// = new MeshFrames();
+	MeshData* meshFrame = nullptr;// = new MeshFrames();
 
 	int VMCount = 0;
 	unsigned int* meshIndexes = nullptr;
@@ -218,7 +214,7 @@ MeshFrames* OBJLoader::LoadModel(std::string path, unsigned int framePerSecond)
 				}
 			}
 
-			meshFrame = new MeshFrames(countFrame, rawIndexUniqueCount, charsCount[3] * 3, materialListLen, framePerSecond);// * 3 face have 3 index
+			meshFrame = new MeshData(rawIndexUniqueCount, charsCount[3] * 3, materialListLen);// * 3 face have 3 index
 			for (unsigned int i = 0; i < materialListLen; i++)
 				meshFrame->SetMaterial(Material{ materialList[i].color, materialList[i].specular }, i);
 
@@ -239,6 +235,16 @@ MeshFrames* OBJLoader::LoadModel(std::string path, unsigned int framePerSecond)
 		SSVertexMaterial* meshVertex = meshFrame->GetFrameData(qfa + 1);
 		for (unsigned int i = 0; i < rawIndexUniqueCount; i++)
 		{
+			/*
+		FVector fv = rawMeshVertex[rawMeshIndexUnique[i][0]];
+		fv = fv.RotateAngleAxis(180, FVector(0, 1, 0));
+		fv = fv.RotateAngleAxis(180, FVector(0, 0, -1));
+		meshVertex[i].Position = fv;// rotate from blender export default forward -z, up y
+
+		meshVertex[i].Normal.X = rawMeshNormal[rawMeshIndexUnique[i][1]].X;
+		meshVertex[i].Normal.Y = rawMeshNormal[rawMeshIndexUnique[i][1]].Y * -1;
+		meshVertex[i].Normal.Z = rawMeshNormal[rawMeshIndexUnique[i][1]].Z * -1;
+*/
 			meshVertex[i].Position = rawMeshVertex[rawMeshIndexUnique[i][0]];
 			meshVertex[i].Normal = rawMeshNormal[rawMeshIndexUnique[i][1]];
 			meshVertex[i].materialIndex = rawMeshIndexUnique[i][2];

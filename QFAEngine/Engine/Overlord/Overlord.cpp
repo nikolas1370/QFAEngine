@@ -8,8 +8,8 @@
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
 
 #include <Input/Input.h>
-#include <Render/Text/Text.h>
-
+#include <Render/UI/Text.h>
+#include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
 
 bool QFAOverlord::Life = false;
 bool QFAOverlord::isInit = false; 
@@ -17,7 +17,7 @@ QFAWindow* QFAOverlord::Window = nullptr;
 QCameraComponent* QFAOverlord::CurentCamera = nullptr;
 
 int QFAOverlord::DefaultWidth = 600;
-int QFAOverlord::DefaultHeight = 800;
+int QFAOverlord::DefaultHeight = 600;
 
 bool QFAOverlord::StartLife()
 {
@@ -49,16 +49,12 @@ bool QFAOverlord::Init()
         ASSERT(false);
         return false;
     }
-
+    
     QTime::Init();    
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     Window = new QFAWindow(DefaultWidth, DefaultHeight, "QFA");    
     QFAInput::Init(Window->glfWindow);
 
-    std::cout << "openGL VERSION " << " " << glGetString(GL_VERSION) << std::endl;
     isInit = true;
     return true;
 }
@@ -74,6 +70,7 @@ void QFAOverlord::MainLoop()
         QWorld::ProcessTicks();
         QFAWindow::RenderWindow();
     }
+    
 
     if (Life)
         QFAOverlord::EndLife();

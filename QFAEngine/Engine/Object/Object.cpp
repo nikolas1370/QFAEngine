@@ -10,10 +10,7 @@ QObject::~QObject()
     Valid = 0;
 }
 
-bool QObject::IsValid()
-{
-    return this && Valid == ValidNumber;
-}
+
 
 void QObject::Destroy()
 {

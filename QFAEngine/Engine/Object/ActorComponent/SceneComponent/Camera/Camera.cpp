@@ -45,7 +45,7 @@ void QCameraComponent::UpdateModelMatrix(bool onlyPosition)
 	if (!IsRootComponent())
 	{
 		QSceneComponent* parent = GetParentComponent();		
-		while (true)
+		while (true)// process rotation camera
 		{
 			if (!parent->IsValid())
 				break;
@@ -56,9 +56,9 @@ void QCameraComponent::UpdateModelMatrix(bool onlyPosition)
 	}
 
 	cameraRotationMatrex = Math::DefauldMatrix3;
-	cameraRotationMatrex = Math::rotateMatrix3(cameraRotationMatrex, glm::radians(FinallyRotation.X), glm::vec3(0.0f, 0.0f, -1.0f));
+	cameraRotationMatrex = Math::rotateMatrix3(cameraRotationMatrex, glm::radians(FinallyRotation.X), glm::vec3(0.0f, 0.0f, 1.0f));
 	cameraRotationMatrex = Math::rotateMatrix3(cameraRotationMatrex, glm::radians((FinallyRotation.Y) * -1), glm::vec3(1.f, 0.f, 0.f));
-	cameraRotationMatrex = Math::rotateMatrix3(cameraRotationMatrex, glm::radians((FinallyRotation.Z)), glm::vec3(0.0f, 1.0f, 0.0f));
+	cameraRotationMatrex = Math::rotateMatrix3(cameraRotationMatrex, glm::radians((FinallyRotation.Z)), glm::vec3(0.0f, -1.0f, 0.0f));
 }
 
 FVector QCameraComponent::GetForwardVector() const

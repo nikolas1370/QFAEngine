@@ -1,7 +1,6 @@
 #include "SceneComponent.h"
 #include <Object/Actor/Actor.h>
 
-
 QSceneComponent::QSceneComponent()
 {
 	InWorldComponent = true;
@@ -20,7 +19,7 @@ void QSceneComponent::ChangeWorldPosition(const FVector position)
 		ParentActor->Position = position;
 		RelativePosition = 0;
 		AccumulateScale = FVector(1);
-		WorldPosition = ToOpenglCoordinate(position);
+		WorldPosition = position.ConvertToVulkanCoordinate();
 		if (NeedUpdateMatrix)
 			UpdateModelMatrix(true);
 		for (unsigned int i = 0; i < (unsigned int)ListComponents.Length(); i++)
@@ -29,11 +28,11 @@ void QSceneComponent::ChangeWorldPosition(const FVector position)
 	}
 	else if (ParentActorComponent->IsValid())
 	{
-		WorldPosition = ToOpenglCoordinate(position);
+		WorldPosition = position.ConvertToVulkanCoordinate();
 		RelativePosition = position - ParentActorComponent->GetWorldPosition();
 		RelativePosition = RelativePosition.ReversScale(AccumulateScale);
 		//invers RotationMatrix rotate finally position to pure relative position(pure = not scale and rotate)
-		RelativePosition = FromOpenglCoordinate(FVector(glm::inverse(ParentActorComponent->RotationMatrix) * ToOpenglCoordinate(RelativePosition).GetGLMVector()));
+		RelativePosition = FVector(glm::inverse(ParentActorComponent->RotationMatrix) * RelativePosition.ConvertToVulkanCoordinate().GetGLMVector()).ConvertFromVulkanCoordinate();
 		if(NeedUpdateMatrix)
 			UpdateModelMatrix(true);
 
@@ -52,11 +51,11 @@ void QSceneComponent::ChangeLocalPosition(const FVector position)
 	if (!temA->IsValid())
 		return;
 	AccumulateScale = ParentActorComponent->AccumulateScale * ParentActorComponent->Scale;
-	WorldPosition = ToOpenglCoordinate(position + temA->GetActorPosition());
-	RelativePosition = FromOpenglCoordinate(WorldPosition - ParentActorComponent->WorldPosition);
+	WorldPosition = (position + temA->GetActorPosition()).ConvertToVulkanCoordinate();
+	RelativePosition = (WorldPosition - ParentActorComponent->WorldPosition).ConvertFromVulkanCoordinate();
 	RelativePosition = RelativePosition.ReversScale(ParentActorComponent->AccumulateScale * ParentActorComponent->Scale);
 	//invers RotationMatrix rotate finally position to pure relative position(pure = not scale and rotate)
-	RelativePosition = FromOpenglCoordinate(FVector(glm::inverse(ParentActorComponent->RotationMatrix) * ToOpenglCoordinate(RelativePosition).GetGLMVector()));
+	RelativePosition = FVector(glm::inverse(ParentActorComponent->RotationMatrix) * RelativePosition.ConvertToVulkanCoordinate().GetGLMVector()).ConvertFromVulkanCoordinate();
 
 	if (NeedUpdateMatrix)
 		UpdateModelMatrix(true);
@@ -88,7 +87,7 @@ FVector QSceneComponent::GetLocalPosition()
 
 void QSceneComponent::ChangedParentRotation()
 {// rotate component center(relative position) around parent whit parent rotateMatrix
-	glm::vec3 ass = ParentActorComponent->RotationMatrix * ToOpenglCoordinate(GetRelativeScalePosition()).GetGLMVector();	
+	glm::vec3 ass = ParentActorComponent->RotationMatrix * GetRelativeScalePosition().ConvertToVulkanCoordinate().GetGLMVector();
 	WorldPosition = ParentActorComponent->WorldPosition + FVector(ass);
 
 		/*
@@ -138,7 +137,7 @@ void QSceneComponent::ChangeRotation(const FVector rotation)
 void QSceneComponent::UpdateWorldPositionScale(bool onlyPosition)
 {
 	AccumulateScale = ParentActorComponent->AccumulateScale * ParentActorComponent->Scale;
-	glm::vec3 ass = ParentActorComponent->RotationMatrix * ToOpenglCoordinate(GetRelativeScalePosition()).GetGLMVector();
+	glm::vec3 ass = ParentActorComponent->RotationMatrix * GetRelativeScalePosition().ConvertToVulkanCoordinate().GetGLMVector();
 	WorldPosition = ParentActorComponent->WorldPosition + FVector(ass);
 	if (NeedUpdateMatrix)
 		UpdateModelMatrix(onlyPosition);
@@ -176,8 +175,9 @@ FVector QSceneComponent::GetForwardVector() const
 	if (IRootComponent)
 		return ParentActor->GetActorForwardVector();
 
-	glm::vec3 fv = glm::vec3(ToOpenglCoordinate(FVector::ForwardVector).GetGLMVector());
-	return FromOpenglCoordinate(FVector(RotationMatrix * fv));
+	//glm::vec3 fv = glm::vec3(ToOpenglCoordinate(FVector::ForwardVector).GetGLMVector());
+	//return FromOpenglCoordinate(FVector(RotationMatrix * fv)); // FVector(RotationMatrix * fv).ConvertFromVulkanCoordinate()
+	return FVector::ForwardVector;
 }
 
 FVector QSceneComponent::GetRightVector() const
@@ -185,8 +185,11 @@ FVector QSceneComponent::GetRightVector() const
 	if (IRootComponent)
 		return ParentActor->GetActorRightVector();
 
+	/*
 	glm::vec3 fv = glm::vec3(ToOpenglCoordinate(FVector::RightVector).GetGLMVector());
 	return FromOpenglCoordinate(FVector(RotationMatrix * fv));
+	*/
+	return FVector::RightVector;
 }
 
 FVector QSceneComponent::GetUpVector() const
@@ -194,8 +197,11 @@ FVector QSceneComponent::GetUpVector() const
 	if (IRootComponent)
 		return ParentActor->GetActorUpVector();
 
+	/*
 	glm::vec3 fv = glm::vec3(ToOpenglCoordinate(FVector::UpVector).GetGLMVector());
 	return FromOpenglCoordinate(FVector(RotationMatrix * fv));
+	*/
+	return FVector::UpVector;
 }
 
 bool QSceneComponent::ItsMyFather(QSceneComponent* component)

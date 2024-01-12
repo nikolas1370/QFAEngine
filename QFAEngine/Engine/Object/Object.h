@@ -26,7 +26,10 @@ public:
 	virtual ~QObject();
 
 
-	bool IsValid();
+	inline bool IsValid()
+	{
+		return this && Valid == ValidNumber;
+	}
 
 	/*
 		analogue to "delete someQObject;"
