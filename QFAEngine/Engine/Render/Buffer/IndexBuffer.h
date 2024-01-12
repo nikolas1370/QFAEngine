@@ -1,6 +1,6 @@
 #pragma once
 #include <Tools/Debug/OpenGlStuff.h>
-#include <Render/vk/VKBuffer.h>
+#include <Render/Buffer/VKBuffer.h>
 class QFAVKIndexBuffer
 {
 

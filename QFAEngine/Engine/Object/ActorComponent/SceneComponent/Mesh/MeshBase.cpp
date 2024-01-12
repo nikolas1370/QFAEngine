@@ -2,7 +2,7 @@
 #include <Object/Actor/Actor.h>
 #include <Render/vk/LogicalDevice.h>
 #include <Tools/Debug/OpenGlStuff.h>
-#include <Render/vk/VKBuffer.h>
+#include <Render/Buffer/VKBuffer.h>
 
 
 #include <Render/Pipline/MeshShadowPipeline.h>

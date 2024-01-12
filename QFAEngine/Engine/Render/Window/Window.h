@@ -14,8 +14,8 @@
 #include <Render/vk/TextureImage.h>
 #include <Render/vk/ImageView.h>
 #include <Render/vk/TextureSampler.h>
-#include <Render/vk/VertexBuffer.h>
-#include <Render/vk/IndexBuffer.h>
+#include <Render/Buffer/VertexBuffer.h>
+#include <Render/Buffer/IndexBuffer.h>
 #include <Render/UI/Text.h>
 #include <Render/RenderPass/RenderPassDepth.h>
 #include <Render/Framebuffer/ShadowFrameBuffer.h>

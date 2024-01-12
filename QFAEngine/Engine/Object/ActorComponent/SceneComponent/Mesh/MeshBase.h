@@ -123,8 +123,8 @@ class QFAWindow;
 class QFAVKMeshPipeline;
 class QStaticMesh;
 #include <Render/Pipline/MeshPipeline.h>
-#include <Render/vk/IndexBuffer.h>
-#include <Render/vk/VertexBuffer.h>
+#include <Render/Buffer/IndexBuffer.h>
+#include <Render/Buffer/VertexBuffer.h>
 
 
 class QMeshBaseComponent : public QSceneComponent // abstract class

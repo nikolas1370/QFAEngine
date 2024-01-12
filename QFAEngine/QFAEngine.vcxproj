@@ -72,7 +72,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)..\freetype-master 2.13.2\include;$(SolutionDir)..\glfw-3.3.8\glfw-3.3.8.bin.WIN64\include;$(SolutionDir)..\glew-2.1.0\include;$(SolutionDir)..\glm;$(SolutionDir)QFAEngine/Engine;$(SolutionDir)..\stb;C:\VulkanSDK\1.3.268.0\Include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\freetype-master 2.13.2\include;$(SolutionDir)..\glfw-3.3.8\glfw-3.3.8.bin.WIN64\include;$(SolutionDir)..\glm;$(SolutionDir)QFAEngine/Engine;$(SolutionDir)..\stb;C:\VulkanSDK\1.3.268.0\Include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(SolutionDir)..\freetype-master 2.13.2\include;$(SolutionDir)..\glfw-3.3.8\glfw-3.3.8.bin.WIN64\include;$(SolutionDir)..\glew-2.1.0\include;$(SolutionDir)..\glm;$(SolutionDir)QFAEngine/Engine;C:\Users\Juni\Desktop\New folder\vulkan\Include;$(SolutionDir)..\stb;$(IncludePath)</IncludePath>
@@ -122,7 +122,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.268.0\Lib;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug;$(SolutionDir)..\glew-2.1.0\lib\Release\x64;$(SolutionDir)..\glfw-3.3.8\glfw-3.3.8.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.268.0\Lib;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug;$(SolutionDir)..\glfw-3.3.8\glfw-3.3.8.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -169,7 +169,7 @@
     <ClCompile Include="Engine\Render\UI\Text.cpp" />
     <ClCompile Include="Engine\Render\Time.cpp" />
     <ClCompile Include="Engine\Render\Pipline\ImagePipeline.cpp" />
-    <ClCompile Include="Engine\Render\vk\IndexBuffer.cpp" />
+    <ClCompile Include="Engine\Render\Buffer\IndexBuffer.cpp" />
     <ClCompile Include="Engine\Render\vk\LogicalDevice.cpp" />
     <ClCompile Include="Engine\Render\Pipline\MeshPipeline.cpp" />
     <ClCompile Include="Engine\Render\Pipline\MeshShadowPipeline.cpp" />
@@ -192,7 +192,6 @@
     <ClCompile Include="GameCode\TestComponent.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Engine\Tools\File\OBJLoader.cpp" />
-    <ClCompile Include="Engine\Tools\Debug\OpenGlStuffcpp.cpp" />
     <ClCompile Include="Engine\Tools\File\Parser.cpp" />
     <ClCompile Include="Engine\Object\Actor\Actor.cpp" />
   </ItemGroup>
@@ -216,7 +215,7 @@
     <ClInclude Include="Engine\Render\Time.h" />
     <ClInclude Include="Engine\Render\UI\UIUnit.h" />
     <ClInclude Include="Engine\Render\Pipline\ImagePipeline.h" />
-    <ClInclude Include="Engine\Render\vk\IndexBuffer.h" />
+    <ClInclude Include="Engine\Render\Buffer\IndexBuffer.h" />
     <ClInclude Include="Engine\Render\vk\LogicalDevice.h" />
     <ClInclude Include="Engine\Render\Pipline\MeshPipeline.h" />
     <ClInclude Include="Engine\Render\Pipline\MeshShadowPipeline.h" />

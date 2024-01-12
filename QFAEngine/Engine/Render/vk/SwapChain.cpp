@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <Render/vk/LogicalDevice.h>
 #include <Render/vk/TextureImage.h>
-#include <Render/vk/VKBuffer.h>
+#include <Render/Buffer/VKBuffer.h>
 #include <Render/Window/Window.h>
 
 QFAVKSwapChain::QFAVKSwapChain(GLFWwindow* window, VkSurfaceKHR surface, VkCommandPool _commandPool)

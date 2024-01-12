@@ -3,7 +3,7 @@
 #include <stb_image.h>
 
 
-#include <Render/vk/VKBuffer.h>
+#include <Render/Buffer/VKBuffer.h>
 #include <Render/vk/PhysicalDevice.h>
 #include <Render/vk/LogicalDevice.h>
 

@@ -2,8 +2,8 @@
 #include <iostream>
 #include <Render/vk/LogicalDevice.h>
 #include <Render/vk/TextureImage.h>
-#include <Render/vk/VertexBuffer.h>
-#include <Render/vk/ImagePipeline.h>
+#include <Render/Buffer/VertexBuffer.h>
+#include <Render/Pipline/ImagePipeline.h>
 #include <Render/vk/ImageView.h>
 #include <Render/vk/TextureSampler.h>
 
@@ -78,7 +78,6 @@ void QFAImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_, QFAVKTe
     RenderPass = renderPass;
  
     ImageSampler = new QFAVKTextureSampler();
-    image = new QFAVKTextureImage(commandPool_, "6213157_0.jpg");
     image = imago;
 
 

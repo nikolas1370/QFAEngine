@@ -1,7 +1,7 @@
 #include "MeshRenderPass.h"
 
 #include <array>
-#include "LogicalDevice.h"
+#include <Render/vk/LogicalDevice.h>
 
 QFAVKMeshRenderPass::QFAVKMeshRenderPass()
 {

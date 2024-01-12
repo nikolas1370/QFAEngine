@@ -18,7 +18,7 @@ Q swith control between camera and some actor whit mehes
 #pragma comment(lib, "Gdi32.lib") // for glfw
 #pragma comment(lib, "Shell32.lib") // for glfw
 
-#pragma comment(lib, "glew32s.lib") // for glfw 
+//#pragma comment(lib, "glew32s.lib") // for glfw 
 
 #include <Overlord/Overlord.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>

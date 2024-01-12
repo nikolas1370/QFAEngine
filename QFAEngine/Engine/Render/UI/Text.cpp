@@ -2,8 +2,8 @@
 #include <iostream>
 #include <Render/vk/LogicalDevice.h>
 #include <Render/vk/TextureImage.h>
-#include <Render/vk/VertexBuffer.h>
-#include <Render/vk/TextPipeline.h>
+#include <Render/Buffer/VertexBuffer.h>
+#include <Render/Pipline/TextPipeline.h>
 #include <Render/vk/ImageView.h>
 #include <Render/vk/TextureSampler.h>
 
