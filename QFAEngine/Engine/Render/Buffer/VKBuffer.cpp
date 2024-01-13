@@ -4,26 +4,65 @@
 #include <Render/vk/PhysicalDevice.h>
 #include <Render/vk/TextureImage.h>
 
+VmaAllocator QFAVKBuffer::allocator = nullptr;
 
-QFAVKBuffer::QFAVKBuffer(VkDeviceSize size, const void* data, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties)
+
+void QFAVKBuffer::Init(VkInstance instance)
 {
-	createBuffer(size, usage, properties, StagingBuffer, StagingBufferMemory);
+    if (allocator)
+        return;
+    
+    VmaVulkanFunctions vulkanFunctions = {};
+    vulkanFunctions.vkGetInstanceProcAddr = &vkGetInstanceProcAddr;
+    vulkanFunctions.vkGetDeviceProcAddr = &vkGetDeviceProcAddr;
 
-    vkMapMemory(QFAVKLogicalDevice::GetDevice(), StagingBufferMemory, 0, size, 0, &MapData);
+
+
+    VmaAllocatorCreateInfo allocatorCreateInfo = {};
+    allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_2;
+    allocatorCreateInfo.physicalDevice = QFAVKPhysicalDevice::GetDevice();
+    allocatorCreateInfo.device = QFAVKLogicalDevice::GetDevice();
+    allocatorCreateInfo.instance = instance;
+    allocatorCreateInfo.pVulkanFunctions = &vulkanFunctions;
+
+
+    vmaCreateAllocator(&allocatorCreateInfo, &allocator);
+}
+
+QFAVKBuffer::QFAVKBuffer(VkDeviceSize size, const void* data, bool inHost, VkBufferUsageFlags usage)
+{
+    InHost = inHost;
+    CreateBufferInside(size, usage);    
     if (data == nullptr)
         return;
-
-    // To retrieve a host virtual address pointer to a region of a mappable memory object
     
     memcpy(MapData, data, static_cast<size_t>(size));
-    //------------------------------
+}
+
+void QFAVKBuffer::CreateBufferInside(VkDeviceSize size, VkBufferUsageFlags usage)
+{// https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/usage_patterns.html
+    
+    VkBufferCreateInfo bufferInfo = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
+    bufferInfo.size = size;
+    bufferInfo.usage = usage;
+    //
+    VmaAllocationCreateInfo allocInfo = {};
+    allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
+    allocInfo.flags = InHost ? VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT
+                             : VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
+
+    vmaCreateBuffer(allocator, &bufferInfo, &allocInfo, &Buffer, &allocation, nullptr);
+
+    if(InHost)
+        vmaMapMemory(allocator, allocation, &MapData);
 }
 
 QFAVKBuffer::~QFAVKBuffer()
 {
-    vkUnmapMemory(QFAVKLogicalDevice::GetDevice(), StagingBufferMemory);
-	vkDestroyBuffer(QFAVKLogicalDevice::GetDevice(), StagingBuffer, nullptr);
-	vkFreeMemory(QFAVKLogicalDevice::GetDevice(), StagingBufferMemory, nullptr);
+    if (InHost)
+        vmaUnmapMemory(allocator, allocation);
+        
+    vmaDestroyBuffer(allocator, Buffer, allocation);
 }
 
 uint32_t QFAVKBuffer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
@@ -40,52 +79,16 @@ uint32_t QFAVKBuffer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags 
 }
 
 void QFAVKBuffer::copyInImage(QFAVKTextureImage* image, uint32_t width, uint32_t height, VkCommandPool commandPool, int32_t imageOffsetX, int32_t imageOffsetY, VkImageAspectFlags aspect, VkImageLayout endLayout)
-{       
-    // 
-
+{   
     transitionImageLayout(image->TextureImage, image->ImageFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, commandPool, aspect);
     copyBufferToImage(image->TextureImage, width, height, commandPool, imageOffsetX, imageOffsetY, aspect);
     if(endLayout != VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
         transitionImageLayout(image->TextureImage, image->ImageFormat, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, endLayout, commandPool, aspect);
 }  
 
-void QFAVKBuffer::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory)
-{
-    VkBufferCreateInfo bufferInfo{};
-    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferInfo.size = size;
-    bufferInfo.usage = usage;
-    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-    if (vkCreateBuffer(QFAVKLogicalDevice::GetDevice(), &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
-        stopExecute("QFAVKBuffer::createBuffer failed to create buffer!");
-
-    VkMemoryRequirements memRequirements;
-    vkGetBufferMemoryRequirements(QFAVKLogicalDevice::GetDevice(), buffer, &memRequirements);
-
-    VkMemoryAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = findMemoryType( memRequirements.memoryTypeBits, properties);
-
-    
-    /*
-    * limite 4096 allocation  
-    Memory suballocation
-        https://zeux.io/2020/02/27/writing-an-efficient-vulkan-renderer/
-    */
-    if (vkAllocateMemory(QFAVKLogicalDevice::GetDevice(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
-        stopExecute("QFAVKBuffer::createBuffer failed to allocate buffer memory!");
-
-    vkBindBufferMemory(QFAVKLogicalDevice::GetDevice(), buffer, bufferMemory, 0);
-}
-
 void QFAVKBuffer::UpdateData(unsigned int size, void* data)
 {
-
-    memcpy(MapData, data, static_cast<size_t>(size));
-    
-    
+    memcpy(MapData, data, static_cast<size_t>(size));   
 }
 
 void QFAVKBuffer::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandPool commandPool, VkImageAspectFlags aspect)
@@ -192,7 +195,14 @@ void QFAVKBuffer::transitionImageLayout(VkImage image, VkFormat format, VkImageL
         sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
         destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
     }
-        
+    else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_GENERAL)
+    {
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+        sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+        destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    }
     
     else 
         stopExecute("unsupported layout transition!");
@@ -266,7 +276,7 @@ void QFAVKBuffer::copyBufferToImage(VkImage image, uint32_t width, uint32_t heig
         1
     };
 
-    vkCmdCopyBufferToImage(commandBuffer, StagingBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+    vkCmdCopyBufferToImage(commandBuffer, Buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 
     endSingleTimeCommands(commandPool, commandBuffer);
     
@@ -280,7 +290,7 @@ void QFAVKBuffer::copyBuffer( VkBuffer dstBuffer, VkDeviceSize size, VkCommandPo
     copyRegion.size = size;    
     copyRegion.srcOffset = srcOffset;
     copyRegion.dstOffset = dstOffset;    
-    vkCmdCopyBuffer(commandBuffer, StagingBuffer, dstBuffer, 1, &copyRegion);//does not copy more than allocated memory in dstBuffer
+    vkCmdCopyBuffer(commandBuffer, Buffer, dstBuffer, 1, &copyRegion);//does not copy more than allocated memory in dstBuffer
 
     endSingleTimeCommands(commandPool, commandBuffer);
 }

@@ -25,15 +25,13 @@ QFAVKTextPipeline* QFAText::Pipeline;
 QFAVKTextPipeline* QFAText::OldPipeline = nullptr;
 const std::string QFAText::VertexShaderPath = "Engine/Shaders/TextVertex.spv";
 const std::string QFAText::FragmentShaderPath = "Engine/Shaders/TextFragment.spv";
-VkBuffer  QFAText::uniformBufferProj;
-VkDeviceMemory  QFAText::uniformBufferProjMemory;
-void* QFAText::uniformBufferProjMapped;
+
 
 
 QFAArray<QFAText::Symbol> QFAText::Symbols;
 
 
-
+QFAVKBuffer* QFAText::uniformBufferProj;
 
 VkCommandPool QFAText::commandPool;
 unsigned int QFAText::MaxAttlas = 10; 
@@ -45,7 +43,7 @@ QFAVKTextureSampler* QFAText::AtlassSampler;
 
 
 int QFAText::maxTextInframe = 20;
-std::vector<QFAText::TextParamBuffer> QFAText::TPB;
+std::vector<QFAVKBuffer*> QFAText::TPB;
 
 
 int QFAText::NumberTextInFrame;
@@ -82,22 +80,18 @@ void QFAText::Init(VkRenderPass renderPass, VkCommandPool commandPool_)
 
     TPB.resize(maxTextInframe);
     
+
     VkDeviceSize bufferSize = sizeof(glm::mat4);
-    QFAVKBuffer::createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBufferProj, uniformBufferProjMemory);
-    vkMapMemory(QFAVKLogicalDevice::GetDevice(), uniformBufferProjMemory, 0, bufferSize, 0, &uniformBufferProjMapped);
-
-
+    uniformBufferProj = new QFAVKBuffer(bufferSize, nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+    
     bufferSize = sizeof(UniformBufferTextParam);
+    //
+    
     for (size_t i = 0; i < maxTextInframe; i++)
-    {
-        QFAVKBuffer::createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, TPB[i].uniformBufferTextparam, TPB[i].uniformBufferTextparamMemory);
-        vkMapMemory(QFAVKLogicalDevice::GetDevice(), TPB[i].uniformBufferTextparamMemory, 0, bufferSize, 0, &TPB[i].uniformBufferTextparamMapped);
-    }
+        TPB[i] = new QFAVKBuffer(bufferSize, nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+    
     
     Pipeline = new QFAVKTextPipeline(RenderPass, QFAText::VertexShaderPath, QFAText::FragmentShaderPath);
-    std::cout << "QFAText constructor--------------\n";
-    
-
 
 
     if (FT_Init_FreeType(&QFAText::ft))
@@ -541,18 +535,11 @@ void QFAText::EndLife()
 {
     free(QFAText::GlyphInfoData);
 
-    vkUnmapMemory(QFAVKLogicalDevice::GetDevice(), uniformBufferProjMemory);
-    vkDestroyBuffer(QFAVKLogicalDevice::GetDevice(), uniformBufferProj, nullptr); // some plase
-    vkFreeMemory(QFAVKLogicalDevice::GetDevice(), uniformBufferProjMemory, nullptr);
-    
+    delete uniformBufferProj;
 
     
     for (size_t i = 0; i < TPB.size(); i++)
-    {
-        vkUnmapMemory(QFAVKLogicalDevice::GetDevice(), TPB[i].uniformBufferTextparamMemory);
-        vkDestroyBuffer(QFAVKLogicalDevice::GetDevice(), TPB[i].uniformBufferTextparam, nullptr);
-        vkFreeMemory(QFAVKLogicalDevice::GetDevice(), TPB[i].uniformBufferTextparamMemory, nullptr);
-    }
+        delete TPB[i];
 
 
     for (size_t i = 0; i < GlyphAtlasList.Length(); i++)
@@ -625,8 +612,8 @@ void QFAText::StartTextRender(const glm::mat4& proj)
 
     UniformBufferObject ubo{};
     ubo.projection = proj;
-    memcpy(uniformBufferProjMapped, &ubo, sizeof(ubo.projection));
-
+    memcpy(uniformBufferProj->MapData, &ubo, sizeof(ubo.projection));
+    
     if (NumberTextInFrame > maxTextInframe)
     {   
         maxTextInframe *= 2;
@@ -634,8 +621,7 @@ void QFAText::StartTextRender(const glm::mat4& proj)
         VkDeviceSize bufferSize = sizeof(UniformBufferTextParam);
         for (size_t i = maxTextInframe - 1; i < maxTextInframe; i++)
         {
-            QFAVKBuffer::createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, TPB[i].uniformBufferTextparam, TPB[i].uniformBufferTextparamMemory);
-            vkMapMemory(QFAVKLogicalDevice::GetDevice(), TPB[i].uniformBufferTextparamMemory, 0, bufferSize, 0, &TPB[i].uniformBufferTextparamMapped);
+            TPB[i] = new QFAVKBuffer(bufferSize, nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
         }        
 
         Pipeline->RecreateDescriptorPool();        
@@ -668,7 +654,7 @@ void QFAText::updateUniformBuffer()
     tem.outlineColor = OutlineColor;
     tem.outline = (int)Outline;
     tem.opacity = Opacity;
-    memcpy(TPB[NumberTextInFrame].uniformBufferTextparamMapped, &tem, sizeof(UniformBufferTextParam));
+    memcpy(TPB[NumberTextInFrame]->MapData, &tem, sizeof(UniformBufferTextParam));
 }
 
 

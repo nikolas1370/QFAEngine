@@ -3,11 +3,6 @@ layout (location = 0) in vec4 vertex; // <vec2 pos, vec2 tex>
 
 
 
-layout(binding = 0) uniform UniformBufferObject 
-{
-    mat4 projection;
-} prog;
-
 
 layout(location = 0) out vec2 TexCoords;
 

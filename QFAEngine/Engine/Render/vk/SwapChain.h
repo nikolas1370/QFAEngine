@@ -3,7 +3,7 @@
 #include <vector>
 #include "VKStruct.h"
 #include <Tools/Debug/OpenGlStuff.h>
-
+#include <Render/vk/TextureImage.h>
 
 class QFAWindow;
 
@@ -47,11 +47,7 @@ private:
 	void CreateImageViews();
 	VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
 	
-
-	void createDepthResources();
-
-	void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
-	VkImage depthImage;
-	VkDeviceMemory depthImageMemory;
+	void createDepthResources();	
+	QFAVKTextureImage* depthImage;
 	VkImageView depthImageView;
 };

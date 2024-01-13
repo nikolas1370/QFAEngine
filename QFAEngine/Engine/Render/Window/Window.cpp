@@ -78,6 +78,7 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 	QFAVKPhysicalDevice::Init(Instance, surface);
 
 	QFAVKLogicalDevice::Init(surface);
+	QFAVKBuffer::Init(Instance->instance);
 
 	createCommandPool();
 	SwapChain = new QFAVKSwapChain(glfWindow, surface, commandPool);
@@ -204,6 +205,7 @@ void QFAWindow::DrawText(QFAViewport* _viewport)
 	submitInfo.pSignalSemaphores = signalSemaphores;
 	
 	
+	
 	vkCmdEndRenderPass(UICommandBuffers[ViewportProcess]);
 
 	if (vkEndCommandBuffer(UICommandBuffers[ViewportProcess]) != VK_SUCCESS)
@@ -285,7 +287,7 @@ void QFAWindow::DrawOffscreenBuffer()
 
 void QFAWindow::recordCommandBufferTestImege()
 {
-	VkBuffer vertexBuffers[] = { imugo->vertexBufer->VertexBuffer };
+	VkBuffer vertexBuffers[] = { imugo->vertexBufer->GpuSideBuffer->Buffer };
 	VkDeviceSize offsets[] = { 0 };
 
 	vkCmdBindVertexBuffers(FinisCommandBuffer, 0, 1, vertexBuffers, offsets);
@@ -662,8 +664,8 @@ void QFAWindow::recordCommandBufferMesh(QMeshBaseComponent* mesh, bool shadow)
 	VkDeviceSize offsets[] = { 0 };
 	if (shadow)
 	{
-		vkCmdBindVertexBuffers(ShadowCommandBuffers[ViewportProcess], 0, 1, &mesh->VertexBufer->VertexBuffer, offsets);
-		vkCmdBindIndexBuffer(ShadowCommandBuffers[ViewportProcess], mesh->IndexBuffer->IndexBuffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdBindVertexBuffers(ShadowCommandBuffers[ViewportProcess], 0, 1, &mesh->VertexBufer->GpuSideBuffer->Buffer, offsets);
+		vkCmdBindIndexBuffer(ShadowCommandBuffers[ViewportProcess], mesh->IndexBuffer->GpuSideBuffer->Buffer, 0, VK_INDEX_TYPE_UINT32);
 		auto nextSet = mesh->GetShadowNextSet();
 		vkCmdBindDescriptorSets(ShadowCommandBuffers[ViewportProcess], VK_PIPELINE_BIND_POINT_GRAPHICS,
 			QMeshBaseComponent::ShadowPipline->pipelineLayout, 0, 1, &nextSet, 0, nullptr);
@@ -672,8 +674,8 @@ void QFAWindow::recordCommandBufferMesh(QMeshBaseComponent* mesh, bool shadow)
 	}
 	else
 	{
-		vkCmdBindVertexBuffers(MeshCommandBuffers[ViewportProcess], 0, 1, &mesh->VertexBufer->VertexBuffer, offsets);
-		vkCmdBindIndexBuffer(MeshCommandBuffers[ViewportProcess], mesh->IndexBuffer->IndexBuffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdBindVertexBuffers(MeshCommandBuffers[ViewportProcess], 0, 1, &mesh->VertexBufer->GpuSideBuffer->Buffer, offsets);
+		vkCmdBindIndexBuffer(MeshCommandBuffers[ViewportProcess], mesh->IndexBuffer->GpuSideBuffer->Buffer, 0, VK_INDEX_TYPE_UINT32);
 
 		auto nextSets = mesh->GetNextSets();
 		vkCmdBindDescriptorSets(MeshCommandBuffers[ViewportProcess], VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -685,7 +687,7 @@ void QFAWindow::recordCommandBufferMesh(QMeshBaseComponent* mesh, bool shadow)
 
 void QFAWindow::recordCommandBufferText(QFAText* text, QFAViewport* viewPort)
 {
-	VkBuffer vertexBuffers[] = { text->vertexBufer->VertexBuffer };
+	VkBuffer vertexBuffers[] = { text->vertexBufer->GpuSideBuffer->Buffer};
 	VkDeviceSize offsets[] = { 0 };
 	
 	vkCmdBindVertexBuffers(UICommandBuffers[ViewportProcess], 0, 1, vertexBuffers, offsets);

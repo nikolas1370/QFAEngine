@@ -3,6 +3,7 @@
 #include <Tools/Array.h>
 #include <Math/Vector.h>
 #include <Render/UI/UIUnit.h>
+#include <Render/Buffer/VKBuffer.h>
 
 /* ttf type */
 typedef unsigned long  FT_ULong;
@@ -32,63 +33,30 @@ class QFAImage : public QFAUIUnit
     
     friend QFAWindow;
     friend QFAVKImagePipeline;
-   
 public:
   
 
     QFAImage(VkCommandPool _commandPool);
     ~QFAImage();
-    
-    
+        
     void SetPosition(unsigned int x, unsigned int y);    
     
     void Destroy();
-
 
     void SetSize(unsigned int w, unsigned int h)
     {
 
     }
-
-
 private: 
-
-
-
-
-
     void Init(VkRenderPass renderPass, VkCommandPool commandPool, QFAVKTextureImage* imago, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT);
     static void EndLife();
-    
 
-
-    
     QFAVKVertexBuffer* vertexBufer;
-
-
-    /*
-    static VkBuffer uniformBufferProj;
-    static VkDeviceMemory uniformBufferProjMemory;
-    static void* uniformBufferProjMapped;
-    */
-    
-
     static QFAVKImagePipeline* Pipeline;
-    
-
-
     static VkCommandPool commandPool;
-
-
     static QFAVKTextureSampler* ImageSampler;
-    
-
     static VkRenderPass RenderPass;
-
-
     static QFAVKTextureImage* image;
-
-
     static VkDescriptorImageInfo imageInfo;
     QFAVKImageView* view;
 
@@ -100,15 +68,5 @@ private:
         float textureY;
     };
 
-    
-
     ImageShaderVertex quad[6];
-
-
-    static VkBuffer uniformBufferProj;
-    static VkDeviceMemory uniformBufferProjMemory;
-    static void* uniformBufferProjMapped;
-
-
-
 };

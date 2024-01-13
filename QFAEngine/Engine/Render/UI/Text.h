@@ -3,6 +3,7 @@
 #include <Tools/Array.h>
 #include <Math/Vector.h>
 #include <Render/UI/UIUnit.h>
+#include <Render/Buffer/VKBuffer.h>
 
 /* ttf type */
 typedef unsigned long  FT_ULong;
@@ -202,11 +203,9 @@ private:
     static const int GlyphAtlasWidth = 1000;
 
 
-    static VkBuffer uniformBufferProj;
-    static VkDeviceMemory uniformBufferProjMemory;
-    static void* uniformBufferProjMapped;
+    static QFAVKBuffer* uniformBufferProj;
 
-    
+
 
     static QFAVKTextPipeline* Pipeline;
     static QFAVKTextPipeline* OldPipeline;
@@ -233,25 +232,9 @@ private:
 
     
 
-    /*----*/
-
-
-    // not move in pipline
-    struct TextParamBuffer
-    {
-        VkBuffer uniformBufferTextparam;
-        VkDeviceMemory uniformBufferTextparamMemory;
-        void* uniformBufferTextparamMapped;
-    };
-
-    
-    /*
-        max amount descriptorSets.  
-        if not enough descriptorSets in next fram be create new
-            and in this frame all next  text be have textParam from first text in frame        
-    */
+ 
     static int maxTextInframe;
-    static std::vector<TextParamBuffer> TPB;
+    static std::vector<QFAVKBuffer*> TPB; // do allocation beter
   
     
     VkDescriptorSet CurentDescriptorSet;

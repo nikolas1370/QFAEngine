@@ -287,12 +287,12 @@ void QFAVKTextPipeline::updataDescriptorSets()
     for (size_t i = 0; i < descriptorSets.size(); i++)
     {
         VkDescriptorBufferInfo bufferInfo{};
-        bufferInfo.buffer = QFAText::uniformBufferProj;
+        bufferInfo.buffer = QFAText::uniformBufferProj->Buffer;
         bufferInfo.offset = 0;
         bufferInfo.range = sizeof(glm::mat4);
 
         VkDescriptorBufferInfo bufferInfo2{};
-        bufferInfo2.buffer = QFAText::TPB[i].uniformBufferTextparam;
+        bufferInfo2.buffer = QFAText::TPB[i]->Buffer;
         bufferInfo2.offset = 0;
         bufferInfo2.range = sizeof(QFAText::UniformBufferTextParam);
 

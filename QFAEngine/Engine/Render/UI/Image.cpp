@@ -9,27 +9,10 @@
 
 QFAVKTextureImage* QFAImage::image = nullptr;
 VkDescriptorImageInfo QFAImage::imageInfo;
-
-
-
 QFAVKImagePipeline* QFAImage::Pipeline;
-
-
-
 VkCommandPool QFAImage::commandPool;
-
-
 QFAVKTextureSampler* QFAImage::ImageSampler;
-
-
 VkRenderPass QFAImage::RenderPass;
-
-VkBuffer QFAImage::uniformBufferProj;
-VkDeviceMemory QFAImage::uniformBufferProjMemory;
-void* QFAImage::uniformBufferProjMapped;
-
-
-
 
 QFAImage::QFAImage(VkCommandPool _commandPool)
 {
@@ -80,13 +63,6 @@ void QFAImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_, QFAVKTe
     ImageSampler = new QFAVKTextureSampler();
     image = imago;
 
-
-    VkDeviceSize bufferSize = sizeof(glm::mat4);
-    QFAVKBuffer::createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBufferProj, uniformBufferProjMemory);
-    vkMapMemory(QFAVKLogicalDevice::GetDevice(), uniformBufferProjMemory, 0, bufferSize, 0, &uniformBufferProjMapped);
-
-
-
     view = new QFAVKImageView(image, aspect);
     
     imageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
@@ -99,6 +75,7 @@ void QFAImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_, QFAVKTe
 QFAImage::~QFAImage()
 {
     delete vertexBufer;
+    delete ImageSampler;
 }
 
 void QFAImage::SetPosition(unsigned int x, unsigned int y)
@@ -117,11 +94,10 @@ void QFAImage::Destroy()
 
 void QFAImage::EndLife()
 {
-    vkUnmapMemory(QFAVKLogicalDevice::GetDevice(), uniformBufferProjMemory);
-    vkDestroyBuffer(QFAVKLogicalDevice::GetDevice(), uniformBufferProj, nullptr); // some plase
-    vkFreeMemory(QFAVKLogicalDevice::GetDevice(), uniformBufferProjMemory, nullptr);
     
     delete Pipeline;
     delete ImageSampler;  
+    
+    
 }
 

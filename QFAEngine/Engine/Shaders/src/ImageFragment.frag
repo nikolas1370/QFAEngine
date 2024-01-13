@@ -5,7 +5,7 @@ layout(location = 0) in vec2 TexCoords;
 
 layout(location = 0) out vec4 color;
 //uniform sampler2D glyphTexture[7];
-layout(binding = 1) uniform sampler2D imageTexture;
+layout(binding = 0) uniform sampler2D imageTexture;
 
 
 

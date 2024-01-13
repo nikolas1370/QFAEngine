@@ -174,7 +174,7 @@ public:
 		if (SetsInUse >= Set1Buffers.size())
 			createDescriptorPool1();
 
-		return Set1Buffers[SetsInUse].BufferVertexModelMatrixMapped;
+		return Set1Buffers[SetsInUse].vertexBuffer->MapData;
 	}
 
 	inline void* GetFragmentBuffer()
@@ -182,7 +182,7 @@ public:
 		if (SetsInUse >= Set1Buffers.size())
 			createDescriptorPool1();
 
-		return Set1Buffers[SetsInUse].BufferFragmentMapped;
+		return Set1Buffers[SetsInUse].fragmentBuffer->MapData;
 	}
 
 	inline void* GetShadowBuffer()
@@ -190,7 +190,7 @@ public:
 		if (ShadowSetsInUse >= ShadowSetBuffers.size())
 			createDescriptorPoolShadow();
 
-		return ShadowSetBuffers[ShadowSetsInUse].BufferShadowModelMatrixMapped;		
+		return ShadowSetBuffers[ShadowSetsInUse]->MapData;		
 	}
 
 
@@ -268,10 +268,12 @@ private:
 	};
 
 	
+	
+
 	static std::array<VkDescriptorSet, QFAWindow::MaxActiveViewPort> ViewportSets;
-	static std::array<SBufferVertex, QFAWindow::MaxActiveViewPort> BuffersVertex;
+	static std::array<QFAVKBuffer*, QFAWindow::MaxActiveViewPort> BuffersVertex;
 
-
+	
 
 	static  VkDescriptorSet descriptorSetShadow; 
 
@@ -283,22 +285,14 @@ private:
 
 	struct SSet1Buffers
 	{
-		VkBuffer BufferVertexModelMatrix;
-		VkDeviceMemory BufferVertexModelMatrixMemory;
-		void* BufferVertexModelMatrixMapped;
+		QFAVKBuffer* vertexBuffer;
+		QFAVKBuffer* fragmentBuffer;
 
-		VkBuffer BufferFragment;
-		VkDeviceMemory BufferFragmentMemory;
-		void* BufferFragmentMapped;
+
 	};
 
 
-	struct SShadowSetBuffers
-	{
-		VkBuffer BufferShadowModelMatrix;
-		VkDeviceMemory BufferShadowModelMatrixMemory;
-		void* BufferShadowModelMatrixMapped;
-	};
+
 
 	static unsigned int SetsInUse ; // in one frame
 	
@@ -308,7 +302,7 @@ private:
 
 	static unsigned int ShadowSetsInUse; 
 	static std::vector<VkDescriptorSet> ShadowDescriptorSets;
-	static std::vector<SShadowSetBuffers> ShadowSetBuffers;
+	static std::vector<QFAVKBuffer*> ShadowSetBuffers;
 	
 	
 

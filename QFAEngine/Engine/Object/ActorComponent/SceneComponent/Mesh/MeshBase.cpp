@@ -32,11 +32,11 @@ std::vector<QMeshBaseComponent::SSet1Buffers> QMeshBaseComponent::Set1Buffers;
 unsigned int QMeshBaseComponent::SetsInUse = 0;
 unsigned int QMeshBaseComponent::ShadowSetsInUse = 0;
 std::vector<VkDescriptorSet> QMeshBaseComponent::ShadowDescriptorSets;
-std::vector<QMeshBaseComponent::SShadowSetBuffers> QMeshBaseComponent::ShadowSetBuffers;
+std::vector<QFAVKBuffer*> QMeshBaseComponent::ShadowSetBuffers;
 
 
 std::array<VkDescriptorSet, QFAWindow::MaxActiveViewPort> QMeshBaseComponent::ViewportSets;
-std::array<QMeshBaseComponent::SBufferVertex, QFAWindow::MaxActiveViewPort> QMeshBaseComponent::BuffersVertex;
+std::array<QFAVKBuffer*, QFAWindow::MaxActiveViewPort> QMeshBaseComponent::BuffersVertex;
 
 
 MeshData::MeshData(int uniqueIndexCount, int indexCount, int materialCount)
@@ -152,7 +152,7 @@ void QMeshBaseComponent::StartFrameViewpoet(glm::mat4& viewPortProjection, glm::
 
 	ubo.cameraP = cameraPosition;
 	
-	memcpy(BuffersVertex[QFAWindow::GetMainWindow()->ViewportProcess].BufferVertexMapped, &ubo.projection, sizeof(ubo) );
+	memcpy(BuffersVertex[QFAWindow::GetMainWindow()->ViewportProcess]->MapData, &ubo.projection, sizeof(ubo) );
 	SetsInUse = 0;	
 }
 
@@ -241,11 +241,11 @@ void QMeshBaseComponent::createDescriptorSet0()
 		if (vkAllocateDescriptorSets(QFAVKLogicalDevice::GetDevice(), &allocInfo, &ViewportSets[i]) != VK_SUCCESS)
 			stopExecute("failed to allocate descriptor sets!");
 
-		QFAVKBuffer::createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, BuffersVertex[i].BufferVertex, BuffersVertex[i].BufferVertexMemory);
-		vkMapMemory(QFAVKLogicalDevice::GetDevice(), BuffersVertex[i].BufferVertexMemory, 0, bufferSize, 0, &BuffersVertex[i].BufferVertexMapped);
+
+		BuffersVertex[i] = new QFAVKBuffer(bufferSize, nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 
 		VkDescriptorBufferInfo bufferInfoVertex{};
-		bufferInfoVertex.buffer = BuffersVertex[i].BufferVertex;
+		bufferInfoVertex.buffer = BuffersVertex[i]->Buffer;
 		bufferInfoVertex.offset = 0;
 		bufferInfoVertex.range = sizeof(UBOVertex);
 
@@ -299,13 +299,10 @@ void QMeshBaseComponent::createDescriptorSet1()
 		if (vkAllocateDescriptorSets(QFAVKLogicalDevice::GetDevice(), &allocInfo, &DescriptorSets1[i]) != VK_SUCCESS)
 			stopExecute("failed to allocate descriptor sets!");
 
-		QFAVKBuffer::createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, Set1Buffers[i].BufferVertexModelMatrix, Set1Buffers[i].BufferVertexModelMatrixMemory);
-		vkMapMemory(QFAVKLogicalDevice::GetDevice(), Set1Buffers[i].BufferVertexModelMatrixMemory, 0, bufferSize, 0, &Set1Buffers[i].BufferVertexModelMatrixMapped);
-				
-		QFAVKBuffer::createBuffer(bufferSizeFragment, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, Set1Buffers[i].BufferFragment, Set1Buffers[i].BufferFragmentMemory);
-		vkMapMemory(QFAVKLogicalDevice::GetDevice(), Set1Buffers[i].BufferFragmentMemory, 0, bufferSizeFragment, 0, &Set1Buffers[i].BufferFragmentMapped);
+		Set1Buffers[i].vertexBuffer = new QFAVKBuffer(bufferSize, nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+		Set1Buffers[i].fragmentBuffer = new QFAVKBuffer(bufferSizeFragment, nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 
-		bufferInfoVertexMatrix.buffer = Set1Buffers[i].BufferVertexModelMatrix;
+		bufferInfoVertexMatrix.buffer = Set1Buffers[i].vertexBuffer->Buffer;
 		std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
 		descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		descriptorWrites[0].dstSet = DescriptorSets1[i];
@@ -316,7 +313,7 @@ void QMeshBaseComponent::createDescriptorSet1()
 		descriptorWrites[0].pBufferInfo = &bufferInfoVertexMatrix;
 
 		VkDescriptorBufferInfo bufferInfoFragment{};
-		bufferInfoFragment.buffer = Set1Buffers[i].BufferFragment; 
+		bufferInfoFragment.buffer = Set1Buffers[i].fragmentBuffer->Buffer; 
 		bufferInfoFragment.offset = 0;
 		bufferInfoFragment.range = sizeof(UBOFragment);
 
@@ -355,10 +352,9 @@ void QMeshBaseComponent::createDescriptorSetShadow()
 		if (vkAllocateDescriptorSets(QFAVKLogicalDevice::GetDevice(), &allocInfo, &ShadowDescriptorSets[i]) != VK_SUCCESS)
 			stopExecute("failed to allocate descriptor sets!");
 		
-		QFAVKBuffer::createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, ShadowSetBuffers[i].BufferShadowModelMatrix, ShadowSetBuffers[i].BufferShadowModelMatrixMemory);
-		vkMapMemory(QFAVKLogicalDevice::GetDevice(), ShadowSetBuffers[i].BufferShadowModelMatrixMemory, 0, bufferSize, 0, &ShadowSetBuffers[i].BufferShadowModelMatrixMapped);
-		
-		bufferInfoVertex.buffer = ShadowSetBuffers[i].BufferShadowModelMatrix;
+		ShadowSetBuffers[i] = new QFAVKBuffer(bufferSize, nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);		
+
+		bufferInfoVertex.buffer = ShadowSetBuffers[i]->Buffer;
 
 		std::array<VkWriteDescriptorSet, 1> descriptorWrites{};
 

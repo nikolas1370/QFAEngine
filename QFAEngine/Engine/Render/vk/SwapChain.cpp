@@ -54,8 +54,6 @@ QFAVKSwapChain::QFAVKSwapChain(GLFWwindow* window, VkSurfaceKHR surface, VkComma
     if (vkCreateSwapchainKHR(QFAVKLogicalDevice::GetDevice(), &createInfo, nullptr, &SwapChain) != VK_SUCCESS)
         stopExecute("failed to create swap chain!");
         
-    
-
     vkGetSwapchainImagesKHR(QFAVKLogicalDevice::GetDevice(), SwapChain, &imageCount, nullptr);
     swapChainImages.resize(imageCount);
     vkGetSwapchainImagesKHR(QFAVKLogicalDevice::GetDevice(), SwapChain, &imageCount, swapChainImages.data());
@@ -131,7 +129,6 @@ VkPresentModeKHR QFAVKSwapChain::chooseSwapPresentMode(const std::vector<VkPrese
     for (const auto& availablePresentMode : availablePresentModes) 
         if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) 
             return availablePresentMode;
-
     
     return VK_PRESENT_MODE_FIFO_KHR; 
 }
@@ -153,12 +150,9 @@ VkExtent2D QFAVKSwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capa
 
         actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
         actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
-
         return actualExtent;
     }
 }
-
-
 
 void QFAVKSwapChain::CreateImageViews()
 {
@@ -193,53 +187,10 @@ VkImageView QFAVKSwapChain::createImageView(VkImage image, VkFormat format, VkIm
 
 void QFAVKSwapChain::createDepthResources()
 {
-    // 
-    
-    createImage(swapChainExtent.width, swapChainExtent.height, QFAWindow::depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory);
-    depthImageView = createImageView(depthImage, QFAWindow::depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
-
-    
+    depthImage = new QFAVKTextureImage(commandPool, swapChainExtent.width, swapChainExtent.height, 4, VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_IMAGE_ASPECT_DEPTH_BIT);
+    depthImageView = createImageView(depthImage->TextureImage, QFAWindow::depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
 }
 
-
-
-void QFAVKSwapChain::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
-{// findMemoryType
-    VkImageCreateInfo imageInfo{};
-    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-    imageInfo.imageType = VK_IMAGE_TYPE_2D;
-    imageInfo.extent.width = width;
-    imageInfo.extent.height = height;
-    imageInfo.extent.depth = 1;
-    imageInfo.mipLevels = 1;
-    imageInfo.arrayLayers = 1;
-    imageInfo.format = format;
-    imageInfo.tiling = tiling;
-    imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    imageInfo.usage = usage;
-    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-    if (vkCreateImage(QFAVKLogicalDevice::GetDevice(), &imageInfo, nullptr, &image) != VK_SUCCESS)
-        stopExecute("QFAVKTextureImage::createImage failed to create image!");
-
-    VkMemoryRequirements memRequirements;
-    vkGetImageMemoryRequirements(QFAVKLogicalDevice::GetDevice(), image, &memRequirements);
-
-    VkMemoryAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = memRequirements.size;
-
-    allocInfo.memoryTypeIndex = QFAVKBuffer::findMemoryType(memRequirements.memoryTypeBits, properties);
-
-    if (vkAllocateMemory(QFAVKLogicalDevice::GetDevice(), &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
-        stopExecute("QFAVKTextureImage::createImage failed to allocate image memory!");
-
-    vkBindImageMemory(QFAVKLogicalDevice::GetDevice(), image, imageMemory, 0);
-
-
-
-}
 
 void QFAVKSwapChain::createFramebuffers(VkRenderPass renderPass)
 {
