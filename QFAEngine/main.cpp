@@ -8,7 +8,6 @@
 #include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
 #include <Math/Vector2D.h>
 #include <Object/Actor/Actor.h>
-#include <Tools/File/OBJLoader.h>
 
 #include <Tools/File/FileLoader.h>
 
@@ -20,17 +19,17 @@
 #include <Render/UI/Text.h>
 
 
-
+#include <Tools/File/ModelLoader.h>
 
 int main()
 {    
     QFAOverlord::Init();
 
-
-    //QStaticMesh* Mesh = OBJLoader::LoadModel("NoEngineModel/Arrow.obj");
-    QStaticMesh* Mesh2 = OBJLoader::LoadModel("NoEngineModel/quad2.obj");
-    //QStaticMesh* Mesh3 = OBJLoader::LoadModel("NoEngineModel/anim/dore_1.obj");
-
+QStaticMesh* Mesh = QFAModelLoader::LoadModel("NoEngineModel/Arrow.fbx"); // 
+Mesh = QFAModelLoader::LoadModel("NoEngineModel/Arrow.obj");
+QStaticMesh* Mesh2 = QFAModelLoader::LoadModel("NoEngineModel/quad2.fbx");
+    //Mesh2 = QFAModelLoader::LoadModel("NoEngineModel/quad2.obj");
+    QStaticMesh* Mesh3 = QFAModelLoader::LoadModel("NoEngineModel/anim/dore_1.obj");
 
     QWorld* mainWorld = new QWorld();
 
@@ -42,22 +41,22 @@ int main()
     QActor* animActor = new QActor();
     
     firstActor->SetRootComponent(Mesh2);
-    /*
-    Mesh->AttachComponent(Mesh3);
-    Mesh3->SetRelativePosition(FVector(0, 0, -1));
-    */
     
-    //secondActor->SetRootComponent(Mesh);   
-    secondActor->SetActorPosition(FVector(0, 0, -0.5));
-    firstActor->SetActorPosition(FVector(0, 0, 1));
+    Mesh->AttachComponent(Mesh3);
+    Mesh3->SetRelativePosition(FVector(0, 0, -100));
+    
+    
+    secondActor->SetRootComponent(Mesh);   
+    secondActor->SetActorPosition(FVector(0, 0, -50));
+    firstActor->SetActorPosition(FVector(0, 0, 100));
     secondActor->SetActorRotation(FVector(0, 0, 0));
 
     mainWorld->AddActor(firstActor);
-    //mainWorld->AddActor(secondActor);
+    mainWorld->AddActor(secondActor);
     secondActor->Name = "mainactor";
 
     ACameraEditor Camera;    
-    Camera.SetActorPosition(FVector(-10, 0, 0));
+    Camera.SetActorPosition(FVector(-1000, 0, 0));
     mainWorld->AddActor(&Camera);
     Camera.SetActorRotation(FVector(0, 0, 0));
     
@@ -76,12 +75,13 @@ int main()
     secondCamera->ActivateCamera(secondViewPort);
     thirdCamera->ActivateCamera(thirdViewPort);
     fourthCamera->ActivateCamera(fourthViewPort);
+
     
     
     mainWindow->AddViewport(secondViewPort);
     mainWindow->AddViewport(thirdViewPort);
     mainWindow->AddViewport(fourthViewPort);
-    
+        
     firstdViewPort->SetParameters(0, 0, 0.5, 1);    
     secondViewPort->SetParameters(0.5f, 0.66666f,    0.5f, 0.33333f);
     thirdViewPort->SetParameters(0.5f,  0.33333f, 0.5f, 0.33333f);
@@ -92,15 +92,15 @@ int main()
     mainWorld->AddActor(fourthCamera);
     
     
-    secondCamera->SetActorPosition(FVector(-6.09397, -7.52392, -0.0468553));
+    secondCamera->SetActorPosition(FVector(-609.397, -752.392, -4.68553));
     secondCamera->SetActorRotation(FVector(0, -1.8, 49.5));
 
     
-    thirdCamera->SetActorPosition(FVector(-6.45376, 6.17212, -0.0468553));
+    thirdCamera->SetActorPosition(FVector(-645.376, 617.212, -4.68553));
     thirdCamera->SetActorRotation(FVector(0, -4.4, -51.5));
 
     
-    fourthCamera->SetActorPosition(FVector(-9.09311, -0.381247, 6.01103));
+    fourthCamera->SetActorPosition(FVector(-909.311, -38.1247, 601.103));
     fourthCamera->SetActorRotation(FVector(0, -23.7998, -0.000142425));
     
     
@@ -152,7 +152,7 @@ int main()
     text->Opacity = 0.9f;
     text->SetTextAlign(QFAText::ETextAlign::TACenter);
 
-    firstdViewPort->AddText(text);
+    //firstdViewPort->AddText(text);
 
 
 

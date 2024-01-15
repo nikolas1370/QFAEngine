@@ -10,7 +10,7 @@
 
 class QFAVKMeshShadowPipeline;
 
-struct VertexMaterial// in future be replace to VertexMaterialNew 
+struct VertexMaterial// 
 {
 	FVector Position;
 	FVector Normal;
@@ -18,14 +18,14 @@ struct VertexMaterial// in future be replace to VertexMaterialNew
 	float Specular = 0;
 };
 
-struct SSVertexMaterial // Shader structure vertex
+struct SSVertexMaterial // structure input vertex Shader 
 {
 	FVector Position;
 	FVector Normal;
-	int materialIndex;
+	int materialIndex = 0;
 };
 
-struct Material
+struct Material // struct in fragment shader
 {
 	FVector Color = FVector(1, 1, 1);
 	float Specular = 0;
@@ -38,7 +38,7 @@ class MeshData
 	{ without Interpolation
 		[SSVertexFrame1,.., SSVertexFrameLast] // successively frame after frame
 		Indexes,
-		Materials
+		Materials  
 	}
 	*/	
 	char* FramesData; 
@@ -58,7 +58,7 @@ public:
 		indexCount = count of indices in list who represent all of mesh
 	*/
 	MeshData( int uniqueIndexCount, int indexCount, int materialCount);// false to true
-
+	MeshData(int VertexCount, int indexCount, int materialCount, int notNed);
 
 	~MeshData()
 	{

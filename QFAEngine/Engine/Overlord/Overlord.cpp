@@ -37,6 +37,7 @@ void QFAOverlord::EndLife()
     
 
     QFAText::EndLife();
+    //QFAVKBuffer::EndLife();  nee dele all buffer and image before call
 
     glfwTerminate(); 
     

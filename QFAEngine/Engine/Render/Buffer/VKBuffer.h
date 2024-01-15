@@ -6,10 +6,11 @@ class QFAWindow;
 class QFAVKVertexBuffer;
 class QFAVKIndexBuffer;
 class QFAVKTextureImage;
-
+class QFAOverlord;
 
 class QFAVKBuffer
 {
+	friend QFAOverlord;
 	friend QFAVKTextureImage;
 	friend QFAWindow;
 	friend QFAVKIndexBuffer;
@@ -58,7 +59,7 @@ private:
 	void copyBufferToImage(VkImage image, uint32_t width, uint32_t height, VkCommandPool commandPool, int32_t imageOffsetX = 0, int32_t imageOffsetY = 0, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT);
 	static VkCommandBuffer beginSingleTimeCommands(VkCommandPool commandPool);
 	static void endSingleTimeCommands(VkCommandPool commandPool, VkCommandBuffer commandBuffer);
-
+	static void EndLife();
 public:
 	static void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandPool commandPool, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT);
 	void copyInImage(QFAVKTextureImage* image, uint32_t width, uint32_t height, VkCommandPool commandPool, int32_t imageOffsetX = 0, int32_t imageOffsetY = 0, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT, VkImageLayout endLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);

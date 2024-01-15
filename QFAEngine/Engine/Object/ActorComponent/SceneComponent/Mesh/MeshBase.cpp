@@ -53,10 +53,29 @@ MeshData::MeshData(int uniqueIndexCount, int indexCount, int materialCount)
 	FramesData = (char*)malloc(FrameSize + sizeof(unsigned int) * IndexCount + sizeof(Material) * materialCount);
 }
 
+
+/*
+
+;kj-----------------------
+*/
+
+MeshData::MeshData(int vertexCount, int indexCount, int materialCount, int notNed)
+{	
+	MaterialCount = materialCount;
+	IndexCount = indexCount;
+	VertexCount = vertexCount;
+	VerticesSize = sizeof(VertexMaterial) * vertexCount;
+
+	FrameSize = sizeof(SSVertexMaterial) * vertexCount;
+	FramesData = (char*)malloc(FrameSize + ( sizeof(unsigned int) * IndexCount) + ( sizeof(Material) * materialCount));
+}
+
 SSVertexMaterial* MeshData::GetFrameData(int frame) const
 {
 	return (SSVertexMaterial*)&FramesData[0];
 }
+
+/*--------------*/
 
 QMeshBaseComponent::QMeshBaseComponent()	
 {	

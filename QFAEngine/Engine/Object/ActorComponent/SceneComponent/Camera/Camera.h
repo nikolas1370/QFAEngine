@@ -11,8 +11,8 @@ class QCameraComponent : public QSceneComponent
 	friend QFAOverlord;
 	friend QFAViewport;
 	// Field of view 
-	float Fov = 90;
-	float ViewDistance = 1000;
+	float Fov = 45;
+	float ViewDistance = 100000;
 
 	glm::mat3 cameraRotationMatrex;	
 	// parents rotation + rotation
@@ -29,8 +29,7 @@ public:
 	void Deactivate();
 	QCameraComponent()
 	{
-		Fov = 45.0f;
-		ViewDistance = 1000.0f;
+	
 	}
 	QCameraComponent(float fov, float viewDistance);
 

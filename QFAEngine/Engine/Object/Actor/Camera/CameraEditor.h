@@ -10,7 +10,7 @@ class ACameraEditor : public ACameraActor
 	FVector2D mouseAxis;
 	bool mosePress;
 	QFAInput Input;
-	float Speed = 10;
+	float Speed = 1000;
 protected:
 	void Tick(float delta) override;
 public:

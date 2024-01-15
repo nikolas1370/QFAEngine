@@ -8,7 +8,7 @@ class ACameraActor : public QActor
 {
 	
 protected:
-	QCameraComponent Camera = QCameraComponent(45.0f, 1000.0f);
+	QCameraComponent Camera = QCameraComponent(45.0f, 100000.0f);
 public:
 	ACameraActor();
 	~ACameraActor();

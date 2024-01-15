@@ -219,6 +219,11 @@ void QFAVKBuffer::transitionImageLayout(VkImage image, VkFormat format, VkImageL
     endSingleTimeCommands(commandPool, commandBuffer);
 }
 
+void QFAVKBuffer::EndLife()
+{
+    vmaDestroyAllocator(allocator);
+}
+
 
 
 VkCommandBuffer QFAVKBuffer::beginSingleTimeCommands(VkCommandPool commandPool)

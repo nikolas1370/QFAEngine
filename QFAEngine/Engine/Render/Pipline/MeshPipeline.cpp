@@ -69,7 +69,7 @@ QFAVKMeshPipeline::QFAVKMeshPipeline( VkRenderPass rPas, const std::string verte
     rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;    
     
     
-    rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;// VK_FRONT_FACE_CLOCKWISE;
+    rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;// VK_FRONT_FACE_COUNTER_CLOCKWISE ;
     rasterizer.depthBiasEnable = VK_FALSE;
 
     VkPipelineMultisampleStateCreateInfo multisampling{};
