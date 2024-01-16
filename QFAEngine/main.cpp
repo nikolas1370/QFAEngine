@@ -25,10 +25,8 @@ int main()
 {    
     QFAOverlord::Init();
 
-QStaticMesh* Mesh = QFAModelLoader::LoadModel("NoEngineModel/Arrow.fbx"); // 
-Mesh = QFAModelLoader::LoadModel("NoEngineModel/Arrow.obj");
-QStaticMesh* Mesh2 = QFAModelLoader::LoadModel("NoEngineModel/quad2.fbx");
-    //Mesh2 = QFAModelLoader::LoadModel("NoEngineModel/quad2.obj");
+    QStaticMesh* Mesh = QFAModelLoader::LoadModel("NoEngineModel/Arrow.fbx"); // Arrow.fbx
+    QStaticMesh* Mesh2 = QFAModelLoader::LoadModel("NoEngineModel/quad2.fbx");
     QStaticMesh* Mesh3 = QFAModelLoader::LoadModel("NoEngineModel/anim/dore_1.obj");
 
     QWorld* mainWorld = new QWorld();
@@ -56,7 +54,7 @@ QStaticMesh* Mesh2 = QFAModelLoader::LoadModel("NoEngineModel/quad2.fbx");
     secondActor->Name = "mainactor";
 
     ACameraEditor Camera;    
-    Camera.SetActorPosition(FVector(-1000, 0, 0));
+    Camera.SetActorPosition(FVector(-1000, 0, 0)); 
     mainWorld->AddActor(&Camera);
     Camera.SetActorRotation(FVector(0, 0, 0));
     
@@ -152,7 +150,7 @@ QStaticMesh* Mesh2 = QFAModelLoader::LoadModel("NoEngineModel/quad2.fbx");
     text->Opacity = 0.9f;
     text->SetTextAlign(QFAText::ETextAlign::TACenter);
 
-    //firstdViewPort->AddText(text);
+    firstdViewPort->AddText(text);
 
 
 

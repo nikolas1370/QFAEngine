@@ -1,7 +1,7 @@
 #pragma once
-#include <assimp/Importer.hpp>      // C++ importer interface
-#include <assimp/scene.h>           // Output data structure
-#include <assimp/postprocess.h>     // Post processing flags
+#include <assimp/Importer.hpp>      
+#include <assimp/scene.h>           
+#include <assimp/postprocess.h>     
 //#include <assimp/DefaultLogger.hpp>
 #include <assimp/material.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
@@ -10,8 +10,7 @@
 #pragma comment(lib, "assimp-vc143-mt.lib")
 
 class QFAModelLoader
-{
-    
+{    
     static void CalculateIndex(const aiScene* scene, const aiNode* node, unsigned int& indexCount, unsigned int& vertexCount);
 
     /*
@@ -40,9 +39,7 @@ void QFAModelLoader::CalculateIndex(const aiScene* scene, const aiNode* node, un
     {
         unsigned int meshIndex = node->mMeshes[i];
         for (size_t j = 0; j < scene->mMeshes[meshIndex]->mNumFaces; j++)
-        {
             indexCount += scene->mMeshes[meshIndex]->mFaces[j].mNumIndices;
-        }
 
         vertexCount += scene->mMeshes[meshIndex]->mNumVertices;
     }
@@ -55,17 +52,10 @@ inline void QFAModelLoader::WriteIndex(const aiScene* scene, const aiNode* node,
 { 
     for (size_t i = 0; i < node->mNumMeshes; i++)
     {
-
-        //std::cout << "-----------------\n";
         unsigned int meshIndex = node->mMeshes[i];
         for (size_t j = 0; j < scene->mMeshes[meshIndex]->mNumFaces; j++)
-        {
             for (size_t k = 0; k < scene->mMeshes[meshIndex]->mFaces[j].mNumIndices; k++)
-            {
                 meshIndexes[indexCount++] = scene->mMeshes[meshIndex]->mFaces[j].mIndices[k] + unicueIndex;
-                
-            }
-        }
         
         unicueIndex += scene->mMeshes[meshIndex]->mNumVertices;
     }
@@ -78,32 +68,41 @@ inline void QFAModelLoader::WriteVertex(const aiScene* scene, const aiNode* node
 {
     if(node->mNumMeshes > 0)
     {
-        aiMatrix4x4 finiteMatrix;
+        aiMatrix4x4 finiteMatrix;        
+        aiVector3D rotationAngel;
+        FVector rotations;
         if(!isObj)
-            finiteMatrix = GetFiniteMatrix(node);
+        {
+            aiVector3D scale;
+            aiVector3D rotation;
+            aiVector3D position;
+            finiteMatrix = GetFiniteMatrix(node);            
+            finiteMatrix.Decompose(scale, rotation, position);
+            rotations = FVector(Math::RadiansToDegrees(rotation.x), Math::RadiansToDegrees(rotation.y), Math::RadiansToDegrees(rotation.z));            
+        }
 
         for (size_t i = 0; i < node->mNumMeshes; i++)
         {
             unsigned int meshIndex = node->mMeshes[i];
             for (size_t j = 0; j < scene->mMeshes[meshIndex]->mNumVertices; j++)
             {
-                aiVector3D vertNormal;
                 if (isObj)
                 {
                     aiVector3D vert = scene->mMeshes[meshIndex]->mVertices[j] * 100.0f;
                     meshVertex[verticeCound].Position = FVector(vert.x, vert.y, vert.z);
-
+                    meshVertex[verticeCound].Normal.X = scene->mMeshes[meshIndex]->mNormals[j].x;
+                    meshVertex[verticeCound].Normal.Y = scene->mMeshes[meshIndex]->mNormals[j].y;
+                    meshVertex[verticeCound].Normal.Z = scene->mMeshes[meshIndex]->mNormals[j].z;
                 }
                 else// fbx
-                {
+                {                     
                     aiVector3D vert = finiteMatrix * scene->mMeshes[meshIndex]->mVertices[j];
                     meshVertex[verticeCound].Position = FVector(vert.x, vert.y, vert.z);
-
+                    meshVertex[verticeCound].Normal = FVector(scene->mMeshes[meshIndex]->mNormals[j].x, scene->mMeshes[meshIndex]->mNormals[j].y, scene->mMeshes[meshIndex]->mNormals[j].z)
+                        .RotateAngleAxis(rotations.X, FVector(1, 0, 0));
+                    meshVertex[verticeCound].Normal = meshVertex[verticeCound].Normal.RotateAngleAxis(rotations.Y, FVector(0, 1, 0));
+                    meshVertex[verticeCound].Normal = meshVertex[verticeCound].Normal.RotateAngleAxis(rotations.Z, FVector(0, 0, 1));
                 }
-
-                meshVertex[verticeCound].Normal.X = scene->mMeshes[meshIndex]->mNormals[j].x;
-                meshVertex[verticeCound].Normal.Y = scene->mMeshes[meshIndex]->mNormals[j].y;
-                meshVertex[verticeCound].Normal.Z = scene->mMeshes[meshIndex]->mNormals[j].z;
 
                 meshVertex[verticeCound].materialIndex = scene->mMeshes[meshIndex]->mMaterialIndex;
                 verticeCound++;
@@ -171,8 +170,8 @@ QStaticMesh* QFAModelLoader::LoadModel(const std::string& pFile)
         aiProcess_JoinIdenticalVertices |
         aiProcess_SortByPType |
         aiProcess_FlipWindingOrder |
-        aiProcess_GenNormals // 
-    );
+        aiProcess_GenSmoothNormals 
+    ); /*//aiProcess_GenNormals // */
 
     if (nullptr == scene)
     {
