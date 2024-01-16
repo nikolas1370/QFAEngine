@@ -24,10 +24,14 @@
 int main()
 {    
     QFAOverlord::Init();
+    std::vector<QStaticMesh*> meshes = QFAModelLoader::LoadModelSeparate("NoEngineModel/quad2.obj");
+    QStaticMesh* Mesh = meshes[0];
+    QStaticMesh* Mesh2 = meshes[1];
+    QStaticMesh* Mesh3 = meshes[2];
 
-    QStaticMesh* Mesh = QFAModelLoader::LoadModel("NoEngineModel/Arrow.fbx"); // Arrow.fbx
-    QStaticMesh* Mesh2 = QFAModelLoader::LoadModel("NoEngineModel/quad2.fbx");
-    QStaticMesh* Mesh3 = QFAModelLoader::LoadModel("NoEngineModel/anim/dore_1.obj");
+    //QStaticMesh* Mesh = QFAModelLoader::LoadModel("NoEngineModel/Arrow.fbx"); // Arrow.fbx
+    //QStaticMesh* Mesh2 = QFAModelLoader::LoadModel("NoEngineModel/quad2.obj");
+    //QStaticMesh* Mesh3 = QFAModelLoader::LoadModel("NoEngineModel/anim/dore_1.obj");
 
     QWorld* mainWorld = new QWorld();
 

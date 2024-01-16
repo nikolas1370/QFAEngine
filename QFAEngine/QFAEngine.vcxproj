@@ -192,7 +192,6 @@
     <ClCompile Include="GameCode\TestActor.cpp" />
     <ClCompile Include="GameCode\TestComponent.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Engine\Tools\File\Parser.cpp" />
     <ClCompile Include="Engine\Object\Actor\Actor.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -244,7 +243,6 @@
     <ClInclude Include="Engine\Math\Vector4D.h" />
     <ClInclude Include="Engine\Tools\File\ModelLoader.h" />
     <ClInclude Include="Engine\Tools\Debug\OpenGlStuff.h" />
-    <ClInclude Include="Engine\Tools\File\Parser.h" />
     <ClInclude Include="Engine\Object\Actor\Actor.h" />
     <ClInclude Include="GameCode\TestActor.h" />
     <ClInclude Include="GameCode\TestComponent.h" />

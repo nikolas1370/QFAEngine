@@ -6,20 +6,31 @@
 #include <assimp/material.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
+#include <Tools/Debug/OpenGlStuff.h>
 
 #pragma comment(lib, "assimp-vc143-mt.lib")
 
 class QFAModelLoader
 {    
-    static void CalculateIndex(const aiScene* scene, const aiNode* node, unsigned int& indexCount, unsigned int& vertexCount);
+
+    enum EFileFormat : char8_t
+    {
+        UNDEFINED,
+        OBJ,
+        FBX
+    };
+
+    static EFileFormat GetFileFormat(const aiScene* scene);
+
+    static void CalculateIndex(const aiScene* scene, const aiNode* node, unsigned int& indexCount, unsigned int& vertexCount, bool calculateChildren);
 
     /*
     * each aiMesh have own index
     * unicueIndex convert aiMesh index in MeshData index
     */
-    static void WriteIndex(const aiScene* scene, const aiNode* node, unsigned int* meshIndexes, unsigned int& unicueIndex, unsigned int& indexCount);
-    static void WriteVertex(const aiScene* scene, const aiNode* node, unsigned int& verticeCound, SSVertexMaterial* meshVertex, bool isObj);
-    static void WriteMaterial(const aiScene* scene, const aiNode* node, MeshData* mesDataReal);
+    static void WriteIndex(const aiScene* scene, const aiNode* node, unsigned int* meshIndexes, unsigned int& unicueIndex, unsigned int& indexCount, bool processChildren);
+    static void WriteVertex(const aiScene* scene, const aiNode* node, unsigned int& verticeCound, SSVertexMaterial* meshVertex, EFileFormat fileFormat, bool processChildren);
+    static void WriteMaterial(const aiScene* scene, const aiNode* node, MeshData* mesDataReal, bool processChildren);
     static aiMatrix4x4 GetFiniteMatrix(const aiNode* node);
 public:
 	QFAModelLoader();
@@ -29,11 +40,36 @@ public:
         import up Y and forwart -Z because blender defauld setings
     */
     static QStaticMesh* LoadModel(const std::string& pFile);
+    static std::vector<QStaticMesh*> LoadModelSeparate(const std::string& pFile);
+    //load model separate
 private:
+    static void GetMesh(const aiScene* scene, const aiNode* node, EFileFormat fileFormat, std::vector<QStaticMesh*>& vector);
 
 };
 
-void QFAModelLoader::CalculateIndex(const aiScene* scene, const aiNode* node, unsigned int& indexCount, unsigned int& vertexCount)
+inline QFAModelLoader::EFileFormat QFAModelLoader::GetFileFormat(const aiScene* scene)
+{
+    aiString objFormat("Wavefront Object Importer"); 
+    aiString fbxFormat("Autodesk FBX Importer");
+    aiString str("SourceAsset_Format");
+    for (size_t i = 0; i < scene->mMetaData->mNumProperties; i++)
+    {
+        aiMetadataEntry* kio = &scene->mMetaData->mValues[i];
+        if ((str == scene->mMetaData->mKeys[i]))
+        {
+            if (*((aiString*)kio->mData) == objFormat)
+                return EFileFormat::OBJ;
+            else if (*((aiString*)kio->mData) == fbxFormat)
+                return EFileFormat::FBX;
+
+            break;
+        }
+    }
+    
+    return EFileFormat::UNDEFINED;
+}
+
+void QFAModelLoader::CalculateIndex(const aiScene* scene, const aiNode* node, unsigned int& indexCount, unsigned int& vertexCount, bool calculateChildren)
 {
     for (size_t i = 0; i < node->mNumMeshes; i++)
     {
@@ -44,11 +80,12 @@ void QFAModelLoader::CalculateIndex(const aiScene* scene, const aiNode* node, un
         vertexCount += scene->mMeshes[meshIndex]->mNumVertices;
     }
     
-    for (size_t i = 0; i < node->mNumChildren; i++)
-        CalculateIndex(scene, node->mChildren[i], indexCount, vertexCount);
+    if(calculateChildren)
+        for (size_t i = 0; i < node->mNumChildren; i++)
+            CalculateIndex(scene, node->mChildren[i], indexCount, vertexCount, calculateChildren);
 }
 
-inline void QFAModelLoader::WriteIndex(const aiScene* scene, const aiNode* node, unsigned int* meshIndexes, unsigned int& unicueIndex, unsigned int& indexCount)
+inline void QFAModelLoader::WriteIndex(const aiScene* scene, const aiNode* node, unsigned int* meshIndexes, unsigned int& unicueIndex, unsigned int& indexCount, bool processChildren)
 { 
     for (size_t i = 0; i < node->mNumMeshes; i++)
     {
@@ -59,19 +96,19 @@ inline void QFAModelLoader::WriteIndex(const aiScene* scene, const aiNode* node,
         
         unicueIndex += scene->mMeshes[meshIndex]->mNumVertices;
     }
-
-    for (size_t i = 0; i < node->mNumChildren; i++)
-        WriteIndex(scene, node->mChildren[i], meshIndexes, unicueIndex, indexCount);
+    if(processChildren)
+        for (size_t i = 0; i < node->mNumChildren; i++)
+            WriteIndex(scene, node->mChildren[i], meshIndexes, unicueIndex, indexCount, processChildren);
 }
 
-inline void QFAModelLoader::WriteVertex(const aiScene* scene, const aiNode* node, unsigned int& verticeCound, SSVertexMaterial* meshVertex, bool isObj)
+inline void QFAModelLoader::WriteVertex(const aiScene* scene, const aiNode* node, unsigned int& verticeCound, SSVertexMaterial* meshVertex, EFileFormat fileFormat, bool processChildren)
 {
     if(node->mNumMeshes > 0)
     {
         aiMatrix4x4 finiteMatrix;        
         aiVector3D rotationAngel;
         FVector rotations;
-        if(!isObj)
+        if(fileFormat == EFileFormat::FBX)
         {
             aiVector3D scale;
             aiVector3D rotation;
@@ -86,7 +123,7 @@ inline void QFAModelLoader::WriteVertex(const aiScene* scene, const aiNode* node
             unsigned int meshIndex = node->mMeshes[i];
             for (size_t j = 0; j < scene->mMeshes[meshIndex]->mNumVertices; j++)
             {
-                if (isObj)
+                if (fileFormat == EFileFormat::OBJ || fileFormat == EFileFormat::UNDEFINED)
                 {
                     aiVector3D vert = scene->mMeshes[meshIndex]->mVertices[j] * 100.0f;
                     meshVertex[verticeCound].Position = FVector(vert.x, vert.y, vert.z);
@@ -110,11 +147,12 @@ inline void QFAModelLoader::WriteVertex(const aiScene* scene, const aiNode* node
         }
     }
 
-    for (size_t i = 0; i < node->mNumChildren; i++)
-        WriteVertex(scene, node->mChildren[i],  verticeCound, meshVertex, isObj);
+    if(processChildren)
+        for (size_t i = 0; i < node->mNumChildren; i++)
+            WriteVertex(scene, node->mChildren[i],  verticeCound, meshVertex, fileFormat, processChildren);
 }
 
-inline void QFAModelLoader::WriteMaterial(const aiScene* scene, const aiNode* node, MeshData* mesDataReal)
+inline void QFAModelLoader::WriteMaterial(const aiScene* scene, const aiNode* node, MeshData* mesDataReal, bool processChildren)
 {
     aiColor3D color(0.f, 0.f, 0.f);
     for (size_t i = 0; i < node->mNumMeshes; i++)
@@ -127,8 +165,9 @@ inline void QFAModelLoader::WriteMaterial(const aiScene* scene, const aiNode* no
         mesDataReal->SetMaterial(mat, materialIndex);
     }
 
-    for (size_t i = 0; i < node->mNumChildren; i++)
-        WriteMaterial(scene, node->mChildren[i],  mesDataReal);
+    if(processChildren)
+        for (size_t i = 0; i < node->mNumChildren; i++)
+            WriteMaterial(scene, node->mChildren[i],  mesDataReal, processChildren);
 }
 
 inline aiMatrix4x4 QFAModelLoader::GetFiniteMatrix(const aiNode* node)
@@ -171,63 +210,95 @@ QStaticMesh* QFAModelLoader::LoadModel(const std::string& pFile)
         aiProcess_SortByPType |
         aiProcess_FlipWindingOrder |
         aiProcess_GenSmoothNormals 
-    ); /*//aiProcess_GenNormals // */
+    ); 
 
     if (nullptr == scene)
     {
         std::cout << "fail\n";
+        ASSERT(false);
         return nullptr;
     }
-    
-    bool obj = false;
-
-    aiString objFormat("Wavefront Object Importer");
-    aiString fbxFormat("Autodesk FBX Importer");
-    aiString str("SourceAsset_Format");
-
-    for (size_t i = 0; i < scene->mMetaData->mNumProperties; i++)
-    {
-        aiMetadataEntry* kio = &scene->mMetaData->mValues[i];
-        if ((str == scene->mMetaData->mKeys[i]))
-        {
-            if (*((aiString*)kio->mData) == objFormat)
-                obj = true;
-            else if (*((aiString*)kio->mData) == fbxFormat)
-                obj = false;
-
-            break;
-        }
-    }
-
+   
+    EFileFormat fileFormat = GetFileFormat(scene);  
     unsigned int allIndexCound = 0;
     unsigned int verticeCound = 0;
     for (size_t i = 0; i < scene->mRootNode->mNumChildren; i++)
-        CalculateIndex(scene, scene->mRootNode->mChildren[i], allIndexCound, verticeCound);
-
-
-    std::cout << allIndexCound << " " << verticeCound << " lopoid\n";
+        CalculateIndex(scene, scene->mRootNode->mChildren[i], allIndexCound, verticeCound, true);
 
     MeshData* mesDataReal = new MeshData(verticeCound, allIndexCound, scene->mNumMaterials, 0);
-    
-    //----------
-    unsigned int* meshIndexes = mesDataReal->GetIndexData();;
+
+    unsigned int* meshIndexes = mesDataReal->GetIndexData();
 
     allIndexCound = 0;
 
     unsigned int unicueIndex = 0;
     for (size_t i = 0; i < scene->mRootNode->mNumChildren; i++)
-        WriteIndex(scene, scene->mRootNode->mChildren[i], meshIndexes, unicueIndex, allIndexCound);
+        WriteIndex(scene, scene->mRootNode->mChildren[i], meshIndexes, unicueIndex, allIndexCound, true);
 
     SSVertexMaterial* meshVertex = mesDataReal->GetFrameData(0);
     verticeCound = 0;
     
     for (size_t i = 0; i < scene->mRootNode->mNumChildren; i++)
-        WriteVertex(scene, scene->mRootNode->mChildren[i], verticeCound, meshVertex, obj);    
+        WriteVertex(scene, scene->mRootNode->mChildren[i], verticeCound, meshVertex, fileFormat, true);
 
     for (size_t i = 0; i < scene->mRootNode->mNumChildren; i++)
-        WriteMaterial(scene, scene->mRootNode->mChildren[i], mesDataReal);  
+        WriteMaterial(scene, scene->mRootNode->mChildren[i], mesDataReal, true);
+    
+    importer.FreeScene();
+    return new QStaticMesh(mesDataReal);
+}
 
-    QStaticMesh* meshReal = new QStaticMesh(mesDataReal);
+std::vector<QStaticMesh*> QFAModelLoader::LoadModelSeparate(const std::string& pFile)
+{
+    std::vector<QStaticMesh*> meshes;
+    Assimp::Importer importer;
 
-    return meshReal;
+    const aiScene* scene = importer.ReadFile(pFile,
+        aiProcess_CalcTangentSpace |
+        aiProcess_Triangulate |
+        aiProcess_JoinIdenticalVertices |
+        aiProcess_SortByPType |
+        aiProcess_FlipWindingOrder |
+        aiProcess_GenSmoothNormals
+    );
+
+    if (nullptr == scene)
+    {
+        std::cout << "fail\n";
+        ASSERT(false);
+        return meshes;
+    }
+    EFileFormat fileFormat = GetFileFormat(scene);
+    
+    GetMesh(scene, scene->mRootNode, fileFormat, meshes);
+    importer.FreeScene();
+    return meshes;
+}
+
+void QFAModelLoader::GetMesh(const aiScene* scene, const aiNode* node, EFileFormat fileFormat, std::vector<QStaticMesh*>& vector)
+{
+    for (size_t i = 0; i < node->mNumChildren; i++)
+    {   
+        unsigned int allIndexCound = 0;
+        unsigned int verticeCound = 0;
+        unsigned int unicueIndex = 0;
+
+        CalculateIndex(scene, node->mChildren[i], allIndexCound, verticeCound, false);
+
+        MeshData* mesDataReal = new MeshData(verticeCound, allIndexCound, scene->mNumMaterials, 0);
+        unsigned int* meshIndexes = mesDataReal->GetIndexData();
+
+        allIndexCound = 0;
+        WriteIndex(scene, node->mChildren[i], meshIndexes, unicueIndex, allIndexCound, false);
+
+        SSVertexMaterial* meshVertex = mesDataReal->GetFrameData(0);
+        verticeCound = 0;
+
+        WriteVertex(scene, node->mChildren[i], verticeCound, meshVertex, fileFormat, false);
+        WriteMaterial(scene, node->mChildren[i], mesDataReal, false);
+        vector.push_back(new QStaticMesh(mesDataReal));
+
+        for (size_t j = 0; j < node->mChildren[i]->mNumChildren; j++)
+            GetMesh(scene, node->mChildren[i]->mChildren[j], fileFormat, vector);
+    }    
 }
