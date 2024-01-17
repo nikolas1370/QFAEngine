@@ -6,10 +6,10 @@ layout(location = 1) in float AtlasIndex;
 
 layout(location = 0) out vec4 color;
 //uniform sampler2D glyphTexture[7];
-layout(binding = 1) uniform sampler2D glyphTexture[];
+layout(set = 1,binding = 0) uniform sampler2D glyphTexture[];
 
 
-layout(binding = 2) uniform UniformBufferTextParam 
+layout(set = 1, binding = 1) uniform UniformBufferTextParam 
 {    
     vec3 textColor;     
     int outline;

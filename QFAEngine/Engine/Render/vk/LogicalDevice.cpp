@@ -1,6 +1,6 @@
 #include "LogicalDevice.h"
 #include <set>
-#include <Tools/Debug/OpenGlStuff.h>
+#include <Tools/Debug/VulkanSuff.h>
 #include <Render/vk/QueueFamilies.h>
 
 bool QFAVKLogicalDevice::IsInit = false;

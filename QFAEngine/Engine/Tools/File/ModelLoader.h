@@ -2,17 +2,14 @@
 #include <assimp/Importer.hpp>      
 #include <assimp/scene.h>           
 #include <assimp/postprocess.h>     
-//#include <assimp/DefaultLogger.hpp>
 #include <assimp/material.h>
-#include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
-#include <Tools/Debug/OpenGlStuff.h>
+#include <Tools/Debug/VulkanSuff.h>
 
 #pragma comment(lib, "assimp-vc143-mt.lib")
 
 class QFAModelLoader
-{    
-
+{   
     enum EFileFormat : char8_t
     {
         UNDEFINED,
@@ -41,10 +38,8 @@ public:
     */
     static QStaticMesh* LoadModel(const std::string& pFile);
     static std::vector<QStaticMesh*> LoadModelSeparate(const std::string& pFile);
-    //load model separate
 private:
     static void GetMesh(const aiScene* scene, const aiNode* node, EFileFormat fileFormat, std::vector<QStaticMesh*>& vector);
-
 };
 
 inline QFAModelLoader::EFileFormat QFAModelLoader::GetFileFormat(const aiScene* scene)
@@ -197,12 +192,6 @@ QFAModelLoader::~QFAModelLoader()
 QStaticMesh* QFAModelLoader::LoadModel(const std::string& pFile)
 {
     Assimp::Importer importer;
-
-    /*
-    Assimp::DefaultLogger::create("", Assimp::Logger::VERBOSE);
-    Assimp::LogStream* stderrStream = Assimp::LogStream::createDefaultStream(aiDefaultLogStream_STDERR);
-    Assimp::DefaultLogger::get()->attachStream(stderrStream, Assimp::Logger::NORMAL | Assimp::Logger::DEBUGGING | Assimp::Logger::VERBOSE);
-    */
     const aiScene* scene = importer.ReadFile(pFile,
         aiProcess_CalcTangentSpace |
         aiProcess_Triangulate |
@@ -222,22 +211,20 @@ QStaticMesh* QFAModelLoader::LoadModel(const std::string& pFile)
     EFileFormat fileFormat = GetFileFormat(scene);  
     unsigned int allIndexCound = 0;
     unsigned int verticeCound = 0;
+    unsigned int unicueIndex = 0;
+
     for (size_t i = 0; i < scene->mRootNode->mNumChildren; i++)
         CalculateIndex(scene, scene->mRootNode->mChildren[i], allIndexCound, verticeCound, true);
 
     MeshData* mesDataReal = new MeshData(verticeCound, allIndexCound, scene->mNumMaterials, 0);
-
+    SSVertexMaterial* meshVertex = mesDataReal->GetFrameData(0);
     unsigned int* meshIndexes = mesDataReal->GetIndexData();
-
     allIndexCound = 0;
-
-    unsigned int unicueIndex = 0;
+    verticeCound = 0;
+    
     for (size_t i = 0; i < scene->mRootNode->mNumChildren; i++)
         WriteIndex(scene, scene->mRootNode->mChildren[i], meshIndexes, unicueIndex, allIndexCound, true);
 
-    SSVertexMaterial* meshVertex = mesDataReal->GetFrameData(0);
-    verticeCound = 0;
-    
     for (size_t i = 0; i < scene->mRootNode->mNumChildren; i++)
         WriteVertex(scene, scene->mRootNode->mChildren[i], verticeCound, meshVertex, fileFormat, true);
 
@@ -286,14 +273,12 @@ void QFAModelLoader::GetMesh(const aiScene* scene, const aiNode* node, EFileForm
         CalculateIndex(scene, node->mChildren[i], allIndexCound, verticeCound, false);
 
         MeshData* mesDataReal = new MeshData(verticeCound, allIndexCound, scene->mNumMaterials, 0);
-        unsigned int* meshIndexes = mesDataReal->GetIndexData();
-
-        allIndexCound = 0;
-        WriteIndex(scene, node->mChildren[i], meshIndexes, unicueIndex, allIndexCound, false);
-
         SSVertexMaterial* meshVertex = mesDataReal->GetFrameData(0);
+        unsigned int* meshIndexes = mesDataReal->GetIndexData();        
+        allIndexCound = 0;
         verticeCound = 0;
-
+        
+        WriteIndex(scene, node->mChildren[i], meshIndexes, unicueIndex, allIndexCound, false);
         WriteVertex(scene, node->mChildren[i], verticeCound, meshVertex, fileFormat, false);
         WriteMaterial(scene, node->mChildren[i], mesDataReal, false);
         vector.push_back(new QStaticMesh(mesDataReal));

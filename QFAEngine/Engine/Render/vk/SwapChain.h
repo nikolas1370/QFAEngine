@@ -2,7 +2,7 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 #include "VKStruct.h"
-#include <Tools/Debug/OpenGlStuff.h>
+#include <Tools/Debug/VulkanSuff.h>
 #include <Render/vk/TextureImage.h>
 
 class QFAWindow;

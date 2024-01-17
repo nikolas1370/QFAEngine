@@ -1,6 +1,6 @@
 #pragma once
 #include <Tools/Array.h>
-#include <Tools/Debug/OpenGlStuff.h>
+#include <Tools/Debug/VulkanSuff.h>
 #include <Math/Math.h>
 #include <Render/vk/VKInstance.h>
 #include <Render/vk/PhysicalDevice.h>
@@ -10,13 +10,13 @@
 #include <string>
 
 #include <Render/vk/QueueFamilies.h>
-#include <Tools/Debug/OpenGlStuff.h>
+#include <Tools/Debug/VulkanSuff.h>
 #include <Render/vk/TextureImage.h>
 #include <Render/vk/ImageView.h>
 #include <Render/vk/TextureSampler.h>
 #include <Render/Buffer/VertexBuffer.h>
 #include <Render/Buffer/IndexBuffer.h>
-#include <Render/UI/Text.h>
+
 #include <Render/RenderPass/RenderPassDepth.h>
 #include <Render/Framebuffer/ShadowFrameBuffer.h>
 #include <Render/RenderPass/TextRenderPass.h>
@@ -34,6 +34,7 @@ class QFAVKMeshFrameBuffer;
 class QActor;
 class QSceneComponent;
 class QWorld;
+class QFAText;
 
 class QFAWindow
 {
@@ -109,17 +110,22 @@ private:
 	VkSemaphore GetImageSemaphore;	
 	std::array<VkSemaphore, QFAWindow::MaxActiveViewPort> ActorFinishedSemaphore;
 	std::array<VkSemaphore, QFAWindow::MaxActiveViewPort> ActorShadowFinishedSemaphore;
-	std::array<VkSemaphore, QFAWindow::MaxActiveViewPort> UISemaphore;
-	std::array<VkPipelineStageFlags, QFAWindow::MaxActiveViewPort> UISemaphoreStages;
+	VkSemaphore UISemaphore;
+	
+	std::array< VkPipelineStageFlags, QFAWindow::MaxActiveViewPort> ActorWaittageMasks;
 
 	VkSemaphore FinisSemaphore;
 
 	std::array<VkCommandBuffer, QFAWindow::MaxActiveViewPort> ShadowCommandBuffers;
 	std::array<VkCommandBuffer, QFAWindow::MaxActiveViewPort> MeshCommandBuffers;
-	std::array<VkCommandBuffer, QFAWindow::MaxActiveViewPort> UICommandBuffers;
+	VkCommandBuffer UICommandBuffer;
 	VkCommandBuffer FinisCommandBuffer;
 	
+	/*
+	ActorFinishedSemaphore  redu in DrawText
 	
+	*/
+
 	static VkSemaphore imageAvailableSemaphore; 
 	static VkSemaphore renderFinishedSemaphores;
 
@@ -165,7 +171,7 @@ private:
 
 	unsigned int ProcessMeshComponent(QSceneComponent* component, bool shadow);
 
-	void DrawText(QFAViewport* viewport);
+	void DrawText();
 
 
 	void DrawOffscreenBuffer();
@@ -205,5 +211,13 @@ public:
 	std::array<QFAVKImageView*, MaxActiveViewPort> ShadowImagesViews;
 	QFAVKTextureSampler* ShadowSampler;
 
+	struct SViewportBuffers
+	{
+		QFAVKBuffer* uiProjectionBuffer;
+	};
+	std::array<SViewportBuffers, MaxActiveViewPort> ViewportBuffers;
+
+
 	void CreateShadow();
+	void CreateViewtortsBuffers();
 }; // ShadowImages[0]->TextureImage

@@ -3,7 +3,7 @@ layout (location = 0) in vec4 vertex; // <vec2 pos, vec2 tex>
 layout (location = 1) in int atlasIndex;
 
 
-layout(binding = 0) uniform UniformBufferObject 
+layout(set = 0,binding = 0) uniform UniformBufferObject 
 {
     mat4 projection;
 } prog;

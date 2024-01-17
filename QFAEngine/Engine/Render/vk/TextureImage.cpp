@@ -7,6 +7,15 @@
 #include <Render/vk/PhysicalDevice.h>
 #include <Render/vk/LogicalDevice.h>
 
+QFAVKTextureImage::QFAVKTextureImage(VkCommandPool commandPool, SImageCreateInfo& ici)
+{
+    ImageFormat = ici.format;
+    VkDeviceSize imageSize = ici.Width * ici.Height * ici.channelCount;
+    buffer = new QFAVKBuffer(imageSize, nullptr, true);
+    createImage(ici.Width, ici.Height, ici.format, VK_IMAGE_TILING_OPTIMAL, ici.usage);
+    QFAVKBuffer::transitionImageLayout(TextureImage, ici.format, VK_IMAGE_LAYOUT_UNDEFINED, ici.layout, commandPool, ici.aspect);
+}
+
 QFAVKTextureImage::QFAVKTextureImage(VkCommandPool commandPool, int Width, int Height, unsigned int channelCount,  VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspect )
 {
     ImageFormat = format;

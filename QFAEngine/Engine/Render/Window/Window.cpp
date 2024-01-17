@@ -14,7 +14,7 @@
 #include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
 #include <Render/UI/Image.h>
 #include <Render/Pipline/ImagePipeline.h>
-
+#include <Render/UI/Text.h>
 
 #include <Render/Pipline/MeshShadowPipeline.h>
 #include <Render/Framebuffer/MeshFrameBuffer.h> 
@@ -90,6 +90,8 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 	
 	frameBufferMesh = new QFAVKMeshFrameBuffer(commandPool, width, height);
 
+	CreateViewtortsBuffers();
+
 	QFAText::Init(TextRenderPass->renderPass, commandPool);
 	for (size_t i = 0; i < MaxActiveViewPort; i++)
 		ShadowFrameBuffers[i] = new QFAVKShadowFrameBuffer(commandPool, RenderPassOffScreen->renderPass);
@@ -112,12 +114,13 @@ QFAWindow::~QFAWindow()
 	
 	*/
 
+
 	glfwDestroyWindow(glfWindow);
 }
 
 void QFAWindow::createCommandBuffer()
 {
-	std::array<VkCommandBuffer, 3 * MaxActiveViewPort + 1> comb;
+	std::array<VkCommandBuffer, 2 * MaxActiveViewPort + 2> comb;
 
 	VkCommandBufferAllocateInfo allocInfo{};
 	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -128,30 +131,30 @@ void QFAWindow::createCommandBuffer()
 	if (vkAllocateCommandBuffers(QFAVKLogicalDevice::GetDevice(), &allocInfo, comb.data()) != VK_SUCCESS)
 		stopExecute("failed to allocate command buffers!");
 
-	FinisCommandBuffer = comb.back();
+	FinisCommandBuffer = comb[comb.size() - 2];
+	UICommandBuffer = comb[comb.size() - 1];
 	int index = 0;
-	for (size_t i = 0; i < MaxActiveViewPort; i += 3)
+	for (size_t i = 0; i < MaxActiveViewPort; i += 2)
 	{
 		ShadowCommandBuffers[index] = comb[i];
-		MeshCommandBuffers[index] = comb[i + 1];
-		UICommandBuffers[index] = comb[i + 2];
+		MeshCommandBuffers[index] = comb[i + 1];		
 		index++;
 	}
 }
 
-void QFAWindow::DrawText(QFAViewport* _viewport)
+void QFAWindow::DrawText()
 {
 
 	VkCommandBufferBeginInfo beginInfo{};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-	if (vkBeginCommandBuffer(MainWindow->UICommandBuffers[ViewportProcess], &beginInfo) != VK_SUCCESS)
+	if (vkBeginCommandBuffer(MainWindow->UICommandBuffer, &beginInfo) != VK_SUCCESS)
 		stopExecute("failed to begin recording command buffer!");
 		
 	VkRenderPassBeginInfo renderPassInfo{};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	renderPassInfo.renderPass = MainWindow->TextRenderPass->renderPass;
-	renderPassInfo.framebuffer = frameBufferMesh->Framebuffer;//SwapChain->swapChainFramebuffers[imageIndex];
+	renderPassInfo.framebuffer = frameBufferMesh->Framebuffer;
 	renderPassInfo.renderArea.offset = { 0, 0 };
 	renderPassInfo.renderArea.extent = MainWindow->SwapChain->swapChainExtent;
 
@@ -162,58 +165,85 @@ void QFAWindow::DrawText(QFAViewport* _viewport)
 	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
 	renderPassInfo.pClearValues = clearValues.data();
 
-	vkCmdBeginRenderPass(MainWindow->UICommandBuffers[ViewportProcess], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);	
+	vkCmdBeginRenderPass(MainWindow->UICommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);	
+	vkCmdBindPipeline(MainWindow->UICommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, QFAText::Pipeline->graphicsPipeline);
+	/*----------------*/
 
-	VkViewport viewport{};
-	viewport.x = _viewport->X;
-	viewport.y = _viewport->Y;
-	viewport.width = _viewport->Width;
-	viewport.height = _viewport->Height;
-	viewport.minDepth = 0.0f;
-	viewport.maxDepth = 1.0f;
-	vkCmdSetViewport(MainWindow->UICommandBuffers[ViewportProcess], 0, 1, &viewport); // can in start render viewport do 
+	QFAText::StartTextRender();
 
-	VkRect2D scissor{};
-	scissor.offset = { 0, 0 };
-	scissor.extent = MainWindow->SwapChain->swapChainExtent;
-	vkCmdSetScissor(MainWindow->UICommandBuffers[ViewportProcess], 0, 1, &scissor);
-
-
-	vkCmdBindPipeline(MainWindow->UICommandBuffers[ViewportProcess], VK_PIPELINE_BIND_POINT_GRAPHICS, QFAText::Pipeline->graphicsPipeline);
-	QFAText::StartTextRender(_viewport->UIProjection);
-
-	for (size_t j = 0; j < _viewport->Texts.Length(); j++)
+	for (size_t i = 0; i < MainWindow->Viewports.Length(); i++)
 	{
-		_viewport->Texts[j]->Render();
-		recordCommandBufferText(_viewport->Texts[j], _viewport);
+
+		VkViewport viewport{};
+		viewport.x = MainWindow->Viewports[i]->X;
+		viewport.y = MainWindow->Viewports[i]->Y;
+		viewport.width = MainWindow->Viewports[i]->Width;
+		viewport.height = MainWindow->Viewports[i]->Height;
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(MainWindow->UICommandBuffer, 0, 1, &viewport); // can in start render viewport do 
+
+		VkRect2D scissor{};
+		scissor.offset = { 0, 0 };
+		scissor.extent = MainWindow->SwapChain->swapChainExtent;
+		vkCmdSetScissor(MainWindow->UICommandBuffer, 0, 1, &scissor);
+
+
+		
+		QFAText::StartTextRenderViewPort(MainWindow->Viewports[i]->UIProjection, i);
+
+		for (size_t j = 0; j < MainWindow->Viewports[i]->Texts.Length(); j++)
+		{
+			MainWindow->Viewports[i]->Texts[j]->Render();
+			recordCommandBufferText(MainWindow->Viewports[i]->Texts[j], MainWindow->Viewports[i]);
+		}
 	}
+
+	
+
+	/*------------------*/
 
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-	VkSemaphore waitSemaphores[] = {   ActorFinishedSemaphore[ViewportProcess]};
-	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-	submitInfo.waitSemaphoreCount = 1;
-	submitInfo.pWaitSemaphores = waitSemaphores ;
-	submitInfo.pWaitDstStageMask = waitStages;
+	// VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+	submitInfo.waitSemaphoreCount = ViewportProcess;
+	submitInfo.pWaitSemaphores = ActorFinishedSemaphore.data();
+	submitInfo.pWaitDstStageMask = ActorWaittageMasks.data();
 
 	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &UICommandBuffers[ViewportProcess];
+	submitInfo.pCommandBuffers = &UICommandBuffer;
 
-	VkSemaphore signalSemaphores[] = { UISemaphore[ViewportProcess]};	
+	VkSemaphore signalSemaphores[] = { UISemaphore};	
 	submitInfo.signalSemaphoreCount = 1;
 	submitInfo.pSignalSemaphores = signalSemaphores;
 	
 	
 	
-	vkCmdEndRenderPass(UICommandBuffers[ViewportProcess]);
+	vkCmdEndRenderPass(UICommandBuffer);
 
-	if (vkEndCommandBuffer(UICommandBuffers[ViewportProcess]) != VK_SUCCESS)
+	if (vkEndCommandBuffer(UICommandBuffer) != VK_SUCCESS)
 		stopExecute("failed to record command buffer!");
 
 	if (vkQueueSubmit(QFAVKLogicalDevice::GetGraphicsQueue(), 1, &submitInfo, nullptr) != VK_SUCCESS)
 		stopExecute("failed to submit draw command buffer!");	
 }
+
+void QFAWindow::recordCommandBufferText(QFAText* text, QFAViewport* viewPort)
+{
+	VkBuffer vertexBuffers[] = { text->vertexBufer->GpuSideBuffer->Buffer };
+	VkDeviceSize offsets[] = { 0 };
+
+	vkCmdBindVertexBuffers(UICommandBuffer, 0, 1, vertexBuffers, offsets);
+
+	VkDescriptorSet ar[] = { text->CurentDescriptorSetProject, text->CurentDescriptorSet };
+
+	vkCmdBindDescriptorSets(UICommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+		QFAText::Pipeline->pipelineLayout, 0, 2, ar, 0, nullptr);
+
+	vkCmdDraw(UICommandBuffer, static_cast<uint32_t>(text->CountSymbolForRender * 6), 1, 0, 0);
+}
+
 
 void QFAWindow::DrawOffscreenBuffer()
 {
@@ -222,7 +252,6 @@ void QFAWindow::DrawOffscreenBuffer()
 
 	if (vkBeginCommandBuffer(MainWindow->FinisCommandBuffer, &beginInfo) != VK_SUCCESS)
 		stopExecute("failed to begin recording command buffer!");
-
 
 	VkRenderPassBeginInfo renderPassInfo{};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -261,10 +290,11 @@ void QFAWindow::DrawOffscreenBuffer()
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-	submitInfo.waitSemaphoreCount = ViewportProcess;
-	submitInfo.pWaitSemaphores = &UISemaphore[0];// ;
+	submitInfo.waitSemaphoreCount = 1;
+	submitInfo.pWaitSemaphores = &UISemaphore;// ;
 	
-	submitInfo.pWaitDstStageMask = UISemaphoreStages.data();
+	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+	submitInfo.pWaitDstStageMask = waitStages;
 
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = &FinisCommandBuffer;
@@ -274,9 +304,6 @@ void QFAWindow::DrawOffscreenBuffer()
 	submitInfo.pSignalSemaphores = signalSemaphores;
 
 	vkCmdEndRenderPass(FinisCommandBuffer);
-
-	
-	QFAVKBuffer::transitionImageLayout(frameBufferMesh->ColorImage->TextureImage, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL, commandPool, VK_IMAGE_ASPECT_COLOR_BIT);
 
 	if (vkEndCommandBuffer(FinisCommandBuffer) != VK_SUCCESS)
 		stopExecute("failed to record command buffer!");
@@ -304,17 +331,17 @@ void QFAWindow::createSyncObject()
 	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;	
 	
 	if(vkCreateSemaphore(QFAVKLogicalDevice::GetDevice(), &semaphoreInfo, nullptr, &GetImageSemaphore) != VK_SUCCESS ||
-		vkCreateSemaphore(QFAVKLogicalDevice::GetDevice(), &semaphoreInfo, nullptr, &FinisSemaphore) != VK_SUCCESS)
+		vkCreateSemaphore(QFAVKLogicalDevice::GetDevice(), &semaphoreInfo, nullptr, &FinisSemaphore) != VK_SUCCESS ||
+		vkCreateSemaphore(QFAVKLogicalDevice::GetDevice(), &semaphoreInfo, nullptr, &UISemaphore) != VK_SUCCESS)
 		stopExecute("failed to create Semaphore");
 
 	for (size_t i = 0; i < QFAWindow::MaxActiveViewPort; i++)
 	{
 		if (vkCreateSemaphore(QFAVKLogicalDevice::GetDevice(), &semaphoreInfo, nullptr, &ActorFinishedSemaphore[i]) != VK_SUCCESS ||
-			vkCreateSemaphore(QFAVKLogicalDevice::GetDevice(), &semaphoreInfo, nullptr, &ActorShadowFinishedSemaphore[i]) != VK_SUCCESS ||			
-			vkCreateSemaphore(QFAVKLogicalDevice::GetDevice(), &semaphoreInfo, nullptr, &UISemaphore[i]) != VK_SUCCESS )
+			vkCreateSemaphore(QFAVKLogicalDevice::GetDevice(), &semaphoreInfo, nullptr, &ActorShadowFinishedSemaphore[i]) != VK_SUCCESS)
 			stopExecute("failed to create Semaphore");
 
-		UISemaphoreStages[i] = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		ActorWaittageMasks[i] = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;	
 	}
 
 }
@@ -474,9 +501,11 @@ void QFAWindow::RenderWindow()
 	MainWindow->ViewportProcess = 0;
 
 	MainWindow->StartFrame();
-
+	
 	for (size_t i = 0; i < MainWindow->Viewports.Length(); i++)
 	{
+
+
 		MainWindow->StartRenderOff();
 
 		MainWindow->RenderOff(MainWindow->Viewports[i]); // in problem
@@ -485,13 +514,20 @@ void QFAWindow::RenderWindow()
 
 		MainWindow->DrawActors(MainWindow->Viewports[i], i == 0);
 
-		MainWindow->DrawText(MainWindow->Viewports[i]);
+
 
 		MainWindow->ViewportProcess++;
+		//vkQueueWaitIdle(QFAVKLogicalDevice::GetGraphicsQueue());
 	}
 
+	
+	MainWindow->DrawText();
+
 	MainWindow->DrawOffscreenBuffer();
+
+	
 	MainWindow->PresentFrame();
+	
 }
 
 void QFAWindow::StartFrame()
@@ -554,6 +590,14 @@ void QFAWindow::CreateShadow()
 	{		
 		ShadowImages[i] = new QFAVKTextureImage(commandPool, QFAVKShadowFrameBuffer::GetShadowResolution(), QFAVKShadowFrameBuffer::GetShadowResolution(), 4, QFAWindow::depthFormat, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_IMAGE_ASPECT_DEPTH_BIT);
 		ShadowImagesViews[i] = new QFAVKImageView(ShadowImages[i], VK_IMAGE_ASPECT_DEPTH_BIT);
+	}
+}
+
+void QFAWindow::CreateViewtortsBuffers()
+{
+	for (size_t i = 0; i < ViewportBuffers.size(); i++)
+	{
+		ViewportBuffers[i].uiProjectionBuffer = new QFAVKBuffer(sizeof(glm::mat4), nullptr, true);		
 	}
 }
 
@@ -685,17 +729,5 @@ void QFAWindow::recordCommandBufferMesh(QMeshBaseComponent* mesh, bool shadow)
 	}	
 }
 
-void QFAWindow::recordCommandBufferText(QFAText* text, QFAViewport* viewPort)
-{
-	VkBuffer vertexBuffers[] = { text->vertexBufer->GpuSideBuffer->Buffer};
-	VkDeviceSize offsets[] = { 0 };
-	
-	vkCmdBindVertexBuffers(UICommandBuffers[ViewportProcess], 0, 1, vertexBuffers, offsets);
-	
-	vkCmdBindDescriptorSets(UICommandBuffers[ViewportProcess], VK_PIPELINE_BIND_POINT_GRAPHICS,
-		QFAText::Pipeline->pipelineLayout, 0, 1, &text->CurentDescriptorSet, 0, nullptr);
-	
-	vkCmdDraw(UICommandBuffers[ViewportProcess], static_cast<uint32_t>(text->CountSymbolForRender * 6), 1, 0, 0);
-}
 
 

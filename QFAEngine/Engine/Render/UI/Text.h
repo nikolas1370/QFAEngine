@@ -1,22 +1,22 @@
 #pragma once
-#include <Tools/Debug/OpenGlStuff.h>
+#include <Tools/Debug/VulkanSuff.h>
 #include <Tools/Array.h>
 #include <Math/Vector.h>
 #include <Render/UI/UIUnit.h>
 #include <Render/Buffer/VKBuffer.h>
-
+#include <Render/Window/Window.h>
 /* ttf type */
 typedef unsigned long  FT_ULong;
 struct FT_LibraryRec;
 struct FT_FaceRec_;
-typedef struct FT_LibraryRec_  *FT_Library;
-typedef struct FT_FaceRec_*  FT_Face;
+typedef struct FT_LibraryRec_* FT_Library;
+typedef struct FT_FaceRec_* FT_Face;
 /* ------ */
 
 
 class QFAViewport;
 class QFAOverlord;
-class QFAWindow;
+
 class QFAVKVertexBuffer;
 
 class QFAVKTextureImage;
@@ -35,10 +35,10 @@ class QFAVKTextureSampler;
 class QFAText : public QFAUIUnit
 {
     friend QFAViewport;
-    friend QFAOverlord;    
+    friend QFAOverlord;
     friend QFAWindow;
     friend QFAVKTextPipeline;
-    
+
     struct SGlyphAtlasListRow
     {
         unsigned int x = 0;// when start new Glyph in pixel
@@ -68,11 +68,11 @@ class QFAText : public QFAUIUnit
             for some symbol in ukrainian need more spase above base line('¥'(U+0490) and '¯'(U+0407))
             exclude from code if need less spase above base line (row be bawe less Height)
         */
-        float HeightMultiplier; 
-        
+        float HeightMultiplier;
+
         float ratio; // Width / Height
     };
-    
+
     struct Symbol
     {
         FT_ULong symbol;// FT_Load_Char
@@ -109,13 +109,13 @@ class QFAText : public QFAUIUnit
 
     struct SGlyphAtlas
     {
-        int atlasIndex;
+        int atlasIndex = -1; // not created atlas hawe index -1
         int y = 0;// when start new row in pixel
         QFAArray<SGlyphAtlasListRow> Rows;
         QFAVKTextureImage* texture;
         QFAVKImageView* view;
     };
-    
+
     struct UniformBufferTextParam
     {
         alignas(16) FVector textColor;
@@ -145,40 +145,41 @@ public:
 
     QFAText();
     ~QFAText();
-    
+
     void SetText(std::wstring  text);
-    void SetSize(unsigned int w, unsigned int h);    
+    void SetSize(unsigned int w, unsigned int h);
     /* 0,0 == left top corner */
-    void SetPosition(unsigned int x, unsigned int y);    
+    void SetPosition(unsigned int x, unsigned int y);
     void SetTextSize(unsigned int height);
     void Destroy();
     void SetOverflowWrap(EOverflowWrap wrap);
     void SetTextAlign(ETextAlign aligh);
-        
 
-    
-private: 
+
+
+private:
 
     void updateUniformBuffer();
     void PrepareSymbolsToGpu();
     void ProcessText();
     void AddGlyph(FT_ULong symbol);
-    
+
     static bool ReTextRender;
 
     void Render();
+    static void StartTextRender();
 
-    static void StartTextRender(const glm::mat4& proj);
+    static void StartTextRenderViewPort(const glm::mat4& proj, unsigned int viewportIndex);
     static void CreateAtlas();
     static void Init(VkRenderPass renderPass, VkCommandPool commandPool);
     static void EndLife();
-    
 
-    
+
+
     bool TextChange;
 
 
-    
+
     QFAVKVertexBuffer* vertexBufer;
 
     EOverflowWrap OverflowWrap = EOverflowWrap::OWWord;
@@ -203,9 +204,6 @@ private:
     static const int GlyphAtlasWidth = 1000;
 
 
-    static QFAVKBuffer* uniformBufferProj;
-
-
 
     static QFAVKTextPipeline* Pipeline;
     static QFAVKTextPipeline* OldPipeline;
@@ -222,21 +220,64 @@ private:
 
 
     static QFAVKTextureSampler* AtlassSampler;
-    
+
 
     static VkRenderPass RenderPass;
 
     static unsigned int MaxAttlas;
-    static QFAArray<SGlyphAtlas> GlyphAtlasList;
+    static std::vector<SGlyphAtlas> GlyphAtlasList;
+
+
+    static VkDescriptorPool TextProjectPool;
+    static VkDescriptorPool TextProjectPoolOld;
+    struct STextProjectSet
+    {
+        VkDescriptorSet set;
+        QFAVKBuffer* buffer = nullptr;
+    };
+    static std::array<STextProjectSet, QFAWindow::MaxActiveViewPort> ViewportsUIProject;
+    static std::array<STextProjectSet, QFAWindow::MaxActiveViewPort> ViewportsUIProjectOld;// delete
+
+    struct STextSet
+    {
+        VkDescriptorSet set;
+        QFAVKBuffer* textParametrBuffer;
+    };
+    static VkDescriptorSet CurentDescriptorSet;
+    static VkDescriptorSet CurentDescriptorSetProject;
+
+
+
+
+    static  std::vector<VkDescriptorPool> TextParamPools;// descriptorPools;
+    static  std::vector<VkDescriptorPool> TextParamPoolsOld;// descriptorPools;
+    //static QFAVKBuffer* uniformBufferProj;
+
+    // before descriptorSets
+    static std::vector<STextSet> textParamSets;
+    static std::vector<STextSet> textParamSetsOld;
     static std::vector<VkDescriptorImageInfo> DII;
 
-    
+    static void RecreateCreatePiline();
+    static void CreatePiline();
 
- 
+
+
+    static void CreateTextProjectionPool();
+    /*
+        addPool == true  create new pool and allocate sets
+        addPool == false TextParamPools move in TextParamPoolsOld
+            and same with sets
+            allocate need pools and sets
+            in StartTextRender() old pools delete
+
+    */
+    static void CreateTextParameterPool(bool addPool);
+
+
+    static const int AmountSetsInPool = 20;
     static int maxTextInframe;
-    static std::vector<QFAVKBuffer*> TPB; // do allocation beter
-  
-    
-    VkDescriptorSet CurentDescriptorSet;
-    static int NumberTextInFrame;    
+
+
+    static int NumberTextInFrame;
 };

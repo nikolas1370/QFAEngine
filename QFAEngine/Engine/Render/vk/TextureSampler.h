@@ -1,5 +1,5 @@
 #pragma once
-#include <Tools/Debug/OpenGlStuff.h>
+#include <Tools/Debug/VulkanSuff.h>
 class QFAVKTextureSampler
 {
 	/*

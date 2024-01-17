@@ -30,9 +30,6 @@
     <ClCompile Include="Engine\Render\Render.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Tools\Debug\OpenGlStuffcpp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Render\Buffer\Framebuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

@@ -33,7 +33,7 @@ QFAVKBuffer::QFAVKBuffer(VkDeviceSize size, const void* data, bool inHost, VkBuf
 {
     InHost = inHost;
     CreateBufferInside(size, usage);    
-    if (data == nullptr)
+    if (data == nullptr || !inHost)
         return;
     
     memcpy(MapData, data, static_cast<size_t>(size));
@@ -44,7 +44,7 @@ void QFAVKBuffer::CreateBufferInside(VkDeviceSize size, VkBufferUsageFlags usage
     
     VkBufferCreateInfo bufferInfo = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
     bufferInfo.size = size;
-    bufferInfo.usage = usage;
+    bufferInfo.usage = usage;    
     //
     VmaAllocationCreateInfo allocInfo = {};
     allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
@@ -203,6 +203,16 @@ void QFAVKBuffer::transitionImageLayout(VkImage image, VkFormat format, VkImageL
         sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
         destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
     }
+    else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+    {
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+        sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+        destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    }
+
+    // 
     
     else 
         stopExecute("unsupported layout transition!");

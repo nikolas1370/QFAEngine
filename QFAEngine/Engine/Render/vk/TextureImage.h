@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <Tools/Debug/OpenGlStuff.h>
+#include <Tools/Debug/VulkanSuff.h>
 class QFAVKBuffer;
 class QFAVKImageView;
 
@@ -20,6 +20,18 @@ public:
 	VmaAllocation ImageAllocation;
 	QFAVKBuffer* buffer;
 
+	struct SImageCreateInfo
+	{
+		VkImageLayout layout = VK_IMAGE_LAYOUT_GENERAL;
+		VkFormat format = VK_FORMAT_R8G8B8A8_SRGB;
+		VkImageUsageFlags usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+		VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT;
+		int Width;
+		int Height;
+		unsigned int channelCount = 4;		
+	};
+
+	QFAVKTextureImage(VkCommandPool commandPool, SImageCreateInfo &ici);
 	QFAVKTextureImage(VkCommandPool commandPool, int Width, int Height, unsigned int channelCount, VkFormat format, VkImageUsageFlags usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT);
 	QFAVKTextureImage(VkCommandPool commandPool, const std::string src);
 	~QFAVKTextureImage();

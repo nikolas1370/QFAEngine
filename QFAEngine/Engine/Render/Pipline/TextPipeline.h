@@ -8,19 +8,23 @@ class QFAText;
 class QFAVKTextPipeline
 {
 	friend QFAText;
-	void createDescriptorPool();
-	void createDescriptorSets();
+	/*
+	
+
+	void RecreateDescriptorPool();
+
+	*/
 
 	// index == -1 updata all DescriptorSet
-	void updataDescriptorSets();
+	
 	VkVertexInputBindingDescription getBindingDescription();
 	std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions();
-	void RecreateDescriptorPool();
-	int AtlassCount;
+
+	//int AtlassCount;
 public:
 	VkPipelineLayout pipelineLayout;
 	VkPipeline graphicsPipeline;
-	VkDescriptorSetLayout descriptorSetLayout;
+	std::array< VkDescriptorSetLayout, 2> descriptorSetLayouts;
 	QFAVKTextPipeline(VkRenderPass rPas, const std::string vertexShaderPath, const std::string fragmentShaderPath);
 	~QFAVKTextPipeline();
 
@@ -30,8 +34,7 @@ private:
 
 	// move in frameBuffer or not
 	void createDescriptorSetLayout();
-	VkDescriptorPool descriptorPool;
-	std::vector<VkDescriptorSet> descriptorSets;
+
 };
 
 

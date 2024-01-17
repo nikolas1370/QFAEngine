@@ -6,7 +6,7 @@
 #include <Render/Pipline/TextPipeline.h>
 #include <Render/vk/ImageView.h>
 #include <Render/vk/TextureSampler.h>
-
+#include <Render/Window/Window.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H  
 
@@ -14,37 +14,51 @@ FT_Library QFAText::ft;
 FT_Face QFAText::face;
 unsigned int QFAText::CountGlyphInBuffer = 100;
 QFAText::GlyphShader* QFAText::GlyphInfoData;
-QFAArray<QFAText::SGlyphAtlas> QFAText::GlyphAtlasList;
+std::vector<QFAText::SGlyphAtlas> QFAText::GlyphAtlasList;
 QFAArray<QFAText::PrepareData> QFAText::SymbolsForRender;
+
+VkDescriptorPool QFAText::TextProjectPoolOld;
+
+std::array<QFAText::STextProjectSet, QFAWindow::MaxActiveViewPort> QFAText::ViewportsUIProjectOld;// delete
 /*----*/
+
 
 #pragma comment(lib, "freetype.lib")
 /*----*/
 
-QFAVKTextPipeline* QFAText::Pipeline;
+QFAVKTextPipeline* QFAText::Pipeline = nullptr;
 QFAVKTextPipeline* QFAText::OldPipeline = nullptr;
 const std::string QFAText::VertexShaderPath = "Engine/Shaders/TextVertex.spv";
 const std::string QFAText::FragmentShaderPath = "Engine/Shaders/TextFragment.spv";
 
 
+std::vector<QFAText::STextSet> QFAText::textParamSetsOld;
+std::vector<VkDescriptorPool> QFAText::TextParamPoolsOld;// descriptorPools;
+
 
 QFAArray<QFAText::Symbol> QFAText::Symbols;
 
 
-QFAVKBuffer* QFAText::uniformBufferProj;
+
 
 VkCommandPool QFAText::commandPool;
-unsigned int QFAText::MaxAttlas = 10; 
+unsigned int QFAText::MaxAttlas = 10;
 
 std::vector<VkDescriptorImageInfo> QFAText::DII;
 VkRenderPass QFAText::RenderPass;
 QFAVKTextureSampler* QFAText::AtlassSampler;
 
 
+int QFAText::maxTextInframe = QFAText::AmountSetsInPool;
 
-int QFAText::maxTextInframe = 20;
-std::vector<QFAVKBuffer*> QFAText::TPB;
+std::array<QFAText::STextProjectSet, QFAWindow::MaxActiveViewPort> QFAText::ViewportsUIProject;
+VkDescriptorPool QFAText::TextProjectPool;
 
+VkDescriptorSet QFAText::CurentDescriptorSet;
+VkDescriptorSet QFAText::CurentDescriptorSetProject;
+
+std::vector<VkDescriptorPool> QFAText::TextParamPools;
+std::vector<QFAText::STextSet> QFAText::textParamSets;
 
 int QFAText::NumberTextInFrame;
 
@@ -58,12 +72,8 @@ struct UniformBufferObject
     alignas(16) glm::mat4 projection;
 };
 
-
-
 QFAText::QFAText()
 {
-
-
     vertexBufer = new QFAVKVertexBuffer(sizeof(GlyphShader) * CountGlyphInGUP, nullptr, commandPool);
 }
 
@@ -71,28 +81,10 @@ void QFAText::Init(VkRenderPass renderPass, VkCommandPool commandPool_)
 {
     commandPool = commandPool_;
     RenderPass = renderPass;
- 
-    
 
-    DII.resize(MaxAttlas);    
     AtlassSampler = new QFAVKTextureSampler();
-    CreateAtlas();    
 
-    TPB.resize(maxTextInframe);
-    
-
-    VkDeviceSize bufferSize = sizeof(glm::mat4);
-    uniformBufferProj = new QFAVKBuffer(bufferSize, nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
-    
-    bufferSize = sizeof(UniformBufferTextParam);
-    //
-    
-    for (size_t i = 0; i < maxTextInframe; i++)
-        TPB[i] = new QFAVKBuffer(bufferSize, nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
-    
-    
-    Pipeline = new QFAVKTextPipeline(RenderPass, QFAText::VertexShaderPath, QFAText::FragmentShaderPath);
-
+    CreatePiline();
 
     if (FT_Init_FreeType(&QFAText::ft))
     {
@@ -105,8 +97,8 @@ void QFAText::Init(VkRenderPass renderPass, VkCommandPool commandPool_)
         std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
         return;
     }
-    
-    QFAText::GlyphInfoData = (GlyphShader*)malloc(sizeof(GlyphShader) * QFAText::CountGlyphInBuffer);   
+
+    QFAText::GlyphInfoData = (GlyphShader*)malloc(sizeof(GlyphShader) * QFAText::CountGlyphInBuffer);
 }
 
 QFAText ::~QFAText()
@@ -122,10 +114,10 @@ void QFAText::AddGlyph(FT_ULong symbol)
     {
         std::cout << "QFAText ::AddGlyph FT_Load_Char error" << std::endl;
         __debugbreak();
-    }   
+    }
 
     if (face->glyph->bitmap.rows > 0)
-    {   
+    {
         if (face->glyph->bitmap.rows >= face->glyph->bitmap.width)
             gi.ratio = (float)face->glyph->bitmap.width / (float)face->glyph->bitmap.rows;
         else
@@ -136,43 +128,43 @@ void QFAText::AddGlyph(FT_ULong symbol)
 
     if (FT_Render_Glyph(face->glyph, FT_RENDER_MODE_SDF))
         std::cout << "ERORRRRRRR" << std::endl;
-    
+
     SGlyphAtlas* atlas = nullptr;;
     SGlyphAtlasListRow* row = nullptr;
     bool find = false;
-    for (size_t i = 0; i < GlyphAtlasList.Length() && !find; i++)
-    {        
-        for (size_t j = 0; j < GlyphAtlasList[i].Rows.Length() ; j++)
+    for (size_t i = 0; i < GlyphAtlasList.size() && !find; i++)
+    {
+        for (size_t j = 0; j < GlyphAtlasList[i].Rows.Length(); j++)
         {
             if (face->glyph->bitmap.width + GlyphAtlasList[i].Rows[j].x <= GlyphAtlasWidth)
-            {                
+            {
                 atlas = &GlyphAtlasList[i];
                 row = &GlyphAtlasList[i].Rows[j];
                 find = true;
                 break;
             }
-        }        
+        }
     }
 
     if (!row)
     {
-        for (size_t i = 0; i < GlyphAtlasList.Length(); i++)
+        for (size_t i = 0; i < GlyphAtlasList.size(); i++)
         {
             if (GlyphAtlasList[i].y + AtlasRowHeight <= GlyphAtlasHeight)
             {
                 GlyphAtlasList[i].Rows.Add(SGlyphAtlasListRow{});
-                atlas = &GlyphAtlasList[i];                
-                row = &GlyphAtlasList[i].Rows.Last();                     
+                atlas = &GlyphAtlasList[i];
+                row = &GlyphAtlasList[i].Rows.Last();
                 break;
             }
         }
 
         if (!row)
-        {       
+        {
             CreateAtlas();
-            atlas = &GlyphAtlasList.Last();            
-            GlyphAtlasList.Last().Rows.Add(SGlyphAtlasListRow{});
-            row = &GlyphAtlasList.Last().Rows.Last();                                    
+            atlas = &GlyphAtlasList.back();
+            GlyphAtlasList.back().Rows.Add(SGlyphAtlasListRow{});
+            row = &GlyphAtlasList.back().Rows.Last();
         }
 
         row->y = atlas->y;
@@ -184,19 +176,19 @@ void QFAText::AddGlyph(FT_ULong symbol)
     gi.x = (float)row->x / (float)GlyphAtlasWidth;
     gi.y = (float)row->y / (float)GlyphAtlasHeight;
     gi.xEnd = gi.x + ((float)gi.width / (float)GlyphAtlasWidth);
-    gi.yEnd = gi.y + ((float)gi.height / (float)GlyphAtlasHeight);    
-    gi.advance_x = face->glyph->advance.x / 64;    
+    gi.yEnd = gi.y + ((float)gi.height / (float)GlyphAtlasHeight);
+    gi.advance_x = face->glyph->advance.x / 64;
     gi.bitmap_left = face->glyph->bitmap_left;
     gi.bitmap_top = face->glyph->bitmap_top;
-    gi.bitmap_bottom = gi.height - gi.bitmap_top;    
-    gi.atlasIndex = atlas->atlasIndex;    
+    gi.bitmap_bottom = gi.height - gi.bitmap_top;
+    gi.atlasIndex = atlas->atlasIndex;
 
     gi.HeightMultiplier = (float)(face->ascender - face->descender) / (float)face->units_per_EM;
     float maxH = (float)(face->ascender - face->descender);// descender < 0
     gi.MaxAscender = (int)round(((float)FontLoadCharHeight * ((float)face->ascender / maxH)));
     gi.MaxDescender = (int)round(((float)FontLoadCharHeight * ((float)face->descender / maxH)));
-    
-    
+
+
     if (face->glyph->bitmap.pitch != 0 || face->glyph->bitmap.rows != 0)
     {
         GlyphAtlasList[atlas->atlasIndex].texture->buffer->UpdateData(gi.height * gi.width, face->glyph->bitmap.buffer);
@@ -204,15 +196,15 @@ void QFAText::AddGlyph(FT_ULong symbol)
     }
 
     row->x += face->glyph->bitmap.width + OffsetBetweenGlyph;
-    
-    Symbols.Add(Symbol{ symbol, gi });    
+
+    Symbols.Add(Symbol{ symbol, gi });
 }
 
 
 void QFAText::ProcessText()
 {
     QFAText::SymbolsForRender.Clear();
-        
+
     unsigned int numRow = 0;
     int x = 0;
     float tem = ((float)FontHeight / (float)FontLoadCharHeight);
@@ -220,8 +212,8 @@ void QFAText::ProcessText()
     unsigned int wordStart = 0;
     unsigned int wordW = 0;
     for (size_t i = 0; i < Text.size(); i++)
-    { 
-        bool find = false;     
+    {
+        bool find = false;
         unsigned int symI;
         for (size_t j = 0; j < Symbols.Length(); j++)
         {
@@ -232,44 +224,44 @@ void QFAText::ProcessText()
                 break;
             }
         }
-        
+
         if (!find)
-        {           
+        {
             symI = (unsigned int)Symbols.Length();
-            AddGlyph(Text[i]);           
+            AddGlyph(Text[i]);
         }
 
         unsigned int glyphWidth = (unsigned int)((float)FontHeight * Symbols[symI].Glyph.ratio);
         int glyphBitmap_left = (int)((float)Symbols[symI].Glyph.bitmap_left * tem);
 
         if (OverflowWrap == EOverflowWrap::OWSymbol)
-        {                  
+        {
             if (Width < glyphWidth)
-            {                
+            {
                 QFAText::SymbolsForRender.Add(PrepareData{ (unsigned int)symI, numRow });
                 numRow++;
                 x = 0;
             }
-            else if(x + glyphBitmap_left + glyphWidth >= Width)
+            else if (x + glyphBitmap_left + glyphWidth >= Width)
             {
                 numRow++;
                 x = 0;
-                QFAText::SymbolsForRender.Add(PrepareData{ (unsigned int)symI, numRow });                
+                QFAText::SymbolsForRender.Add(PrepareData{ (unsigned int)symI, numRow });
                 x += (int)((float)Symbols[symI].Glyph.advance_x * tem);
             }
             else
             {
-                QFAText::SymbolsForRender.Add(PrepareData{ (unsigned int)symI, numRow });                
+                QFAText::SymbolsForRender.Add(PrepareData{ (unsigned int)symI, numRow });
                 x += (int)((float)Symbols[symI].Glyph.advance_x * tem);
-            }            
-        }        
-        else if(OverflowWrap == EOverflowWrap::OWWord)
-        {       
+            }
+        }
+        else if (OverflowWrap == EOverflowWrap::OWWord)
+        {
             wordW += (int)((float)Symbols[symI].Glyph.advance_x * tem);
             if (wordLen++ == 0)
                 wordStart = (unsigned int)i;// in current time  all symbol in Text be presend in SymbolsForRender                         
 
-            QFAText::SymbolsForRender.Add(PrepareData{ (unsigned int)symI});
+            QFAText::SymbolsForRender.Add(PrepareData{ (unsigned int)symI });
             if (Text[i] == L' ' || i == Text.size() - 1)
             {
                 int spaceS = 0;
@@ -286,11 +278,11 @@ void QFAText::ProcessText()
 
                     for (size_t j = wordStart; j < wordStart + wordLen; j++)
                         QFAText::SymbolsForRender[j].row = numRow;
-                    
+
                     numRow++;
-                    x = 0;                    
+                    x = 0;
                 }
-                else if(x + wordW <= Width)
+                else if (x + wordW <= Width)
                 {
                     for (size_t j = wordStart; j < wordStart + wordLen; j++)
                         QFAText::SymbolsForRender[j].row = numRow;
@@ -301,11 +293,11 @@ void QFAText::ProcessText()
                 {
                     x = wordW + spaceS;
                     numRow++;
-                    
+
                     for (size_t j = wordStart; j < wordStart + wordLen; j++)
-                        QFAText::SymbolsForRender[j].row = numRow;        
-                }                
-                
+                        QFAText::SymbolsForRender[j].row = numRow;
+                }
+
                 wordW = 0;
                 wordLen = 0;
                 wordStart = 0;
@@ -313,25 +305,25 @@ void QFAText::ProcessText()
         }
         else
             QFAText::SymbolsForRender.Add(PrepareData{ (unsigned int)symI, 0 });
-    }    
+    }
 
-    CountSymbolForRender = (unsigned int)SymbolsForRender.Length();    
+    CountSymbolForRender = (unsigned int)SymbolsForRender.Length();
     PrepareSymbolsToGpu();
-    
+
     if (CountSymbolForRender > CountGlyphInGUP)
     {
         CountGlyphInGUP = (unsigned int)((float)CountSymbolForRender * 1.5f);
         delete vertexBufer;
-        vertexBufer = new QFAVKVertexBuffer(sizeof(GlyphShader) * CountGlyphInGUP, GlyphInfoData, commandPool);        
+        vertexBufer = new QFAVKVertexBuffer(sizeof(GlyphShader) * CountGlyphInGUP, GlyphInfoData, commandPool);
     }
     else
-        vertexBufer->UpdateData(sizeof(GlyphShader)* CountSymbolForRender, GlyphInfoData);    
-   
+        vertexBufer->UpdateData(sizeof(GlyphShader) * CountSymbolForRender, GlyphInfoData);
+
     TextChange = false;
 }
 
 void QFAText::PrepareSymbolsToGpu()
-{    
+{
     if (CountSymbolForRender == 0)
         return;
 
@@ -340,8 +332,8 @@ void QFAText::PrepareSymbolsToGpu()
     int w = 0;
     unsigned int row = 0;
     float tem = ((float)FontHeight / (float)FontLoadCharHeight);
-    if (TextAlign == ETextAlign::TALeft) 
-    {      
+    if (TextAlign == ETextAlign::TALeft)
+    {
         for (size_t i = 0; i < CountSymbolForRender; i++)
         {
             if (row != QFAText::SymbolsForRender[i].row)
@@ -354,8 +346,8 @@ void QFAText::PrepareSymbolsToGpu()
 
             float temX = ((float)Position_x + (float)w + (float)gi->bitmap_left * tem);
             float temXEnd = temX + (float)gi->width * tem;
-            
-            float start_y = (float)Position_y + ((float)FontHeight * gi->HeightMultiplier - (float)FontHeight) +  ((float)row * ((float)FontHeight * gi->HeightMultiplier));                       
+
+            float start_y = (float)Position_y + ((float)FontHeight * gi->HeightMultiplier - (float)FontHeight) + ((float)row * ((float)FontHeight * gi->HeightMultiplier));
             //float temY = start_y + ((float)gi->MaxAscender - gi->bitmap_top * tem); 
             float temY = start_y + (float)(gi->MaxAscender - gi->bitmap_top) * tem;
             float temYEnd = temY + (float)gi->height * tem;
@@ -366,13 +358,13 @@ void QFAText::PrepareSymbolsToGpu()
 
             GlyphInfoData[i].leftBottom_2 = GlyphInfoData[i].leftBottom_1;
             GlyphInfoData[i].rightTop_2 = GlyphInfoData[i].rightTop_1;
-            GlyphInfoData[i].leftTop_2 = GlyphShaderVertex{ temXEnd, temY,   gi->xEnd, gi->y, (int)gi->atlasIndex };          
+            GlyphInfoData[i].leftTop_2 = GlyphShaderVertex{ temXEnd, temY,   gi->xEnd, gi->y, (int)gi->atlasIndex };
 
             w += (int)((float)gi->advance_x * tem);
         }
     }
     else if (TextAlign == ETextAlign::TACenter)
-    {           
+    {
         int rowLen = 0;
         for (size_t startRow = 0; startRow < CountSymbolForRender; startRow += rowLen)
         {
@@ -387,24 +379,24 @@ void QFAText::PrepareSymbolsToGpu()
                         rowW -= (int)((float)Symbols[QFAText::SymbolsForRender[i - 1].symbolIndex].Glyph.advance_x * tem) - 1;
 
                     break;
-                }                    
+                }
 
                 rowLen++;
                 rowW += (int)((float)Symbols[QFAText::SymbolsForRender[i].symbolIndex].Glyph.advance_x * tem);
             }
 
             w = ((int)Width - rowW) / 2;// rowW can be larger Width
-            for (size_t i = startRow; i < startRow + rowLen; i++)            
-            {                
+            for (size_t i = startRow; i < startRow + rowLen; i++)
+            {
                 GlyphInfo* gi = &Symbols[QFAText::SymbolsForRender[i].symbolIndex].Glyph;
 
                 float temX = ((float)Position_x + (float)w + (float)gi->bitmap_left * tem);
                 float temXEnd = temX + (float)gi->width * tem;
-                
-                float start_y = (float)Position_y + ((float)FontHeight * gi->HeightMultiplier - (float)FontHeight) +  ((float)row * ((float)FontHeight * gi->HeightMultiplier));
+
+                float start_y = (float)Position_y + ((float)FontHeight * gi->HeightMultiplier - (float)FontHeight) + ((float)row * ((float)FontHeight * gi->HeightMultiplier));
                 float temY = start_y + (float)(gi->MaxAscender - gi->bitmap_top) * tem;
-                float temYEnd = temY + (float)gi->height * tem;               
-                
+                float temYEnd = temY + (float)gi->height * tem;
+
                 QFAText::GlyphInfoData[i].leftBottom_1 = GlyphShaderVertex{ temX, temY ,   gi->x, gi->y, (int)gi->atlasIndex };
                 GlyphInfoData[i].rightBottom_1 = { temX, temYEnd,   gi->x, gi->yEnd, (int)gi->atlasIndex };
                 GlyphInfoData[i].rightTop_1 = { temXEnd, temYEnd,   gi->xEnd, gi->yEnd, (int)gi->atlasIndex };
@@ -412,7 +404,7 @@ void QFAText::PrepareSymbolsToGpu()
                 GlyphInfoData[i].leftBottom_2 = GlyphInfoData[i].leftBottom_1;
                 GlyphInfoData[i].rightTop_2 = GlyphInfoData[i].rightTop_1;
                 GlyphInfoData[i].leftTop_2 = GlyphShaderVertex{ temXEnd, temY,   gi->xEnd, gi->y, (int)gi->atlasIndex };
-                
+
                 w += (int)((float)gi->advance_x * tem);
             }
         }
@@ -422,17 +414,17 @@ void QFAText::PrepareSymbolsToGpu()
         int statrtFor = 0;
         if (Symbols[QFAText::SymbolsForRender[CountSymbolForRender - 1].symbolIndex].symbol == L' ')
             CountSymbolForRender--;// if last symbol space(' ') symbol past
-        
-        row = QFAText::SymbolsForRender[CountSymbolForRender - 1].row;        
+
+        row = QFAText::SymbolsForRender[CountSymbolForRender - 1].row;
         w = Width;
         for (int i = CountSymbolForRender - 1; i >= 0; i--)
-        {            
+        {
             if (row != QFAText::SymbolsForRender[i].row)
             {
                 row = QFAText::SymbolsForRender[i].row;
                 w = Width;
             }
-            
+
             if (Symbols[QFAText::SymbolsForRender[i].symbolIndex].symbol == L' ' && QFAText::SymbolsForRender[i].row != QFAText::SymbolsForRender[i + 1].row)
             {// if last symbol in row be space(' ') symbol have all parameters 0                
                 QFAText::GlyphInfoData[i].leftBottom_1 = GlyphShaderVertex{ 0, 0,   0, 0, 0 };
@@ -443,10 +435,10 @@ void QFAText::PrepareSymbolsToGpu()
                 GlyphInfoData[i].rightTop_2 = GlyphInfoData[i].rightTop_1;
                 GlyphInfoData[i].leftTop_2 = GlyphShaderVertex{ 0, 0,   0, 0, 0 };
                 GlyphInfo* temGi = &Symbols[QFAText::SymbolsForRender[i].symbolIndex].Glyph;
-                
-                w +=  (int)((float)temGi->width * tem - 1.0f);
+
+                w += (int)((float)temGi->width * tem - 1.0f);
                 continue;
-            }                       
+            }
 
             GlyphInfo* gi = &Symbols[QFAText::SymbolsForRender[i].symbolIndex].Glyph;
 
@@ -464,15 +456,11 @@ void QFAText::PrepareSymbolsToGpu()
             GlyphInfoData[i].leftBottom_2 = GlyphInfoData[i].leftBottom_1;
             GlyphInfoData[i].rightTop_2 = GlyphInfoData[i].rightTop_1;
             GlyphInfoData[i].leftTop_2 = GlyphShaderVertex{ temXEnd, temY,   gi->xEnd, gi->y, (int)gi->atlasIndex };
-            
+
             w -= (int)((float)gi->advance_x * tem);
         }
     }
 }
-
-
-
-
 
 void QFAText::SetPosition(unsigned int x, unsigned int y)
 {
@@ -496,7 +484,7 @@ void QFAText::Destroy()
 void QFAText::SetText(std::wstring  text)
 {
     if (text.length() > CountGlyphInBuffer)
-    {        
+    {
         free(QFAText::GlyphInfoData);
         QFAText::CountGlyphInBuffer = (unsigned int)((float)text.length() * 1.5);
         QFAText::GlyphInfoData = (GlyphShader*)malloc(sizeof(GlyphShader) * QFAText::CountGlyphInBuffer);
@@ -534,15 +522,7 @@ void QFAText::SetTextAlign(ETextAlign aligh)
 void QFAText::EndLife()
 {
     free(QFAText::GlyphInfoData);
-
-    delete uniformBufferProj;
-
-    
-    for (size_t i = 0; i < TPB.size(); i++)
-        delete TPB[i];
-
-
-    for (size_t i = 0; i < GlyphAtlasList.Length(); i++)
+    for (size_t i = 0; i < GlyphAtlasList.size(); i++)
     {
         delete GlyphAtlasList[i].texture;
         delete GlyphAtlasList[i].view;
@@ -550,100 +530,228 @@ void QFAText::EndLife()
 
     delete Pipeline;
     delete AtlassSampler;
-    if(OldPipeline)
+    if (OldPipeline)
         delete OldPipeline;
-    
-    
-   
-    if(face)
+
+    if (face)
         FT_Done_Face(face);
 
-    if(ft)
+    if (ft)
         FT_Done_FreeType(ft);
 }
 
-#include <Render/Window/Window.h>
-void QFAText::CreateAtlas()
+void QFAText::RecreateCreatePiline()
 {
-    std::cout << "create atlass " << GlyphAtlasList.Length() << "\n";
-    if (GlyphAtlasList.Length() >= MaxAttlas)
-    {        
-        int oldMaxAttlas = MaxAttlas;
-        MaxAttlas *= 2;
-        DII.resize(MaxAttlas);
-        for (size_t i = oldMaxAttlas; i < MaxAttlas; i++)
-            DII[i] = DII[0];
-
-        OldPipeline = Pipeline;
-        Pipeline = new QFAVKTextPipeline(RenderPass, QFAText::VertexShaderPath, QFAText::FragmentShaderPath);        
-        vkCmdBindPipeline(QFAWindow::MainWindow->UICommandBuffers[QFAWindow::MainWindow->ViewportProcess], VK_PIPELINE_BIND_POINT_GRAPHICS, Pipeline->graphicsPipeline);
-    }
-
-    SGlyphAtlas gi;
-    int len = (int)GlyphAtlasList.Length();
-    gi.atlasIndex = len;
-    gi.texture = new QFAVKTextureImage(commandPool, GlyphAtlasWidth, GlyphAtlasHeight, 1, VK_FORMAT_R8_UNORM);
-    gi.view = new QFAVKImageView(gi.texture);
-
-    DII[len].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    DII[len].imageView = gi.view->ImageView;
-    DII[len].sampler = AtlassSampler->textureSampler;
-    if (GlyphAtlasList.Length() == 0)
-    {
-        for (size_t i = 1; i < MaxAttlas; i++)
-            DII[i] = DII[0];
-    }
-    else if(NumberTextInFrame < maxTextInframe)
-        Pipeline->updataDescriptorSets();
-    
-    GlyphAtlasList.Add(gi);
+    OldPipeline = Pipeline;
+    Pipeline = new QFAVKTextPipeline(RenderPass, QFAText::VertexShaderPath, QFAText::FragmentShaderPath);
+    CreateTextProjectionPool();
+    CreateTextParameterPool(false);
 }
 
-void QFAText::StartTextRender(const glm::mat4& proj)
+void QFAText::CreatePiline()
 {
+    Pipeline = new QFAVKTextPipeline(RenderPass, QFAText::VertexShaderPath, QFAText::FragmentShaderPath);
+    CreateTextProjectionPool();
+    CreateTextParameterPool(true);
+}
 
-    
+void QFAText::CreateTextProjectionPool()
+{
+    TextProjectPoolOld = TextProjectPool;
+    ViewportsUIProjectOld = ViewportsUIProject;
 
+    std::array<VkDescriptorPoolSize, 1> poolSizes{};
+    poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    poolSizes[0].descriptorCount = 1;
+
+    VkDescriptorPoolCreateInfo poolInfo{};
+    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+    poolInfo.pPoolSizes = poolSizes.data();
+    poolInfo.maxSets = ViewportsUIProject.size();
+
+    TextProjectPool = nullptr;
+    if (vkCreateDescriptorPool(QFAVKLogicalDevice::GetDevice(), &poolInfo, nullptr, &TextProjectPool) != VK_SUCCESS)
+        stopExecute("failed to create descriptor pool!");
+
+    for (size_t i = 0; i < ViewportsUIProject.size(); i++)
+    {
+        if (ViewportsUIProject[i].buffer == nullptr)
+            ViewportsUIProject[i].buffer = new QFAVKBuffer(sizeof(glm::mat4), nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+
+        VkDescriptorSetAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        allocInfo.descriptorPool = TextProjectPool;
+        allocInfo.descriptorSetCount = 1;
+        allocInfo.pSetLayouts = &Pipeline->descriptorSetLayouts[0];
+
+        if (vkAllocateDescriptorSets(QFAVKLogicalDevice::GetDevice(), &allocInfo, &ViewportsUIProject[i].set) != VK_SUCCESS)
+            stopExecute("failed to allocate descriptor sets!");
+
+        VkDescriptorBufferInfo bufferInfo{};
+        bufferInfo.buffer = ViewportsUIProject[i].buffer->Buffer;
+        bufferInfo.offset = 0;
+        bufferInfo.range = sizeof(glm::mat4);
+
+        std::array<VkWriteDescriptorSet, 1> descriptorWrites{};
+        descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrites[0].dstSet = ViewportsUIProject[i].set;
+        descriptorWrites[0].dstBinding = 0;
+        descriptorWrites[0].dstArrayElement = 0;
+        descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptorWrites[0].descriptorCount = 1;
+        descriptorWrites[0].pBufferInfo = &bufferInfo;
+
+        vkUpdateDescriptorSets(QFAVKLogicalDevice::GetDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+    }
+}
+
+void QFAText::CreateTextParameterPool(bool addPool)
+{
+    if (addPool)
+    {
+        TextParamPools.resize(TextParamPools.size() + 1);
+        textParamSets.resize(textParamSets.size() + AmountSetsInPool);
+    }
+    else
+    {
+        TextParamPoolsOld = TextParamPools;
+        textParamSetsOld = textParamSets;
+    }
+
+    GlyphAtlasList.resize(MaxAttlas);
+    DII.resize(MaxAttlas);
+    for (size_t i = 0; i < MaxAttlas; i++) // create atlas if need
+    {
+        if (GlyphAtlasList[i].atlasIndex >= 0)
+            continue;
+
+        QFAVKTextureImage::SImageCreateInfo ici;
+        ici.Width = GlyphAtlasWidth;
+        ici.Height = GlyphAtlasHeight;
+        ici.channelCount = 1;
+        ici.format = VK_FORMAT_R8_UNORM;
+        ici.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+        SGlyphAtlas gi;
+        gi.texture = new QFAVKTextureImage(commandPool, ici);
+        gi.view = new QFAVKImageView(gi.texture);
+        gi.atlasIndex = i;
+
+        DII[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        DII[i].imageView = gi.view->ImageView;
+        DII[i].sampler = AtlassSampler->textureSampler;
+        GlyphAtlasList[i] = gi;
+    }
+
+    for (size_t i = (addPool ? TextParamPools.size() - 1 : 0); i < TextParamPools.size(); i++)
+    {
+        std::array<VkDescriptorPoolSize, 2> poolSizesSet2{};
+        poolSizesSet2[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        poolSizesSet2[0].descriptorCount = QFAText::MaxAttlas;
+        poolSizesSet2[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        poolSizesSet2[1].descriptorCount = 1;
+
+        VkDescriptorPoolCreateInfo poolInfoSet2{};
+        poolInfoSet2.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        poolInfoSet2.poolSizeCount = static_cast<uint32_t>(poolSizesSet2.size());
+        poolInfoSet2.pPoolSizes = poolSizesSet2.data();
+        poolInfoSet2.maxSets = QFAText::AmountSetsInPool;
+
+        TextParamPools[i] = nullptr;
+        if (vkCreateDescriptorPool(QFAVKLogicalDevice::GetDevice(), &poolInfoSet2, nullptr, &TextParamPools[i]))
+            stopExecute("failed to create descriptor pool!");
+
+        for (size_t j = i * AmountSetsInPool; j < textParamSets.size(); j++)
+        {
+            VkDescriptorSetAllocateInfo allocInfo{};
+            allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+            allocInfo.descriptorPool = TextParamPools[i];
+            allocInfo.descriptorSetCount = 1;
+            allocInfo.pSetLayouts = &Pipeline->descriptorSetLayouts[1];
+
+
+            if (VkResult res = vkAllocateDescriptorSets(QFAVKLogicalDevice::GetDevice(), &allocInfo, &textParamSets[j].set))
+                stopExecute("failed to allocate descriptor sets!", res);
+
+            if (textParamSets[j].textParametrBuffer == nullptr)
+                textParamSets[j].textParametrBuffer = new QFAVKBuffer(sizeof(QFAText::UniformBufferTextParam), nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+
+            VkDescriptorBufferInfo bufferInfo2{};
+            bufferInfo2.buffer = textParamSets[j].textParametrBuffer->Buffer;
+            bufferInfo2.offset = 0;
+            bufferInfo2.range = sizeof(QFAText::UniformBufferTextParam);
+
+            std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
+
+            descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[0].dstSet = textParamSets[j].set;
+            descriptorWrites[0].dstBinding = 0;
+            descriptorWrites[0].dstArrayElement = 0;
+            descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            descriptorWrites[0].descriptorCount = QFAText::MaxAttlas;
+            descriptorWrites[0].pImageInfo = QFAText::DII.data();
+
+            descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[1].dstSet = textParamSets[j].set;
+            descriptorWrites[1].dstBinding = 1;
+            descriptorWrites[1].dstArrayElement = 0;
+            descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            descriptorWrites[1].descriptorCount = 1;
+            descriptorWrites[1].pBufferInfo = &bufferInfo2;
+
+            vkUpdateDescriptorSets(QFAVKLogicalDevice::GetDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+        }
+    }
+}
+
+void QFAText::CreateAtlas()
+{
+    if (GlyphAtlasList.size() >= MaxAttlas)
+    {
+        MaxAttlas *= 2;
+        RecreateCreatePiline();
+        vkCmdBindPipeline(QFAWindow::MainWindow->UICommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, Pipeline->graphicsPipeline);
+    }
+}
+
+void QFAText::StartTextRender()
+{
+    NumberTextInFrame = 0;
     if (OldPipeline)
     {
+        for (size_t i = 0; i < TextParamPoolsOld.size(); i++)
+            vkDestroyDescriptorPool(QFAVKLogicalDevice::GetDevice(), TextParamPoolsOld[i], nullptr);
+
+        vkDestroyDescriptorPool(QFAVKLogicalDevice::GetDevice(), TextProjectPoolOld, nullptr);
         delete OldPipeline;
         OldPipeline = nullptr;
     }
+}
+
+void QFAText::StartTextRenderViewPort(const glm::mat4& proj, unsigned int viewportIndex)
+{
+    CurentDescriptorSetProject = ViewportsUIProject[viewportIndex].set;
 
     UniformBufferObject ubo{};
     ubo.projection = proj;
-    memcpy(uniformBufferProj->MapData, &ubo, sizeof(ubo.projection));
-    
-    if (NumberTextInFrame > maxTextInframe)
-    {   
-        maxTextInframe *= 2;
-        TPB.resize(maxTextInframe);
-        VkDeviceSize bufferSize = sizeof(UniformBufferTextParam);
-        for (size_t i = maxTextInframe - 1; i < maxTextInframe; i++)
-        {
-            TPB[i] = new QFAVKBuffer(bufferSize, nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
-        }        
-
-        Pipeline->RecreateDescriptorPool();        
-    }
-
-    NumberTextInFrame = 0;
+    memcpy(ViewportsUIProject[viewportIndex].buffer->MapData, &ubo, sizeof(ubo.projection));
 }
 
 void QFAText::Render()
 {
-    
     if (TextChange)
         ProcessText();
 
-    if (NumberTextInFrame >= maxTextInframe)// if descriptorSet not enough in this frame all next text be have textParametr from first text
-        CurentDescriptorSet = Pipeline->descriptorSets[0];
-    else
+    if (NumberTextInFrame >= maxTextInframe)
     {
-        CurentDescriptorSet = Pipeline->descriptorSets[NumberTextInFrame];
-        updateUniformBuffer();
+        maxTextInframe += AmountSetsInPool;
+        CreateTextParameterPool(true);
     }
-    
+
+    CurentDescriptorSet = textParamSets[NumberTextInFrame].set;
+    updateUniformBuffer();
+
     NumberTextInFrame++;
 }
 
@@ -654,8 +762,10 @@ void QFAText::updateUniformBuffer()
     tem.outlineColor = OutlineColor;
     tem.outline = (int)Outline;
     tem.opacity = Opacity;
-    memcpy(TPB[NumberTextInFrame]->MapData, &tem, sizeof(UniformBufferTextParam));
+    memcpy(textParamSets[NumberTextInFrame].textParametrBuffer->MapData, &tem, sizeof(UniformBufferTextParam));
 }
+
+
 
 
 

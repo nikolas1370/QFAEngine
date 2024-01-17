@@ -1,5 +1,5 @@
 #include "TextPipeline.h"
-#include <Tools/Debug/OpenGlStuff.h>
+#include <Tools/Debug/VulkanSuff.h>
 #include <iostream>
 #include <fstream>
 #include <Render/vk/LogicalDevice.h>
@@ -109,8 +109,8 @@ QFAVKTextPipeline::QFAVKTextPipeline( VkRenderPass rPas, const std::string verte
     createDescriptorSetLayout(); 
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = 1;
-    pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
+    pipelineLayoutInfo.setLayoutCount = descriptorSetLayouts.size();
+    pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
 
     if (vkCreatePipelineLayout(QFAVKLogicalDevice::GetDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
         throw std::runtime_error("failed to create pipeline layout!");
@@ -145,9 +145,6 @@ QFAVKTextPipeline::QFAVKTextPipeline( VkRenderPass rPas, const std::string verte
     
 
 
-    createDescriptorPool();
-    createDescriptorSets();
-    updataDescriptorSets();
 
     vkDestroyShaderModule(QFAVKLogicalDevice::GetDevice(), fragShaderModule, nullptr);
     vkDestroyShaderModule(QFAVKLogicalDevice::GetDevice(), vertShaderModule, nullptr);
@@ -155,8 +152,7 @@ QFAVKTextPipeline::QFAVKTextPipeline( VkRenderPass rPas, const std::string verte
 
 QFAVKTextPipeline::~QFAVKTextPipeline()
 {
-    vkDestroyDescriptorPool(QFAVKLogicalDevice::GetDevice(), descriptorPool, nullptr);
-    vkDestroyDescriptorSetLayout(QFAVKLogicalDevice::GetDevice(), descriptorSetLayout, nullptr);
+    //vkDestroyDescriptorSetLayout(QFAVKLogicalDevice::GetDevice(), descriptorSetLayout, nullptr);
     vkDestroyPipeline(QFAVKLogicalDevice::GetDevice(), graphicsPipeline, nullptr);
     vkDestroyPipelineLayout(QFAVKLogicalDevice::GetDevice(), pipelineLayout, nullptr);
 }
@@ -202,33 +198,45 @@ void QFAVKTextPipeline::createDescriptorSetLayout()
     uboLayoutBinding.pImmutableSamplers = nullptr;
     uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
-    VkDescriptorSetLayoutBinding samplerLayoutBinding{};
-    samplerLayoutBinding.binding = 1;
-    samplerLayoutBinding.descriptorCount = QFAText::DII.size();
-    samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    samplerLayoutBinding.pImmutableSamplers = nullptr;
-    samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
     
-    VkDescriptorSetLayoutBinding uboLayoutBinding2{};
-    uboLayoutBinding2.binding = 2;
-    uboLayoutBinding2.descriptorCount = 1;
-    uboLayoutBinding2.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    uboLayoutBinding2.pImmutableSamplers = nullptr;
-    uboLayoutBinding2.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    
-    std::array<VkDescriptorSetLayoutBinding, 3> bindings = { uboLayoutBinding, samplerLayoutBinding, uboLayoutBinding2 };
+    std::array<VkDescriptorSetLayoutBinding, 1> bindings = { uboLayoutBinding};
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
     layoutInfo.pBindings = bindings.data();
 
+    //, 
 
 
 
-
-    if (vkCreateDescriptorSetLayout(QFAVKLogicalDevice::GetDevice(), &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
+    if (vkCreateDescriptorSetLayout(QFAVKLogicalDevice::GetDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[0]) != VK_SUCCESS)
         stopExecute("failed to create descriptor set layout!");
+
+    /*-----*/
+
+
+    VkDescriptorSetLayoutBinding samplerLayoutBinding{};
+    samplerLayoutBinding.binding = 0;
+    samplerLayoutBinding.descriptorCount = QFAText::MaxAttlas;
+    samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    samplerLayoutBinding.pImmutableSamplers = nullptr;
+    samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+
+    VkDescriptorSetLayoutBinding uboLayoutBinding2{};
+    uboLayoutBinding2.binding = 1;
+    uboLayoutBinding2.descriptorCount = 1;
+    uboLayoutBinding2.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uboLayoutBinding2.pImmutableSamplers = nullptr;
+    uboLayoutBinding2.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    std::array<VkDescriptorSetLayoutBinding, 2> bindingsFragment = { samplerLayoutBinding, uboLayoutBinding2 };
+    layoutInfo.bindingCount = static_cast<uint32_t>(bindingsFragment.size());
+    layoutInfo.pBindings = bindingsFragment.data();
+
+    if (vkCreateDescriptorSetLayout(QFAVKLogicalDevice::GetDevice(), &layoutInfo, nullptr, &descriptorSetLayouts[1]) != VK_SUCCESS)
+        stopExecute("failed to create descriptor set layout!");
+
 }
 
 
@@ -241,90 +249,6 @@ void QFAVKTextPipeline::createDescriptorSetLayout()
     if count text in this frame reached maxTextSetsInPool create new Descriptor pool
 */
 
-void QFAVKTextPipeline::createDescriptorPool()
-{ 
-
-    std::array<VkDescriptorPoolSize, 3> poolSizes{};
-    poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSizes[0].descriptorCount = 1;
-    poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    poolSizes[1].descriptorCount = QFAText::DII.size();
-    poolSizes[2].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSizes[2].descriptorCount = 1;
-
-    VkDescriptorPoolCreateInfo poolInfo{};
-    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
-    poolInfo.pPoolSizes = poolSizes.data();
-    poolInfo.maxSets = QFAText::maxTextInframe;  ////------------------------
-    poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT; // if not need free descriptorSet not set it flag
-
-    if (vkCreateDescriptorPool(QFAVKLogicalDevice::GetDevice(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
-        stopExecute("failed to create descriptor pool!");
-}
-
-
-void QFAVKTextPipeline::createDescriptorSets()
-{
-
-    // try remove for   
-    descriptorSets.resize(QFAText::maxTextInframe);
-    for (size_t i = 0; i < QFAText::maxTextInframe; i++)
-    {
-        VkDescriptorSetAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-        allocInfo.descriptorPool = descriptorPool;
-        allocInfo.descriptorSetCount = 1;
-        allocInfo.pSetLayouts = &descriptorSetLayout;
-
-        if (vkAllocateDescriptorSets(QFAVKLogicalDevice::GetDevice(), &allocInfo, &descriptorSets[i]) != VK_SUCCESS)
-            stopExecute("failed to allocate descriptor sets!");
-    }
-}
-
-void QFAVKTextPipeline::updataDescriptorSets()
-{
-    for (size_t i = 0; i < descriptorSets.size(); i++)
-    {
-        VkDescriptorBufferInfo bufferInfo{};
-        bufferInfo.buffer = QFAText::uniformBufferProj->Buffer;
-        bufferInfo.offset = 0;
-        bufferInfo.range = sizeof(glm::mat4);
-
-        VkDescriptorBufferInfo bufferInfo2{};
-        bufferInfo2.buffer = QFAText::TPB[i]->Buffer;
-        bufferInfo2.offset = 0;
-        bufferInfo2.range = sizeof(QFAText::UniformBufferTextParam);
-
-        std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
-
-        descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[0].dstSet = descriptorSets[i];
-        descriptorWrites[0].dstBinding = 0;
-        descriptorWrites[0].dstArrayElement = 0;
-        descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        descriptorWrites[0].descriptorCount = 1;
-        descriptorWrites[0].pBufferInfo = &bufferInfo;
-
-        descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[1].dstSet = descriptorSets[i];
-        descriptorWrites[1].dstBinding = 1;
-        descriptorWrites[1].dstArrayElement = 0;
-        descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        descriptorWrites[1].descriptorCount = QFAText::DII.size();
-        descriptorWrites[1].pImageInfo = QFAText::DII.data();
-
-        descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[2].dstSet = descriptorSets[i];
-        descriptorWrites[2].dstBinding = 2;
-        descriptorWrites[2].dstArrayElement = 0;
-        descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        descriptorWrites[2].descriptorCount = 1;
-        descriptorWrites[2].pBufferInfo = &bufferInfo2;
-
-        vkUpdateDescriptorSets(QFAVKLogicalDevice::GetDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
-    }
-}
 
 
 
@@ -355,6 +279,7 @@ std::array<VkVertexInputAttributeDescription, 2> QFAVKTextPipeline::getAttribute
     return attributeDescriptions;
 }
 
+/*
 void QFAVKTextPipeline::RecreateDescriptorPool()
 {
     
@@ -363,3 +288,4 @@ void QFAVKTextPipeline::RecreateDescriptorPool()
     createDescriptorSets();
     updataDescriptorSets();
 }
+*/
