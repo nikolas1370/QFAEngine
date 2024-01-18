@@ -1,5 +1,5 @@
 #include "StaticMesh.h"
-#include <Tools/Debug/VulkanSuff.h>
+#include <Tools/VulkanSuff.h>
 
 QStaticMesh::QStaticMesh(MeshData* meshData)
 {

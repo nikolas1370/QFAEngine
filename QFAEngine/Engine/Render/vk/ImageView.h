@@ -1,5 +1,5 @@
 #pragma once
-#include <Tools/Debug/VulkanSuff.h>
+#include <Tools/VulkanSuff.h>
 class QFAVKTextureImage;
 class QFAVKImageView
 {

@@ -1,5 +1,5 @@
 #pragma once
-#include <Tools/Debug/VulkanSuff.h>
+#include <Tools/VulkanSuff.h>
 #include <Render/Buffer/VKBuffer.h>
 
 class QFAWindow;

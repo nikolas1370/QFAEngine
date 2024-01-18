@@ -66,7 +66,7 @@ public:
     
 
     T& operator[](size_t i)
-    {
+    {        
         return vector[i];
     }
 
@@ -85,6 +85,11 @@ public:
     {
         size = 0;
     }    
+
+    inline T* Data()
+    {
+        return vector.data();
+    }
 private:
 
 };

@@ -5,7 +5,7 @@
 #include <Object/World/World.h>
 #include <Object/Actor/Actor.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
-#include <Tools/Debug/VulkanSuff.h>
+#include <Tools/VulkanSuff.h>
 #include <Render/UI/Text.h>
 
 

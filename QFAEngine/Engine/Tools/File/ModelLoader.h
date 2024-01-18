@@ -4,7 +4,7 @@
 #include <assimp/postprocess.h>     
 #include <assimp/material.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
-#include <Tools/Debug/VulkanSuff.h>
+#include <Tools/VulkanSuff.h>
 
 #pragma comment(lib, "assimp-vc143-mt.lib")
 

@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <Tools/Debug/VulkanSuff.h>
+#include <Tools/VulkanSuff.h>
 class QFAVKBuffer;
 class QFAVKImageView;
 

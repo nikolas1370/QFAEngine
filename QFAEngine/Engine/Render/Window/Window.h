@@ -1,6 +1,6 @@
 #pragma once
 #include <Tools/Array.h>
-#include <Tools/Debug/VulkanSuff.h>
+#include <Tools/VulkanSuff.h>
 #include <Math/Math.h>
 #include <Render/vk/VKInstance.h>
 #include <Render/vk/PhysicalDevice.h>
@@ -10,7 +10,7 @@
 #include <string>
 
 #include <Render/vk/QueueFamilies.h>
-#include <Tools/Debug/VulkanSuff.h>
+
 #include <Render/vk/TextureImage.h>
 #include <Render/vk/ImageView.h>
 #include <Render/vk/TextureSampler.h>
@@ -94,7 +94,7 @@ public:
 	*/
 private:
 	
-	std::array<QFAVKShadowFrameBuffer*, MaxActiveViewPort> ShadowFrameBuffers;
+	QFAVKShadowFrameBuffer* ShadowFrameBuffer;
 
 	
 	void StartRenderOff();
@@ -108,11 +108,10 @@ private:
 
 
 	VkSemaphore GetImageSemaphore;	
-	std::array<VkSemaphore, QFAWindow::MaxActiveViewPort> ActorFinishedSemaphore;
-	std::array<VkSemaphore, QFAWindow::MaxActiveViewPort> ActorShadowFinishedSemaphore;
+	std::array<VkSemaphore, QFAWindow::MaxActiveViewPort> ActorFinishedSemi;
+	std::array<VkSemaphore, QFAWindow::MaxActiveViewPort> ActorShadowFinishedSemi;
 	VkSemaphore UISemaphore;
-	
-	std::array< VkPipelineStageFlags, QFAWindow::MaxActiveViewPort> ActorWaittageMasks;
+
 
 	VkSemaphore FinisSemaphore;
 

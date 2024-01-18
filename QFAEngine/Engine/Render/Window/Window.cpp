@@ -92,9 +92,8 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 
 	CreateViewtortsBuffers();
 
-	QFAText::Init(TextRenderPass->renderPass, commandPool);
-	for (size_t i = 0; i < MaxActiveViewPort; i++)
-		ShadowFrameBuffers[i] = new QFAVKShadowFrameBuffer(commandPool, RenderPassOffScreen->renderPass);
+	QFAText::Init(TextRenderPass->renderPass, commandPool);	
+	ShadowFrameBuffer = new QFAVKShadowFrameBuffer(commandPool, RenderPassOffScreen->renderPass);
 
 	CreateShadow();
 	QMeshBaseComponent::Init(RenderPass->renderPass, RenderPassOffScreen->renderPass, commandPool);
@@ -206,10 +205,10 @@ void QFAWindow::DrawText()
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-	// VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-	submitInfo.waitSemaphoreCount = ViewportProcess;
-	submitInfo.pWaitSemaphores = ActorFinishedSemaphore.data();
-	submitInfo.pWaitDstStageMask = ActorWaittageMasks.data();
+	VkPipelineStageFlags bit = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	submitInfo.waitSemaphoreCount = 1;
+	submitInfo.pWaitSemaphores = &ActorFinishedSemi[ViewportProcess - 1];
+	submitInfo.pWaitDstStageMask = &bit;
 
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = &UICommandBuffer;
@@ -217,8 +216,6 @@ void QFAWindow::DrawText()
 	VkSemaphore signalSemaphores[] = { UISemaphore};	
 	submitInfo.signalSemaphoreCount = 1;
 	submitInfo.pSignalSemaphores = signalSemaphores;
-	
-	
 	
 	vkCmdEndRenderPass(UICommandBuffer);
 
@@ -337,11 +334,9 @@ void QFAWindow::createSyncObject()
 
 	for (size_t i = 0; i < QFAWindow::MaxActiveViewPort; i++)
 	{
-		if (vkCreateSemaphore(QFAVKLogicalDevice::GetDevice(), &semaphoreInfo, nullptr, &ActorFinishedSemaphore[i]) != VK_SUCCESS ||
-			vkCreateSemaphore(QFAVKLogicalDevice::GetDevice(), &semaphoreInfo, nullptr, &ActorShadowFinishedSemaphore[i]) != VK_SUCCESS)
+		if (vkCreateSemaphore(QFAVKLogicalDevice::GetDevice(), &semaphoreInfo, nullptr, &ActorFinishedSemi[i]) != VK_SUCCESS ||
+			vkCreateSemaphore(QFAVKLogicalDevice::GetDevice(), &semaphoreInfo, nullptr, &ActorShadowFinishedSemi[i]) != VK_SUCCESS)
 			stopExecute("failed to create Semaphore");
-
-		ActorWaittageMasks[i] = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;	
 	}
 
 }
@@ -399,7 +394,7 @@ void QFAWindow::StartRenderOff()
 	VkRenderPassBeginInfo renderPassInfo{};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	renderPassInfo.renderPass = MainWindow->RenderPassOffScreen->renderPass;
-	renderPassInfo.framebuffer = ShadowFrameBuffers[ViewportProcess]->Framebuffer;
+	renderPassInfo.framebuffer = ShadowFrameBuffer->Framebuffer;
 	renderPassInfo.renderArea.offset = { 0, 0 };
 	renderPassInfo.renderArea.extent = {(uint32_t)shadowResolution, (uint32_t)shadowResolution };
 
@@ -472,7 +467,7 @@ void QFAWindow::EndRenderOff()
 	ic.dstOffset = { 0,0 };
 	ic.extent = { (uint32_t)shadowResolution, (uint32_t)shadowResolution, 1 };	
 	
-	vkCmdCopyImage(MainWindow->ShadowCommandBuffers[ViewportProcess], ShadowFrameBuffers[ViewportProcess]->depthImageQFA->TextureImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, ShadowImages[ViewportProcess]->TextureImage, VK_IMAGE_LAYOUT_GENERAL, 1, &ic);
+	vkCmdCopyImage(MainWindow->ShadowCommandBuffers[ViewportProcess], ShadowFrameBuffer->depthImageQFA->TextureImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, ShadowImages[ViewportProcess]->TextureImage, VK_IMAGE_LAYOUT_GENERAL, 1, &ic);
 
 	if (vkEndCommandBuffer(ShadowCommandBuffers[ViewportProcess]) != VK_SUCCESS)
 		stopExecute("failed to record command buffer!");
@@ -480,19 +475,23 @@ void QFAWindow::EndRenderOff()
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
+
 	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-	submitInfo.waitSemaphoreCount = 0;
-	submitInfo.pWaitSemaphores = nullptr;
+	submitInfo.waitSemaphoreCount = ViewportProcess == 0 ? 0 : 1;
+	submitInfo.pWaitSemaphores = ViewportProcess == 0 ? nullptr : &ActorFinishedSemi[ViewportProcess - 1];
 	submitInfo.pWaitDstStageMask = waitStages;
 
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = &ShadowCommandBuffers[ViewportProcess];
 
 	submitInfo.signalSemaphoreCount = 1;
-	submitInfo.pSignalSemaphores = &ActorShadowFinishedSemaphore[ViewportProcess];
+	submitInfo.pSignalSemaphores = &ActorShadowFinishedSemi[ViewportProcess];
+
+
 
 	if (vkQueueSubmit(QFAVKLogicalDevice::GetGraphicsQueue(), 1, &submitInfo, nullptr/*inFlightFence*/) != VK_SUCCESS)
 		stopExecute("failed to submit draw command buffer!");
+	
 }
 
 void QFAWindow::RenderWindow()
@@ -504,29 +503,25 @@ void QFAWindow::RenderWindow()
 	
 	for (size_t i = 0; i < MainWindow->Viewports.Length(); i++)
 	{
-
-
 		MainWindow->StartRenderOff();
 
-		MainWindow->RenderOff(MainWindow->Viewports[i]); // in problem
+		MainWindow->RenderOff(MainWindow->Viewports[i]); 
 
 		MainWindow->EndRenderOff();
-
+		
 		MainWindow->DrawActors(MainWindow->Viewports[i], i == 0);
 
-
-
 		MainWindow->ViewportProcess++;
-		//vkQueueWaitIdle(QFAVKLogicalDevice::GetGraphicsQueue());
 	}
 
 	
 	MainWindow->DrawText();
-
+	
 	MainWindow->DrawOffscreenBuffer();
 
 	
 	MainWindow->PresentFrame();
+	
 	
 }
 
@@ -666,10 +661,9 @@ void QFAWindow::DrawActors(QFAViewport* _viewport, bool clear)
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
 
-	//VkSemaphore waitSemaphores[] = {  };
 	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 	submitInfo.waitSemaphoreCount = 1;
-	submitInfo.pWaitSemaphores = &ActorShadowFinishedSemaphore[ViewportProcess];
+	submitInfo.pWaitSemaphores = &ActorShadowFinishedSemi[ViewportProcess];
 	submitInfo.pWaitDstStageMask = waitStages;
 
 	submitInfo.commandBufferCount = 1;
@@ -677,10 +671,12 @@ void QFAWindow::DrawActors(QFAViewport* _viewport, bool clear)
 
 
 	submitInfo.signalSemaphoreCount = 1;
-	submitInfo.pSignalSemaphores = &ActorFinishedSemaphore[ViewportProcess];
+	submitInfo.pSignalSemaphores = &ActorFinishedSemi[ViewportProcess];
 
 	if (vkQueueSubmit(QFAVKLogicalDevice::GetGraphicsQueue(), 1, &submitInfo, nullptr/*MainWindow->inFlightFence*/) != VK_SUCCESS)
 		stopExecute("failed to submit draw command buffer!");
+
+	
 }
 
 unsigned int QFAWindow::ProcessMeshComponent(QSceneComponent* component, bool shadow)

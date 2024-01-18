@@ -1,6 +1,6 @@
 #pragma once
 #include <Render/RenderPass/MeshRenderPass.h>
-#include <Tools/Debug/VulkanSuff.h>
+#include <Tools/VulkanSuff.h>
 #include <Render/vk/TextureImage.h>
 #include <Render/vk/LogicalDevice.h>
 #include <Render/Pipline/MeshPipeline.h>

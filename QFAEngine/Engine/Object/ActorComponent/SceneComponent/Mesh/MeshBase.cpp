@@ -1,7 +1,7 @@
 #include "MeshBase.h"
 #include <Object/Actor/Actor.h>
 #include <Render/vk/LogicalDevice.h>
-#include <Tools/Debug/VulkanSuff.h>
+#include <Tools/VulkanSuff.h>
 #include <Render/Buffer/VKBuffer.h>
 
 
