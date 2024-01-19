@@ -36,7 +36,7 @@ public:
 
 
 
-	void UpdateModelMatrix(bool onlyPosition) override;
+	void UpdateModelMatrix() override;
 
 	
 	/* 

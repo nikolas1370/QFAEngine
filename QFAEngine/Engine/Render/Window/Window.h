@@ -8,7 +8,7 @@
 #include <Render/vk/SwapChain.h>
 #include <Render/RenderPass/RenderPass.h>
 #include <string>
-
+#include <Math/Vector.h>
 #include <Render/vk/QueueFamilies.h>
 
 #include <Render/vk/TextureImage.h>
@@ -190,9 +190,9 @@ private:
 
 	// Depth bias (and slope) are used to avoid shadowing artifacts
 // Constant depth bias factor (always applied)
-	float depthBiasConstant = 2.05f; // 1.25f
+	float depthBiasConstant = 3.05f; // 1.25f   2.05f
 	// Slope depth bias factor, applied depending on polygon's slope
-	float depthBiasSlope = 2.55f; // 1.75f
+	float depthBiasSlope = 3.55f; // 1.75f    2.55f
 	
 public:
 	const float shadowResolution = 2000;
@@ -205,9 +205,9 @@ public:
 
 	/*---*/
 	
-	std::array<QFAVKTextureImage*, MaxActiveViewPort> ShadowImages;
+	QFAVKTextureImage* ShadowImage;
 	
-	std::array<QFAVKImageView*, MaxActiveViewPort> ShadowImagesViews;
+	QFAVKImageView* ShadowImagesView;
 	QFAVKTextureSampler* ShadowSampler;
 
 	struct SViewportBuffers
@@ -219,4 +219,6 @@ public:
 
 	void CreateShadow();
 	void CreateViewtortsBuffers();
+
+	FVector CurentCameraPosition;
 }; // ShadowImages[0]->TextureImage

@@ -36,11 +36,8 @@ QCameraComponent::QCameraComponent(float fov, float viewDistance)
 
 
 
-void QCameraComponent::UpdateModelMatrix(bool onlyPosition)
+void QCameraComponent::UpdateModelMatrix()
 {
-	if (onlyPosition)
-		return;
-
 	FinallyRotation = Rotation;
 	if (!IsRootComponent())
 	{

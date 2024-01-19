@@ -12,8 +12,12 @@ void QStaticMesh::SetMesh(MeshData* meshData)
 	CreateVertexIndexBuffers();
 }
 
-void QStaticMesh::UpdateBuffers( uint64_t startFrameTime, bool isShadow)
-{		
+void QStaticMesh::UpdateBuffers( uint64_t startFrameTime, bool isShadow, const FVector &cameraPos)
+{	
+	// convertation from 1 unit 1 centimeter to 1 unit 1 meter.
+	ModelMatrix[3][0] = (WorldPosition.X - cameraPos.X) * 0.01;
+	ModelMatrix[3][1] = (WorldPosition.Y - cameraPos.Y) * 0.01;
+	ModelMatrix[3][2] = (WorldPosition.Z - cameraPos.Z) * 0.01;
 	if (isShadow)
 	{
 		QMeshBaseComponent::UBOShadowVertex ubo{};
@@ -23,7 +27,6 @@ void QStaticMesh::UpdateBuffers( uint64_t startFrameTime, bool isShadow)
 	}
 	else
 	{
-
 		memcpy(GetModelBuffer(), &ModelMatrix, sizeof(ModelMatrix));
 
 		void* faragbuf = GetFragmentBuffer();

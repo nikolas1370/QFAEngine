@@ -35,13 +35,14 @@ public:
 
     /*
         import up Y and forwart -Z because blender defauld setings
+
+        minimal fbx support - fbx 7.1 (FBX 2011)
     */
     static QStaticMesh* LoadModel(const std::string& pFile);
     static std::vector<QStaticMesh*> LoadModelSeparate(const std::string& pFile);
 private:
     static void GetMesh(const aiScene* scene, const aiNode* node, EFileFormat fileFormat, std::vector<QStaticMesh*>& vector);
 };
-
 inline QFAModelLoader::EFileFormat QFAModelLoader::GetFileFormat(const aiScene* scene)
 {
     aiString objFormat("Wavefront Object Importer"); 
@@ -120,7 +121,7 @@ inline void QFAModelLoader::WriteVertex(const aiScene* scene, const aiNode* node
             {
                 if (fileFormat == EFileFormat::OBJ || fileFormat == EFileFormat::UNDEFINED)
                 {
-                    aiVector3D vert = scene->mMeshes[meshIndex]->mVertices[j] * 100.0f;
+                    aiVector3D vert = scene->mMeshes[meshIndex]->mVertices[j];
                     meshVertex[verticeCound].Position = FVector(vert.x, vert.y, vert.z);
                     meshVertex[verticeCound].Normal.X = scene->mMeshes[meshIndex]->mNormals[j].x;
                     meshVertex[verticeCound].Normal.Y = scene->mMeshes[meshIndex]->mNormals[j].y;
@@ -129,7 +130,7 @@ inline void QFAModelLoader::WriteVertex(const aiScene* scene, const aiNode* node
                 else// fbx
                 {                     
                     aiVector3D vert = finiteMatrix * scene->mMeshes[meshIndex]->mVertices[j];
-                    meshVertex[verticeCound].Position = FVector(vert.x, vert.y, vert.z);
+                    meshVertex[verticeCound].Position = FVector(vert.x, vert.y, vert.z) * 0.01f;// scale in fbx by default 100
                     meshVertex[verticeCound].Normal = FVector(scene->mMeshes[meshIndex]->mNormals[j].x, scene->mMeshes[meshIndex]->mNormals[j].y, scene->mMeshes[meshIndex]->mNormals[j].z)
                         .RotateAngleAxis(rotations.X, FVector(1, 0, 0));
                     meshVertex[verticeCound].Normal = meshVertex[verticeCound].Normal.RotateAngleAxis(rotations.Y, FVector(0, 1, 0));
@@ -203,7 +204,8 @@ QStaticMesh* QFAModelLoader::LoadModel(const std::string& pFile)
 
     if (nullptr == scene)
     {
-        std::cout << "fail\n";
+        const char* errorNA =  importer.GetErrorString();        
+        std::cout << errorNA << "\n";
         ASSERT(false);
         return nullptr;
     }

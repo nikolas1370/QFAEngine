@@ -1,5 +1,5 @@
 #include "TextRenderPass.h"
-#include <Tools/Debug/VulkanSuff.h>
+#include <Tools/VulkanSuff.h>
 #include <Render/vk/LogicalDevice.h>
 #include <Render/Window/Window.h>
 QFAVKTextRenderPass::QFAVKTextRenderPass(VkFormat swapChainImageFormat)

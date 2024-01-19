@@ -104,6 +104,8 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 	imugo = new QFAImage(commandPool);
 	
 	imugo->Init(RenderPass->renderPass, commandPool, frameBufferMesh->ColorImage);
+	
+	
 }
 
 QFAWindow::~QFAWindow()
@@ -437,13 +439,14 @@ void QFAWindow::RenderOff(QFAViewport* _viewport)
 
 	QWorld* world = _viewport->CurentCamera->GetWorld();
 	QDirectionLight* dl = world->GetDirectionDight();
-	glm::mat4 liteMat = dl->GetLightMatrix(MainWindow->Viewports[QFAWindow::GetMainWindow()->ViewportProcess]->CurentCamera->GetWorldPosition().ConvertToVulkanCoordinate());
+	glm::mat4 liteMat = dl->GetLightMatrix();
 	
 	QMeshBaseComponent::ShaderDL.ambient = dl->Ambient;
 	QMeshBaseComponent::ShaderDL.diffuse = dl->Diffuse;
 	QMeshBaseComponent::ShaderDL.direction = dl->Direction;
 	QMeshBaseComponent::ShaderDL.specular = dl->Specular;
 	
+	CurentCameraPosition = _viewport->CurentCamera->WorldPosition;
 	QMeshBaseComponent::StartShadowFrameViewport(liteMat);
 	unsigned int countComponentForRender = 0;
 	for (size_t i = 0; i < world->Actors.Length(); i++)
@@ -453,7 +456,7 @@ void QFAWindow::RenderOff(QFAViewport* _viewport)
 void QFAWindow::EndRenderOff()
 {
 	vkCmdEndRenderPass(ShadowCommandBuffers[ViewportProcess]);
-
+	
 	VkImageSubresourceLayers isl;
 	isl.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 	isl.mipLevel = 0;
@@ -467,16 +470,16 @@ void QFAWindow::EndRenderOff()
 	ic.dstOffset = { 0,0 };
 	ic.extent = { (uint32_t)shadowResolution, (uint32_t)shadowResolution, 1 };	
 	
-	vkCmdCopyImage(MainWindow->ShadowCommandBuffers[ViewportProcess], ShadowFrameBuffer->depthImageQFA->TextureImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, ShadowImages[ViewportProcess]->TextureImage, VK_IMAGE_LAYOUT_GENERAL, 1, &ic);
-
+	vkCmdCopyImage(MainWindow->ShadowCommandBuffers[ViewportProcess], ShadowFrameBuffer->depthImageQFA->TextureImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, ShadowImage->TextureImage, VK_IMAGE_LAYOUT_GENERAL, 1, &ic);
+	
 	if (vkEndCommandBuffer(ShadowCommandBuffers[ViewportProcess]) != VK_SUCCESS)
 		stopExecute("failed to record command buffer!");
 
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-
 	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+	//submitInfo.waitSemaphoreCount = ViewportProcess == 0 ? 0 : 1;
 	submitInfo.waitSemaphoreCount = ViewportProcess == 0 ? 0 : 1;
 	submitInfo.pWaitSemaphores = ViewportProcess == 0 ? nullptr : &ActorFinishedSemi[ViewportProcess - 1];
 	submitInfo.pWaitDstStageMask = waitStages;
@@ -502,7 +505,7 @@ void QFAWindow::RenderWindow()
 	MainWindow->StartFrame();
 	
 	for (size_t i = 0; i < MainWindow->Viewports.Length(); i++)
-	{
+	{		
 		MainWindow->StartRenderOff();
 
 		MainWindow->RenderOff(MainWindow->Viewports[i]); 
@@ -514,15 +517,12 @@ void QFAWindow::RenderWindow()
 		MainWindow->ViewportProcess++;
 	}
 
-	
 	MainWindow->DrawText();
 	
 	MainWindow->DrawOffscreenBuffer();
 
 	
 	MainWindow->PresentFrame();
-	
-	
 }
 
 void QFAWindow::StartFrame()
@@ -581,11 +581,8 @@ void QFAWindow::CreateShadow()
 {
 	ShadowSampler = new QFAVKTextureSampler();
 
-	for (size_t i = 0; i < MaxActiveViewPort; i++)
-	{		
-		ShadowImages[i] = new QFAVKTextureImage(commandPool, QFAVKShadowFrameBuffer::GetShadowResolution(), QFAVKShadowFrameBuffer::GetShadowResolution(), 4, QFAWindow::depthFormat, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_IMAGE_ASPECT_DEPTH_BIT);
-		ShadowImagesViews[i] = new QFAVKImageView(ShadowImages[i], VK_IMAGE_ASPECT_DEPTH_BIT);
-	}
+	ShadowImage= new QFAVKTextureImage(commandPool, QFAVKShadowFrameBuffer::GetShadowResolution(), QFAVKShadowFrameBuffer::GetShadowResolution(),4, QFAWindow::depthFormat, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_IMAGE_ASPECT_DEPTH_BIT);	
+	ShadowImagesView= new QFAVKImageView(ShadowImage, VK_IMAGE_ASPECT_DEPTH_BIT);
 }
 
 void QFAWindow::CreateViewtortsBuffers()
@@ -641,13 +638,13 @@ void QFAWindow::DrawActors(QFAViewport* _viewport, bool clear)
 
 	QWorld* world = _viewport->CurentCamera->GetWorld();
 		
-	glm::mat4 lightMat = world->GetDirectionDight()->GetLightMatrix(_viewport->CurentCamera->GetWorldPosition().ConvertToVulkanCoordinate());
+	glm::mat4 lightMat = world->GetDirectionDight()->GetLightMatrix();
 	QMeshBaseComponent::StartFrameViewpoet(_viewport->MatrixPerspective,
 		_viewport->CurentCamera->cameraRotationMatrex,
-		_viewport->CurentCamera->WorldPosition,
 		lightMat); 
 	unsigned int countComponentForRender = 0; 
 	
+
 	
 	for (size_t i = 0; i < world->Actors.Length(); i++)
 		countComponentForRender += ProcessMeshComponent(world->Actors[i]->RootComponent, false);
@@ -687,7 +684,7 @@ unsigned int QFAWindow::ProcessMeshComponent(QSceneComponent* component, bool sh
 	unsigned int countComponentForRender = 0;
 	if (QMeshBaseComponent* mesh = dynamic_cast<QMeshBaseComponent*>(component))
 	{		
-		mesh->UpdateBuffers(0, shadow);
+		mesh->UpdateBuffers(0, shadow, CurentCameraPosition);
 		recordCommandBufferMesh(mesh, shadow);
 		countComponentForRender++;
 	}

@@ -68,7 +68,7 @@ struct SpotLight
 };
 
 
-layout(location = 4) in vec3 viewPos;
+
 
 
 
@@ -92,7 +92,7 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
 
  
-layout(location = 5) in vec4 FragPosLightSpace;
+layout(location = 4) in vec4 FragPosLightSpace;
 
 layout(location = 1) in float outMaterial; // program linker error when type int
 
@@ -213,17 +213,12 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 
 void main()
 {
-  
-
     vec3 norm = normalize(Normal);
-    vec3 viewDir = normalize(viewPos - FragPos);
-    
-    
-    
+    vec3 viewDir = normalize(-FragPos);
+       
     vec3 result = CalcDirLight(prog.DL, norm, viewDir);
           
     FragColor = vec4(result, 1.0);
-	
 }
 
 

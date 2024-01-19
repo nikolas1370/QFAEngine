@@ -54,9 +54,9 @@ protected:
 
 
 
-	// in opengl format
+	// in vulkan format
 	FVector WorldPosition = FVector(0);
-	// in opengl format
+	// in vulkan format
 	glm::mat3 RotationMatrix = Math::DefauldMatrix3;
 	/*
 	 contain parent AccumulateScale * parent scale 
@@ -85,7 +85,7 @@ protected:
 	bool NeedUpdateMatrix = false;
 
 
-	virtual void UpdateModelMatrix(bool onlyPosition) {};
+	virtual void UpdateModelMatrix() {};
 public:
 
 	// remove to private
@@ -120,7 +120,7 @@ public:
 	
 	inline FVector GetWorldPosition() const
 	{		
-		return WorldPosition.ConvertFromVulkanCoordinate();
+		return WorldPosition.ConvertFromVulkanCoordinate() ;
 	}
 
 	/*

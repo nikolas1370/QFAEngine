@@ -10,7 +10,6 @@ layout(set = 0, binding = 0) uniform UniformBufferObject
     mat4 projection;     
     mat4 cameraR;
     mat4 directionLightMatrix; 
-    vec3 cameraP;     
 } prog;
 
 layout(set = 1, binding = 0) uniform UniformBufferObject2 
@@ -23,10 +22,7 @@ layout(location = 0) out vec3 Normal;
 layout(location = 1) out float outMaterial;
 layout(location = 2) out vec3 FragPos;  
 layout(location = 3) out vec3 localPos;
-
-layout(location = 4) out vec3 viewPos;
-
-layout(location = 5) out vec4 FragPosLightSpace;
+layout(location = 4) out vec4 FragPosLightSpace;
 
 const mat4 biasMat = mat4( // from -1 1 to 0 1 
 	0.5, 0.0, 0.0, 0.0,
@@ -36,7 +32,15 @@ const mat4 biasMat = mat4( // from -1 1 to 0 1
 
 void main()
 {
-    viewPos = prog.cameraP;
+    /*
+
+
+remove prog.cameraP
+
+
+    */
+
+
 
     outMaterial = float(material);
     // do in cpu side
@@ -45,19 +49,7 @@ void main()
     vec4 worldPosition = model.model * vec4(LocalPosition, 1);
     FragPos = vec3(worldPosition);
     
-    vec4 cameraPosition =  worldPosition;
-    
-    cameraPosition.x = worldPosition.x - prog.cameraP.x;
-    cameraPosition.y = worldPosition.y - prog.cameraP.y;
-    cameraPosition.z = worldPosition.z - prog.cameraP.z;
-
-
-    
-
-
-    gl_Position = prog.projection * prog.cameraR * cameraPosition;
-
-
+    gl_Position = prog.projection * prog.cameraR * worldPosition;
 
     FragPosLightSpace = biasMat * prog.directionLightMatrix * worldPosition;
 };

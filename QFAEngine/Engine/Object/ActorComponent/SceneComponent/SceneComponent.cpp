@@ -20,8 +20,7 @@ void QSceneComponent::ChangeWorldPosition(const FVector position)
 		RelativePosition = 0;
 		AccumulateScale = FVector(1);
 		WorldPosition = position.ConvertToVulkanCoordinate();
-		if (NeedUpdateMatrix)
-			UpdateModelMatrix(true);
+		
 		for (unsigned int i = 0; i < (unsigned int)ListComponents.Length(); i++)
 			if (ListComponents[i]->IsValid())
 				ListComponents[i]->UpdateWorldPositionScale(true);
@@ -33,8 +32,6 @@ void QSceneComponent::ChangeWorldPosition(const FVector position)
 		RelativePosition = RelativePosition.ReversScale(AccumulateScale);
 		//invers RotationMatrix rotate finally position to pure relative position(pure = not scale and rotate)
 		RelativePosition = FVector(glm::inverse(ParentActorComponent->RotationMatrix) * RelativePosition.ConvertToVulkanCoordinate().GetGLMVector()).ConvertFromVulkanCoordinate();
-		if(NeedUpdateMatrix)
-			UpdateModelMatrix(true);
 
 		for (int i = 0; i < ListComponents.Length(); i++)
 			if (ListComponents[i]->IsValid())
@@ -56,9 +53,6 @@ void QSceneComponent::ChangeLocalPosition(const FVector position)
 	RelativePosition = RelativePosition.ReversScale(ParentActorComponent->AccumulateScale * ParentActorComponent->Scale);
 	//invers RotationMatrix rotate finally position to pure relative position(pure = not scale and rotate)
 	RelativePosition = FVector(glm::inverse(ParentActorComponent->RotationMatrix) * RelativePosition.ConvertToVulkanCoordinate().GetGLMVector()).ConvertFromVulkanCoordinate();
-
-	if (NeedUpdateMatrix)
-		UpdateModelMatrix(true);
 
 	for (int i = 0; i < ListComponents.Length(); i++)
 		if (ListComponents[i]->IsValid())
@@ -105,7 +99,7 @@ void QSceneComponent::ChangedParentRotation()
 	RotationMatrix = Math::rotateMatrix3(RotationMatrix, glm::radians(Rotation.Y), glm::vec3(1.f, 0.f, 0.f));
 	RotationMatrix = Math::rotateMatrix3(RotationMatrix, glm::radians(Rotation.X), glm::vec3(0.0f, 0.0f, -1.0f));
 	if (NeedUpdateMatrix)
-		UpdateModelMatrix(false);
+		UpdateModelMatrix();
 
 	for (int i = 0; i < ListComponents.Length(); i++)
 		if(ListComponents[i]->IsValid())
@@ -124,7 +118,7 @@ void QSceneComponent::ChangeRotation(const FVector rotation)
 		RotationMatrix = Math::rotateMatrix3(RotationMatrix, glm::radians(Rotation.Y), glm::vec3(1.f, 0.f, 0.f));
 		RotationMatrix = Math::rotateMatrix3(RotationMatrix, glm::radians(Rotation.X), glm::vec3(0.0f, 0.0f, -1.0f));
 		if (NeedUpdateMatrix)
-			UpdateModelMatrix(false);
+			UpdateModelMatrix();
 
 		for (int i = 0; i < ListComponents.Length(); i++)
 			if (ListComponents[i]->IsValid())
@@ -139,8 +133,8 @@ void QSceneComponent::UpdateWorldPositionScale(bool onlyPosition)
 	AccumulateScale = ParentActorComponent->AccumulateScale * ParentActorComponent->Scale;
 	glm::vec3 ass = ParentActorComponent->RotationMatrix * GetRelativeScalePosition().ConvertToVulkanCoordinate().GetGLMVector();
 	WorldPosition = ParentActorComponent->WorldPosition + FVector(ass);
-	if (NeedUpdateMatrix)
-		UpdateModelMatrix(onlyPosition);
+	if (NeedUpdateMatrix && !onlyPosition)
+		UpdateModelMatrix();
 
 	for (int i = 0; i < ListComponents.Length(); i++)
 		if (ListComponents[i]->IsValid())
@@ -155,7 +149,7 @@ void QSceneComponent::ChangeScale(const FVector scale)
 		AccumulateScale = FVector(1);
 		ParentActor->Scale = scale;
 		if (NeedUpdateMatrix)
-			UpdateModelMatrix(false);
+			UpdateModelMatrix();
 
 		for (int i = 0; i < ListComponents.Length(); i++)
 			if (ListComponents[i]->IsValid())

@@ -1,5 +1,5 @@
 #include "ImagePipeline.h"
-#include <Tools/Debug/VulkanSuff.h>
+#include <Tools/VulkanSuff.h>
 #include <iostream>
 #include <fstream>
 #include <Render/vk/LogicalDevice.h>

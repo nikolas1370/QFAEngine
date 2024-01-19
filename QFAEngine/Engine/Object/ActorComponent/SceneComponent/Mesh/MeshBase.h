@@ -139,8 +139,18 @@ protected:
 	bool CastShadow = true;
 
 	
+	/*
+		delete update position in this matrix
+		delete update position in this matrix
+		delete update position in this matrix
+		delete update position in this matrix
+		delete update position in this matrix
+		delete update position in this matrix
+				delete update position in this matrix
+				delete update position in this matrix
+	*/
 	glm::mat4 ModelMatrix = Math::DefauldMatrix4;
-	void UpdateModelMatrix(bool onlyPosition) override;
+	void UpdateModelMatrix() override;
 
 
 
@@ -163,7 +173,7 @@ public:
 
 
 
-	virtual void UpdateBuffers( uint64_t startFrameTime, bool isShadow) = 0;
+	virtual void UpdateBuffers( uint64_t startFrameTime, bool isShadow, const FVector& cameraPos) = 0;
 	
 
 
@@ -319,7 +329,6 @@ protected:
 		alignas(64) glm::mat4 projection;// put in start mesh render		
 		alignas(64) glm::mat4 cameraR;
 		alignas(64) glm::mat4 directionLightMatrix;
-		alignas(16) FVector cameraP;		
 	};
 
 
@@ -332,6 +341,6 @@ protected:
 
 	void CreateVertexIndexBuffers();
 
-	static void StartFrameViewpoet(glm::mat4& viewPortProjection, glm::mat3& cameraRotationMatrix, FVector& cameraPosition, glm::mat4& directionLightMatrix);
+	static void StartFrameViewpoet(glm::mat4& viewPortProjection, glm::mat3& cameraRotationMatrix,  glm::mat4& directionLightMatrix);
 
 };

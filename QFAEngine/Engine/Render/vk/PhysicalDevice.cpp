@@ -1,5 +1,5 @@
 #include "PhysicalDevice.h"
-#include <Tools/Debug/VulkanSuff.h>
+#include <Tools/VulkanSuff.h>
 #include <set>
 #include <Render/vk/QueueFamilies.h>
 
@@ -11,8 +11,6 @@ void QFAVKPhysicalDevice::Init(QFAVKInstance* instance, VkSurfaceKHR surface)
 {
     if (IsInit)
         return;
-
-
 
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(instance->instance, &deviceCount, nullptr);

@@ -55,7 +55,7 @@ void QFAVKMeshRenderPass::CreateRenderPass(bool Clear)
         colorAttachment.initialLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         
 
-        depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+        depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // if one view port render in more then 1 comadbuffer change value
         depthAttachment.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
         
     }

@@ -1,5 +1,5 @@
 #include "RenderPass.h"
-#include <Tools/Debug/VulkanSuff.h>
+#include <Tools/VulkanSuff.h>
 #include <Render/vk/LogicalDevice.h>
 #include <Render/Window/Window.h>
 QFAVKRenderPass::QFAVKRenderPass(VkFormat swapChainImageFormat, bool present)

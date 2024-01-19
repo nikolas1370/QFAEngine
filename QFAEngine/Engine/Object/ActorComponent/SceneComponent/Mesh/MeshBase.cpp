@@ -85,22 +85,9 @@ QMeshBaseComponent::QMeshBaseComponent()
 
 
 
-void QMeshBaseComponent::UpdateModelMatrix(bool onlyPosition)
-{
-	if (onlyPosition)
-	{
-		ModelMatrix[3][0] = WorldPosition.X;
-		ModelMatrix[3][1] = WorldPosition.Y;
-		ModelMatrix[3][2] = WorldPosition.Z;
-		return;
-	}
-		
+void QMeshBaseComponent::UpdateModelMatrix()
+{	
 	ModelMatrix = glm::mat4(RotationMatrix);
-	
-	ModelMatrix[3][0] = WorldPosition.X;
-	ModelMatrix[3][1] = WorldPosition.Y;
-	ModelMatrix[3][2] = WorldPosition.Z;
-
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(AccumulateScale.Y * Scale.Y , AccumulateScale.Z * Scale.Z, AccumulateScale.X * Scale.X));
 }
 
@@ -158,18 +145,14 @@ void QMeshBaseComponent::CreateVertexIndexBuffers()
 }
 
 
-void QMeshBaseComponent::StartFrameViewpoet(glm::mat4& viewPortProjection, glm::mat3& cameraRotationMatrix, FVector& cameraPosition, glm::mat4& directionLightMatrix)
+void QMeshBaseComponent::StartFrameViewpoet(glm::mat4& viewPortProjection, glm::mat3& cameraRotationMatrix, glm::mat4& directionLightMatrix)
 {
 	QMeshBaseComponent::UBOVertex ubo{};
 
 	ubo.projection = viewPortProjection;
-
 	
 	ubo.cameraR = glm::mat4(cameraRotationMatrix);
 	ubo.directionLightMatrix = directionLightMatrix;
-
-
-	ubo.cameraP = cameraPosition;
 	
 	memcpy(BuffersVertex[QFAWindow::GetMainWindow()->ViewportProcess]->MapData, &ubo.projection, sizeof(ubo) );
 	SetsInUse = 0;	
@@ -280,7 +263,7 @@ void QMeshBaseComponent::createDescriptorSet0()
 
 		VkDescriptorImageInfo IF;// 
 		IF.imageLayout = VK_IMAGE_LAYOUT_GENERAL;// VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		IF.imageView = window->ShadowImagesViews[i]->ImageView;
+		IF.imageView = window->ShadowImagesView->ImageView;
 		IF.sampler = window->ShadowSampler->textureSampler;
 
 		descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

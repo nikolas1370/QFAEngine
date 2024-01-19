@@ -60,46 +60,14 @@ int main()
     QFAWindow* mainWindow = QFAWindow::GetMainWindow();
     QFAViewport* firstdViewPort = mainWindow->GetViewport(0);
     
-    QFAViewport* secondViewPort = new QFAViewport;
-    QFAViewport* thirdViewPort = new QFAViewport;
-    QFAViewport* fourthViewPort = new QFAViewport;
-    
-    ACameraActor* secondCamera = new ACameraActor();
-    ACameraActor* thirdCamera = new  ACameraActor();
-    ACameraActor* fourthCamera = new ACameraActor();
+
+
     Camera.ActivateCamera(firstdViewPort);
     
-    secondCamera->ActivateCamera(secondViewPort);
-    thirdCamera->ActivateCamera(thirdViewPort);
-    fourthCamera->ActivateCamera(fourthViewPort);
 
-    
-    
-    mainWindow->AddViewport(secondViewPort);
-    mainWindow->AddViewport(thirdViewPort);
-    mainWindow->AddViewport(fourthViewPort);
-        
-    firstdViewPort->SetParameters(0, 0, 0.5, 1);    
-    secondViewPort->SetParameters(0.5f, 0.66666f,    0.5f, 0.33333f);
-    thirdViewPort->SetParameters(0.5f,  0.33333f, 0.5f, 0.33333f);
-    fourthViewPort->SetParameters(0.5f, 0.0f, 0.5f, 0.33333f);
-        
-    mainWorld->AddActor(secondCamera);
-    mainWorld->AddActor(thirdCamera);
-    mainWorld->AddActor(fourthCamera);
-    
-    
-    secondCamera->SetActorPosition(FVector(-609.397, -752.392, -4.68553));
-    secondCamera->SetActorRotation(FVector(0, -1.8, 49.5));
+ 
+    firstdViewPort->SetParameters(0, 0, 1, 1);    
 
-    
-    thirdCamera->SetActorPosition(FVector(-645.376, 617.212, -4.68553));
-    thirdCamera->SetActorRotation(FVector(0, -4.4, -51.5));
-
-    
-    fourthCamera->SetActorPosition(FVector(-909.311, -38.1247, 601.103));
-    fourthCamera->SetActorRotation(FVector(0, -23.7998, -0.000142425));
-    
     
     QFAText* text = new QFAText();
     QFAText* text_2 = new QFAText();
@@ -111,32 +79,7 @@ int main()
     text_2->Color = FVector(1, 0.5, 0);
     /*-----*/
 
-    
-    
-    QFAText* text2 = new QFAText();
-    text2->SetText(L"Viewport 2");
-    QFAText* text3 = new QFAText();
-    text3->SetText(L"Viewport 3");
-    QFAText* text4 = new QFAText();
-    text4->SetText(L"Viewport 4");
-    
-    text2->Color = FVector(0, 0, 1);
-    text3->Color = FVector(0, 0.5, 0);
-    text4->Color = FVector(1, 0, 0);
 
-    text2->SetPosition(0,0);
-    text3->SetPosition(0,0);
-    text4->SetPosition(0,0);
-    
-    text2->SetTextSize(25);
-    text3->SetTextSize(25);
-    text4->SetTextSize(25);
-
-    
-    secondViewPort->AddText(text2);
-    thirdViewPort->AddText(text3);
-    fourthViewPort->AddText(text4);
-    
 
     text->SetPosition(0, 25);
 
@@ -149,11 +92,9 @@ int main()
     text->Opacity = 0.9f;
     text->SetTextAlign(QFAText::ETextAlign::TACenter);
 
-    firstdViewPort->AddText(text);
+    //firstdViewPort->AddText(text);
 
 
-
-    
     firstdViewPort->AddText(text_2);
     text->SetSize(600, 300);
     text_2->SetSize(600, 300);

@@ -33,7 +33,7 @@ public:
 
 
 
-	glm::mat4 GetLightMatrix(const FVector& cameraPositionVulkan);
+	glm::mat4 GetLightMatrix();
 
 	inline bool GetCastShadow()
 	{
