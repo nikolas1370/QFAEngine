@@ -8,8 +8,8 @@ class QFAWindow;
 class QSceneComponent;
 class QWorld;
 class QMeshBaseComponent;
-class QFAText;
 
+class QFAUIUnit;
 class QFAViewport
 {
 
@@ -37,7 +37,7 @@ class QFAViewport
 	QWorld* CurentFrameWorld;
 
 
-	QFAArray<QFAText*> Texts;
+	QFAArray<QFAUIUnit*> UIUnits;
 	glm::mat4 UIProjection;
 
 
@@ -68,8 +68,8 @@ public:
 	*/
 	void SetParameters(float xP, float  yP, float widthP, float heightP);
 
-	void AddText(QFAText* text);
-	void RemoveText(QFAText* text);
+	void AddUnit(QFAUIUnit* unit);
+	void RemoveUnit(QFAUIUnit* unit);
 private:
 
 };

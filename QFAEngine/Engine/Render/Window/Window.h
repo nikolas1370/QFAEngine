@@ -35,7 +35,7 @@ class QActor;
 class QSceneComponent;
 class QWorld;
 class QFAText;
-
+class QFAUIUnit;
 class QFAWindow
 {
 
@@ -162,7 +162,6 @@ private:
 	
 	void createCommandPool();
 	
-	void recordCommandBufferText(QFAText* text, QFAViewport* viewPort);
 	void recreateSwapChain();
 
 	void DrawActors(QFAViewport* viewport, bool clear);
@@ -194,10 +193,17 @@ private:
 	// Slope depth bias factor, applied depending on polygon's slope
 	float depthBiasSlope = 3.55f; // 1.75f    2.55f
 	
+
+	void ProcessUIUnit(QFAUIUnit* unit);
+
 public:
+	QFAVKImageView* ShadowImagesView;
+	QFAVKTextureSampler* ShadowSampler;
+	static VkFormat depthFormat; // VK_FORMAT_D32_SFLOAT
+private:
 	const float shadowResolution = 2000;
 	// VkFormat
-	static VkFormat depthFormat; // VK_FORMAT_D32_SFLOAT
+	
 
 
 
@@ -207,8 +213,7 @@ public:
 	
 	QFAVKTextureImage* ShadowImage;
 	
-	QFAVKImageView* ShadowImagesView;
-	QFAVKTextureSampler* ShadowSampler;
+	
 
 	struct SViewportBuffers
 	{
@@ -221,4 +226,5 @@ public:
 	void CreateViewtortsBuffers();
 
 	FVector CurentCameraPosition;
-}; // ShadowImages[0]->TextureImage
+
+};

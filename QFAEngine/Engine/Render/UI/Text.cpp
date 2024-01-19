@@ -7,6 +7,7 @@
 #include <Render/vk/ImageView.h>
 #include <Render/vk/TextureSampler.h>
 #include <Render/Window/Window.h>
+#include <Render/UI/UIParentComponent.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H  
 
@@ -74,6 +75,8 @@ struct UniformBufferObject
 
 QFAText::QFAText()
 {
+    CanRender = true;
+    Type = EUIType::Text;
     vertexBufer = new QFAVKVertexBuffer(sizeof(GlyphShader) * CountGlyphInGUP, nullptr, commandPool);
 }
 
@@ -464,16 +467,14 @@ void QFAText::PrepareSymbolsToGpu()
 
 void QFAText::SetPosition(unsigned int x, unsigned int y)
 {
-    TextChange = true;
-    Position_x = x;
-    Position_y = y;
+    if (ParentViewport)
+        SetPositionParent(x, y);
 }
 
 void QFAText::SetSize(unsigned int w, unsigned int h)
 {
-    TextChange = true;
-    Width = w;
-    Height = h;
+    if (ParentViewport)
+        SetSizeParent(w, h);
 }
 
 void QFAText::Destroy()
@@ -738,7 +739,7 @@ void QFAText::StartTextRenderViewPort(const glm::mat4& proj, unsigned int viewpo
     memcpy(ViewportsUIProject[viewportIndex].buffer->MapData, &ubo, sizeof(ubo.projection));
 }
 
-void QFAText::Render()
+void QFAText::Render(VkCommandBuffer comandebuffer)
 {
     if (TextChange)
         ProcessText();
@@ -752,8 +753,40 @@ void QFAText::Render()
     CurentDescriptorSet = textParamSets[NumberTextInFrame].set;
     updateUniformBuffer();
 
+    /*----*/
+
+    VkBuffer vertexBuffers[] = { vertexBufer->GpuSideBuffer->Buffer };
+    VkDeviceSize offsets[] = { 0 };
+
+    vkCmdBindVertexBuffers(comandebuffer, 0, 1, vertexBuffers, offsets);
+
+    VkDescriptorSet ar[] = { CurentDescriptorSetProject, CurentDescriptorSet };
+
+    vkCmdBindDescriptorSets(comandebuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+        QFAText::Pipeline->pipelineLayout, 0, 2, ar, 0, nullptr);
+
+    vkCmdDraw(comandebuffer, static_cast<uint32_t>(CountSymbolForRender * 6), 1, 0, 0);
+
+    /*----*/
+
     NumberTextInFrame++;
 }
+
+void QFAText::SetSizeParent(unsigned int w, unsigned int h)
+{
+    TextChange = true;
+    Width = w;
+    Height = h;
+}
+
+void QFAText::SetPositionParent(unsigned int x, unsigned int y)
+{
+    TextChange = true;
+    Position_x = x;
+    Position_y = y;
+}
+
+
 
 void QFAText::updateUniformBuffer()
 {

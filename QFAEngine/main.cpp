@@ -20,9 +20,10 @@
 
 
 #include <Tools/File/ModelLoader.h>
+#include <Render/UI/Canvas.h>
 
 int main()
-{    
+{   
     QFAOverlord::Init();
     QStaticMesh* Mesh = QFAModelLoader::LoadModel("NoEngineModel/Arrow.fbx");
     QStaticMesh* Mesh2 = QFAModelLoader::LoadModel("NoEngineModel/quad2.obj");
@@ -92,14 +93,25 @@ int main()
     text->Opacity = 0.9f;
     text->SetTextAlign(QFAText::ETextAlign::TACenter);
 
-    //firstdViewPort->AddText(text);
+    QFAUICanvas* can = new QFAUICanvas;
 
+    firstdViewPort->AddUnit(can);
+    can->AddUnit(text);
 
-    firstdViewPort->AddText(text_2);
-    text->SetSize(600, 300);
+    QFAUICanvas::SCanvasSlot canvasSlot;
+    canvasSlot.Height = 0.9;
+    canvasSlot.Width = 1;
+    canvasSlot.x = 0;
+    canvasSlot.y = 0.1;
+
+    text->SetSlot(&canvasSlot, sizeof(canvasSlot));
+    
+    firstdViewPort->AddUnit(text_2);
+    
     text_2->SetSize(600, 300);
 
     QFAOverlord::StartLife();
 
     return 0;
 }
+

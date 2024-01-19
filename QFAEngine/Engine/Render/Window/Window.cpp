@@ -18,6 +18,9 @@
 
 #include <Render/Pipline/MeshShadowPipeline.h>
 #include <Render/Framebuffer/MeshFrameBuffer.h> 
+#include <Render/UI/UIParentComponent.h>
+
+
 
 QFAWindow* QFAWindow::MainWindow = nullptr;
 
@@ -101,6 +104,7 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 	createCommandBuffer();
 	createSyncObject();
 
+	// write own class for it image
 	imugo = new QFAImage(commandPool);
 	
 	imugo->Init(RenderPass->renderPass, commandPool, frameBufferMesh->ColorImage);
@@ -174,7 +178,6 @@ void QFAWindow::DrawText()
 
 	for (size_t i = 0; i < MainWindow->Viewports.Length(); i++)
 	{
-
 		VkViewport viewport{};
 		viewport.x = MainWindow->Viewports[i]->X;
 		viewport.y = MainWindow->Viewports[i]->Y;
@@ -188,19 +191,12 @@ void QFAWindow::DrawText()
 		scissor.offset = { 0, 0 };
 		scissor.extent = MainWindow->SwapChain->swapChainExtent;
 		vkCmdSetScissor(MainWindow->UICommandBuffer, 0, 1, &scissor);
-
-
 		
 		QFAText::StartTextRenderViewPort(MainWindow->Viewports[i]->UIProjection, i);
 
-		for (size_t j = 0; j < MainWindow->Viewports[i]->Texts.Length(); j++)
-		{
-			MainWindow->Viewports[i]->Texts[j]->Render();
-			recordCommandBufferText(MainWindow->Viewports[i]->Texts[j], MainWindow->Viewports[i]);
-		}
+		for (size_t j = 0; j < MainWindow->Viewports[i]->UIUnits.Length(); j++)
+			ProcessUIUnit(MainWindow->Viewports[i]->UIUnits[j]);
 	}
-
-	
 
 	/*------------------*/
 
@@ -228,21 +224,15 @@ void QFAWindow::DrawText()
 		stopExecute("failed to submit draw command buffer!");	
 }
 
-void QFAWindow::recordCommandBufferText(QFAText* text, QFAViewport* viewPort)
+void QFAWindow::ProcessUIUnit(QFAUIUnit* unit)
 {
-	VkBuffer vertexBuffers[] = { text->vertexBufer->GpuSideBuffer->Buffer };
-	VkDeviceSize offsets[] = { 0 };
+	if (unit->CanRender)
+		((QFAUIRenderUnit*)unit)->Render(UICommandBuffer);
 
-	vkCmdBindVertexBuffers(UICommandBuffer, 0, 1, vertexBuffers, offsets);
-
-	VkDescriptorSet ar[] = { text->CurentDescriptorSetProject, text->CurentDescriptorSet };
-
-	vkCmdBindDescriptorSets(UICommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-		QFAText::Pipeline->pipelineLayout, 0, 2, ar, 0, nullptr);
-
-	vkCmdDraw(UICommandBuffer, static_cast<uint32_t>(text->CountSymbolForRender * 6), 1, 0, 0);
+	if (unit->CanBeParent)
+		for (size_t i = 0; i < ((QFAUIParentComponent*)unit)->Children.Length(); i++)
+			ProcessUIUnit(((QFAUIParentComponent*)unit)->Children[i]);
 }
-
 
 void QFAWindow::DrawOffscreenBuffer()
 {
@@ -592,6 +582,7 @@ void QFAWindow::CreateViewtortsBuffers()
 		ViewportBuffers[i].uiProjectionBuffer = new QFAVKBuffer(sizeof(glm::mat4), nullptr, true);		
 	}
 }
+
 
 void QFAWindow::DrawActors(QFAViewport* _viewport, bool clear)
 {

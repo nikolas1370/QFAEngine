@@ -3,9 +3,11 @@
 #include <Render/Buffer/VKBuffer.h>
 
 class QFAWindow;
+class QFAText;
 class QFAVKVertexBuffer
 {
 	friend QFAWindow;
+	friend QFAText;
 	QFAVKBuffer* CpuSideBuffer;
 	QFAVKBuffer* GpuSideBuffer;
 	VkCommandPool CommandPool;

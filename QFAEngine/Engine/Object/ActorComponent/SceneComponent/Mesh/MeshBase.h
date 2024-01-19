@@ -138,17 +138,6 @@ protected:
 
 	bool CastShadow = true;
 
-	
-	/*
-		delete update position in this matrix
-		delete update position in this matrix
-		delete update position in this matrix
-		delete update position in this matrix
-		delete update position in this matrix
-		delete update position in this matrix
-				delete update position in this matrix
-				delete update position in this matrix
-	*/
 	glm::mat4 ModelMatrix = Math::DefauldMatrix4;
 	void UpdateModelMatrix() override;
 

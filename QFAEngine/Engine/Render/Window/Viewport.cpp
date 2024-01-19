@@ -7,23 +7,35 @@
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
 #include <Tools/VulkanSuff.h>
 #include <Render/UI/Text.h>
-
+#include <Render/UI/UIParentComponent.h>
 
 QFAViewport* QFAViewport::DefaultViewPort = nullptr;
 
-void QFAViewport::AddText(QFAText* text)
+void QFAViewport::AddUnit(QFAUIUnit* unit)
 {
-	if (!text)
+	if (!unit)
 		return;
 
-	Texts.Add(text);
+	if (unit->Parent)
+		unit->Parent->removeUnit(unit);
+	else if(unit->ParentViewport)
+		unit->ParentViewport->RemoveUnit(unit);
 
+	unit->ParentViewport = this;
+	UIUnits.Add(unit);
+	if (unit->SelfResizable)
+		unit->ViewportSizeChange(Width, Height);
 }
 
-void QFAViewport::RemoveText(QFAText* text)
+void QFAViewport::RemoveUnit(QFAUIUnit* unit)
 {
-	Texts.Remove(text);
+	if (!unit)
+		return;
+	
+	UIUnits.Remove(unit);
+	unit->ParentViewport = nullptr;
 }
+
 
 void QFAViewport::Settup(int windowWidth, int windowHeight)
 {
@@ -42,6 +54,10 @@ void QFAViewport::Settup(int windowWidth, int windowHeight)
 		MatrixPerspective = glm::perspectiveLH_ZO(glm::radians(CurentCamera->Fov), (float)Width / (float)Height, 0.1f, CurentCamera->ViewDistance); // (near) not Less than 0.1f	
 	else
 		std::cout << "QFAViewport::Settup Camera not set\n";
+
+	for (size_t i = 0; i < UIUnits.Length(); i++)
+		if (UIUnits[i]->SelfResizable)
+			UIUnits[i]->ViewportSizeChange(Width, Height);
 }
 
 
@@ -100,4 +116,8 @@ void QFAViewport::SetParameters(float xP, float  yP, float widthP, float heightP
 	UIProjection = glm::orthoLH_ZO(0.0f, (float)Width, 0.0f, (float)Height, 0.0f, 1.0f);
 	MatrixPerspective = glm::perspectiveLH_ZO(glm::radians(CurentCamera->Fov),
 		(float)Width / (float)Height, 0.1f, CurentCamera->ViewDistance); 
+	
+	for (size_t i = 0; i < UIUnits.Length(); i++)
+		if (UIUnits[i]->SelfResizable)
+			UIUnits[i]->ViewportSizeChange(Width, Height);
 }

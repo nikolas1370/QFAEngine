@@ -1,8 +1,8 @@
 #pragma once
-#include <Tools/VulkanSuff.h>
+
 #include <Tools/Array.h>
 #include <Math/Vector.h>
-#include <Render/UI/UIUnit.h>
+#include <Render/UI/RenderUnit.h>
 #include <Render/Buffer/VKBuffer.h>
 #include <Render/Window/Window.h>
 /* ttf type */
@@ -32,7 +32,7 @@ class QFAVKTextureSampler;
 
 */
 
-class QFAText : public QFAUIUnit
+class QFAText : public QFAUIRenderUnit
 {
     friend QFAViewport;
     friend QFAOverlord;
@@ -123,6 +123,8 @@ class QFAText : public QFAUIUnit
         alignas(16) FVector outlineColor;
         alignas(4) float opacity;
     };
+
+
 public:
     enum EOverflowWrap
     {
@@ -147,9 +149,9 @@ public:
     ~QFAText();
 
     void SetText(std::wstring  text);
-    void SetSize(unsigned int w, unsigned int h);
+    void SetSize(unsigned int w, unsigned int h) override;
     /* 0,0 == left top corner */
-    void SetPosition(unsigned int x, unsigned int y);
+    void SetPosition(unsigned int x, unsigned int y) override;
     void SetTextSize(unsigned int height);
     void Destroy();
     void SetOverflowWrap(EOverflowWrap wrap);
@@ -159,6 +161,10 @@ public:
 
 private:
 
+    void SetSizeParent(unsigned int w, unsigned int h) override;
+    void SetPositionParent(unsigned int x, unsigned int y) override;
+
+
     void updateUniformBuffer();
     void PrepareSymbolsToGpu();
     void ProcessText();
@@ -166,7 +172,7 @@ private:
 
     static bool ReTextRender;
 
-    void Render();
+    void Render(VkCommandBuffer comandebuffer) override;
     static void StartTextRender();
 
     static void StartTextRenderViewPort(const glm::mat4& proj, unsigned int viewportIndex);
@@ -280,4 +286,6 @@ private:
 
 
     static int NumberTextInFrame;
+
+        
 };

@@ -32,16 +32,6 @@ const mat4 biasMat = mat4( // from -1 1 to 0 1
 
 void main()
 {
-    /*
-
-
-remove prog.cameraP
-
-
-    */
-
-
-
     outMaterial = float(material);
     // do in cpu side
     Normal = mat3(transpose(inverse(model.model))) * normal; // rotate normal by invers transpose model matrix
