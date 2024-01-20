@@ -20,14 +20,9 @@ public:
 	QFAUICanvas();
 	~QFAUICanvas();
 
-	struct SCanvasSlot
-	{/* 0 - 1 */
-		float Width;
-		float Height;
-		float x;
-		float y;
-		QFAUIUnit::EUIType typeParent = QFAUIUnit::EUIType::Canvas;
-	};
+
+
+	
 
 private:	
 };

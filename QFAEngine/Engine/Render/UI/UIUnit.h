@@ -2,6 +2,37 @@
 
 #include <cstring>
 
+namespace QFAUIType
+{
+	enum Type : unsigned char
+	{
+		NONE = 0,
+		Text = 1,
+		Canvas = 2
+	};
+}
+
+namespace QFAUISlot
+{
+	// use for parent slot
+	struct SParentSlot
+	{
+		QFAUIType::Type typeParent;
+		unsigned short structSize = sizeof(SParentSlot);
+		float ParentSloot[4];
+	};
+
+	struct SCanvasSlot
+	{/* 0 - 1 */
+		QFAUIType::Type typeParent = QFAUIType::Canvas;
+		unsigned short structSize = sizeof(SCanvasSlot);
+		float Width;
+		float Height;
+		float x;
+		float y;
+	};
+}
+
 class QFAViewport;
 class QFAWindow;
 class QFAUIParentComponent;
@@ -18,15 +49,10 @@ class QFAUIUnit
 
 	}
 protected:
-	enum EUIType : unsigned char
-	{
-		NONE = 0,
-		Text = 1,
-		Canvas = 2
-	};
+
 
 	bool CanBeParent = false;
-	EUIType Type = EUIType::NONE;
+	QFAUIType::Type Type = QFAUIType::NONE;
 	bool CanRender = false;
 
 	// if QFAViewport can call ViewportSizeChange
@@ -50,21 +76,9 @@ public:
 	virtual void SetPosition(unsigned int x, unsigned int y){}
 	virtual void SetSize(unsigned int w, unsigned int h){}
 
-	// use for parent slot
-	struct SParentSlot
-	{		
-		float ParentSloot[4];
-		QFAUIUnit::EUIType typeParent;
-	};
-
-	/*
-	
-	do with template
-	
-	*/
-	void SetSlot(void* slot, int slotSize);
+	void SetSlot(void* slot);
 
 protected:
-	SParentSlot Slot;
+	QFAUISlot::SParentSlot Slot;
 };
 

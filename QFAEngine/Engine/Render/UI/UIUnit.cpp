@@ -1,12 +1,11 @@
 #include "UIUnit.h"
 #include <Render/UI/UIParentComponent.h>
 
-void QFAUIUnit::SetSlot(void* slot, int slotSize)
+void QFAUIUnit::SetSlot(void* slot)
 {
-	if (slotSize > sizeof(SParentSlot))
-		slotSize = sizeof(SParentSlot);
+	if (!slot)
+		return;
 
-	memcpy(&Slot, slot, slotSize);
-
+	memcpy(&Slot, slot, ((QFAUISlot::SParentSlot*)slot)->structSize);
 	Parent->MySlotChange(this);
 }

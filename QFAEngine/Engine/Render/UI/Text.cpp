@@ -76,7 +76,7 @@ struct UniformBufferObject
 QFAText::QFAText()
 {
     CanRender = true;
-    Type = EUIType::Text;
+    Type = QFAUIType::Text;
     vertexBufer = new QFAVKVertexBuffer(sizeof(GlyphShader) * CountGlyphInGUP, nullptr, commandPool);
 }
 

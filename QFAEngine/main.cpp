@@ -22,8 +22,13 @@
 #include <Tools/File/ModelLoader.h>
 #include <Render/UI/Canvas.h>
 
+
+
 int main()
 {   
+    
+    
+
     QFAOverlord::Init();
     QStaticMesh* Mesh = QFAModelLoader::LoadModel("NoEngineModel/Arrow.fbx");
     QStaticMesh* Mesh2 = QFAModelLoader::LoadModel("NoEngineModel/quad2.obj");
@@ -98,13 +103,13 @@ int main()
     firstdViewPort->AddUnit(can);
     can->AddUnit(text);
 
-    QFAUICanvas::SCanvasSlot canvasSlot;
-    canvasSlot.Height = 0.9;
-    canvasSlot.Width = 1;
-    canvasSlot.x = 0;
-    canvasSlot.y = 0.1;
+    QFAUISlot::SCanvasSlot canvasSlot;
+    canvasSlot.Height = 1;
+    canvasSlot.Width = 0.8;
+    canvasSlot.x = 0.1;
+    canvasSlot.y = 0.0;
 
-    text->SetSlot(&canvasSlot, sizeof(canvasSlot));
+    text->SetSlot(&canvasSlot);
     
     firstdViewPort->AddUnit(text_2);
     

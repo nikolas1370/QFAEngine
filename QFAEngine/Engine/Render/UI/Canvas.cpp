@@ -4,7 +4,7 @@
 QFAUICanvas::QFAUICanvas()
 {
 	SelfResizable = true;
-	Type = EUIType::Canvas;
+	Type = QFAUIType::Canvas;
 }
 
 QFAUICanvas::~QFAUICanvas()
@@ -16,10 +16,10 @@ void QFAUICanvas::ViewportSizeChange(int viewportWidth, int viewportHeight)
 	Width = viewportWidth;
 	Height = viewportHeight;
 	
-	SCanvasSlot* slot;
+	QFAUISlot::SCanvasSlot* slot;
 	for (size_t i = 0; i < Children.Length(); i++)
 	{
-		slot = (SCanvasSlot*)&Children[i]->Slot.ParentSloot;
+		slot = (QFAUISlot::SCanvasSlot*)&Children[i]->Slot;
 		Children[i]->SetPositionParent(slot->x * Width, slot->y * Height);
 		Children[i]->SetSizeParent(slot->Width * Width, slot->Height * Height);
 	}
@@ -27,7 +27,7 @@ void QFAUICanvas::ViewportSizeChange(int viewportWidth, int viewportHeight)
 
 void QFAUICanvas::NewUnit(QFAUIUnit* unit)
 {
-	SCanvasSlot* slot = (SCanvasSlot*)&unit->Slot.ParentSloot;
+	QFAUISlot::SCanvasSlot* slot = (QFAUISlot::SCanvasSlot*)&unit->Slot;
 	if (unit->Slot.typeParent != Type)
 	{ 
 		slot->Width = 1.0f;
@@ -42,6 +42,5 @@ void QFAUICanvas::NewUnit(QFAUIUnit* unit)
 
 void QFAUICanvas::MySlotChange(QFAUIUnit* unit)
 {
-
 	NewUnit(unit);
 }
