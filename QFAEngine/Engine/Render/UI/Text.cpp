@@ -786,8 +786,6 @@ void QFAText::SetPositionParent(unsigned int x, unsigned int y)
     Position_y = y;
 }
 
-
-
 void QFAText::updateUniformBuffer()
 {
     UniformBufferTextParam tem;
@@ -795,6 +793,37 @@ void QFAText::updateUniformBuffer()
     tem.outlineColor = OutlineColor;
     tem.outline = (int)Outline;
     tem.opacity = Opacity;
+    if (Parent && Parent->GetOverflow())
+    {        
+        tem.overflow = Parent->GetOverflow();
+        FVector2D parentPosition = Parent->GetPosition();
+        FVector2D parentSize = Parent->GetSize();
+
+        if (Parent->GetOverflow() == QFAUIParentComponent::Hidden)
+        {
+            tem.leftTopX = parentPosition.X;
+            tem.leftTopY = parentPosition.Y;
+            tem.rightBottomX = parentPosition.X + parentSize.X;
+            tem.rightBottomY = parentPosition.Y + parentSize.Y;
+        }
+        else if (Parent->GetOverflow() == QFAUIParentComponent::HiddenHorizon)
+        {
+            tem.leftTopX = parentPosition.X;
+            tem.leftTopY = 0;
+            tem.rightBottomX = parentPosition.X + parentSize.X;
+            tem.rightBottomY = 1000000;
+        }
+        else if (Parent->GetOverflow() == QFAUIParentComponent::HiddenVertical)
+        {
+            tem.leftTopX = 0;
+            tem.leftTopY = parentPosition.Y;
+            tem.rightBottomX = 1000000;
+            tem.rightBottomY = parentPosition.Y + parentSize.Y;
+        }        
+    }
+    else
+        tem.overflow = 0;
+
     memcpy(textParamSets[NumberTextInFrame].textParametrBuffer->MapData, &tem, sizeof(UniformBufferTextParam));
 }
 

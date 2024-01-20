@@ -122,6 +122,11 @@ class QFAText : public QFAUIRenderUnit
         alignas(4) int outline;
         alignas(16) FVector outlineColor;
         alignas(4) float opacity;
+        int overflow;
+        float leftTopX;
+        float leftTopY;
+        float rightBottomX;
+        float rightBottomY;
     };
 
 

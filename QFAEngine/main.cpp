@@ -99,17 +99,19 @@ int main()
     text->SetTextAlign(QFAText::ETextAlign::TACenter);
 
     QFAUICanvas* can = new QFAUICanvas;
+    QFAUICanvas* canvas2 = new QFAUICanvas;
+    canvas2->SetOverflow(QFAUIParentComponent::EOverflow::Hidden);
 
     firstdViewPort->AddUnit(can);
-    can->AddUnit(text);
-
+    can->AddUnit(canvas2);
+    canvas2->AddUnit(text);    
+    
     QFAUISlot::SCanvasSlot canvasSlot;
-    canvasSlot.Height = 1;
+    canvasSlot.Height = 0.5;
     canvasSlot.Width = 0.8;
     canvasSlot.x = 0.1;
     canvasSlot.y = 0.0;
-
-    text->SetSlot(&canvasSlot);
+    canvas2->SetSlot(&canvasSlot);
     
     firstdViewPort->AddUnit(text_2);
     

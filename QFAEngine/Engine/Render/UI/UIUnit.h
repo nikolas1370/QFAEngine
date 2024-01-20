@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstring>
+#include <Math/Vector2D.h>
 
 namespace QFAUIType
 {
@@ -75,6 +76,15 @@ protected:
 public:
 	virtual void SetPosition(unsigned int x, unsigned int y){}
 	virtual void SetSize(unsigned int w, unsigned int h){}
+
+	inline FVector2D GetPosition() 
+	{
+		return FVector2D(Position_x, Position_y);
+	}
+	FVector2D GetSize()
+	{
+		return FVector2D(Width, Height);
+	}
 
 	void SetSlot(void* slot);
 

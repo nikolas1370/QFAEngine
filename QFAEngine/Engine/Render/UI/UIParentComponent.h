@@ -16,10 +16,31 @@ protected:
 	virtual void NewUnit(QFAUIUnit* unit) = 0;
 	// child call if slot change
 	virtual void MySlotChange(QFAUIUnit* unit) = 0;
+
+	
 public:
+
+	enum EOverflow : unsigned char
+	{
+		Visible = 0,
+		Hidden = 1,
+		HiddenHorizon = 2,
+		HiddenVertical = 3
+	};
 
 	QFAUIParentComponent();
 
 	void AddUnit(QFAUIUnit* unit);
 	void removeUnit(QFAUIUnit* unit);
+	inline EOverflow GetOverflow()
+	{
+		return Overflow;
+	}
+
+	inline void SetOverflow(EOverflow over)
+	{
+		Overflow = over;
+	}
+protected:
+	EOverflow Overflow = EOverflow::Visible;
 };
