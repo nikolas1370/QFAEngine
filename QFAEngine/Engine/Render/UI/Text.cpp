@@ -706,6 +706,7 @@ void QFAText::CreateTextParameterPool(bool addPool)
     }
 }
 
+
 void QFAText::CreateAtlas()
 {
     if (GlyphAtlasList.size() >= MaxAttlas)
@@ -793,41 +794,71 @@ void QFAText::updateUniformBuffer()
     tem.outlineColor = OutlineColor;
     tem.outline = (int)Outline;
     tem.opacity = Opacity;
-    if (Parent && Parent->GetOverflow())
-    {        
-        tem.overflow = Parent->GetOverflow();
-        FVector2D parentPosition = Parent->GetPosition();
-        FVector2D parentSize = Parent->GetSize();
 
-        if (Parent->GetOverflow() == QFAUIParentComponent::Hidden)
-        {
-            tem.leftTopX = parentPosition.X;
-            tem.leftTopY = parentPosition.Y;
-            tem.rightBottomX = parentPosition.X + parentSize.X;
-            tem.rightBottomY = parentPosition.Y + parentSize.Y;
-        }
-        else if (Parent->GetOverflow() == QFAUIParentComponent::HiddenHorizon)
-        {
-            tem.leftTopX = parentPosition.X;
-            tem.leftTopY = 0;
-            tem.rightBottomX = parentPosition.X + parentSize.X;
-            tem.rightBottomY = 1000000;
-        }
-        else if (Parent->GetOverflow() == QFAUIParentComponent::HiddenVertical)
-        {
-            tem.leftTopX = 0;
-            tem.leftTopY = parentPosition.Y;
-            tem.rightBottomX = 1000000;
-            tem.rightBottomY = parentPosition.Y + parentSize.Y;
-        }        
-    }
-    else
-        tem.overflow = 0;
-
+    tem.overflow = 0;    
+    tem.leftTopX = 0;
+    tem.leftTopY = 0;
+    tem.rightBottomX = 1000000;
+    tem.rightBottomY = 1000000;
+    
+    ProcessParentOverflow(tem, Parent);
     memcpy(textParamSets[NumberTextInFrame].textParametrBuffer->MapData, &tem, sizeof(UniformBufferTextParam));
 }
 
 
+void QFAText::ProcessParentOverflow(UniformBufferTextParam& param, QFAUIParentComponent* parent)
+{    
+    if (!parent)
+        return;
+
+    
+
+    FVector2D parentPosition = parent->GetPosition();
+    FVector2D parentSize = parent->GetSize();
+
+    if (parent->GetOverflow() == QFAUIParentComponent::Hidden)
+    {        
+        param.overflow = 1;
+        if(parentPosition.X > param.leftTopX )
+        {
+            param.leftTopX = parentPosition.X;
+        
+        }
+
+        if(parentPosition.Y > param.leftTopY)
+            param.leftTopY = parentPosition.Y;
+        
+        float tem = parentPosition.X + parentSize.X;
+        if(tem < param.rightBottomX)
+            param.rightBottomX = tem;
+
+        tem = parentPosition.Y + parentSize.Y;
+        if (tem < param.rightBottomY)
+            param.rightBottomY = parentPosition.Y + parentSize.Y;
+    }
+    else if (parent->GetOverflow() == QFAUIParentComponent::HiddenHorizon)
+    {
+        param.overflow = 1;
+        if (parentPosition.X > param.leftTopX)
+            param.leftTopX = parentPosition.X;
+
+        float tem = parentPosition.X + parentSize.X;
+        if (tem < param.rightBottomX)
+            param.rightBottomX = tem;        
+    }
+    else if (parent->GetOverflow() == QFAUIParentComponent::HiddenVertical)
+    {
+        param.overflow = 1;
+        if (parentPosition.Y > param.leftTopY)
+            param.leftTopY = parentPosition.Y;
+
+        float tem = parentPosition.Y + parentSize.Y;
+        if (tem < param.rightBottomY)
+            param.rightBottomY = parentPosition.Y + parentSize.Y;        
+    }
+
+    ProcessParentOverflow(param, parent->GetParent());
+}
 
 
 

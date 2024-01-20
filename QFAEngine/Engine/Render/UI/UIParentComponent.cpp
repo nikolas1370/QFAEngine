@@ -8,7 +8,7 @@ QFAUIParentComponent::QFAUIParentComponent()
 
 void QFAUIParentComponent::AddUnit(QFAUIUnit* unit)
 {
-	if (!unit)
+	if (!unit || unit == this)// check if unit is parent 
 		return;
 
 	if (unit->Parent)

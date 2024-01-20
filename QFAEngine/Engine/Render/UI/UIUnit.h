@@ -65,8 +65,8 @@ protected:
 	// 0 == top 
 	int Position_y = 0;
 
-	QFAViewport* ParentViewport;// if null this unit not root units
-	QFAUIParentComponent* Parent;
+	QFAViewport* ParentViewport = nullptr;// if null this unit not root units
+	QFAUIParentComponent* Parent = nullptr;
 
 
 
@@ -88,6 +88,10 @@ public:
 
 	void SetSlot(void* slot);
 
+	inline QFAUIParentComponent* GetParent()
+	{
+		return Parent;
+	}
 protected:
 	QFAUISlot::SParentSlot Slot;
 };

@@ -22,6 +22,8 @@ void QFAUICanvas::ViewportSizeChange(int viewportWidth, int viewportHeight)
 	UpdatePositionSizeChildren();
 }
 
+
+
 void QFAUICanvas::NewUnit(QFAUIUnit* unit)
 {
 	QFAUISlot::SCanvasSlot* slot = (QFAUISlot::SCanvasSlot*)&unit->Slot;
@@ -33,7 +35,7 @@ void QFAUICanvas::NewUnit(QFAUIUnit* unit)
 		slot->y = 0.0f;		
 	}	
 
-	unit->SetPositionParent(slot->x * Width, slot->y * Height);
+	unit->SetPositionParent(slot->x * Width + Position_x, slot->y * Height + Position_y);
 	unit->SetSizeParent(slot->Width * Width, slot->Height * Height);	
 }
 

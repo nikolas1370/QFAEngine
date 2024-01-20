@@ -1,6 +1,6 @@
 #pragma once
 #include <Render/UI/UIParentComponent.h>
-
+#include <Math/Vector2D.h>
 
 class QFAUICanvas : public QFAUIParentComponent
 {

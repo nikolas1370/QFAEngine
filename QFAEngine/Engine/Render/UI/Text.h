@@ -292,5 +292,5 @@ private:
 
     static int NumberTextInFrame;
 
-        
+    void ProcessParentOverflow(UniformBufferTextParam &param, QFAUIParentComponent* parent);
 };
