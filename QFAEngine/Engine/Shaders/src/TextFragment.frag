@@ -1,6 +1,5 @@
 #version 460 core
 #extension GL_EXT_nonuniform_qualifier : enable
- // GL_EXT_nonuniform_qualifier
 layout(location = 0) in vec2 TexCoords;
 layout(location = 1) in float AtlasIndex;
 

@@ -805,13 +805,10 @@ void QFAText::updateUniformBuffer()
     memcpy(textParamSets[NumberTextInFrame].textParametrBuffer->MapData, &tem, sizeof(UniformBufferTextParam));
 }
 
-
 void QFAText::ProcessParentOverflow(UniformBufferTextParam& param, QFAUIParentComponent* parent)
 {    
     if (!parent)
         return;
-
-    
 
     FVector2D parentPosition = parent->GetPosition();
     FVector2D parentSize = parent->GetSize();
@@ -820,10 +817,7 @@ void QFAText::ProcessParentOverflow(UniformBufferTextParam& param, QFAUIParentCo
     {        
         param.overflow = 1;
         if(parentPosition.X > param.leftTopX )
-        {
             param.leftTopX = parentPosition.X;
-        
-        }
 
         if(parentPosition.Y > param.leftTopY)
             param.leftTopY = parentPosition.Y;
@@ -859,7 +853,3 @@ void QFAText::ProcessParentOverflow(UniformBufferTextParam& param, QFAUIParentCo
 
     ProcessParentOverflow(param, parent->GetParent());
 }
-
-
-
-

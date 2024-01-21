@@ -3,18 +3,13 @@
 #include <Render/Window/Viewport.h>
 #include <Object/World/World.h>
 #include <Object/Actor/Actor.h>
-void QCameraComponent::Activate(QFAViewport* viewport)
+void QCameraComponent::Activate()
 {
 	if (!IsValid())
 		return;
 
-	if (viewport)
-		viewport->ChangeCamera(this);
-	else if (Viewport = QFAViewport::GetDefaultViewport())
-	{
-		
-		Viewport->ChangeCamera(this);
-	}
+	if(Viewport)
+		Viewport->CameraChangeParameter(1);
 
 	IsActive = true;	
 }
@@ -23,6 +18,9 @@ void QCameraComponent::Deactivate()
 {
 	if (!IsValid())
 		return;
+
+	if (Viewport)
+		Viewport->CameraChangeParameter(2);
 
 	IsActive = false;
 }

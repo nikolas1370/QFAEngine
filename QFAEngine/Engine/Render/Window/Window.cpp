@@ -19,7 +19,7 @@
 #include <Render/Pipline/MeshShadowPipeline.h>
 #include <Render/Framebuffer/MeshFrameBuffer.h> 
 #include <Render/UI/UIParentComponent.h>
-
+#include <Render/Pipline/PresentImagePipeline.h>
 
 
 QFAWindow* QFAWindow::MainWindow = nullptr;
@@ -57,7 +57,7 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 	}
 
 	QFAViewport* vp = new QFAViewport;
-	Viewports.Add(vp);
+	AddViewport(vp);
 	vp->Settup(width, height);
 
 	if (!QFAWindow::Init)
@@ -104,12 +104,9 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 	createCommandBuffer();
 	createSyncObject();
 
-	// write own class for it image
-	imugo = new QFAImage(commandPool);
-	
-	imugo->Init(RenderPass->renderPass, commandPool, frameBufferMesh->ColorImage);
-	
-	
+	imugo = new QFAPresentImage(commandPool);
+
+	imugo->Init(RenderPass->renderPass, commandPool, frameBufferMesh->ColorImage);	
 }
 
 QFAWindow::~QFAWindow()
@@ -272,7 +269,7 @@ void QFAWindow::DrawOffscreenBuffer()
 	scissor.extent = MainWindow->SwapChain->swapChainExtent;
 	vkCmdSetScissor(MainWindow->FinisCommandBuffer, 0, 1, &scissor);
 
-	vkCmdBindPipeline(MainWindow->FinisCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, QFAImage::Pipeline->graphicsPipeline);
+	vkCmdBindPipeline(MainWindow->FinisCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, QFAPresentImage::Pipeline->graphicsPipeline);
 
 	recordCommandBufferTestImege();
 
@@ -309,7 +306,7 @@ void QFAWindow::recordCommandBufferTestImege()
 	vkCmdBindVertexBuffers(FinisCommandBuffer, 0, 1, vertexBuffers, offsets);
 
 	vkCmdBindDescriptorSets(FinisCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-		QFAImage::Pipeline->pipelineLayout, 0, 1, &QFAVKImagePipeline::descriptorSet, 0, nullptr);
+		QFAPresentImage::Pipeline->pipelineLayout, 0, 1, &QFAPresentImagePipeline::descriptorSet, 0, nullptr);
 	
 	vkCmdDraw(FinisCommandBuffer, static_cast<uint32_t>(6), 1, 0, 0);
 }
@@ -341,7 +338,7 @@ void QFAWindow::recreateSwapChain()
 
 	frameBufferMesh->ResizeBuffer(commandPool, NewWidth, NewHeight);
 	delete imugo;
-	imugo = new QFAImage(commandPool);
+	imugo = new QFAPresentImage(commandPool);
 	imugo->Init(RenderPass->renderPass, commandPool, frameBufferMesh->ColorImage);
 }
 
@@ -349,6 +346,13 @@ void QFAWindow::AddViewport(QFAViewport* viewport)
 {
 	Viewports.Add(viewport);
 	viewport->Settup(Width, Height);
+	viewport->WindowAddMe(this);
+}
+
+void QFAWindow::RemoveViewport(QFAViewport* viewport)
+{
+	if (Viewports.Remove(viewport))
+		viewport->WindowRemoveMe();
 }
 
 QFAViewport* QFAWindow::GetViewport(size_t index)

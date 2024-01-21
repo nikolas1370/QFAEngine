@@ -101,8 +101,8 @@ int main()
     QFAUICanvas* can = new QFAUICanvas;
     QFAUICanvas* canvas2 = new QFAUICanvas;
     QFAUICanvas* canvas3 = new QFAUICanvas;
-    canvas2->SetOverflow(QFAUIParentComponent::EOverflow::Hidden);
-    canvas3->SetOverflow(QFAUIParentComponent::EOverflow::Hidden);
+    canvas2->SetOverflow(QFAUIParentComponent::EOverflow::HiddenHorizon);
+    canvas3->SetOverflow(QFAUIParentComponent::EOverflow::HiddenVertical);
 
     firstdViewPort->AddUnit(can);
     can->AddUnit(canvas2);
@@ -117,13 +117,13 @@ int main()
     canvas2->SetSlot(&canvasSlot);
 
     QFAUISlot::SCanvasSlot canvasSlot2;
-    canvasSlot2.Height = 1;
+    canvasSlot2.Height = 1.8;
     canvasSlot2.Width = 1;
     canvasSlot2.x = -0.1;
     canvasSlot2.y = 0.0;
     canvas3->SetSlot(&canvasSlot2);
     
-    //firstdViewPort->AddUnit(text_2);
+    firstdViewPort->AddUnit(text_2);
     
     text_2->SetSize(600, 300);
 

@@ -42,5 +42,24 @@ public:
 		Overflow = over;
 	}
 protected:
+	void RemoveUnitWithoutNotify(QFAUIUnit* unit);
 	EOverflow Overflow = EOverflow::Visible;
+
+	
+	/*
+		if child class nedd this 4 function create new virtual function for them
+	*/
+	void ParentEnable() final;
+	
+	
+	void ParentDisable() final;
+	
+
+	
+	void ParentAttach() final;
+	
+	
+	void ParentDisconect() final;
+	
+	/*--*/
 };

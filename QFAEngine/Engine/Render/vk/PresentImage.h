@@ -24,31 +24,29 @@ class QFAVKTextPipeline;
 class QFAVKImageView;
 class QFAVKTextureSampler;
 
-class QFAVKImagePipeline;
+class QFAPresentImagePipeline;
 
-class QFAImage : public QFAUIUnit
+class QFAPresentImage
 {
     
     friend QFAWindow;
-    friend QFAVKImagePipeline;
+    friend QFAPresentImagePipeline;
 
-    void SetSizeParent(unsigned int w, unsigned int h) override {}
-    void SetPositionParent(unsigned int x, unsigned int y) override {}
 public:
   
 
-    QFAImage(VkCommandPool _commandPool);
-    ~QFAImage();        
+    QFAPresentImage(VkCommandPool _commandPool);
+    ~QFAPresentImage();
 
 
 private: 
-    void Init(VkRenderPass renderPass, VkCommandPool commandPool);
+    void Init(VkRenderPass renderPass, VkCommandPool commandPool, QFAVKTextureImage* imago, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT);
     static void EndLife();
 
     
 
     QFAVKVertexBuffer* vertexBufer;
-    static QFAVKImagePipeline* Pipeline;
+    static QFAPresentImagePipeline* Pipeline;
     static VkCommandPool commandPool;
     static QFAVKTextureSampler* ImageSampler;
     static VkRenderPass RenderPass;
@@ -67,13 +65,5 @@ private:
     ImageShaderVertex quad[6];
 
 
-protected:
-    void ParentEnable() override;
-    void ParentDisable() override;
-    void ParentAttach() override;
-    void ParentDisconect() override;
 
-
-    void RecreateCreatePiline();
-    void CreatePiline();
 };

@@ -1,20 +1,21 @@
-﻿#include "Image.h"
+﻿#include "PresentImage.h"
 #include <iostream>
 #include <Render/vk/LogicalDevice.h>
 #include <Render/vk/TextureImage.h>
 #include <Render/Buffer/VertexBuffer.h>
-#include <Render/Pipline/ImagePipeline.h>
+#include <Render/Pipline/PresentImagePipeline.h>
 #include <Render/vk/ImageView.h>
 #include <Render/vk/TextureSampler.h>
 
-QFAVKTextureImage* QFAImage::image = nullptr;
-VkDescriptorImageInfo QFAImage::imageInfo;
-QFAVKImagePipeline* QFAImage::Pipeline;
-VkCommandPool QFAImage::commandPool;
-QFAVKTextureSampler* QFAImage::ImageSampler;
-VkRenderPass QFAImage::RenderPass;
+QFAVKTextureImage* QFAPresentImage::image = nullptr;
+VkDescriptorImageInfo QFAPresentImage::imageInfo;
+QFAPresentImagePipeline* QFAPresentImage::Pipeline;
+VkCommandPool QFAPresentImage::commandPool;
+QFAVKTextureSampler* QFAPresentImage::ImageSampler;
+VkRenderPass QFAPresentImage::RenderPass;
 
-QFAImage::QFAImage(VkCommandPool _commandPool)
+
+QFAPresentImage::QFAPresentImage(VkCommandPool _commandPool)
 {
     commandPool = _commandPool;
     // left top
@@ -55,11 +56,11 @@ QFAImage::QFAImage(VkCommandPool _commandPool)
     vertexBufer = new QFAVKVertexBuffer(sizeof(ImageShaderVertex) * 6, &quad, commandPool);
 }
 
-void QFAImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_)
+void QFAPresentImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_, QFAVKTextureImage* imago, VkImageAspectFlags aspect)
 {
     commandPool = commandPool_;
     RenderPass = renderPass;
- /*
+ 
     ImageSampler = new QFAVKTextureSampler();
     image = imago;
 
@@ -68,14 +69,13 @@ void QFAImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_)
     imageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
     imageInfo.imageView = view->ImageView;
     imageInfo.sampler = ImageSampler->textureSampler;
-    // PresentImageFragment
-    Pipeline = new QFAVKImagePipeline(RenderPass, "Engine/Shaders/ImageVertex.spv", "Engine/Shaders/ImageFragment.spv");
-    */
-
+    // 
+    Pipeline = new QFAPresentImagePipeline(RenderPass, "Engine/Shaders/PresentImageVertex.spv", "Engine/Shaders/PresentImageFragment.spv");
     
+
 }
 
-QFAImage::~QFAImage()
+QFAPresentImage::~QFAPresentImage()
 {
     delete vertexBufer;
     delete ImageSampler;
@@ -83,47 +83,8 @@ QFAImage::~QFAImage()
 
 
 
-void QFAImage::EndLife()
+void QFAPresentImage::EndLife()
 {    
     delete Pipeline;
     delete ImageSampler;
-}
-
-void QFAImage::RecreateCreatePiline()
-{
-    /*
-    OldPipeline = Pipeline;
-    Pipeline = new QFAVKTextPipeline(RenderPass, QFAText::VertexShaderPath, QFAText::FragmentShaderPath);
-    CreateTextProjectionPool();
-    CreateTextParameterPool(false);
-    */
-}
-
-void QFAImage::CreatePiline()
-{
-    /*
-    Pipeline = new QFAVKTextPipeline(RenderPass, QFAText::VertexShaderPath, QFAText::FragmentShaderPath);
-    CreateTextProjectionPool();
-    CreateTextParameterPool(true);
-    */
-}
-
-void QFAImage::ParentEnable()
-{
-
-}
-
-void QFAImage::ParentDisable()
-{
-
-}
-
-void QFAImage::ParentAttach()
-{
-
-}
-
-void QFAImage::ParentDisconect()
-{
-
 }

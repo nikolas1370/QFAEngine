@@ -165,6 +165,7 @@
     <ClCompile Include="Engine\Overlord\Overlord.cpp" />
     <ClCompile Include="Engine\Render\Framebuffer\MeshFrameBuffer.cpp" />
     <ClCompile Include="Engine\Render\Framebuffer\ShadowFrameBuffer.cpp" />
+    <ClCompile Include="Engine\Render\Pipline\PresentImagePipeline.cpp" />
     <ClCompile Include="Engine\Render\UI\Canvas.cpp" />
     <ClCompile Include="Engine\Render\UI\Image.cpp" />
     <ClCompile Include="Engine\Render\UI\RenderUnit.cpp" />
@@ -182,6 +183,7 @@
     <ClCompile Include="Engine\Render\RenderPass\MeshRenderPass.cpp" />
     <ClCompile Include="Engine\Render\Pipline\TextPipeline.cpp" />
     <ClCompile Include="Engine\Render\RenderPass\RenderPass.cpp" />
+    <ClCompile Include="Engine\Render\vk\PresentImage.cpp" />
     <ClCompile Include="Engine\Render\vk\SwapChain.cpp" />
     <ClCompile Include="Engine\Render\RenderPass\TextRenderPass.cpp" />
     <ClCompile Include="Engine\Render\vk\TextureImage.cpp" />
@@ -213,6 +215,7 @@
     <ClInclude Include="Engine\Overlord\Overlord.h" />
     <ClInclude Include="Engine\Render\Framebuffer\MeshFrameBuffer.h" />
     <ClInclude Include="Engine\Render\Framebuffer\ShadowFrameBuffer.h" />
+    <ClInclude Include="Engine\Render\Pipline\PresentImagePipeline.h" />
     <ClInclude Include="Engine\Render\UI\Canvas.h" />
     <ClInclude Include="Engine\Render\UI\Image.h" />
     <ClInclude Include="Engine\Render\UI\RenderUnit.h" />
@@ -229,6 +232,7 @@
     <ClInclude Include="Engine\Render\RenderPass\RenderPassDepth.h" />
     <ClInclude Include="Engine\Render\RenderPass\MeshRenderPass.h" />
     <ClInclude Include="Engine\Render\Pipline\TextPipeline.h" />
+    <ClInclude Include="Engine\Render\vk\PresentImage.h" />
     <ClInclude Include="Engine\Render\vk\QueueFamilies.h" />
     <ClInclude Include="Engine\Render\RenderPass\RenderPass.h" />
     <ClInclude Include="Engine\Render\vk\SwapChain.h" />

@@ -1,5 +1,5 @@
 #include "CameraActor.h"
-
+#include <Render/Window/Viewport.h>
 ACameraActor::ACameraActor()
 {
 	CanTick = true;
@@ -13,5 +13,7 @@ ACameraActor::~ACameraActor()
 
 void ACameraActor::ActivateCamera(QFAViewport* viewport)
 {
-	Camera.Activate(viewport);
+	Camera.Activate();
+	if (viewport)
+		viewport->ChangeCamera(&Camera);	
 }

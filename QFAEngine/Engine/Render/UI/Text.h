@@ -155,9 +155,11 @@ public:
 
     void SetText(std::wstring  text);
     void SetSize(unsigned int w, unsigned int h) override;
-    /* 0,0 == left top corner */
+    /* remove in UIUnit */
     void SetPosition(unsigned int x, unsigned int y) override;
     void SetTextSize(unsigned int height);
+    /*----*/
+
     void Destroy();
     void SetOverflowWrap(EOverflowWrap wrap);
     void SetTextAlign(ETextAlign aligh);

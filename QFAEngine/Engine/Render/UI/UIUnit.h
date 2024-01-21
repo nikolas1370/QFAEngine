@@ -69,13 +69,15 @@ protected:
 	QFAUIParentComponent* Parent = nullptr;
 
 
-
+	// parent set size
 	virtual void SetSizeParent(unsigned int w, unsigned int h) = 0;
-	virtual void SetPositionParent(unsigned int x, unsigned int y) = 0;
-	
+	// parent set position
+	virtual void SetPositionParent(unsigned int x, unsigned int y) = 0;	
 public:
-	virtual void SetPosition(unsigned int x, unsigned int y){}
-	virtual void SetSize(unsigned int w, unsigned int h){}
+	virtual void SetPosition(unsigned int x, unsigned int y) {}
+	virtual void SetSize(unsigned int w, unsigned int h) {}
+
+	~QFAUIUnit();
 
 	inline FVector2D GetPosition() 
 	{
@@ -92,7 +94,24 @@ public:
 	{
 		return Parent;
 	}
+
+	
+
+	/*-----*/
+	inline void Destroy()
+	{
+		delete this;
+	}
 protected:
 	QFAUISlot::SParentSlot Slot;
-};
 
+	// call if one of parent was enable ore QFAViewport camera enable. 
+	inline virtual void ParentEnable() {}
+	// call if one of parent was disable ore QFAViewport camera disable.
+	inline virtual void ParentDisable() {}
+
+	// call if one of parent was attach. Not call if parent change
+	inline virtual void ParentAttach() {}
+	// call if one of parent was disconect
+	inline virtual void ParentDisconect() {}
+};

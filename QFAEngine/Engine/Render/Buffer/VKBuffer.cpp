@@ -15,7 +15,7 @@ void QFAVKBuffer::Init(VkInstance instance)
     VmaVulkanFunctions vulkanFunctions = {};
     vulkanFunctions.vkGetInstanceProcAddr = &vkGetInstanceProcAddr;
     vulkanFunctions.vkGetDeviceProcAddr = &vkGetDeviceProcAddr;
-
+    
 
 
     VmaAllocatorCreateInfo allocatorCreateInfo = {};
@@ -45,6 +45,7 @@ void QFAVKBuffer::CreateBufferInside(VkDeviceSize size, VkBufferUsageFlags usage
     VkBufferCreateInfo bufferInfo = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
     bufferInfo.size = size;
     bufferInfo.usage = usage;    
+    bufferInfo.pNext = nullptr;
     //
     VmaAllocationCreateInfo allocInfo = {};
     allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
@@ -107,6 +108,7 @@ void QFAVKBuffer::transitionImageLayout(VkImage image, VkFormat format, VkImageL
     barrier.subresourceRange.levelCount = 1;
     barrier.subresourceRange.baseArrayLayer = 0;
     barrier.subresourceRange.layerCount = 1;
+    barrier.pNext = nullptr;
 
     VkPipelineStageFlags sourceStage;
     VkPipelineStageFlags destinationStage;
@@ -243,6 +245,7 @@ VkCommandBuffer QFAVKBuffer::beginSingleTimeCommands(VkCommandPool commandPool)
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandPool = commandPool;
     allocInfo.commandBufferCount = 1;
+    allocInfo.pNext = nullptr;
 
     VkCommandBuffer commandBuffer;
     vkAllocateCommandBuffers(QFAVKLogicalDevice::GetDevice(), &allocInfo, &commandBuffer);
@@ -250,7 +253,7 @@ VkCommandBuffer QFAVKBuffer::beginSingleTimeCommands(VkCommandPool commandPool)
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
+    beginInfo.pNext = nullptr;
     vkBeginCommandBuffer(commandBuffer, &beginInfo);
 
     return commandBuffer;
@@ -264,6 +267,7 @@ void QFAVKBuffer::endSingleTimeCommands(VkCommandPool commandPool, VkCommandBuff
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
+    submitInfo.pNext = nullptr;
     
     vkQueueSubmit(QFAVKLogicalDevice::GetGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
     vkQueueWaitIdle(QFAVKLogicalDevice::GetGraphicsQueue());

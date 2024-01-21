@@ -18,6 +18,8 @@ QFAVKImageView::QFAVKImageView(QFAVKTextureImage* ti, VkImageAspectFlags as)
 
     if (vkCreateImageView(QFAVKLogicalDevice::GetDevice(), &viewInfo, nullptr, &ImageView) != VK_SUCCESS)
         stopExecute("failed to create texture image view!");
+
+    
 }
 
 QFAVKImageView::~QFAVKImageView()

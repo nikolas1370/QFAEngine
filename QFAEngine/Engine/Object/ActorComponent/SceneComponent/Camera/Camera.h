@@ -24,8 +24,7 @@ class QCameraComponent : public QSceneComponent
 	bool IsActive = true;
 public:
 
-	// if viewport == nullptr camera attach to default viewport
-	void Activate(QFAViewport* viewport = nullptr);
+	void Activate();
 	void Deactivate();
 	QCameraComponent()
 	{

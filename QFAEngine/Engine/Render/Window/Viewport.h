@@ -10,14 +10,18 @@ class QWorld;
 class QMeshBaseComponent;
 
 class QFAUIUnit;
+class QFAUIParentComponent;
+
 class QFAViewport
 {
 
 
 	friend QFAWindow;
+	friend QFAUIParentComponent;
+	friend QFAUIUnit;
 
-	// first create ViewPort
-	static QFAViewport* DefaultViewPort;
+	QFAWindow* Window;
+
 	glm::mat4 MatrixPerspective;
 	QCameraComponent* CurentCamera = nullptr;
 
@@ -49,12 +53,15 @@ public:
 	QFAViewport();
 	~QFAViewport();
 
-	inline void ActivateCamera();
+	void ActivateCamera();
+	void DeactivateCamera();
 
-	static inline QFAViewport* GetDefaultViewport()
-	{
-		return DefaultViewPort;
-	}
+	// if camera change some parameter
+	// 0 not camera, 1 camera activate, 2 camera deactivate
+	// rewrite to QCameraComponent::Parameter
+	void CameraChangeParameter(int param);
+
+	
 	void ChangeCamera(QCameraComponent* camera);
 
 	/*
@@ -70,6 +77,10 @@ public:
 
 	void AddUnit(QFAUIUnit* unit);
 	void RemoveUnit(QFAUIUnit* unit);
-private:
+protected:
+	// inside function
+	void RemoveUnitWithoutNotify(QFAUIUnit* unit); // , bool notifyUnit
 
+	void WindowAddMe(QFAWindow* window);
+	void WindowRemoveMe();
 };

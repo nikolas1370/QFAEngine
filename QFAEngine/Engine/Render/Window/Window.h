@@ -20,6 +20,7 @@
 #include <Render/RenderPass/RenderPassDepth.h>
 #include <Render/Framebuffer/ShadowFrameBuffer.h>
 #include <Render/RenderPass/TextRenderPass.h>
+#include <Render/vk/PresentImage.h>
 
 struct GLFWwindow;
 class QFAViewport;
@@ -143,6 +144,7 @@ public:
 	}
 
 	void AddViewport(QFAViewport* viewport);
+	void RemoveViewport(QFAViewport* viewport);
 	QFAViewport* GetViewport(size_t index);
 	inline size_t GetViewportCount()
 	{
@@ -183,7 +185,7 @@ private:
 	void PresentFrame();
 	
 
-	QFAImage* imugo;
+	QFAPresentImage* imugo;
 
 	/*----*/
 
