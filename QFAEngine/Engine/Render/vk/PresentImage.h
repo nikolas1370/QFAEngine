@@ -19,7 +19,7 @@ class QFAOverlord;
 class QFAWindow;
 class QFAVKVertexBuffer;
 
-class QFAVKTextureImage;
+class QFAImage;
 class QFAVKTextPipeline;
 class QFAVKImageView;
 class QFAVKTextureSampler;
@@ -40,7 +40,7 @@ public:
 
 
 private: 
-    void Init(VkRenderPass renderPass, VkCommandPool commandPool, QFAVKTextureImage* imago, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT);
+    void Init(VkRenderPass renderPass, VkCommandPool commandPool, QFAImage* imago, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT);
     static void EndLife();
 
     
@@ -50,7 +50,7 @@ private:
     static VkCommandPool commandPool;
     static QFAVKTextureSampler* ImageSampler;
     static VkRenderPass RenderPass;
-    static QFAVKTextureImage* image;
+    static QFAImage* image;
     static VkDescriptorImageInfo imageInfo;
     QFAVKImageView* view;
 

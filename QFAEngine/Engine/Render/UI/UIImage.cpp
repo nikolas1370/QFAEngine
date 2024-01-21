@@ -1,21 +1,21 @@
-﻿#include "Image.h"
+﻿#include "UIImage.h"
 #include <iostream>
 #include <Render/vk/LogicalDevice.h>
-#include <Render/vk/TextureImage.h>
+#include <Render/Image.h>
 #include <Render/Buffer/VertexBuffer.h>
 #include <Render/Pipline/ImagePipeline.h>
 #include <Render/vk/ImageView.h>
 #include <Render/vk/TextureSampler.h>
 
-QFAVKTextureImage* QFAImage::image = nullptr;
-VkDescriptorImageInfo QFAImage::imageInfo;
-QFAVKImagePipeline* QFAImage::Pipeline;
-VkCommandPool QFAImage::commandPool;
-QFAVKTextureSampler* QFAImage::ImageSampler;
-VkRenderPass QFAImage::RenderPass;
+VkDescriptorImageInfo QFAUIImage::imageInfo;
+QFAVKImagePipeline* QFAUIImage::Pipeline;
+VkCommandPool QFAUIImage::commandPool;
+QFAVKTextureSampler* QFAUIImage::ImageSampler;
+VkRenderPass QFAUIImage::RenderPass;
 
-QFAImage::QFAImage(VkCommandPool _commandPool)
+QFAUIImage::QFAUIImage(VkCommandPool _commandPool)
 {
+    Type = QFAUIType::Image;
     commandPool = _commandPool;
     // left top
     quad[0]; 
@@ -55,15 +55,15 @@ QFAImage::QFAImage(VkCommandPool _commandPool)
     vertexBufer = new QFAVKVertexBuffer(sizeof(ImageShaderVertex) * 6, &quad, commandPool);
 }
 
-void QFAImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_)
+void QFAUIImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_)
 {
     commandPool = commandPool_;
-    RenderPass = renderPass;
- /*
+    RenderPass = renderPass;    
     ImageSampler = new QFAVKTextureSampler();
-    image = imago;
+ /*
 
-    view = new QFAVKImageView(image, aspect);
+
+    
     
     imageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
     imageInfo.imageView = view->ImageView;
@@ -75,21 +75,28 @@ void QFAImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_)
     
 }
 
-QFAImage::~QFAImage()
+
+
+QFAUIImage::~QFAUIImage()
 {
     delete vertexBufer;
     delete ImageSampler;
 }
 
+void QFAUIImage::SetImage(QFAImage* image)
+{
+    Image = image;
+}
 
 
-void QFAImage::EndLife()
+
+void QFAUIImage::EndLife()
 {    
     delete Pipeline;
     delete ImageSampler;
 }
 
-void QFAImage::RecreateCreatePiline()
+void QFAUIImage::RecreateCreatePiline()
 {
     /*
     OldPipeline = Pipeline;
@@ -99,7 +106,7 @@ void QFAImage::RecreateCreatePiline()
     */
 }
 
-void QFAImage::CreatePiline()
+void QFAUIImage::CreatePiline()
 {
     /*
     Pipeline = new QFAVKTextPipeline(RenderPass, QFAText::VertexShaderPath, QFAText::FragmentShaderPath);
@@ -108,22 +115,37 @@ void QFAImage::CreatePiline()
     */
 }
 
-void QFAImage::ParentEnable()
+/*
+
+    нада зробить на перевіркі чи це небуло ложне збрацювання(баг)
+
+
+*/
+
+void QFAUIImage::ParentEnable()
 {
 
 }
 
-void QFAImage::ParentDisable()
+
+void QFAUIImage::ParentDisable()
 {
 
 }
 
-void QFAImage::ParentAttach()
+/*
+
+    нада зробить на перевіркі чи це небуло ложне збрацювання(баг)
+
+
+*/
+void QFAUIImage::ParentAttach()
 {
 
 }
 
-void QFAImage::ParentDisconect()
+
+void QFAUIImage::ParentDisconect()
 {
 
 }

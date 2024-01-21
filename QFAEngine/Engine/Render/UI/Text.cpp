@@ -1,7 +1,7 @@
 ﻿#include "Text.h"
 #include <iostream>
 #include <Render/vk/LogicalDevice.h>
-#include <Render/vk/TextureImage.h>
+#include <Render/Image.h>
 #include <Render/Buffer/VertexBuffer.h>
 #include <Render/Pipline/TextPipeline.h>
 #include <Render/vk/ImageView.h>
@@ -467,13 +467,13 @@ void QFAText::PrepareSymbolsToGpu()
 
 void QFAText::SetPosition(unsigned int x, unsigned int y)
 {
-    if (ParentViewport)
+    if (!Parent || Parent->GetIsRoot())
         SetPositionParent(x, y);
 }
 
 void QFAText::SetSize(unsigned int w, unsigned int h)
 {
-    if (ParentViewport)
+    if (!Parent || Parent->GetIsRoot())
         SetSizeParent(w, h);
 }
 
@@ -627,7 +627,7 @@ void QFAText::CreateTextParameterPool(bool addPool)
         if (GlyphAtlasList[i].atlasIndex >= 0)
             continue;
 
-        QFAVKTextureImage::SImageCreateInfo ici;
+        QFAImage::SImageCreateInfo ici;
         ici.Width = GlyphAtlasWidth;
         ici.Height = GlyphAtlasHeight;
         ici.channelCount = 1;
@@ -635,7 +635,7 @@ void QFAText::CreateTextParameterPool(bool addPool)
         ici.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
         SGlyphAtlas gi;
-        gi.texture = new QFAVKTextureImage(commandPool, ici);
+        gi.texture = new QFAImage(ici);
         gi.view = new QFAVKImageView(gi.texture);
         gi.atlasIndex = i;
 

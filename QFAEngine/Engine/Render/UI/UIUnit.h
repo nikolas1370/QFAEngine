@@ -9,7 +9,9 @@ namespace QFAUIType
 	{
 		NONE = 0,
 		Text = 1,
-		Canvas = 2
+		Canvas = 2,
+		ViewportRoot = 3,
+		Image = 4
 	};
 }
 
@@ -23,8 +25,11 @@ namespace QFAUISlot
 		float ParentSloot[4];
 	};
 
+	/* 
+		all parameter 0 - 1 == 0% - 100%
+	*/
 	struct SCanvasSlot
-	{/* 0 - 1 */
+	{
 		QFAUIType::Type typeParent = QFAUIType::Canvas;
 		unsigned short structSize = sizeof(SCanvasSlot);
 		float Width;
@@ -32,25 +37,45 @@ namespace QFAUISlot
 		float x;
 		float y;
 	};
+
+	struct SViewportRootSlot
+	{
+		QFAUIType::Type typeParent = QFAUIType::ViewportRoot;
+		unsigned short structSize = sizeof(SViewportRootSlot);
+	};
 }
 
 class QFAViewport;
 class QFAWindow;
 class QFAUIParentComponent;
 class QFAUICanvas;
+class QFAViewportRoot;
+
+/*
+
+
+
+
+	зробить параметер який дозволя хранить чи батько позволя рендериться 
+
+
+
+
+
+*/
 class QFAUIUnit
 {
 	friend QFAViewport;
 	friend QFAWindow;
 	friend QFAUIParentComponent;
 	friend QFAUICanvas;
-	// call if viewport change own size
-	virtual void ViewportSizeChange(int viewportWidth, int viewportHeight)
-	{
+	friend QFAViewportRoot;	
+	QFAUISlot::SCanvasSlot l;
 
-	}
+	//IsRoot == true only for QFAViewportRoot
+	bool IsRoot = false;
 protected:
-
+	bool IsActive = true;
 
 	bool CanBeParent = false;
 	QFAUIType::Type Type = QFAUIType::NONE;
@@ -63,10 +88,9 @@ protected:
 	unsigned int Height = 120;
 	int Position_x = 0;
 	// 0 == top 
-	int Position_y = 0;
-
-	QFAViewport* ParentViewport = nullptr;// if null this unit not root units
+	int Position_y = 0;	
 	QFAUIParentComponent* Parent = nullptr;
+
 
 
 	// parent set size
@@ -95,6 +119,10 @@ public:
 		return Parent;
 	}
 
+	inline bool GetIsRoot()
+	{
+		return IsRoot;
+	}
 	
 
 	/*-----*/
@@ -105,12 +133,19 @@ public:
 protected:
 	QFAUISlot::SParentSlot Slot;
 
-	// call if one of parent was enable ore QFAViewport camera enable. 
+	/*
+	* call if one of parent was enable or QFAViewport camera enable. 
+	* and call if parent can be rendered
+	*/
 	inline virtual void ParentEnable() {}
-	// call if one of parent was disable ore QFAViewport camera disable.
+	// call if one of parent was disable or QFAViewport camera disable.
 	inline virtual void ParentDisable() {}
 
-	// call if one of parent was attach. Not call if parent change
+	/*
+	* call if one of parent was attach.
+	* and call if parent can be rendered.
+	* Not call if parent change.
+	*/
 	inline virtual void ParentAttach() {}
 	// call if one of parent was disconect
 	inline virtual void ParentDisconect() {}

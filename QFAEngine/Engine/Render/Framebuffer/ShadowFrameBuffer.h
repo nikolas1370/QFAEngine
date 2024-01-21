@@ -1,5 +1,5 @@
 #pragma once
-#include <Render/vk/TextureImage.h>
+#include <Render/Image.h>
 
 class QFAWindow;
 class QFAVKShadowFrameBuffer
@@ -15,7 +15,7 @@ public:
 	}
 private:
 
-	QFAVKTextureImage* depthImageQFA;
+	QFAImage* depthImageQFA;
 	VkImageView depthImageView;
 
 	static const int shadowResolution = 2000;

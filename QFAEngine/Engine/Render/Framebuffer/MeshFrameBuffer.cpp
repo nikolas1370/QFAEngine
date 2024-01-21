@@ -22,7 +22,7 @@ void QFAVKMeshFrameBuffer::ResizeBuffer(VkCommandPool commandPool, int w, int h)
 void QFAVKMeshFrameBuffer::CreateBuffer(VkCommandPool commandPool, int w, int h)
 {
 
-	ColorImage = new QFAVKTextureImage(commandPool, w, h, 4, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+	ColorImage = new QFAImage(w, h, 4, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
 
 	VkImageViewCreateInfo viewInfo{};
 	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -39,7 +39,7 @@ void QFAVKMeshFrameBuffer::CreateBuffer(VkCommandPool commandPool, int w, int h)
 	if (vkCreateImageView(QFAVKLogicalDevice::GetDevice(), &viewInfo, nullptr, &ColorImageView) != VK_SUCCESS)
 		stopExecute("failed to create texture image view!");
 
-	DepthImage = new QFAVKTextureImage(commandPool, w, h, 4, VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_IMAGE_ASPECT_DEPTH_BIT);
+	DepthImage = new QFAImage(w, h, 4, VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_IMAGE_ASPECT_DEPTH_BIT);
 
 	VkImageViewCreateInfo viewInfo2{};
 	viewInfo2.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;

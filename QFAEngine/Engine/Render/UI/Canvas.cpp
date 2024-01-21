@@ -11,16 +11,7 @@ QFAUICanvas::~QFAUICanvas()
 {
 }
 
-void QFAUICanvas::ViewportSizeChange(int viewportWidth, int viewportHeight)
-{
-	Position_x = 0;
-	Position_y = 0;
 
-	Width = viewportWidth;
-	Height = viewportHeight;
-	
-	UpdatePositionSizeChildren();
-}
 
 
 

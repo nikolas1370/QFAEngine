@@ -1,21 +1,19 @@
 #pragma once
 #include <Tools/VulkanSuff.h>
 
-class QFAVKTextureImage;
 class QFAWindow;
 class QFAVKVertexBuffer;
 class QFAVKIndexBuffer;
-class QFAVKTextureImage;
+class QFAImage;
 class QFAOverlord;
 
 class QFAVKBuffer
 {
 	friend QFAOverlord;
-	friend QFAVKTextureImage;
+	friend QFAImage;
 	friend QFAWindow;
 	friend QFAVKIndexBuffer;
 	friend QFAVKVertexBuffer;
-	friend QFAVKTextureImage;
 
 	void CreateBufferInside(VkDeviceSize size, VkBufferUsageFlags usage);
 
@@ -62,7 +60,7 @@ private:
 	static void EndLife();
 public:
 	static void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandPool commandPool, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT);
-	void copyInImage(QFAVKTextureImage* image, uint32_t width, uint32_t height, VkCommandPool commandPool, int32_t imageOffsetX = 0, int32_t imageOffsetY = 0, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT, VkImageLayout endLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	void copyInImage(QFAImage* image, uint32_t width, uint32_t height, VkCommandPool commandPool, int32_t imageOffsetX = 0, int32_t imageOffsetY = 0, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT, VkImageLayout endLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 	void copyBuffer(VkBuffer dstBuffer, VkDeviceSize size, VkCommandPool commandPool, VkDeviceSize srcOffset = 0, VkDeviceSize dstOffset = 0);
 	void UpdateData(unsigned int size, void* data);

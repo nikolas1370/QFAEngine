@@ -1,37 +1,37 @@
-#include "TextureImage.h"
+#include "Image.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
-
 
 #include <Render/Buffer/VKBuffer.h>
 #include <Render/vk/PhysicalDevice.h>
 #include <Render/vk/LogicalDevice.h>
 
-QFAVKTextureImage::QFAVKTextureImage(VkCommandPool commandPool, SImageCreateInfo& ici)
+VkCommandPool QFAImage::CommandPool;
+
+QFAImage::QFAImage(SImageCreateInfo& ici)
 {
     ImageFormat = ici.format;
     VkDeviceSize imageSize = ici.Width * ici.Height * ici.channelCount;
     buffer = new QFAVKBuffer(imageSize, nullptr, true);
     createImage(ici.Width, ici.Height, ici.format, VK_IMAGE_TILING_OPTIMAL, ici.usage);
-    QFAVKBuffer::transitionImageLayout(TextureImage, ici.format, VK_IMAGE_LAYOUT_UNDEFINED, ici.layout, commandPool, ici.aspect);
+    QFAVKBuffer::transitionImageLayout(TextureImage, ici.format, VK_IMAGE_LAYOUT_UNDEFINED, ici.layout, CommandPool, ici.aspect);
 }
 
-QFAVKTextureImage::QFAVKTextureImage(VkCommandPool commandPool, int Width, int Height, unsigned int channelCount,  VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspect )
+QFAImage::QFAImage( int Width, int Height, unsigned int channelCount,  VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspect )
 {
     ImageFormat = format;
     VkDeviceSize imageSize = Width * Height * channelCount;
     buffer = new QFAVKBuffer(imageSize, nullptr, true);
     createImage(Width, Height, format, VK_IMAGE_TILING_OPTIMAL, usage);    
-    QFAVKBuffer::transitionImageLayout(TextureImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, commandPool, aspect);
+    QFAVKBuffer::transitionImageLayout(TextureImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, CommandPool, aspect);
 }
 
-QFAVKTextureImage::QFAVKTextureImage( VkCommandPool commandPool, const std::string src)
+QFAImage::QFAImage( const std::string src)
 {   
     ImageFormat = VK_FORMAT_R8G8B8A8_SRGB;
-
     int texWidth, texHeight, texChannels;
     stbi_uc* pixels = stbi_load(src.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-    VkDeviceSize imageSize = texWidth * texHeight * 4;
+    VkDeviceSize imageSize = texWidth * texHeight * 4; 
 
     if (!pixels)
         stopExecute("failed to load texture image!");
@@ -40,16 +40,26 @@ QFAVKTextureImage::QFAVKTextureImage( VkCommandPool commandPool, const std::stri
     stbi_image_free(pixels);
     
     createImage(texWidth, texHeight, ImageFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
-    buffer->copyInImage(this, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), commandPool);
+    buffer->copyInImage(this, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), CommandPool);
 }
 
-QFAVKTextureImage::~QFAVKTextureImage()
+QFAImage::~QFAImage()
 {
     vmaDestroyImage(QFAVKBuffer::allocator, TextureImage, ImageAllocation);
-    delete buffer;
+    if (buffer)
+        delete buffer;
 }
 
-void QFAVKTextureImage::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage)
+void QFAImage::DeleteImageInCpuSide()
+{
+    if (buffer)
+    {
+        delete buffer;
+        buffer = nullptr;
+    }
+}
+
+void QFAImage::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage)
 {
     VkImageCreateInfo imageInfo{};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -78,4 +88,9 @@ void QFAVKTextureImage::createImage(uint32_t width, uint32_t height, VkFormat fo
         &TextureImage,
         &ImageAllocation,
         nullptr);
+}
+
+void QFAImage::Init(VkCommandPool commandPool)
+{
+    CommandPool = commandPool;
 }

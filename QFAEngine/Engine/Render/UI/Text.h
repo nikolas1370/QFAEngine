@@ -19,7 +19,7 @@ class QFAOverlord;
 
 class QFAVKVertexBuffer;
 
-class QFAVKTextureImage;
+class QFAImage;
 class QFAVKTextPipeline;
 class QFAVKImageView;
 class QFAVKTextureSampler;
@@ -112,7 +112,7 @@ class QFAText : public QFAUIRenderUnit
         int atlasIndex = -1; // not created atlas hawe index -1
         int y = 0;// when start new row in pixel
         QFAArray<SGlyphAtlasListRow> Rows;
-        QFAVKTextureImage* texture;
+        QFAImage* texture;
         QFAVKImageView* view;
     };
 

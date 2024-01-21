@@ -12,7 +12,7 @@
 // vkDeviceWaitIdle(QFAVKLogicalDevice::GetDevice());
 #include <Object/Actor/Actor.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
-#include <Render/UI/Image.h>
+#include <Render/UI/UIImage.h>
 #include <Render/Pipline/ImagePipeline.h>
 #include <Render/UI/Text.h>
 
@@ -84,6 +84,7 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 	QFAVKBuffer::Init(Instance->instance);
 
 	createCommandPool();
+	QFAImage::Init(commandPool);
 	SwapChain = new QFAVKSwapChain(glfWindow, surface, commandPool);
 	RenderPass = new QFAVKRenderPass(SwapChain->swapChainImageFormat, true);
 	RenderPassOffScreen = new QFAVKRenderPassDepth();
@@ -191,8 +192,7 @@ void QFAWindow::DrawText()
 		
 		QFAText::StartTextRenderViewPort(MainWindow->Viewports[i]->UIProjection, i);
 
-		for (size_t j = 0; j < MainWindow->Viewports[i]->UIUnits.Length(); j++)
-			ProcessUIUnit(MainWindow->Viewports[i]->UIUnits[j]);
+		ProcessUIUnit(&MainWindow->Viewports[i]->Root);			
 	}
 
 	/*------------------*/
@@ -575,7 +575,7 @@ void QFAWindow::CreateShadow()
 {
 	ShadowSampler = new QFAVKTextureSampler();
 
-	ShadowImage= new QFAVKTextureImage(commandPool, QFAVKShadowFrameBuffer::GetShadowResolution(), QFAVKShadowFrameBuffer::GetShadowResolution(),4, QFAWindow::depthFormat, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_IMAGE_ASPECT_DEPTH_BIT);	
+	ShadowImage= new QFAImage( QFAVKShadowFrameBuffer::GetShadowResolution(), QFAVKShadowFrameBuffer::GetShadowResolution(),4, QFAWindow::depthFormat, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_IMAGE_ASPECT_DEPTH_BIT);
 	ShadowImagesView= new QFAVKImageView(ShadowImage, VK_IMAGE_ASPECT_DEPTH_BIT);
 }
 

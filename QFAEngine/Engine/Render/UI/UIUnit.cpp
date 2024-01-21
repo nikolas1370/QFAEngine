@@ -5,8 +5,6 @@ QFAUIUnit::~QFAUIUnit()
 {
 	if (Parent)
 		Parent->RemoveUnitWithoutNotify(this);
-	else if (ParentViewport)
-		ParentViewport->RemoveUnitWithoutNotify(this);
 }
 
 void QFAUIUnit::SetSlot(void* slot)

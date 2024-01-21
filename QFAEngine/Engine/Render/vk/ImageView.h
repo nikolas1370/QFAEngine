@@ -1,6 +1,6 @@
 #pragma once
 #include <Tools/VulkanSuff.h>
-class QFAVKTextureImage;
+class QFAImage;
 class QFAVKImageView
 {
 	/*
@@ -13,7 +13,7 @@ class QFAVKImageView
 	
 public:
 	VkImageView ImageView;
-	QFAVKImageView(QFAVKTextureImage* ti, VkImageAspectFlags as = VK_IMAGE_ASPECT_COLOR_BIT);
+	QFAVKImageView(QFAImage* ti, VkImageAspectFlags as = VK_IMAGE_ASPECT_COLOR_BIT);
 
 	~QFAVKImageView();
 	

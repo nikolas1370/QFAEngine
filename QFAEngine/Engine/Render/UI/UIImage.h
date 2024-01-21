@@ -26,7 +26,7 @@ class QFAVKTextureSampler;
 
 class QFAVKImagePipeline;
 
-class QFAImage : public QFAUIUnit
+class QFAUIImage : public QFAUIUnit
 {
     
     friend QFAWindow;
@@ -34,13 +34,15 @@ class QFAImage : public QFAUIUnit
 
     void SetSizeParent(unsigned int w, unsigned int h) override {}
     void SetPositionParent(unsigned int x, unsigned int y) override {}
+
+    QFAImage* Image;
 public:
   
 
-    QFAImage(VkCommandPool _commandPool);
-    ~QFAImage();        
+    QFAUIImage(VkCommandPool _commandPool);
+    ~QFAUIImage();
 
-
+    void SetImage(QFAImage* image);
 private: 
     void Init(VkRenderPass renderPass, VkCommandPool commandPool);
     static void EndLife();
@@ -52,9 +54,9 @@ private:
     static VkCommandPool commandPool;
     static QFAVKTextureSampler* ImageSampler;
     static VkRenderPass RenderPass;
-    static QFAVKTextureImage* image;
+
     static VkDescriptorImageInfo imageInfo;
-    QFAVKImageView* view;
+
 
     struct ImageShaderVertex
     {

@@ -3,7 +3,7 @@
 #include <vector>
 #include "VKStruct.h"
 #include <Tools/VulkanSuff.h>
-#include <Render/vk/TextureImage.h>
+#include <Render/Image.h>
 
 class QFAWindow;
 
@@ -48,6 +48,6 @@ private:
 	VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
 	
 	void createDepthResources();	
-	QFAVKTextureImage* depthImage;
+	QFAImage* depthImage;
 	VkImageView depthImageView;
 };

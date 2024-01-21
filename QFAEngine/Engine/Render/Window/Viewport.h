@@ -2,6 +2,7 @@
 #include <Math/Math.h>
 
 #include <Tools/Array.h>
+#include <Render/Window/QFAViewportRoot.h>
 class QCameraComponent;
 class QFAWindow;
 
@@ -41,14 +42,14 @@ class QFAViewport
 	QWorld* CurentFrameWorld;
 
 
-	QFAArray<QFAUIUnit*> UIUnits;
+
 	glm::mat4 UIProjection;
 
 
 
 	void Settup(int windowWidth, int windowHeight);	
 	bool IsActive = true;
-
+	QFAViewportRoot Root;
 public:
 	QFAViewport();
 	~QFAViewport();
@@ -75,11 +76,18 @@ public:
 	*/
 	void SetParameters(float xP, float  yP, float widthP, float heightP);
 
-	void AddUnit(QFAUIUnit* unit);
-	void RemoveUnit(QFAUIUnit* unit);
+	inline void AddUnit(QFAUIUnit* unit)
+	{
+		Root.AddUnit(unit);
+	}
+
+	inline void RemoveUnit(QFAUIUnit* unit)
+	{
+		Root.removeUnit(unit);
+	}
 protected:
-	// inside function
-	void RemoveUnitWithoutNotify(QFAUIUnit* unit); // , bool notifyUnit
+
+
 
 	void WindowAddMe(QFAWindow* window);
 	void WindowRemoveMe();

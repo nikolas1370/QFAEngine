@@ -13,9 +13,7 @@ void QFAUIParentComponent::AddUnit(QFAUIUnit* unit)
 
 	if (unit->Parent)
 		unit->Parent->RemoveUnitWithoutNotify(unit);
-	else if (unit->ParentViewport)
-		unit->ParentViewport->RemoveUnitWithoutNotify(unit);
-	else
+	else if(IsActive)
 		unit->ParentAttach();
 
 	Children.Add(unit);
@@ -61,3 +59,4 @@ void QFAUIParentComponent::ParentDisconect()
 	for (size_t i = 0; i < Children.Length(); i++)
 		Children[i]->ParentDisconect();
 }
+

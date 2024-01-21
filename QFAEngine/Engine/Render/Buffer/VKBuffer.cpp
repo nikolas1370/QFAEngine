@@ -2,7 +2,7 @@
 #include <cstring>
 #include <Render/vk/LogicalDevice.h>
 #include <Render/vk/PhysicalDevice.h>
-#include <Render/vk/TextureImage.h>
+#include <Render/Image.h>
 
 VmaAllocator QFAVKBuffer::allocator = nullptr;
 
@@ -79,7 +79,7 @@ uint32_t QFAVKBuffer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags 
     stopExecute("QFAVKBuffer::findMemoryType failed to find suitable memory type!");
 }
 
-void QFAVKBuffer::copyInImage(QFAVKTextureImage* image, uint32_t width, uint32_t height, VkCommandPool commandPool, int32_t imageOffsetX, int32_t imageOffsetY, VkImageAspectFlags aspect, VkImageLayout endLayout)
+void QFAVKBuffer::copyInImage(QFAImage* image, uint32_t width, uint32_t height, VkCommandPool commandPool, int32_t imageOffsetX, int32_t imageOffsetY, VkImageAspectFlags aspect, VkImageLayout endLayout)
 {   
     transitionImageLayout(image->TextureImage, image->ImageFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, commandPool, aspect);
     copyBufferToImage(image->TextureImage, width, height, commandPool, imageOffsetX, imageOffsetY, aspect);

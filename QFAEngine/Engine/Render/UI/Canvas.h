@@ -6,7 +6,7 @@ class QFAUICanvas : public QFAUIParentComponent
 {
 
 
-	void ViewportSizeChange(int viewportWidth, int viewportHeight) override;
+	
 protected:
 	
 	void NewUnit(QFAUIUnit* unit) override;

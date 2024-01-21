@@ -1,7 +1,7 @@
 #pragma once
 #include <Render/RenderPass/MeshRenderPass.h>
 #include <Tools/VulkanSuff.h>
-#include <Render/vk/TextureImage.h>
+#include <Render/Image.h>
 #include <Render/vk/LogicalDevice.h>
 #include <Render/Pipline/MeshPipeline.h>
 class QFAVKMeshFrameBuffer
@@ -12,11 +12,11 @@ class QFAVKMeshFrameBuffer
 public:
 	QFAVKMeshFrameBuffer(VkCommandPool commandPool, int w, int h);
 	~QFAVKMeshFrameBuffer();
-	QFAVKTextureImage* ColorImage;
+	QFAImage* ColorImage;
 	VkImageView ColorImageView;
 
 
-	QFAVKTextureImage* DepthImage;
+	QFAImage* DepthImage;
 	VkImageView DepthImageView;
 
 

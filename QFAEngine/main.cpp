@@ -67,6 +67,8 @@ int main()
     QFAViewport* firstdViewPort = mainWindow->GetViewport(0);
     
 
+    
+
 
     Camera.ActivateCamera(firstdViewPort);
     
@@ -84,8 +86,6 @@ int main()
     text_2->SetTextSize(16);
     text_2->Color = FVector(1, 0.5, 0);
     /*-----*/
-
-
 
     text->SetPosition(0, 25);
 

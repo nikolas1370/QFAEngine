@@ -11,7 +11,7 @@
 #include <Math/Vector.h>
 #include <Render/vk/QueueFamilies.h>
 
-#include <Render/vk/TextureImage.h>
+#include <Render/Image.h>
 #include <Render/vk/ImageView.h>
 #include <Render/vk/TextureSampler.h>
 #include <Render/Buffer/VertexBuffer.h>
@@ -75,7 +75,7 @@ class QFAWindow
 
 
 	/*----*/
-	QFAVKTextureImage* imagu;
+	QFAImage* imagu;
 
 
 	//VkImage swapChainImages;
@@ -89,10 +89,7 @@ class QFAWindow
 public:
 	static const int MaxActiveViewPort = 10;
 	unsigned int ViewportProcess = 0;
-	/*
-	QFAVKTextureImage* depthImageQFA;
-	static VkImageView depthImageView;
-	*/
+	
 private:
 	
 	QFAVKShadowFrameBuffer* ShadowFrameBuffer;
@@ -213,7 +210,7 @@ private:
 
 	/*---*/
 	
-	QFAVKTextureImage* ShadowImage;
+	QFAImage* ShadowImage;
 	
 	
 

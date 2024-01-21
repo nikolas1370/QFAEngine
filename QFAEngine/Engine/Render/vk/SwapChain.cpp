@@ -2,7 +2,7 @@
 #include <Render/vk/QueueFamilies.h>
 #include <algorithm>
 #include <Render/vk/LogicalDevice.h>
-#include <Render/vk/TextureImage.h>
+#include <Render/Image.h>
 #include <Render/Buffer/VKBuffer.h>
 #include <Render/Window/Window.h>
 
@@ -187,7 +187,7 @@ VkImageView QFAVKSwapChain::createImageView(VkImage image, VkFormat format, VkIm
 
 void QFAVKSwapChain::createDepthResources()
 {
-    depthImage = new QFAVKTextureImage(commandPool, swapChainExtent.width, swapChainExtent.height, 4, VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_IMAGE_ASPECT_DEPTH_BIT);
+    depthImage = new QFAImage( swapChainExtent.width, swapChainExtent.height, 4, VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_IMAGE_ASPECT_DEPTH_BIT);
     depthImageView = createImageView(depthImage->TextureImage, QFAWindow::depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
 }
 

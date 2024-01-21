@@ -11,51 +11,17 @@
 
 
 
-void QFAViewport::AddUnit(QFAUIUnit* unit)
-{
-	if (!unit)
-		return;
-
-	if (unit->Parent)
-		unit->Parent->RemoveUnitWithoutNotify(unit);
-	else if(unit->ParentViewport)
-		unit->ParentViewport->RemoveUnitWithoutNotify(unit);
-	else
-		unit->ParentAttach();
-
-	unit->ParentViewport = this;
-	UIUnits.Add(unit);
-	if (unit->SelfResizable)
-		unit->ViewportSizeChange(Width, Height);
-}
-
-void QFAViewport::RemoveUnit(QFAUIUnit* unit)
-{
-	if (!unit)
-		return;
-	
-	RemoveUnitWithoutNotify(unit);
-	unit->ParentDisconect();
-}
-
-void QFAViewport::RemoveUnitWithoutNotify(QFAUIUnit* unit)
-{
-	UIUnits.Remove(unit);
-	unit->ParentViewport = nullptr;
-}
-
 void QFAViewport::WindowAddMe(QFAWindow* window)
 {
-	Window = window;
-	for (size_t i = 0; i < UIUnits.Length(); i++)
-		UIUnits[i]->ParentEnable();
+	Window = window;	
+	Root.ParentEnable();
 }
 
 void QFAViewport::WindowRemoveMe()
 {
 	Window = nullptr;
-	for (size_t i = 0; i < UIUnits.Length(); i++)
-		UIUnits[i]->ParentDisable();
+	
+	Root.ParentDisable();
 }
 
 
@@ -77,16 +43,15 @@ void QFAViewport::Settup(int windowWidth, int windowHeight)
 	else
 		std::cout << "QFAViewport::Settup Camera not set\n";
 
-	for (size_t i = 0; i < UIUnits.Length(); i++)
-		if (UIUnits[i]->SelfResizable)
-			UIUnits[i]->ViewportSizeChange(Width, Height);
+
+	Root.SetSizeParent(Width, Height);
 }
 
 
 
 QFAViewport::QFAViewport()
 {
-
+	Root.Viewport = this;
 }
 
 QFAViewport::~QFAViewport()
@@ -101,27 +66,23 @@ inline void QFAViewport::ActivateCamera()
 		CurentCamera->IsActive = true;
 		CurentCamera->Viewport = this;
 		
-		for (size_t i = 0; i < UIUnits.Length(); i++)
-			UIUnits[i]->ParentEnable();
+		
+		if (Window)
+			Root.ParentEnable();
 	}
 }
 
 void QFAViewport::DeactivateCamera()
-{
-	for (size_t i = 0; i < UIUnits.Length(); i++)
-		UIUnits[i]->ParentDisable();
+{	
+	Root.ParentDisable();
 }
 
 void QFAViewport::CameraChangeParameter(int param)
 {	
 	if (param == 1)
-	{  
-		for (size_t i = 0; i < UIUnits.Length(); i++)
-			UIUnits[i]->ParentEnable();
-	}
-	else if(param == 2)
-		for (size_t i = 0; i < UIUnits.Length(); i++)
-			UIUnits[i]->ParentDisable();
+		Root.ParentEnable();
+	else if(param == 2)		
+		Root.ParentDisable();
 }
 
 void QFAViewport::ChangeCamera(QCameraComponent* camera)
@@ -135,18 +96,15 @@ void QFAViewport::ChangeCamera(QCameraComponent* camera)
 
 		if (CurentCamera->IsActive)
 		{
-			for (size_t i = 0; i < UIUnits.Length(); i++)
-				UIUnits[i]->ParentEnable();
+			if (Window)
+				Root.ParentEnable();
 		}
 		else
-			for (size_t i = 0; i < UIUnits.Length(); i++)
-				UIUnits[i]->ParentDisable();
+			Root.ParentDisable();
+				
 	}
 	else
-	{
-		for (size_t i = 0; i < UIUnits.Length(); i++)
-			UIUnits[i]->ParentDisable();
-	}
+		Root.ParentDisable();
 }
 
 void QFAViewport::SetParameters(float xP, float  yP, float widthP, float heightP)
@@ -166,7 +124,5 @@ void QFAViewport::SetParameters(float xP, float  yP, float widthP, float heightP
 	MatrixPerspective = glm::perspectiveLH_ZO(glm::radians(CurentCamera->Fov),
 		(float)Width / (float)Height, 0.1f, CurentCamera->ViewDistance); 
 	
-	for (size_t i = 0; i < UIUnits.Length(); i++)
-		if (UIUnits[i]->SelfResizable)
-			UIUnits[i]->ViewportSizeChange(Width, Height);
+	Root.SetSize(Width, Height);
 }

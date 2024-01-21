@@ -1,13 +1,13 @@
 ﻿#include "PresentImage.h"
 #include <iostream>
 #include <Render/vk/LogicalDevice.h>
-#include <Render/vk/TextureImage.h>
+#include <Render/Image.h>
 #include <Render/Buffer/VertexBuffer.h>
 #include <Render/Pipline/PresentImagePipeline.h>
 #include <Render/vk/ImageView.h>
 #include <Render/vk/TextureSampler.h>
 
-QFAVKTextureImage* QFAPresentImage::image = nullptr;
+QFAImage* QFAPresentImage::image = nullptr;
 VkDescriptorImageInfo QFAPresentImage::imageInfo;
 QFAPresentImagePipeline* QFAPresentImage::Pipeline;
 VkCommandPool QFAPresentImage::commandPool;
@@ -56,7 +56,7 @@ QFAPresentImage::QFAPresentImage(VkCommandPool _commandPool)
     vertexBufer = new QFAVKVertexBuffer(sizeof(ImageShaderVertex) * 6, &quad, commandPool);
 }
 
-void QFAPresentImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_, QFAVKTextureImage* imago, VkImageAspectFlags aspect)
+void QFAPresentImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_, QFAImage* imago, VkImageAspectFlags aspect)
 {
     commandPool = commandPool_;
     RenderPass = renderPass;

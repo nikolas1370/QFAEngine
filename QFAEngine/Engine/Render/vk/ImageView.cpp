@@ -1,9 +1,9 @@
 #include "ImageView.h"
 #include <Render/vk/LogicalDevice.h>
-#include <Render/vk/TextureImage.h>
+#include <Render/Image.h>
 
 
-QFAVKImageView::QFAVKImageView(QFAVKTextureImage* ti, VkImageAspectFlags as)
+QFAVKImageView::QFAVKImageView(QFAImage* ti, VkImageAspectFlags as)
 {
     VkImageViewCreateInfo viewInfo{};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;

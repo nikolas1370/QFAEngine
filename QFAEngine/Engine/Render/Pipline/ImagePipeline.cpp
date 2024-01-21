@@ -4,7 +4,7 @@
 #include <fstream>
 #include <Render/vk/LogicalDevice.h>
 #include <Render/vk/LogicalDevice.h>
-#include <Render/UI/Image.h>
+#include <Render/UI/UIImage.h>
 
 
 VkDescriptorSet QFAVKImagePipeline::descriptorSet;
@@ -222,7 +222,7 @@ VkVertexInputBindingDescription QFAVKImagePipeline::getBindingDescription()
 {
     VkVertexInputBindingDescription bindingDescription{};
     bindingDescription.binding = 0;
-    bindingDescription.stride = sizeof(QFAImage::ImageShaderVertex);
+    bindingDescription.stride = sizeof(QFAUIImage::ImageShaderVertex);
     bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
     return bindingDescription;
@@ -235,7 +235,7 @@ std::array<VkVertexInputAttributeDescription, 1> QFAVKImagePipeline::getAttribut
     attributeDescriptions[0].binding = 0;
     attributeDescriptions[0].location = 0;
     attributeDescriptions[0].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-    attributeDescriptions[0].offset = offsetof(QFAImage::ImageShaderVertex, x);
+    attributeDescriptions[0].offset = offsetof(QFAUIImage::ImageShaderVertex, x);
 
 
     return attributeDescriptions;
@@ -288,7 +288,7 @@ void QFAVKImagePipeline::updataDescriptorSets()
     descriptorWrites[0].dstArrayElement = 0;
     descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     descriptorWrites[0].descriptorCount = 1;
-    descriptorWrites[0].pImageInfo = &QFAImage::imageInfo;
+    descriptorWrites[0].pImageInfo = &QFAUIImage::imageInfo;
 
     vkUpdateDescriptorSets(QFAVKLogicalDevice::GetDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 }
