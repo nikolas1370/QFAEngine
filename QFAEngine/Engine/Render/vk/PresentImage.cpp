@@ -3,13 +3,14 @@
 #include <Render/vk/LogicalDevice.h>
 #include <Render/Image.h>
 #include <Render/Buffer/VertexBuffer.h>
-#include <Render/Pipline/PresentImagePipeline.h>
+#include <Render/Pipline/Pipline.h>
 #include <Render/vk/ImageView.h>
 #include <Render/vk/TextureSampler.h>
+#include <Render/Pipline/Pipline.h>
 
 QFAImage* QFAPresentImage::image = nullptr;
 VkDescriptorImageInfo QFAPresentImage::imageInfo;
-QFAPresentImagePipeline* QFAPresentImage::Pipeline;
+QFAVKPipeline* QFAPresentImage::Pipeline;
 VkCommandPool QFAPresentImage::commandPool;
 QFAVKTextureSampler* QFAPresentImage::ImageSampler;
 VkRenderPass QFAPresentImage::RenderPass;
@@ -61,24 +62,84 @@ void QFAPresentImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_, 
     commandPool = commandPool_;
     RenderPass = renderPass;
  
+    
+    
+    QFAVKPipeline::QFAPipelineCreateInfo PipelineInfo;
+    PipelineInfo.RenderPass = RenderPass;
+    PipelineInfo.PipelineShaderStages.VertexStage = "Engine/Shaders/PresentImageVertex.spv";
+    PipelineInfo.PipelineShaderStages.FragmentStage = "Engine/Shaders/PresentImageFragment.spv";
+
+
+    PipelineInfo.VertexInputInfo.VertexBindingDescriptionCount = 1;
+    VkVertexInputBindingDescription bindingDescription{};
+    bindingDescription.binding = 0;
+    bindingDescription.stride = sizeof(float) * 4;
+    bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+    PipelineInfo.VertexInputInfo.VertexBindingDescriptions = &bindingDescription;
+    
+
+    PipelineInfo.VertexInputInfo.VertexAttributeDescriptionCount = 1;
+    std::array<VkVertexInputAttributeDescription, 1> attributeDescriptions{};
+    attributeDescriptions[0].binding = 0;
+    attributeDescriptions[0].location = 0;
+    attributeDescriptions[0].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+    attributeDescriptions[0].offset = 0;
+    PipelineInfo.VertexInputInfo.VertexAttributeDescriptions = attributeDescriptions.data();
+    
+
+    PipelineInfo.Rasterization.CullMode = VK_CULL_MODE_NONE;
+    PipelineInfo.ColorBlendAttachment.BlendEnable = VK_TRUE;
+    
+
+    std::array<VkDynamicState, 2> dynamicStates =
+    {
+        VK_DYNAMIC_STATE_VIEWPORT,
+        VK_DYNAMIC_STATE_SCISSOR
+    };
+    PipelineInfo.DynamicStates = dynamicStates.data();
+    PipelineInfo.DynamicStateCount = dynamicStates.size();
+
+
+    std::array< QFAVKPipeline::QFADescriptorSetLayout, 1> DescriptorSetLayouts;        
+    std::array<VkDescriptorSetLayoutBinding, 1> bindingsFragment;
+    bindingsFragment[0].binding = 0;
+    bindingsFragment[0].descriptorCount = 1;
+    bindingsFragment[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    bindingsFragment[0].pImmutableSamplers = nullptr;
+    bindingsFragment[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    
+    DescriptorSetLayouts[0].BindingCount = bindingsFragment.size();
+    DescriptorSetLayouts[0].Bindings = bindingsFragment.data();
+
+    PipelineInfo.DescriptorSetLayoutCount = DescriptorSetLayouts.size();
+    PipelineInfo.DescriptorSetLayouts = DescriptorSetLayouts.data();
+
+
+    std::array< uint32_t, 1> MaxSets;
+    MaxSets[0] = 1;
+    PipelineInfo.MaxSets = MaxSets.data();
+
+    Pipeline = new QFAVKPipeline(PipelineInfo);
+
+
     ImageSampler = new QFAVKTextureSampler();
     image = imago;
-
     view = new QFAVKImageView(image, aspect);
-    
+
     imageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
     imageInfo.imageView = view->ImageView;
     imageInfo.sampler = ImageSampler->textureSampler;
-    // 
-    Pipeline = new QFAPresentImagePipeline(RenderPass, "Engine/Shaders/PresentImageVertex.spv", "Engine/Shaders/PresentImageFragment.spv");
-    
-
+    QFAVKPipeline::QFADescriptorSetInfo info;
+    info.dstBinding = 0;
+    info.DescriptorImageInfos = &imageInfo;
+    Pipeline->CreateSet(0, &info);
 }
 
 QFAPresentImage::~QFAPresentImage()
 {
     delete vertexBufer;
     delete ImageSampler;
+    delete Pipeline;
 }
 
 

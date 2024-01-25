@@ -5,6 +5,7 @@
 #include <Render/UI/RenderUnit.h>
 #include <Render/Buffer/VKBuffer.h>
 #include <Render/Window/Window.h>
+
 /* ttf type */
 typedef unsigned long  FT_ULong;
 struct FT_LibraryRec;
@@ -20,24 +21,18 @@ class QFAOverlord;
 class QFAVKVertexBuffer;
 
 class QFAImage;
-class QFAVKTextPipeline;
+class QFAVKPipeline;
+
 class QFAVKImageView;
 class QFAVKTextureSampler;
-
-/*
-    need do buffers like in QMeshBaseComponent
-        create new pool not delete old
-
-
-
-*/
 
 class QFAText : public QFAUIRenderUnit
 {
     friend QFAViewport;
     friend QFAOverlord;
     friend QFAWindow;
-    friend QFAVKTextPipeline;
+    friend QFAVKPipeline;
+
 
     struct SGlyphAtlasListRow
     {
@@ -179,19 +174,17 @@ private:
 
     static bool ReTextRender;
 
+
     void Render(VkCommandBuffer comandebuffer) override;
     static void StartTextRender();
 
-    static void StartTextRenderViewPort(const glm::mat4& proj, unsigned int viewportIndex);
-    static void CreateAtlas();
+
     static void Init(VkRenderPass renderPass, VkCommandPool commandPool);
     static void EndLife();
 
 
 
     bool TextChange;
-
-
 
     QFAVKVertexBuffer* vertexBufer;
 
@@ -218,8 +211,8 @@ private:
 
 
 
-    static QFAVKTextPipeline* Pipeline;
-    static QFAVKTextPipeline* OldPipeline;
+    static QFAVKPipeline* Pipeline;
+    static QFAVKPipeline* OldPipeline;
     static const std::string VertexShaderPath;
     static const std::string FragmentShaderPath;
 
@@ -240,59 +233,29 @@ private:
     static unsigned int MaxAttlas;
     static std::vector<SGlyphAtlas> GlyphAtlasList;
 
-
-    static VkDescriptorPool TextProjectPool;
-    static VkDescriptorPool TextProjectPoolOld;
-    struct STextProjectSet
-    {
-        VkDescriptorSet set;
-        QFAVKBuffer* buffer = nullptr;
-    };
-    static std::array<STextProjectSet, QFAWindow::MaxActiveViewPort> ViewportsUIProject;
-    static std::array<STextProjectSet, QFAWindow::MaxActiveViewPort> ViewportsUIProjectOld;// delete
-
-    struct STextSet
-    {
-        VkDescriptorSet set;
-        QFAVKBuffer* textParametrBuffer;
-    };
     static VkDescriptorSet CurentDescriptorSet;
     static VkDescriptorSet CurentDescriptorSetProject;
 
-
-
-
-    static  std::vector<VkDescriptorPool> TextParamPools;// descriptorPools;
-    static  std::vector<VkDescriptorPool> TextParamPoolsOld;// descriptorPools;
-    //static QFAVKBuffer* uniformBufferProj;
-
-    // before descriptorSets
-    static std::vector<STextSet> textParamSets;
-    static std::vector<STextSet> textParamSetsOld;
+    static std::vector<QFAVKBuffer*> textParamBuffers;
+    
     static std::vector<VkDescriptorImageInfo> DII;
 
-    static void RecreateCreatePiline();
-    static void CreatePiline();
+    
+    static void CreatePipeline();
+    static void RecreatePipeline();
 
 
+    static void CreateTextProjectionSets();
 
-    static void CreateTextProjectionPool();
-    /*
-        addPool == true  create new pool and allocate sets
-        addPool == false TextParamPools move in TextParamPoolsOld
-            and same with sets
-            allocate need pools and sets
-            in StartTextRender() old pools delete
+    static void CreateTextParameterSet();
+    static void RecreateTextParameterSet(VkBuffer buffer);
 
-    */
-    static void CreateTextParameterPool(bool addPool);
-
-
-    static const int AmountSetsInPool = 20;
+    static const int AmountSetsInTextParamPool = 20;
     static int maxTextInframe;
-
 
     static int NumberTextInFrame;
 
     void ProcessParentOverflow(UniformBufferTextParam &param, QFAUIParentComponent* parent);
 };
+
+

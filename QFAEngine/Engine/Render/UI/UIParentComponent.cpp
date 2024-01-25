@@ -13,11 +13,10 @@ void QFAUIParentComponent::AddUnit(QFAUIUnit* unit)
 
 	if (unit->Parent)
 		unit->Parent->RemoveUnitWithoutNotify(unit);
-	else if(IsActive)
-		unit->ParentAttach();
-
+	
 	Children.Add(unit);
 	unit->Parent = this;
+	unit->ParentAttach();
 	NewUnit(unit);
 }
 
@@ -35,6 +34,7 @@ void QFAUIParentComponent::RemoveUnitWithoutNotify(QFAUIUnit* unit)
 	Children.Remove(unit);
 	unit->Parent = nullptr;
 }
+
 
 void QFAUIParentComponent::ParentEnable()
 {	

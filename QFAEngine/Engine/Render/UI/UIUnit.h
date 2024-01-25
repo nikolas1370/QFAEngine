@@ -51,18 +51,7 @@ class QFAUIParentComponent;
 class QFAUICanvas;
 class QFAViewportRoot;
 
-/*
 
-
-
-
-	зробить параметер який дозволя хранить чи батько позволя рендериться 
-
-
-
-
-
-*/
 class QFAUIUnit
 {
 	friend QFAViewport;
@@ -90,8 +79,6 @@ protected:
 	// 0 == top 
 	int Position_y = 0;	
 	QFAUIParentComponent* Parent = nullptr;
-
-
 
 	// parent set size
 	virtual void SetSizeParent(unsigned int w, unsigned int h) = 0;
@@ -143,8 +130,7 @@ protected:
 
 	/*
 	* call if one of parent was attach.
-	* and call if parent can be rendered.
-	* Not call if parent change.
+	* call if parent change.
 	*/
 	inline virtual void ParentAttach() {}
 	// call if one of parent was disconect

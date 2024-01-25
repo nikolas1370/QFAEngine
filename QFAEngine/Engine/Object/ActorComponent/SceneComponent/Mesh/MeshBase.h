@@ -7,8 +7,19 @@
 #include <Render/Window/Window.h>
 #include <Render/vk/TextureSampler.h>
 #include <Render/vk/ImageView.h>
+#include <Render/Pipline/Pipline.h>
 
-class QFAVKMeshShadowPipeline;
+/*
+
+
+remove 
+ShadowDescriptorSets
+
+
+*/
+
+
+
 
 struct VertexMaterial// 
 {
@@ -116,23 +127,22 @@ public:
 };
 
 
-
 class QFAShaderProgram;
 class QFAViewport;
 class QFAWindow;
-class QFAVKMeshPipeline;
+class QFAVKPipeline;
 class QStaticMesh;
-#include <Render/Pipline/MeshPipeline.h>
+
 #include <Render/Buffer/IndexBuffer.h>
 #include <Render/Buffer/VertexBuffer.h>
 
 
-class QMeshBaseComponent : public QSceneComponent // abstract class
+class QMeshBaseComponent : public QSceneComponent 
 {
 	friend QStaticMesh;
 	friend QFAWindow;
 	friend QFAViewport;
-	friend QFAVKMeshPipeline;
+	
 protected:
 	
 
@@ -146,6 +156,7 @@ protected:
 public:	
 
 	QMeshBaseComponent();
+	~QMeshBaseComponent();
 
 	inline void SetCastShadow(bool castShadow)
 	{
@@ -158,20 +169,16 @@ public:
 	}
 	
 	
-	virtual int GetIndexCount() = 0;// pure virtual method
-
+	virtual int GetIndexCount() = 0;
 
 
 	virtual void UpdateBuffers( uint64_t startFrameTime, bool isShadow, const FVector& cameraPos) = 0;
 	
 
-
-
-
 	inline void* GetModelBuffer()
 	{
 		if (SetsInUse >= Set1Buffers.size())
-			createDescriptorPool1();
+			createDescriptorSet1();
 
 		return Set1Buffers[SetsInUse].vertexBuffer->MapData;
 	}
@@ -179,34 +186,29 @@ public:
 	inline void* GetFragmentBuffer()
 	{
 		if (SetsInUse >= Set1Buffers.size())
-			createDescriptorPool1();
-
+			createDescriptorSet1();
+		
 		return Set1Buffers[SetsInUse].fragmentBuffer->MapData;
 	}
 
 	inline void* GetShadowBuffer()
-	{
-		if (ShadowSetsInUse >= ShadowSetBuffers.size())
-			createDescriptorPoolShadow();
-
+	{	
 		return ShadowSetBuffers[ShadowSetsInUse]->MapData;		
 	}
 
-
-
-
  	inline std::array<VkDescriptorSet, 2> GetNextSets()
 	{
-		
-		return std::array<VkDescriptorSet, 2>{QMeshBaseComponent::ViewportSets[QFAWindow::GetMainWindow()->ViewportProcess], DescriptorSets1[SetsInUse++]};
+		return std::array<VkDescriptorSet, 2>
+		{
+			Pipeline->GetSet(0, QFAWindow::GetMainWindow()->ViewportProcess),
+			Pipeline->GetSet(1, SetsInUse++)
+		};
 	}
 
 	inline VkDescriptorSet GetShadowNextSet()
 	{
-		
-		return ShadowDescriptorSets[ShadowSetsInUse++];
+		return ShadowPipline->GetSet(0, ShadowSetsInUse++);		
 	}
-
 
 
 	struct SShaderDirLight
@@ -233,26 +235,26 @@ private:
 
 	
 	static void EndLife();
-	static void createDescriptorPool0();
-	static void createDescriptorPool1();
-	static void createDescriptorPoolShadow();
-	static void createDescriptorSet0();
-	static void createDescriptorSet1();
-	static void createDescriptorSetShadow();
+
 	
+	static void createDescriptorSets0();
+	static void createDescriptorSet1();
+
 
 	static void Init(VkRenderPass renderPass, VkRenderPass ShadowRenderPass, VkCommandPool commandPool_);
-	static VkVertexInputBindingDescription getBindingDescription();
-	static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions();
+	
 
+	static void CreatePipeline();
+	static void CreateShadowPipline();
 
-	static QFAVKMeshPipeline* Pipeline;
-	static QFAVKMeshShadowPipeline* ShadowPipline;
+	static QFAVKPipeline* Pipeline;
+	static QFAVKPipeline* ShadowPipline;
 
 
 
 	static VkCommandPool commandPool;
 	static VkRenderPass RenderPass;
+	static  VkRenderPass ShadowRenderPass;
 
 
 	static  VkDescriptorPool descriptorPool;
@@ -266,10 +268,6 @@ private:
 		void* BufferVertexMapped;
 	};
 
-	
-	
-
-	static std::array<VkDescriptorSet, QFAWindow::MaxActiveViewPort> ViewportSets;
 	static std::array<QFAVKBuffer*, QFAWindow::MaxActiveViewPort> BuffersVertex;
 
 	
@@ -286,8 +284,6 @@ private:
 	{
 		QFAVKBuffer* vertexBuffer;
 		QFAVKBuffer* fragmentBuffer;
-
-
 	};
 
 
@@ -296,7 +292,7 @@ private:
 	static unsigned int SetsInUse ; // in one frame
 	
 	static const unsigned int DescriptorSets1Amount = 100;
-	static std::vector<VkDescriptorSet> DescriptorSets1;
+
 	static std::vector<SSet1Buffers> Set1Buffers;
 
 	static unsigned int ShadowSetsInUse; 

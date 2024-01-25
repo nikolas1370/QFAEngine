@@ -3,7 +3,7 @@
 #include <Render/vk/LogicalDevice.h>
 #include <Render/Image.h>
 #include <Render/Buffer/VertexBuffer.h>
-#include <Render/Pipline/ImagePipeline.h>
+
 #include <Render/vk/ImageView.h>
 #include <Render/vk/TextureSampler.h>
 
@@ -60,22 +60,9 @@ void QFAUIImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_)
     commandPool = commandPool_;
     RenderPass = renderPass;    
     ImageSampler = new QFAVKTextureSampler();
- /*
-
-
-    
-    
-    imageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-    imageInfo.imageView = view->ImageView;
-    imageInfo.sampler = ImageSampler->textureSampler;
-    // PresentImageFragment
-    Pipeline = new QFAVKImagePipeline(RenderPass, "Engine/Shaders/ImageVertex.spv", "Engine/Shaders/ImageFragment.spv");
-    */
 
     
 }
-
-
 
 QFAUIImage::~QFAUIImage()
 {
@@ -88,8 +75,6 @@ void QFAUIImage::SetImage(QFAImage* image)
     Image = image;
 }
 
-
-
 void QFAUIImage::EndLife()
 {    
     delete Pipeline;
@@ -98,29 +83,15 @@ void QFAUIImage::EndLife()
 
 void QFAUIImage::RecreateCreatePiline()
 {
-    /*
-    OldPipeline = Pipeline;
-    Pipeline = new QFAVKTextPipeline(RenderPass, QFAText::VertexShaderPath, QFAText::FragmentShaderPath);
-    CreateTextProjectionPool();
-    CreateTextParameterPool(false);
-    */
+
 }
 
 void QFAUIImage::CreatePiline()
 {
-    /*
-    Pipeline = new QFAVKTextPipeline(RenderPass, QFAText::VertexShaderPath, QFAText::FragmentShaderPath);
-    CreateTextProjectionPool();
-    CreateTextParameterPool(true);
-    */
+    
 }
 
-/*
 
-    нада зробить на перевіркі чи це небуло ложне збрацювання(баг)
-
-
-*/
 
 void QFAUIImage::ParentEnable()
 {
@@ -133,12 +104,7 @@ void QFAUIImage::ParentDisable()
 
 }
 
-/*
 
-    нада зробить на перевіркі чи це небуло ложне збрацювання(баг)
-
-
-*/
 void QFAUIImage::ParentAttach()
 {
 

@@ -27,7 +27,7 @@
 int main()
 {   
     
-    
+
 
     QFAOverlord::Init();
     QStaticMesh* Mesh = QFAModelLoader::LoadModel("NoEngineModel/Arrow.fbx");
@@ -73,13 +73,13 @@ int main()
     Camera.ActivateCamera(firstdViewPort);
     
 
- 
-    firstdViewPort->SetParameters(0, 0, 1, 1);    
+    firstdViewPort->SetParameters(0, 0, 0.5, 1);
+ //   firstdViewPort->SetParameters(0, 0, 1, 1);    
 
     
     QFAText* text = new QFAText();
     QFAText* text_2 = new QFAText();
-    text_2->SetText(L"Viewport 1");
+    text_2->SetText(L"Viewport 1 supre test");
 
     
     text_2->SetPosition(0, 0);
@@ -91,7 +91,6 @@ int main()
 
     text->SetText(L"З'їли Їжака This tutorial will teach you the basics of using the Vulkan graphics and compute API. Vulkan is a new API by the Khronos group (known for OpenGL) that provides a much better abstraction of modern graphics cards. This new interface allows you to better describe what your application intends to do, which can lead to better performance and less surprising driver behavior compared to existing APIs like OpenGL and Direct3D. The ideas behind Vulkan are similar to those of Direct3D 12 and Metal, but Vulkan has the advantage of being fully cross-platform and allows you to develop for Windows, Linux and Android at the same time.");
                                 
-    //text->SetText(L"З'їли Їїжака їжака AaBb");
     text->Color = FVector(1, 0, 0.3f);
     text->Outline = false;
     text->OutlineColor = FVector(0.5f, 0.4f, 0.3f);
@@ -126,6 +125,27 @@ int main()
     firstdViewPort->AddUnit(text_2);
     
     text_2->SetSize(600, 300);
+
+
+
+    /*-----*/
+    QFAViewport* secondViewPort = new QFAViewport;
+    QFAViewport* thirdViewPort = new QFAViewport;
+    QFAViewport* fourthViewPort = new QFAViewport;
+
+    ACameraActor* secondCamera = new ACameraActor();
+    mainWorld->AddActor(secondCamera);
+    secondCamera->SetActorPosition(FVector(-609.397, -752.392, -4.68553));
+    secondCamera->SetActorRotation(FVector(0, -1.8, 49.5));
+    QFAText* textViewPort2 = new QFAText();
+    textViewPort2->SetText(L"ViewPort 2");
+    textViewPort2->SetTextSize(30);
+    textViewPort2->SetPosition(0, 0);
+    
+    secondCamera->ActivateCamera(secondViewPort);
+    mainWindow->AddViewport(secondViewPort);
+    secondViewPort->SetParameters(0.5f, 0.66666f, 0.5f, 0.33333f);
+    secondViewPort->AddUnit(textViewPort2);
 
     QFAOverlord::StartLife();
 

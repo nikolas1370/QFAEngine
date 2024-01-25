@@ -7,19 +7,17 @@
 #include <Object/World/DirectionLight/DirectionLight.h>
 #include <Overlord/Overlord.h>
 #include <Render/Window/Viewport.h>
-#include <Render/Pipline/TextPipeline.h>
 #include <chrono>
-// vkDeviceWaitIdle(QFAVKLogicalDevice::GetDevice());
 #include <Object/Actor/Actor.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
 #include <Render/UI/UIImage.h>
-#include <Render/Pipline/ImagePipeline.h>
+
 #include <Render/UI/Text.h>
 
-#include <Render/Pipline/MeshShadowPipeline.h>
+
 #include <Render/Framebuffer/MeshFrameBuffer.h> 
 #include <Render/UI/UIParentComponent.h>
-#include <Render/Pipline/PresentImagePipeline.h>
+#include <Render/Pipline/Pipline.h>
 
 
 QFAWindow* QFAWindow::MainWindow = nullptr;
@@ -147,7 +145,6 @@ void QFAWindow::createCommandBuffer()
 
 void QFAWindow::DrawText()
 {
-
 	VkCommandBufferBeginInfo beginInfo{};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
@@ -169,11 +166,10 @@ void QFAWindow::DrawText()
 	renderPassInfo.pClearValues = clearValues.data();
 
 	vkCmdBeginRenderPass(MainWindow->UICommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);	
-	vkCmdBindPipeline(MainWindow->UICommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, QFAText::Pipeline->graphicsPipeline);
+	vkCmdBindPipeline(MainWindow->UICommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, QFAText::Pipeline->GetPipeline());
 	/*----------------*/
 
 	QFAText::StartTextRender();
-
 	for (size_t i = 0; i < MainWindow->Viewports.Length(); i++)
 	{
 		VkViewport viewport{};
@@ -189,8 +185,7 @@ void QFAWindow::DrawText()
 		scissor.offset = { 0, 0 };
 		scissor.extent = MainWindow->SwapChain->swapChainExtent;
 		vkCmdSetScissor(MainWindow->UICommandBuffer, 0, 1, &scissor);
-		
-		QFAText::StartTextRenderViewPort(MainWindow->Viewports[i]->UIProjection, i);
+		MainWindow->StartUIRenderViewPort(i);
 
 		ProcessUIUnit(&MainWindow->Viewports[i]->Root);			
 	}
@@ -217,8 +212,12 @@ void QFAWindow::DrawText()
 	if (vkEndCommandBuffer(UICommandBuffer) != VK_SUCCESS)
 		stopExecute("failed to record command buffer!");
 
+
+
 	if (vkQueueSubmit(QFAVKLogicalDevice::GetGraphicsQueue(), 1, &submitInfo, nullptr) != VK_SUCCESS)
 		stopExecute("failed to submit draw command buffer!");	
+
+
 }
 
 void QFAWindow::ProcessUIUnit(QFAUIUnit* unit)
@@ -229,6 +228,17 @@ void QFAWindow::ProcessUIUnit(QFAUIUnit* unit)
 	if (unit->CanBeParent)
 		for (size_t i = 0; i < ((QFAUIParentComponent*)unit)->Children.Length(); i++)
 			ProcessUIUnit(((QFAUIParentComponent*)unit)->Children[i]);
+}
+
+
+
+void QFAWindow::StartUIRenderViewPort( int viewportIndex)
+{	
+	QFAText::CurentDescriptorSetProject = QFAText::Pipeline->GetSet(0, viewportIndex);
+
+	UniformBufferObject ubo{};
+	ubo.projection = MainWindow->Viewports[viewportIndex]->UIProjection;
+	memcpy(ViewportBuffers[viewportIndex].uiProjectionBuffer->MapData, &ubo, sizeof(ubo.projection));
 }
 
 void QFAWindow::DrawOffscreenBuffer()
@@ -269,7 +279,7 @@ void QFAWindow::DrawOffscreenBuffer()
 	scissor.extent = MainWindow->SwapChain->swapChainExtent;
 	vkCmdSetScissor(MainWindow->FinisCommandBuffer, 0, 1, &scissor);
 
-	vkCmdBindPipeline(MainWindow->FinisCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, QFAPresentImage::Pipeline->graphicsPipeline);
+	vkCmdBindPipeline(MainWindow->FinisCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, QFAPresentImage::Pipeline->GetPipeline());
 
 	recordCommandBufferTestImege();
 
@@ -305,8 +315,10 @@ void QFAWindow::recordCommandBufferTestImege()
 
 	vkCmdBindVertexBuffers(FinisCommandBuffer, 0, 1, vertexBuffers, offsets);
 
+	VkDescriptorSet descSet = QFAPresentImage::Pipeline->GetSet(0, 0);
+
 	vkCmdBindDescriptorSets(FinisCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-		QFAPresentImage::Pipeline->pipelineLayout, 0, 1, &QFAPresentImagePipeline::descriptorSet, 0, nullptr);
+		QFAPresentImage::Pipeline->GetPipelineLayout(), 0, 1, &descSet , 0, nullptr);
 	
 	vkCmdDraw(FinisCommandBuffer, static_cast<uint32_t>(6), 1, 0, 0);
 }
@@ -415,7 +427,7 @@ void QFAWindow::RenderOff(QFAViewport* _viewport)
 		0.0f,
 		depthBiasSlope);
 
-	vkCmdBindPipeline(MainWindow->ShadowCommandBuffers[ViewportProcess], VK_PIPELINE_BIND_POINT_GRAPHICS, QMeshBaseComponent::ShadowPipline->graphicsPipeline);
+	vkCmdBindPipeline(MainWindow->ShadowCommandBuffers[ViewportProcess], VK_PIPELINE_BIND_POINT_GRAPHICS, QMeshBaseComponent::ShadowPipline->GetPipeline());
 
 	VkViewport viewport{};
 	viewport.x = 0;
@@ -500,6 +512,7 @@ void QFAWindow::RenderWindow()
 	
 	for (size_t i = 0; i < MainWindow->Viewports.Length(); i++)
 	{		
+		
 		MainWindow->StartRenderOff();
 
 		MainWindow->RenderOff(MainWindow->Viewports[i]); 
@@ -512,7 +525,8 @@ void QFAWindow::RenderWindow()
 	}
 
 	MainWindow->DrawText();
-	
+
+
 	MainWindow->DrawOffscreenBuffer();
 
 	
@@ -580,11 +594,9 @@ void QFAWindow::CreateShadow()
 }
 
 void QFAWindow::CreateViewtortsBuffers()
-{
+{	
 	for (size_t i = 0; i < ViewportBuffers.size(); i++)
-	{
-		ViewportBuffers[i].uiProjectionBuffer = new QFAVKBuffer(sizeof(glm::mat4), nullptr, true);		
-	}
+		ViewportBuffers[i].uiProjectionBuffer = new QFAVKBuffer(sizeof(glm::mat4), nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 }
 
 
@@ -614,7 +626,7 @@ void QFAWindow::DrawActors(QFAViewport* _viewport, bool clear)
 
 	vkCmdBeginRenderPass(MainWindow->MeshCommandBuffers[ViewportProcess], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-	vkCmdBindPipeline(MainWindow->MeshCommandBuffers[ViewportProcess], VK_PIPELINE_BIND_POINT_GRAPHICS, QMeshBaseComponent::Pipeline->graphicsPipeline);
+	vkCmdBindPipeline(MainWindow->MeshCommandBuffers[ViewportProcess], VK_PIPELINE_BIND_POINT_GRAPHICS, QMeshBaseComponent::Pipeline->GetPipeline());
 
 	VkViewport viewport{};
 	viewport.x = _viewport->X;
@@ -700,7 +712,7 @@ void QFAWindow::recordCommandBufferMesh(QMeshBaseComponent* mesh, bool shadow)
 		vkCmdBindIndexBuffer(ShadowCommandBuffers[ViewportProcess], mesh->IndexBuffer->GpuSideBuffer->Buffer, 0, VK_INDEX_TYPE_UINT32);
 		auto nextSet = mesh->GetShadowNextSet();
 		vkCmdBindDescriptorSets(ShadowCommandBuffers[ViewportProcess], VK_PIPELINE_BIND_POINT_GRAPHICS,
-			QMeshBaseComponent::ShadowPipline->pipelineLayout, 0, 1, &nextSet, 0, nullptr);
+			QMeshBaseComponent::ShadowPipline->GetPipelineLayout(), 0, 1, &nextSet, 0, nullptr);
 
 		vkCmdDrawIndexed(ShadowCommandBuffers[ViewportProcess], static_cast<uint32_t>(mesh->GetIndexCount()), 1, 0, 0, 0);
 	}
@@ -711,7 +723,7 @@ void QFAWindow::recordCommandBufferMesh(QMeshBaseComponent* mesh, bool shadow)
 
 		auto nextSets = mesh->GetNextSets();
 		vkCmdBindDescriptorSets(MeshCommandBuffers[ViewportProcess], VK_PIPELINE_BIND_POINT_GRAPHICS,
-			QMeshBaseComponent::Pipeline->pipelineLayout, 0, nextSets.size(), nextSets.data(), 0, nullptr);
+			QMeshBaseComponent::Pipeline->GetPipelineLayout(), 0, nextSets.size(), nextSets.data(), 0, nullptr);
 
 		vkCmdDrawIndexed(MeshCommandBuffers[ViewportProcess], static_cast<uint32_t>(mesh->GetIndexCount()), 1, 0, 0, 0);
 	}	

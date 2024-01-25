@@ -36,6 +36,8 @@ class QFAUIImage : public QFAUIUnit
     void SetPositionParent(unsigned int x, unsigned int y) override {}
 
     QFAImage* Image;
+
+
 public:
   
 

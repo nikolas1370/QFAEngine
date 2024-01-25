@@ -109,6 +109,9 @@ void QFAViewport::ChangeCamera(QCameraComponent* camera)
 
 void QFAViewport::SetParameters(float xP, float  yP, float widthP, float heightP)
 {
+	
+		
+
 	XP = xP;
 	YP = yP;
 	WidthP = widthP;
@@ -117,12 +120,16 @@ void QFAViewport::SetParameters(float xP, float  yP, float widthP, float heightP
 	Y = (int)((float)WindowHeight * YP);
 	Width = (int)((float)WindowWidth * WidthP);
 	Height = (int)((float)WindowHeight * HeightP);
+	Root.SetSizeParent(Width, Height);	
 	if (Height == 0)
 		Height = 1;
+
+	if (!CurentCamera)
+		return;
 
 	UIProjection = glm::orthoLH_ZO(0.0f, (float)Width, 0.0f, (float)Height, 0.0f, 1.0f);
 	MatrixPerspective = glm::perspectiveLH_ZO(glm::radians(CurentCamera->Fov),
 		(float)Width / (float)Height, 0.1f, CurentCamera->ViewDistance); 
-	
-	Root.SetSize(Width, Height);
+
+
 }

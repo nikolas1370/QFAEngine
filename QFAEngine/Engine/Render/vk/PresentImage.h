@@ -24,13 +24,13 @@ class QFAVKTextPipeline;
 class QFAVKImageView;
 class QFAVKTextureSampler;
 
-class QFAPresentImagePipeline;
+class QFAVKPipeline;
 
 class QFAPresentImage
 {
     
     friend QFAWindow;
-    friend QFAPresentImagePipeline;
+    
 
 public:
   
@@ -46,7 +46,7 @@ private:
     
 
     QFAVKVertexBuffer* vertexBufer;
-    static QFAPresentImagePipeline* Pipeline;
+    static QFAVKPipeline* Pipeline;
     static VkCommandPool commandPool;
     static QFAVKTextureSampler* ImageSampler;
     static VkRenderPass RenderPass;

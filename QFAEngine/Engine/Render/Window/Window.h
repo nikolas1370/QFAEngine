@@ -22,6 +22,16 @@
 #include <Render/RenderPass/TextRenderPass.h>
 #include <Render/vk/PresentImage.h>
 
+struct UniformBufferObject
+{// more detail https://fvcaputo.github.io/2019/02/06/memory-alignment.html
+	/*
+		An array or structure type has an extended
+		alignment equal to the largest extended alignment of any of
+		its members, rounded up to a multiple of 16.
+	*/
+	alignas(16) glm::mat4 projection;
+};
+
 struct GLFWwindow;
 class QFAViewport;
 class QFAOverlord;
@@ -43,8 +53,10 @@ class QFAWindow
 	friend QFAText;; 
 
 	friend QFAOverlord;
+	friend QMeshBaseComponent;
 	static QFAWindow* MainWindow;
 	GLFWwindow* glfWindow;
+	
 	static bool Init;
 	int Width;
 	int Height;
@@ -195,6 +207,8 @@ private:
 
 	void ProcessUIUnit(QFAUIUnit* unit);
 
+
+	void StartUIRenderViewPort( int viewportIndex);
 public:
 	QFAVKImageView* ShadowImagesView;
 	QFAVKTextureSampler* ShadowSampler;
@@ -219,7 +233,6 @@ private:
 		QFAVKBuffer* uiProjectionBuffer;
 	};
 	std::array<SViewportBuffers, MaxActiveViewPort> ViewportBuffers;
-
 
 	void CreateShadow();
 	void CreateViewtortsBuffers();
