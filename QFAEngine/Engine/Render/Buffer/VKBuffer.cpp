@@ -36,6 +36,15 @@ QFAVKBuffer::QFAVKBuffer(VkDeviceSize size, const void* data, bool inHost, VkBuf
     if (data == nullptr || !inHost)
         return;
     
+    /*
+    * some time can be
+        Exception thrown at 0x00007FF94A7AF9D1 (vcruntime140d.dll) in QFAEngine.exe: 0xC0000005: Access violation reading location 0x000001FB2EE54000.
+        QMeshBaseComponent::CreateVertexIndexBuffers()
+        QStaticMesh::SetMesh(MeshData* meshData)
+        QStaticMesh::QStaticMesh(MeshData* meshData)
+         QFAModelLoader::LoadModel(const std::string& pFile)
+         only if load model
+    */
     memcpy(MapData, data, static_cast<size_t>(size));
 }
 
@@ -310,6 +319,7 @@ void QFAVKBuffer::copyBuffer( VkBuffer dstBuffer, VkDeviceSize size, VkCommandPo
     copyRegion.srcOffset = srcOffset;
     copyRegion.dstOffset = dstOffset;    
     vkCmdCopyBuffer(commandBuffer, Buffer, dstBuffer, 1, &copyRegion);//does not copy more than allocated memory in dstBuffer
+    
 
     endSingleTimeCommands(commandPool, commandBuffer);
 }

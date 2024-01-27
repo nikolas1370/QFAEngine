@@ -16,7 +16,8 @@ void QFAViewportRoot::SetSizeParent(unsigned int w, unsigned int h)
 	Width = w;
 	Height = h;
 	for (size_t i = 0; i < Children.Length(); i++)
-		Children[i]->SetSizeParent(w, h);
+		if(Children[i]->SelfResizable)
+			Children[i]->SetSizeParent(w, h);
 }
 
 void QFAViewportRoot::SetPositionParent(unsigned int x, unsigned int y)
@@ -24,7 +25,8 @@ void QFAViewportRoot::SetPositionParent(unsigned int x, unsigned int y)
 	Position_x = x;
 	Position_y = y;
 	for (size_t i = 0; i < Children.Length(); i++)
-		Children[i]->SetPositionParent(x, y);	
+		if (Children[i]->SelfResizable)
+			Children[i]->SetPositionParent(x, y);	
 }
 
 void QFAViewportRoot::NewUnit(QFAUIUnit* unit)

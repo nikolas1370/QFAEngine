@@ -149,9 +149,7 @@ public:
     ~QFAText();
 
     void SetText(std::wstring  text);
-    void SetSize(unsigned int w, unsigned int h) override;
-    /* remove in UIUnit */
-    void SetPosition(unsigned int x, unsigned int y) override;
+
     void SetTextSize(unsigned int height);
     /*----*/
 

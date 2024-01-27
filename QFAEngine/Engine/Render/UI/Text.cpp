@@ -431,17 +431,6 @@ void QFAText::PrepareSymbolsToGpu()
     }
 }
 
-void QFAText::SetPosition(unsigned int x, unsigned int y)
-{
-    if (!Parent || Parent->GetIsRoot())
-        SetPositionParent(x, y);
-}
-
-void QFAText::SetSize(unsigned int w, unsigned int h)
-{
-    if (!Parent || Parent->GetIsRoot())
-        SetSizeParent(w, h);
-}
 
 void QFAText::Destroy()
 {

@@ -122,6 +122,7 @@ public:
 
     */
     void CreateSet(uint32_t groupIndex, QFADescriptorSetInfo* DescriptorInfo);
+    void UpdateSet(uint32_t groupIndex, uint32_t setIndex, QFADescriptorSetInfo* DescriptorInfo);
     
     inline VkDescriptorSet GetSet(uint32_t groupIndex, uint32_t setIndex)
     {        

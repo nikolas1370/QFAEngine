@@ -41,6 +41,8 @@ QFAImage::QFAImage( const std::string src)
     
     createImage(texWidth, texHeight, ImageFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
     buffer->copyInImage(this, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), CommandPool);
+
+    ImageView.CreateView(this, VK_IMAGE_ASPECT_COLOR_BIT);
 }
 
 QFAImage::~QFAImage()
@@ -58,6 +60,7 @@ void QFAImage::DeleteImageInCpuSide()
         buffer = nullptr;
     }
 }
+
 
 void QFAImage::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage)
 {

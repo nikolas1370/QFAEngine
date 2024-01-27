@@ -2,7 +2,7 @@
 #include <Tools/VulkanSuff.h>
 #include <Tools/Array.h>
 #include <Math/Vector.h>
-#include <Render/UI/UIUnit.h>
+#include <Render/UI/RenderUnit.h>
 #include <Render/Buffer/VKBuffer.h>
 
 /* ttf type */
@@ -20,39 +20,48 @@ class QFAWindow;
 class QFAVKVertexBuffer;
 
 class QFAVKTextureImage;
-class QFAVKTextPipeline;
 class QFAVKImageView;
 class QFAVKTextureSampler;
 
-class QFAVKImagePipeline;
 
-class QFAUIImage : public QFAUIUnit
+class QFAVKPipeline;
+
+class QFAUIImage : public QFAUIRenderUnit
 {
     
     friend QFAWindow;
-    friend QFAVKImagePipeline;
+    
 
-    void SetSizeParent(unsigned int w, unsigned int h) override {}
-    void SetPositionParent(unsigned int x, unsigned int y) override {}
+
+    void SetSizeParent(unsigned int w, unsigned int h) override;
+    void SetPositionParent(unsigned int x, unsigned int y) override;
 
     QFAImage* Image;
 
+    static QFAVKPipeline* Pipeline;
+    static void CreatePipeline();
+    
+    void Render(VkCommandBuffer comandebuffer) override;
+    void UpdateUniforms();
+    static VkDescriptorSet CurentDescriptorSetProject;
 
 public:
   
 
-    QFAUIImage(VkCommandPool _commandPool);
+    QFAUIImage(QFAImage* image);
     ~QFAUIImage();
 
     void SetImage(QFAImage* image);
+
+
 private: 
-    void Init(VkRenderPass renderPass, VkCommandPool commandPool);
+    static void Init(VkRenderPass renderPass, VkCommandPool commandPool);
     static void EndLife();
 
-    
+    static void CreateTextProjectionSets();
 
     QFAVKVertexBuffer* vertexBufer;
-    static QFAVKImagePipeline* Pipeline;
+    static QFAVKPipeline* QFAVKPipline;
     static VkCommandPool commandPool;
     static QFAVKTextureSampler* ImageSampler;
     static VkRenderPass RenderPass;
@@ -60,7 +69,7 @@ private:
     static VkDescriptorImageInfo imageInfo;
 
 
-    struct ImageShaderVertex
+    struct SImageShaderVertex
     {
         float x;
         float y;
@@ -68,8 +77,32 @@ private:
         float textureY;
     };
 
-    ImageShaderVertex quad[6];
+    SImageShaderVertex quad[6];
 
+    struct SImageIndex
+    {
+        QFAVKBuffer* buffer;
+        QFAUIImage* image = nullptr;
+        unsigned int setIndex;
+    };
+
+    static std::vector<SImageIndex> ImageIndexs;
+    unsigned int Index = 0;
+
+    static const unsigned int AmountSetsInImageParamPool = 100;
+
+
+    struct SImageParam
+    {
+        float opacity;
+        int overflow;
+        float leftTopX;
+        float leftTopY;
+        float rightBottomX;
+        float rightBottomY;
+    };
+
+    void ChangeQuad();
 
 protected:
     void ParentEnable() override;
@@ -78,6 +111,6 @@ protected:
     void ParentDisconect() override;
 
 
-    void RecreateCreatePiline();
-    void CreatePiline();
+    void PrepareSet();
+    void DisableImage();
 };

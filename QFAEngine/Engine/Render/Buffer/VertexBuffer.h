@@ -4,10 +4,12 @@
 
 class QFAWindow;
 class QFAText;
+class QFAUIImage;
 class QFAVKVertexBuffer
 {
 	friend QFAWindow;
 	friend QFAText;
+	friend QFAUIImage;
 	QFAVKBuffer* CpuSideBuffer;
 	QFAVKBuffer* GpuSideBuffer;
 	VkCommandPool CommandPool;

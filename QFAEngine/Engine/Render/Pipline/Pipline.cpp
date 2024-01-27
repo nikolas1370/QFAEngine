@@ -220,11 +220,17 @@ void QFAVKPipeline::CreateSet(uint32_t groupIndex, QFADescriptorSetInfo* descrip
         stopExecute("failed to allocate descriptor sets!");
 
     Pools[groupIndex].ListSet.push_back(set);
+    UpdateSet(groupIndex, Pools[groupIndex].ListSet.size() - 1, descriptorInfo);
+    GroupDescriptorPools[groupIndex].CountSetInLastPool++;
+}
+
+void QFAVKPipeline::UpdateSet(uint32_t groupIndex, uint32_t setIndex,  QFADescriptorSetInfo* descriptorInfo)
+{
     std::array<VkWriteDescriptorSet, MaxDescriptorPoolSizeCount> descriptorWrites{};
     for (size_t j = 0; j < GroupDescriptorPools[groupIndex].DescriptorPoolSizeCount; j++)
     {
         descriptorWrites[j].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[j].dstSet = set;
+        descriptorWrites[j].dstSet = Pools[groupIndex].ListSet[setIndex];
         descriptorWrites[j].dstBinding = descriptorInfo[j].dstBinding;
         descriptorWrites[j].dstArrayElement = 0;
         descriptorWrites[j].descriptorType = GroupDescriptorPools[groupIndex].DescriptorPoolSizes[j].type;
@@ -234,9 +240,7 @@ void QFAVKPipeline::CreateSet(uint32_t groupIndex, QFADescriptorSetInfo* descrip
     }
 
     vkUpdateDescriptorSets(QFAVKLogicalDevice::GetDevice(), GroupDescriptorPools[groupIndex].DescriptorPoolSizeCount, descriptorWrites.data(), 0, nullptr);
-    GroupDescriptorPools[groupIndex].CountSetInLastPool++;
 }
-
 
 std::vector<char> QFAVKPipeline::readFile(const std::string& filename)
 {

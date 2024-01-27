@@ -21,7 +21,7 @@
 #include <Render/Framebuffer/ShadowFrameBuffer.h>
 #include <Render/RenderPass/TextRenderPass.h>
 #include <Render/vk/PresentImage.h>
-
+#include <Render/UI/UIUnit.h>
 struct UniformBufferObject
 {// more detail https://fvcaputo.github.io/2019/02/06/memory-alignment.html
 	/*
@@ -47,11 +47,12 @@ class QSceneComponent;
 class QWorld;
 class QFAText;
 class QFAUIUnit;
+class QFAUIImage;
 class QFAWindow
 {
 
 	friend QFAText;; 
-
+	friend QFAUIImage;
 	friend QFAOverlord;
 	friend QMeshBaseComponent;
 	static QFAWindow* MainWindow;
@@ -180,7 +181,9 @@ private:
 
 	unsigned int ProcessMeshComponent(QSceneComponent* component, bool shadow);
 
-	void DrawText();
+
+	void DrawUI();
+	void DrawPartUI(VkPipeline pipeline, QFAUIType::Type type);
 
 
 	void DrawOffscreenBuffer();
@@ -205,7 +208,7 @@ private:
 	float depthBiasSlope = 3.55f; // 1.75f    2.55f
 	
 
-	void ProcessUIUnit(QFAUIUnit* unit);
+	void ProcessUIUnit(QFAUIUnit* unit, QFAUIType::Type type);
 
 
 	void StartUIRenderViewPort( int viewportIndex);

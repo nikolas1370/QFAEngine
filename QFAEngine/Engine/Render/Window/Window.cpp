@@ -95,6 +95,7 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 	CreateViewtortsBuffers();
 
 	QFAText::Init(TextRenderPass->renderPass, commandPool);	
+	QFAUIImage::Init(TextRenderPass->renderPass, commandPool);
 	ShadowFrameBuffer = new QFAVKShadowFrameBuffer(commandPool, RenderPassOffScreen->renderPass);
 
 	CreateShadow();
@@ -106,6 +107,8 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 	imugo = new QFAPresentImage(commandPool);
 
 	imugo->Init(RenderPass->renderPass, commandPool, frameBufferMesh->ColorImage);	
+
+	
 }
 
 QFAWindow::~QFAWindow()
@@ -143,18 +146,18 @@ void QFAWindow::createCommandBuffer()
 	}
 }
 
-void QFAWindow::DrawText()
+void QFAWindow::DrawUI()
 {
 	VkCommandBufferBeginInfo beginInfo{};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
 	if (vkBeginCommandBuffer(MainWindow->UICommandBuffer, &beginInfo) != VK_SUCCESS)
 		stopExecute("failed to begin recording command buffer!");
-		
+
 	VkRenderPassBeginInfo renderPassInfo{};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	renderPassInfo.renderPass = MainWindow->TextRenderPass->renderPass;
-	renderPassInfo.framebuffer = frameBufferMesh->Framebuffer;
+	renderPassInfo.framebuffer = MainWindow->frameBufferMesh->Framebuffer;
 	renderPassInfo.renderArea.offset = { 0, 0 };
 	renderPassInfo.renderArea.extent = MainWindow->SwapChain->swapChainExtent;
 
@@ -165,69 +168,72 @@ void QFAWindow::DrawText()
 	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
 	renderPassInfo.pClearValues = clearValues.data();
 
-	vkCmdBeginRenderPass(MainWindow->UICommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);	
-	vkCmdBindPipeline(MainWindow->UICommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, QFAText::Pipeline->GetPipeline());
-	/*----------------*/
-
+	vkCmdBeginRenderPass(MainWindow->UICommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	/*---*/
 	QFAText::StartTextRender();
-	for (size_t i = 0; i < MainWindow->Viewports.Length(); i++)
-	{
-		VkViewport viewport{};
-		viewport.x = MainWindow->Viewports[i]->X;
-		viewport.y = MainWindow->Viewports[i]->Y;
-		viewport.width = MainWindow->Viewports[i]->Width;
-		viewport.height = MainWindow->Viewports[i]->Height;
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
-		vkCmdSetViewport(MainWindow->UICommandBuffer, 0, 1, &viewport); // can in start render viewport do 
+	DrawPartUI(QFAText::Pipeline->GetPipeline(), QFAUIType::Text);
+	DrawPartUI(QFAUIImage::Pipeline->GetPipeline(), QFAUIType::Image);
+	/*---*/
 
-		VkRect2D scissor{};
-		scissor.offset = { 0, 0 };
-		scissor.extent = MainWindow->SwapChain->swapChainExtent;
-		vkCmdSetScissor(MainWindow->UICommandBuffer, 0, 1, &scissor);
-		MainWindow->StartUIRenderViewPort(i);
+	vkCmdEndRenderPass(MainWindow->UICommandBuffer);
 
-		ProcessUIUnit(&MainWindow->Viewports[i]->Root);			
-	}
 
-	/*------------------*/
+	if (vkEndCommandBuffer(MainWindow->UICommandBuffer) != VK_SUCCESS)
+		stopExecute("failed to record command buffer!");
 
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
 	VkPipelineStageFlags bit = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	submitInfo.waitSemaphoreCount = 1;
-	submitInfo.pWaitSemaphores = &ActorFinishedSemi[ViewportProcess - 1];
+	submitInfo.pWaitSemaphores = &MainWindow->ActorFinishedSemi[MainWindow->ViewportProcess - 1];
 	submitInfo.pWaitDstStageMask = &bit;
 
 	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &UICommandBuffer;
+	submitInfo.pCommandBuffers = &MainWindow->UICommandBuffer;
 
-	VkSemaphore signalSemaphores[] = { UISemaphore};	
+	VkSemaphore signalSemaphores[] = { MainWindow->UISemaphore };
 	submitInfo.signalSemaphoreCount = 1;
 	submitInfo.pSignalSemaphores = signalSemaphores;
-	
-	vkCmdEndRenderPass(UICommandBuffer);
-
-	if (vkEndCommandBuffer(UICommandBuffer) != VK_SUCCESS)
-		stopExecute("failed to record command buffer!");
-
-
 
 	if (vkQueueSubmit(QFAVKLogicalDevice::GetGraphicsQueue(), 1, &submitInfo, nullptr) != VK_SUCCESS)
-		stopExecute("failed to submit draw command buffer!");	
-
-
+		stopExecute("failed to submit draw command buffer!");
 }
 
-void QFAWindow::ProcessUIUnit(QFAUIUnit* unit)
+void QFAWindow::DrawPartUI(VkPipeline pipeline, QFAUIType::Type type)
 {
-	if (unit->CanRender)
+	vkCmdBindPipeline(UICommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+
+	for (size_t i = 0; i < Viewports.Length(); i++)
+	{
+		VkViewport viewport{};
+		viewport.x = Viewports[i]->X;
+		viewport.y = Viewports[i]->Y;
+		viewport.width = Viewports[i]->Width;
+		viewport.height = Viewports[i]->Height;
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(UICommandBuffer, 0, 1, &viewport); // can in start render viewport do 
+
+		VkRect2D scissor{};
+		scissor.offset = { 0, 0 };
+		scissor.extent = SwapChain->swapChainExtent;
+		vkCmdSetScissor(UICommandBuffer, 0, 1, &scissor);
+		StartUIRenderViewPort(i);
+
+		ProcessUIUnit(&Viewports[i]->Root, type);
+	}
+}
+
+
+void QFAWindow::ProcessUIUnit(QFAUIUnit* unit, QFAUIType::Type type)
+{
+	if (unit->CanRender && unit->Type == type)
 		((QFAUIRenderUnit*)unit)->Render(UICommandBuffer);
 
 	if (unit->CanBeParent)
 		for (size_t i = 0; i < ((QFAUIParentComponent*)unit)->Children.Length(); i++)
-			ProcessUIUnit(((QFAUIParentComponent*)unit)->Children[i]);
+			ProcessUIUnit(((QFAUIParentComponent*)unit)->Children[i], type);
 }
 
 
@@ -235,6 +241,7 @@ void QFAWindow::ProcessUIUnit(QFAUIUnit* unit)
 void QFAWindow::StartUIRenderViewPort( int viewportIndex)
 {	
 	QFAText::CurentDescriptorSetProject = QFAText::Pipeline->GetSet(0, viewportIndex);
+	QFAUIImage::CurentDescriptorSetProject = QFAUIImage::Pipeline->GetSet(0, viewportIndex);
 
 	UniformBufferObject ubo{};
 	ubo.projection = MainWindow->Viewports[viewportIndex]->UIProjection;
@@ -522,10 +529,10 @@ void QFAWindow::RenderWindow()
 		MainWindow->DrawActors(MainWindow->Viewports[i], i == 0);
 
 		MainWindow->ViewportProcess++;
+		//vkDeviceWaitIdle(QFAVKLogicalDevice::GetDevice());
 	}
 
-	MainWindow->DrawText();
-
+	MainWindow->DrawUI();
 
 	MainWindow->DrawOffscreenBuffer();
 

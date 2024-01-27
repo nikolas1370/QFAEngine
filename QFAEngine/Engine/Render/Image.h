@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <Tools/VulkanSuff.h>
+#include <Render/vk/ImageView.h>
 class QFAVKBuffer;
 class QFAVKImageView;
 class QFAWindow;
@@ -22,6 +23,7 @@ class QFAImage
 	static void Init(VkCommandPool commandPool);
 public:
 	VkImage TextureImage;
+	QFAVKImageView ImageView;
 	VmaAllocation ImageAllocation;
 	QFAVKBuffer* buffer;
 

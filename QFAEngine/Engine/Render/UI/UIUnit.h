@@ -70,7 +70,10 @@ protected:
 	QFAUIType::Type Type = QFAUIType::NONE;
 	bool CanRender = false;
 
-	// if QFAViewport can call ViewportSizeChange
+	/*
+	* if true QFAViewportRoot call SetSizeParent or SetPositionParent
+			when QFAViewportRoot resize or move
+	*/
 	bool SelfResizable = false;
 
 	unsigned int Width = 300;
@@ -85,8 +88,16 @@ protected:
 	// parent set position
 	virtual void SetPositionParent(unsigned int x, unsigned int y) = 0;	
 public:
-	virtual void SetPosition(unsigned int x, unsigned int y) {}
-	virtual void SetSize(unsigned int w, unsigned int h) {}
+	/*
+		Position be change if parent is RootUnit
+		in other case use Slot
+	*/
+	virtual void SetPosition(unsigned int x, unsigned int y);
+	/*
+		Size be change if parent is RootUnit
+		in other case use Slot
+	*/
+	virtual void SetSize(unsigned int w, unsigned int h);
 
 	~QFAUIUnit();
 
@@ -98,7 +109,9 @@ public:
 	{
 		return FVector2D(Width, Height);
 	}
-
+	/*
+		all posible slot searsh in namespace QFAUISlot
+	*/
 	void SetSlot(void* slot);
 
 	inline QFAUIParentComponent* GetParent()

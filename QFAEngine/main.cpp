@@ -21,7 +21,7 @@
 
 #include <Tools/File/ModelLoader.h>
 #include <Render/UI/Canvas.h>
-
+#include <Render/UI/UIImage.h>
 
 
 int main()
@@ -146,6 +146,31 @@ int main()
     mainWindow->AddViewport(secondViewPort);
     secondViewPort->SetParameters(0.5f, 0.66666f, 0.5f, 0.33333f);
     secondViewPort->AddUnit(textViewPort2);
+
+
+    /*---*/
+
+    QFAImage* dogy = new QFAImage("SomeImage/6213157_0.jpg");    
+    QFAUIImage* UIDogy = new QFAUIImage(dogy);    
+    firstdViewPort->AddUnit(UIDogy);
+    UIDogy->SetPosition(0, 100);
+    UIDogy->SetSize(200, 200);
+
+    QFAImage* homy = new QFAImage("SomeImage/relax, Akim Kaliberda.jpg");
+    QFAUIImage* UIHomy = new QFAUIImage(homy);
+    UIHomy->SetPosition(0, 400);
+    UIHomy->SetSize(200, 200);
+
+
+
+    QFAUISlot::SCanvasSlot imageSlot;
+    imageSlot.Height = 0.25;
+    imageSlot.Width = 0.25;
+    imageSlot.x = 0.0;
+    imageSlot.y = 0.6;
+    UIHomy->SetSlot(&imageSlot);
+    canvas3->AddUnit(UIHomy);
+
 
     QFAOverlord::StartLife();
 
