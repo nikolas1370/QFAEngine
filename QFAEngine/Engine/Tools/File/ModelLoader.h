@@ -6,7 +6,7 @@
 #include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
 #include <Tools/VulkanSuff.h>
 
-#pragma comment(lib, "assimp-vc143-mt.lib")
+
 
 class QFAModelLoader
 {   

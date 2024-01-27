@@ -11,6 +11,10 @@
 #include <Render/UI/Text.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
 
+#pragma comment(lib, "vulkan-1.lib")
+#pragma comment(lib, "glfw3.lib")
+#pragma comment(lib, "assimp-vc143-mt.lib")
+
 bool QFAOverlord::Life = false;
 bool QFAOverlord::isInit = false; 
 QFAWindow* QFAOverlord::Window = nullptr;

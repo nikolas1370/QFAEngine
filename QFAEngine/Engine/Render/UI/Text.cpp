@@ -64,9 +64,9 @@ void QFAText::Init(VkRenderPass renderPass, VkCommandPool commandPool_)
         return;
     }
 
-    if (FT_New_Face(QFAText::ft, "Editor/Font/Roboto-Regular.ttf", 0, &face))
+    if (FT_New_Face(QFAText::ft, "Font/Roboto-Regular.ttf", 0, &face))
     {
-        std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+        stopExecute("ERROR::FREETYPE: Failed to load font");
         return;
     }
 

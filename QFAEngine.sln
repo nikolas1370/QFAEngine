@@ -5,6 +5,8 @@ VisualStudioVersion = 17.6.33801.468
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "QFAEngine", "QFAEngine\QFAEngine.vcxproj", "{9E939724-A574-4CCD-98E6-FAB734ED9DEC}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestGame", "TestGame\TestGame.vcxproj", "{0913F8FB-A34A-45C8-832E-F5099D48D19C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{9E939724-A574-4CCD-98E6-FAB734ED9DEC}.Release|x64.Build.0 = Release|x64
 		{9E939724-A574-4CCD-98E6-FAB734ED9DEC}.Release|x86.ActiveCfg = Release|Win32
 		{9E939724-A574-4CCD-98E6-FAB734ED9DEC}.Release|x86.Build.0 = Release|Win32
+		{0913F8FB-A34A-45C8-832E-F5099D48D19C}.Debug|x64.ActiveCfg = Debug|x64
+		{0913F8FB-A34A-45C8-832E-F5099D48D19C}.Debug|x64.Build.0 = Debug|x64
+		{0913F8FB-A34A-45C8-832E-F5099D48D19C}.Debug|x86.ActiveCfg = Debug|Win32
+		{0913F8FB-A34A-45C8-832E-F5099D48D19C}.Debug|x86.Build.0 = Debug|Win32
+		{0913F8FB-A34A-45C8-832E-F5099D48D19C}.Release|x64.ActiveCfg = Release|x64
+		{0913F8FB-A34A-45C8-832E-F5099D48D19C}.Release|x64.Build.0 = Release|x64
+		{0913F8FB-A34A-45C8-832E-F5099D48D19C}.Release|x86.ActiveCfg = Release|Win32
+		{0913F8FB-A34A-45C8-832E-F5099D48D19C}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

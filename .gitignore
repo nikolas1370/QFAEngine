@@ -23,8 +23,9 @@ mono_crash.*
 [Rr]eleases/
 x64/
 x86/
-QFAEngine/NoEngineModel/
-QFAEngine/Editor/Font/
+TestGame/NoEngineModel/
+TestGame/Font/
+TestGame/Model/
 [Ww][Ii][Nn]32/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/

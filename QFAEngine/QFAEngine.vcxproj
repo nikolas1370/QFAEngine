@@ -40,13 +40,13 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -124,6 +124,14 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Assimp\lib\x64;C:\VulkanSDK\1.3.275.0\Lib;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug;$(SolutionDir)..\glfw-3.3.8\glfw-3.3.8.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <Lib>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+    </Lib>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -148,6 +156,11 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Assimp\lib\x64;C:\VulkanSDK\1.3.275.0\Lib;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug;$(SolutionDir)..\glfw-3.3.8\glfw-3.3.8.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <Lib>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Math\Math.cpp" />
@@ -192,9 +205,6 @@
     <ClCompile Include="Engine\Render\Window\Viewport.cpp" />
     <ClCompile Include="Engine\Render\Window\Window.cpp" />
     <ClCompile Include="Engine\Tools\VulkanStuff.cpp" />
-    <ClCompile Include="GameCode\TestActor.cpp" />
-    <ClCompile Include="GameCode\TestComponent.cpp" />
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="Engine\Object\Actor\Actor.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -250,8 +260,6 @@
     <ClInclude Include="Engine\Tools\File\ModelLoader.h" />
     <ClInclude Include="Engine\Tools\Debug\OpenGlStuff.h" />
     <ClInclude Include="Engine\Object\Actor\Actor.h" />
-    <ClInclude Include="GameCode\TestActor.h" />
-    <ClInclude Include="GameCode\TestComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\DirectionLightShadow\Fragment.shader" />
