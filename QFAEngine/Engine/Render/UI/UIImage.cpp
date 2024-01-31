@@ -21,82 +21,7 @@ std::vector<QFAUIImage::SImageIndex> QFAUIImage::ImageIndexs;
 VkDescriptorSet QFAUIImage::CurentDescriptorSetProject;
 
 
-void QFAUIImage::CreatePipeline()
-{
-    QFAVKPipeline::QFAPipelineCreateInfo PipelineInfo;
-    PipelineInfo.RenderPass = RenderPass;
-    PipelineInfo.PipelineShaderStages.VertexStage = "Engine/Shaders/ImageVertex.spv";
-    PipelineInfo.PipelineShaderStages.FragmentStage = "Engine/Shaders/ImageFragment.spv";
 
-
-    PipelineInfo.VertexInputInfo.VertexBindingDescriptionCount = 1;
-    VkVertexInputBindingDescription bindingDescription{};
-    bindingDescription.binding = 0;
-    bindingDescription.stride = sizeof(QFAUIImage::SImageShaderVertex);
-    bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-    PipelineInfo.VertexInputInfo.VertexBindingDescriptions = &bindingDescription;
-
-
-    std::array<VkVertexInputAttributeDescription, 1> attributeDescriptions{};
-    PipelineInfo.VertexInputInfo.VertexAttributeDescriptionCount = attributeDescriptions.size();
-    attributeDescriptions[0].binding = 0;
-    attributeDescriptions[0].location = 0;
-    attributeDescriptions[0].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-    attributeDescriptions[0].offset = 0;
-    PipelineInfo.VertexInputInfo.VertexAttributeDescriptions = attributeDescriptions.data();
-
-
-    PipelineInfo.Rasterization.CullMode = VK_CULL_MODE_NONE;
-    PipelineInfo.ColorBlendAttachment.BlendEnable = VK_TRUE;
-
-
-    std::array<VkDynamicState, 2> dynamicStates =
-    {
-        VK_DYNAMIC_STATE_VIEWPORT,
-        VK_DYNAMIC_STATE_SCISSOR
-    };
-    PipelineInfo.DynamicStates = dynamicStates.data();
-    PipelineInfo.DynamicStateCount = dynamicStates.size();
-
-
-    std::array< QFAVKPipeline::QFADescriptorSetLayout, 2> DescriptorSetLayouts;
-    std::array<VkDescriptorSetLayoutBinding, 1> firsLayout;
-    firsLayout[0].binding = 0;
-    firsLayout[0].descriptorCount = 1;
-    firsLayout[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    firsLayout[0].pImmutableSamplers = nullptr;
-    firsLayout[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-
-    std::array<VkDescriptorSetLayoutBinding, 2> secondLayout;
-    secondLayout[0].binding = 0;
-    secondLayout[0].descriptorCount = 1;
-    secondLayout[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    secondLayout[0].pImmutableSamplers = nullptr;
-    secondLayout[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    secondLayout[1].binding = 1;
-    secondLayout[1].descriptorCount = 1;
-    secondLayout[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    secondLayout[1].pImmutableSamplers = nullptr;
-    secondLayout[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-    DescriptorSetLayouts[0].BindingCount = firsLayout.size();
-    DescriptorSetLayouts[1].BindingCount = secondLayout.size();
-    DescriptorSetLayouts[0].Bindings = firsLayout.data();
-    DescriptorSetLayouts[1].Bindings = secondLayout.data();
-
-    PipelineInfo.DescriptorSetLayoutCount = DescriptorSetLayouts.size();
-    PipelineInfo.DescriptorSetLayouts = DescriptorSetLayouts.data();
-
-
-    std::array< uint32_t, 2> MaxSets;
-    MaxSets[0] = QFAWindow::MaxActiveViewPort;
-    MaxSets[1] = QFAUIImage::AmountSetsInImageParamPool;
-    PipelineInfo.MaxSets = MaxSets.data();
-
-    Pipeline = new QFAVKPipeline(PipelineInfo);
-
-    CreateTextProjectionSets();
-}
 
 
 
@@ -125,7 +50,7 @@ void QFAUIImage::Render(VkCommandBuffer comandebuffer)
         убере рядок і нема бага
     
     */
-    std::cout << "QFAUIImage::Render\n";
+    
 
     VkDescriptorSet CurentDescriptorSet = Pipeline->GetSet(1, Index);    
 
@@ -150,15 +75,17 @@ void QFAUIImage::UpdateUniforms()
         return;
     }
 
-    /*        
-        need do next parameter
-    */
     SImageParam ip;
-    ip.opacity = 1;
-    ip.overflow = false;
+    ip.opacity = ProcessParentOpacity(Opacity, Parent);
 
+    ip.overflow.enable = 0;
+    ip.overflow.leftTopX = 0;
+    ip.overflow.leftTopY = 0;
+    ip.overflow.rightBottomX = 1000000;
+    ip.overflow.rightBottomY = 1000000;
+
+    ProcessParentOverflow(ip.overflow, Parent);
     memcpy(ImageIndexs[Index].buffer->MapData, &ip, sizeof(SImageParam));
-
 }
 
 
@@ -223,13 +150,14 @@ void QFAUIImage::ChangeQuad()
     quad[0].textureY = 0;
     quad[0].x = Position_x;
     quad[0].y = Position_y;
+    quad[0].z = ZIndex;
 
     // left bottom
     quad[1].textureX = 0;
     quad[1].textureY = 1;
     quad[1].x = Position_x;
     quad[1].y = Position_y + Height;
-
+    quad[1].z = ZIndex;
 
 
     // right top
@@ -238,6 +166,7 @@ void QFAUIImage::ChangeQuad()
     quad[2].textureY = 0;
     quad[2].x = Position_x + Width;
     quad[2].y = Position_y;
+    quad[2].z = ZIndex;
 
     // right bottom
     quad[3];
@@ -245,14 +174,14 @@ void QFAUIImage::ChangeQuad()
     quad[3].textureY = 1;
     quad[3].x = Position_x + Width;
     quad[3].y = Position_y + Height;
+    quad[3].z = ZIndex;
 
     quad[4] = quad[2];
 
     quad[5] = quad[1];
     vertexBufer->UpdateData(sizeof(quad), &quad);
+    UpdateUniforms();
 }
-
-
 
 void QFAUIImage::SetSizeParent(unsigned int w, unsigned int h)
 {
@@ -363,4 +292,95 @@ void QFAUIImage::DisableImage()
 {
     if (Index < ImageIndexs.size() && ImageIndexs[Index].image == this)
         ImageIndexs[Index].image = nullptr;
+}
+
+
+void QFAUIImage::CreatePipeline()
+{
+    QFAVKPipeline::QFAPipelineCreateInfo PipelineInfo;
+    PipelineInfo.RenderPass = RenderPass;
+    PipelineInfo.PipelineShaderStages.VertexStage = "Engine/Shaders/ImageVertex.spv";
+    PipelineInfo.PipelineShaderStages.FragmentStage = "Engine/Shaders/ImageFragment.spv";
+
+
+    PipelineInfo.VertexInputInfo.VertexBindingDescriptionCount = 1;
+    VkVertexInputBindingDescription bindingDescription{};
+    bindingDescription.binding = 0;
+    bindingDescription.stride = sizeof(QFAUIImage::SImageShaderVertex);
+    bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+    PipelineInfo.VertexInputInfo.VertexBindingDescriptions = &bindingDescription;
+
+
+    std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
+    PipelineInfo.VertexInputInfo.VertexAttributeDescriptionCount = attributeDescriptions.size();
+    attributeDescriptions[0].binding = 0;
+    attributeDescriptions[0].location = 0;
+    attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT; // 
+    attributeDescriptions[0].offset = 0;
+    
+    attributeDescriptions[1].binding = 0;
+    attributeDescriptions[1].location = 1;
+    attributeDescriptions[1].format = VK_FORMAT_R32G32_SFLOAT;
+    attributeDescriptions[1].offset = offsetof(SImageShaderVertex, textureX);
+    
+    PipelineInfo.VertexInputInfo.VertexAttributeDescriptions = attributeDescriptions.data();
+
+
+    PipelineInfo.Rasterization.CullMode = VK_CULL_MODE_NONE;
+
+    QFAVKPipeline::QFAPipelineColorBlendAttachment blendAttachment;
+    blendAttachment.BlendEnable = VK_TRUE;
+    PipelineInfo.ColorBlendState.attachmentCount = 1;
+    PipelineInfo.ColorBlendState.pAttachments = &blendAttachment;
+
+
+    std::array<VkDynamicState, 2> dynamicStates =
+    {
+        VK_DYNAMIC_STATE_VIEWPORT,
+        VK_DYNAMIC_STATE_SCISSOR
+    };
+    PipelineInfo.DynamicStates = dynamicStates.data();
+    PipelineInfo.DynamicStateCount = dynamicStates.size();
+
+
+    std::array< QFAVKPipeline::QFADescriptorSetLayout, 2> DescriptorSetLayouts;
+    std::array<VkDescriptorSetLayoutBinding, 1> firsLayout;
+    firsLayout[0].binding = 0;
+    firsLayout[0].descriptorCount = 1;
+    firsLayout[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    firsLayout[0].pImmutableSamplers = nullptr;
+    firsLayout[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+    std::array<VkDescriptorSetLayoutBinding, 2> secondLayout;
+    secondLayout[0].binding = 0;
+    secondLayout[0].descriptorCount = 1;
+    secondLayout[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    secondLayout[0].pImmutableSamplers = nullptr;
+    secondLayout[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    secondLayout[1].binding = 1;
+    secondLayout[1].descriptorCount = 1;
+    secondLayout[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    secondLayout[1].pImmutableSamplers = nullptr;
+    secondLayout[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    DescriptorSetLayouts[0].BindingCount = firsLayout.size();
+    DescriptorSetLayouts[1].BindingCount = secondLayout.size();
+    DescriptorSetLayouts[0].Bindings = firsLayout.data();
+    DescriptorSetLayouts[1].Bindings = secondLayout.data();
+
+    PipelineInfo.DescriptorSetLayoutCount = DescriptorSetLayouts.size();
+    PipelineInfo.DescriptorSetLayouts = DescriptorSetLayouts.data();
+
+    PipelineInfo.DepthStencil.DepthTestEnable = VK_TRUE;
+    PipelineInfo.DepthStencil.DepthWriteEnable = VK_TRUE;
+    PipelineInfo.DepthStencil.DepthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+
+    std::array< uint32_t, 2> MaxSets;
+    MaxSets[0] = QFAWindow::MaxActiveViewPort;
+    MaxSets[1] = QFAUIImage::AmountSetsInImageParamPool;
+    PipelineInfo.MaxSets = MaxSets.data();
+
+    Pipeline = new QFAVKPipeline(PipelineInfo);
+
+    CreateTextProjectionSets();
 }

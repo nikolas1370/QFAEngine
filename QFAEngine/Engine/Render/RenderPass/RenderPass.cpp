@@ -2,13 +2,12 @@
 #include <Tools/VulkanSuff.h>
 #include <Render/vk/LogicalDevice.h>
 #include <Render/Window/Window.h>
-QFAVKRenderPass::QFAVKRenderPass(VkFormat swapChainImageFormat, bool present)
+QFAVKRenderPass::QFAVKRenderPass(VkFormat imageFormat, bool present)
 {
     // VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
 
-    VkAttachmentDescription colorAttachment{};
-    
-    colorAttachment.format = swapChainImageFormat;
+    VkAttachmentDescription colorAttachment{};    
+    colorAttachment.format = imageFormat;
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
     colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR ;
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -17,7 +16,6 @@ QFAVKRenderPass::QFAVKRenderPass(VkFormat swapChainImageFormat, bool present)
     colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED ;
     colorAttachment.finalLayout = present ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-    
     VkAttachmentDescription depthAttachment{};
     depthAttachment.format = VK_FORMAT_D32_SFLOAT;
     depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -29,9 +27,9 @@ QFAVKRenderPass::QFAVKRenderPass(VkFormat swapChainImageFormat, bool present)
     depthAttachment.finalLayout = present ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;//VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
     
 
-    VkAttachmentReference colorAttachmentRef{};
-    colorAttachmentRef.attachment = 0;
-    colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    std::array <VkAttachmentReference, 1> colorAttachmentRefs{};    
+    colorAttachmentRefs[0].attachment = 0;
+    colorAttachmentRefs[0].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
     VkAttachmentReference depthAttachmentRef{};
     depthAttachmentRef.attachment = 1;
@@ -39,8 +37,8 @@ QFAVKRenderPass::QFAVKRenderPass(VkFormat swapChainImageFormat, bool present)
 
     VkSubpassDescription subpass{};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = 1;
-    subpass.pColorAttachments = &colorAttachmentRef;
+    subpass.colorAttachmentCount = colorAttachmentRefs.size();
+    subpass.pColorAttachments = colorAttachmentRefs.data();
     subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
     VkSubpassDependency dependency{};

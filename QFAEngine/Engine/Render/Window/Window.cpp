@@ -13,7 +13,7 @@
 #include <Render/UI/UIImage.h>
 
 #include <Render/UI/Text.h>
-
+#include <Render/RenderPass/RenderPassSwapChain.h>
 
 #include <Render/Framebuffer/MeshFrameBuffer.h> 
 #include <Render/UI/UIParentComponent.h>
@@ -84,31 +84,49 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 	createCommandPool();
 	QFAImage::Init(commandPool);
 	SwapChain = new QFAVKSwapChain(glfWindow, surface, commandPool);
-	RenderPass = new QFAVKRenderPass(SwapChain->swapChainImageFormat, true);
+	RenderPassSwapChain = new QFAVKRenderPassSwapChain(SwapChain->swapChainImageFormat, true);
+	RenderPass = new QFAVKRenderPass(VK_FORMAT_R8G8B8A8_SRGB, true);
+	
 	RenderPassOffScreen = new QFAVKRenderPassDepth();
-	TextRenderPass = new QFAVKTextRenderPass(SwapChain->swapChainImageFormat);
+	TextRenderPass = new QFAVKTextRenderPass(VK_FORMAT_R8G8B8A8_SRGB);
+	
+	
+	
 
-	SwapChain->createFramebuffers(RenderPass->renderPass);
+	
+	SwapChain->createFramebuffers(RenderPassSwapChain->renderPass);
+	
 	
 	frameBufferMesh = new QFAVKMeshFrameBuffer(commandPool, width, height);
-
+	
+	
 	CreateViewtortsBuffers();
-
+	
+	
 	QFAText::Init(TextRenderPass->renderPass, commandPool);	
+
+
+
+	
 	QFAUIImage::Init(TextRenderPass->renderPass, commandPool);
+	
 	ShadowFrameBuffer = new QFAVKShadowFrameBuffer(commandPool, RenderPassOffScreen->renderPass);
 
+
 	CreateShadow();
+	
 	QMeshBaseComponent::Init(RenderPass->renderPass, RenderPassOffScreen->renderPass, commandPool);
+
+	
 
 	createCommandBuffer();
 	createSyncObject();
-
+	
 	imugo = new QFAPresentImage(commandPool);
 
-	imugo->Init(RenderPass->renderPass, commandPool, frameBufferMesh->ColorImage);	
-
+	imugo->Init(RenderPassSwapChain->renderPass, commandPool, frameBufferMesh->ColorImage);
 	
+
 }
 
 QFAWindow::~QFAWindow()
@@ -161,8 +179,8 @@ void QFAWindow::DrawUI()
 	renderPassInfo.renderArea.offset = { 0, 0 };
 	renderPassInfo.renderArea.extent = MainWindow->SwapChain->swapChainExtent;
 
-	std::array<VkClearValue, 2> clearValues{};
-	clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+	std::array<VkClearValue, 3> clearValues{};
+	clearValues[0].color = { {0, 0, 0, 0} };
 	clearValues[1].depthStencil = { 1.0f, 0 };
 
 	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
@@ -171,8 +189,44 @@ void QFAWindow::DrawUI()
 	vkCmdBeginRenderPass(MainWindow->UICommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 	/*---*/
 	QFAText::StartTextRender();
-	DrawPartUI(QFAText::Pipeline->GetPipeline(), QFAUIType::Text);
-	DrawPartUI(QFAUIImage::Pipeline->GetPipeline(), QFAUIType::Image);
+	QFAVKPipeline* pipeline = nullptr;
+
+	for (size_t u = 0; u < Viewports.Length(); u++)
+	{
+		VkViewport viewport{};
+		viewport.x = Viewports[u]->X;
+		viewport.y = Viewports[u]->Y;
+		viewport.width = Viewports[u]->Width;
+		viewport.height = Viewports[u]->Height;
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(UICommandBuffer, 0, 1, &viewport); // can in start render viewport do 
+
+		VkRect2D scissor{};
+		scissor.offset = { 0, 0 };
+		scissor.extent = SwapChain->swapChainExtent;
+		vkCmdSetScissor(UICommandBuffer, 0, 1, &scissor);
+
+		StartUIRenderViewPort(u);
+
+		SortUIs(&Viewports[u]->Root);
+		for (size_t i = 0; i < SortUIUnits.Length(); i++)
+		{
+			
+			if (SortUIUnits[i]->CanRender)
+			{
+				if (pipeline != ((QFAUIRenderUnit*)SortUIUnits[i])->GetPipeline())
+				{
+					pipeline = ((QFAUIRenderUnit*)SortUIUnits[i])->GetPipeline();
+					vkCmdBindPipeline(UICommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetPipeline());
+				}
+
+				((QFAUIRenderUnit*)SortUIUnits[i])->Render(UICommandBuffer);
+			}
+		}
+	}	
+
+
 	/*---*/
 
 	vkCmdEndRenderPass(MainWindow->UICommandBuffer);
@@ -186,7 +240,7 @@ void QFAWindow::DrawUI()
 
 	VkPipelineStageFlags bit = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	submitInfo.waitSemaphoreCount = 1;
-	submitInfo.pWaitSemaphores = &MainWindow->ActorFinishedSemi[MainWindow->ViewportProcess - 1];
+	submitInfo.pWaitSemaphores = &MainWindow->ActorFinishedSemi[MainWindow->ViewportProcess - 1];	
 	submitInfo.pWaitDstStageMask = &bit;
 
 	submitInfo.commandBufferCount = 1;
@@ -200,52 +254,53 @@ void QFAWindow::DrawUI()
 		stopExecute("failed to submit draw command buffer!");
 }
 
-void QFAWindow::DrawPartUI(VkPipeline pipeline, QFAUIType::Type type)
-{
-	vkCmdBindPipeline(UICommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
-
-	for (size_t i = 0; i < Viewports.Length(); i++)
+void QFAWindow::SortUIs(QFAViewportRoot* root)
+{		
+	SortUIUnits.Clear();
+	for (size_t i = 0; i < root->Children.Length(); i++)
+		AddUnit(root->Children[i]);
+	
+	for (int i = SortUIUnits.Length() - 2; i > 0; i--)
 	{
-		VkViewport viewport{};
-		viewport.x = Viewports[i]->X;
-		viewport.y = Viewports[i]->Y;
-		viewport.width = Viewports[i]->Width;
-		viewport.height = Viewports[i]->Height;
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
-		vkCmdSetViewport(UICommandBuffer, 0, 1, &viewport); // can in start render viewport do 
-
-		VkRect2D scissor{};
-		scissor.offset = { 0, 0 };
-		scissor.extent = SwapChain->swapChainExtent;
-		vkCmdSetScissor(UICommandBuffer, 0, 1, &scissor);
-		StartUIRenderViewPort(i);
-
-		ProcessUIUnit(&Viewports[i]->Root, type);
-	}
+		for (size_t j = 0; j <= i; j++)
+		{ // in start of array number bigger
+			if (SortUIUnits[j + 1]->ZIndex > SortUIUnits[j]->ZIndex) // ZIndex forward == 1 
+			{
+				QFAUIUnit* pTem = SortUIUnits[j];
+				SortUIUnits[j] = SortUIUnits[j + 1];
+				SortUIUnits[j + 1] = pTem;
+			}
+		}
+	}	
 }
 
 
-void QFAWindow::ProcessUIUnit(QFAUIUnit* unit, QFAUIType::Type type)
+void QFAWindow::AddUnit(QFAUIUnit* unit)
 {
-	if (unit->CanRender && unit->Type == type)
-		((QFAUIRenderUnit*)unit)->Render(UICommandBuffer);
+	if (!unit)
+		return;
+
+	SortUIUnits.Add(unit);
 
 	if (unit->CanBeParent)
-		for (size_t i = 0; i < ((QFAUIParentComponent*)unit)->Children.Length(); i++)
-			ProcessUIUnit(((QFAUIParentComponent*)unit)->Children[i], type);
+	{
+		QFAUIParentComponent* parent = (QFAUIParentComponent*)unit;
+
+		for (size_t i = 0; i < parent->Children.Length(); i++)
+			AddUnit(parent->Children[i]);
+	}	
 }
-
-
 
 void QFAWindow::StartUIRenderViewPort( int viewportIndex)
 {	
-	QFAText::CurentDescriptorSetProject = QFAText::Pipeline->GetSet(0, viewportIndex);
+	QFAText::CurentDescriptorSetProject = QFAText::Pipeline->GetSet(0, viewportIndex);	
 	QFAUIImage::CurentDescriptorSetProject = QFAUIImage::Pipeline->GetSet(0, viewportIndex);
 
 	UniformBufferObject ubo{};
 	ubo.projection = MainWindow->Viewports[viewportIndex]->UIProjection;
 	memcpy(ViewportBuffers[viewportIndex].uiProjectionBuffer->MapData, &ubo, sizeof(ubo.projection));
+
+	
 }
 
 void QFAWindow::DrawOffscreenBuffer()
@@ -258,7 +313,7 @@ void QFAWindow::DrawOffscreenBuffer()
 
 	VkRenderPassBeginInfo renderPassInfo{};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	renderPassInfo.renderPass = MainWindow->RenderPass->renderPass;
+	renderPassInfo.renderPass = MainWindow->RenderPassSwapChain->renderPass;
 	renderPassInfo.framebuffer = SwapChain->swapChainFramebuffers[imageIndex];
 	renderPassInfo.renderArea.offset = { 0, 0 };
 	renderPassInfo.renderArea.extent = MainWindow->SwapChain->swapChainExtent;
@@ -295,6 +350,7 @@ void QFAWindow::DrawOffscreenBuffer()
 
 	submitInfo.waitSemaphoreCount = 1;
 	submitInfo.pWaitSemaphores = &UISemaphore;// ;
+	
 	
 	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 	submitInfo.pWaitDstStageMask = waitStages;
@@ -461,9 +517,11 @@ void QFAWindow::RenderOff(QFAViewport* _viewport)
 	
 	CurentCameraPosition = _viewport->CurentCamera->WorldPosition;
 	QMeshBaseComponent::StartShadowFrameViewport(liteMat);
+	/*
 	unsigned int countComponentForRender = 0;
 	for (size_t i = 0; i < world->Actors.Length(); i++)
 		countComponentForRender += ProcessMeshComponent(world->Actors[i]->RootComponent, true);
+	*/
 }
 
 void QFAWindow::EndRenderOff()
@@ -517,28 +575,39 @@ void QFAWindow::RenderWindow()
 
 	MainWindow->StartFrame();
 	
+	
 	for (size_t i = 0; i < MainWindow->Viewports.Length(); i++)
 	{		
+		
 		
 		MainWindow->StartRenderOff();
 
 		MainWindow->RenderOff(MainWindow->Viewports[i]); 
 
 		MainWindow->EndRenderOff();
+
+
 		
 		MainWindow->DrawActors(MainWindow->Viewports[i], i == 0);
-
+		
+		
 		MainWindow->ViewportProcess++;
 		//vkDeviceWaitIdle(QFAVKLogicalDevice::GetDevice());
 	}
+	
 
+
+	
 	MainWindow->DrawUI();
 
 	MainWindow->DrawOffscreenBuffer();
 
 	
 	MainWindow->PresentFrame();
+	
 }
+
+
 
 void QFAWindow::StartFrame()
 {
@@ -606,7 +675,6 @@ void QFAWindow::CreateViewtortsBuffers()
 		ViewportBuffers[i].uiProjectionBuffer = new QFAVKBuffer(sizeof(glm::mat4), nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 }
 
-
 void QFAWindow::DrawActors(QFAViewport* _viewport, bool clear)
 {
 	vkResetCommandBuffer(MainWindow->MeshCommandBuffers[ViewportProcess], /*VkCommandBufferResetFlagBits*/ 0);
@@ -624,8 +692,9 @@ void QFAWindow::DrawActors(QFAViewport* _viewport, bool clear)
 	renderPassInfo.renderArea.offset = { 0, 0 };
 	renderPassInfo.renderArea.extent = MainWindow->SwapChain->swapChainExtent;
 
+
 	std::array<VkClearValue, 2> clearValues{};
-	clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+	clearValues[0].color = { {0.0f, 0.0f, 0.0f, 0.0f} };
 	clearValues[1].depthStencil = { 1.0f, 0 };
 
 	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());

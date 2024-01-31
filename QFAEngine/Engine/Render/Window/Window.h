@@ -48,6 +48,7 @@ class QWorld;
 class QFAText;
 class QFAUIUnit;
 class QFAUIImage;
+class QFAVKRenderPassSwapChain;
 class QFAWindow
 {
 
@@ -67,7 +68,8 @@ class QFAWindow
 	QFAVKInstance*Instance;
 	VkSurfaceKHR surface;	
 	QFAVKSwapChain *SwapChain;
-	QFAVKRenderPass * RenderPass;
+	QFAVKRenderPassSwapChain* RenderPassSwapChain;
+	QFAVKRenderPass* RenderPass;
 	QFAVKRenderPassDepth* RenderPassOffScreen;
 
 	QFAVKTextRenderPass* TextRenderPass;
@@ -183,7 +185,6 @@ private:
 
 
 	void DrawUI();
-	void DrawPartUI(VkPipeline pipeline, QFAUIType::Type type);
 
 
 	void DrawOffscreenBuffer();
@@ -208,7 +209,6 @@ private:
 	float depthBiasSlope = 3.55f; // 1.75f    2.55f
 	
 
-	void ProcessUIUnit(QFAUIUnit* unit, QFAUIType::Type type);
 
 
 	void StartUIRenderViewPort( int viewportIndex);
@@ -242,4 +242,8 @@ private:
 
 	FVector CurentCameraPosition;
 
+	QFAArray<QFAUIUnit*> SortUIUnits;
+
+	void SortUIs(QFAViewportRoot* root);
+	void AddUnit(QFAUIUnit* unit);
 };

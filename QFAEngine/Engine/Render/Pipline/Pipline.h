@@ -9,6 +9,7 @@ class QFAVKPipeline
 public:
     static const uint32_t MaxDescriptorSetLayoutCount = 2;// if need more set more    
     static const uint32_t MaxDescriptorPoolSizeCount = 2;        
+    static const uint32_t MaxColorBlendAttachment = 2;
 
     struct QFAPipelineShaderStages
     {// in future GeomrtryStage 
@@ -47,6 +48,14 @@ public:
         VkBlendOp AlphaBlendOp = VK_BLEND_OP_ADD;
     };
 
+    struct QFAPipelineColorBlendState
+    {
+        uint32_t attachmentCount = 0;
+        QFAPipelineColorBlendAttachment* pAttachments = nullptr;
+    };
+
+
+
     struct QFAPipelineDepthStencil
     {
         VkBool32 DepthTestEnable = VK_FALSE;
@@ -72,7 +81,13 @@ public:
         QFAPipelineShaderStages PipelineShaderStages;
         QFAVertexInputInfo VertexInputInfo;
         QFAPipelineRasterization Rasterization;
-        QFAPipelineColorBlendAttachment ColorBlendAttachment;
+
+        /*
+        
+        
+        */
+        QFAPipelineColorBlendState ColorBlendState; // 
+        //QFAPipelineColorBlendAttachment ColorBlendAttachment; // це в QFAPipelineColorBlendState
         uint32_t DynamicStateCount = 0;
         VkDynamicState* DynamicStates = nullptr;
         QFAPipelineDepthStencil DepthStencil;

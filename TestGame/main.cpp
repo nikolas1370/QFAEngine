@@ -28,6 +28,8 @@ int main()
 
 
     QFAOverlord::Init();
+
+
     QStaticMesh* Mesh = QFAModelLoader::LoadModel("Model/Arrow.fbx");
     QStaticMesh* Mesh2 = QFAModelLoader::LoadModel("Model/quad2.obj");
     QStaticMesh* Mesh3 = QFAModelLoader::LoadModel("Model/anim/dore_1.obj");
@@ -81,7 +83,7 @@ int main()
 
 
     text_2->SetPosition(0, 0);
-    text_2->SetTextSize(16);
+    text_2->SetTextSize(30);    
     text_2->Color = FVector(1, 0.5, 0);
     /*-----*/
 
@@ -91,13 +93,14 @@ int main()
 
     text->Color = FVector(1, 0, 0.3f);
     text->Outline = false;
-    text->OutlineColor = FVector(0.5f, 0.4f, 0.3f);
-    text->Opacity = 0.9f;
+    text->OutlineColor = FVector(0.5f, 0.4f, 0.3f);    
     text->SetTextAlign(QFAText::ETextAlign::TACenter);
 
     QFAUICanvas* can = new QFAUICanvas;
     QFAUICanvas* canvas2 = new QFAUICanvas;
     QFAUICanvas* canvas3 = new QFAUICanvas;
+    can->SetOpacity(1);
+    canvas3->SetOpacity(0.2);
     canvas2->SetOverflow(QFAUIParentComponent::EOverflow::HiddenHorizon);
     canvas3->SetOverflow(QFAUIParentComponent::EOverflow::HiddenVertical);
 
@@ -147,19 +150,19 @@ int main()
 
 
     /*---*/
-
+    
     QFAImage* dogy = new QFAImage("SomeImage/6213157_0.jpg");
     QFAUIImage* UIDogy = new QFAUIImage(dogy);
+    UIDogy->SetZIndex(-1);
     firstdViewPort->AddUnit(UIDogy);
-    UIDogy->SetPosition(0, 100);
+    UIDogy->SetPosition(0, 250);
     UIDogy->SetSize(200, 200);
 
     QFAImage* homy = new QFAImage("SomeImage/relax, Akim Kaliberda.jpg");
     QFAUIImage* UIHomy = new QFAUIImage(homy);
     UIHomy->SetPosition(0, 400);
     UIHomy->SetSize(200, 200);
-
-
+    
 
     QFAUISlot::SCanvasSlot imageSlot;
     imageSlot.Height = 0.25;
@@ -167,9 +170,10 @@ int main()
     imageSlot.x = 0.0;
     imageSlot.y = 0.6;
     UIHomy->SetSlot(&imageSlot);
-    canvas3->AddUnit(UIHomy);
+    can->AddUnit(UIHomy);
 
-
+    
+    
     QFAOverlord::StartLife();
 
     return 0;

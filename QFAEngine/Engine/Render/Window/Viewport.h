@@ -42,6 +42,7 @@ class QFAViewport
 	QWorld* CurentFrameWorld;
 
 
+	
 
 	glm::mat4 UIProjection;
 
@@ -85,6 +86,9 @@ public:
 	{
 		Root.removeUnit(unit);
 	}
+
+	static const float MinMaxZIndexUI;
+	
 protected:
 
 

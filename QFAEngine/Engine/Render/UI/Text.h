@@ -78,6 +78,7 @@ class QFAText : public QFAUIRenderUnit
     {
         float x;
         float y;
+        float z;
         float texture_x;
         float texture_y;
         int AtlasNum;
@@ -111,19 +112,6 @@ class QFAText : public QFAUIRenderUnit
         QFAVKImageView* view;
     };
 
-    struct UniformBufferTextParam
-    {
-        alignas(16) FVector textColor;
-        alignas(4) int outline;
-        alignas(16) FVector outlineColor;
-        alignas(4) float opacity;
-        int overflow;
-        float leftTopX;
-        float leftTopY;
-        float rightBottomX;
-        float rightBottomY;
-    };
-
 
 public:
     enum EOverflowWrap
@@ -143,7 +131,6 @@ public:
     FVector Color = FVector(1);
     FVector OutlineColor = FVector(1, 0, 0);
     bool Outline = false;
-    float Opacity = 1;
 
     QFAText();
     ~QFAText();
@@ -156,7 +143,6 @@ public:
     void Destroy();
     void SetOverflowWrap(EOverflowWrap wrap);
     void SetTextAlign(ETextAlign aligh);
-
 
 
 private:
@@ -252,8 +238,20 @@ private:
     static int maxTextInframe;
 
     static int NumberTextInFrame;
+    struct UniformBufferTextParam
+    {
+        alignas(16) FVector textColor;
+        alignas(4) int outline;
+        alignas(16) FVector outlineColor;
+        alignas(4) float opacity;
+        UniformOverflow overflow;
+    };
 
-    void ProcessParentOverflow(UniformBufferTextParam &param, QFAUIParentComponent* parent);
+    inline QFAVKPipeline* GetPipeline() override
+    {
+        return Pipeline;
+    }
+
 };
 
 

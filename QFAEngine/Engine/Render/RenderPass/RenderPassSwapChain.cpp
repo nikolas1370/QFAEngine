@@ -1,21 +1,22 @@
-#include "TextRenderPass.h"
+#include "RenderPassSwapChain.h"
 #include <Tools/VulkanSuff.h>
 #include <Render/vk/LogicalDevice.h>
 #include <Render/Window/Window.h>
-QFAVKTextRenderPass::QFAVKTextRenderPass(VkFormat swapChainImageFormat)
+QFAVKRenderPassSwapChain::QFAVKRenderPassSwapChain(VkFormat imageFormat, bool present)
 {
+    // VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
 
-
-    VkAttachmentDescription colorAttachment{};
-    
-    colorAttachment.format = swapChainImageFormat;
+    VkAttachmentDescription colorAttachment{};    
+    colorAttachment.format = imageFormat;
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR ;
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; // VK_IMAGE_LAYOUT_GENERAL; // VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_GENERAL;// VK_IMAGE_LAYOUT_GENERAL;//  VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED ;
+    colorAttachment.finalLayout = present ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+
 
     VkAttachmentDescription depthAttachment{};
     depthAttachment.format = VK_FORMAT_D32_SFLOAT;
@@ -25,11 +26,10 @@ QFAVKTextRenderPass::QFAVKTextRenderPass(VkFormat swapChainImageFormat)
     depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;//VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    depthAttachment.finalLayout = present ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;//VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
     
 
-    //VkAttachmentReference colorAttachmentRef{};
-    std::array< VkAttachmentReference, 1> colorAttachmentRefs{};
+    std::array <VkAttachmentReference, 1> colorAttachmentRefs{};    
     colorAttachmentRefs[0].attachment = 0;
     colorAttachmentRefs[0].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
@@ -67,7 +67,7 @@ QFAVKTextRenderPass::QFAVKTextRenderPass(VkFormat swapChainImageFormat)
         stopExecute("failed to create render pass!");
 }
 
-QFAVKTextRenderPass::~QFAVKTextRenderPass()
+QFAVKRenderPassSwapChain::~QFAVKRenderPassSwapChain()
 {
     vkDestroyRenderPass(QFAVKLogicalDevice::GetDevice(), renderPass, nullptr);
 }

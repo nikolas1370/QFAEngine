@@ -221,8 +221,12 @@ void QMeshBaseComponent::CreatePipeline()
 
 
 	PipelineInfo.Rasterization.CullMode = VK_CULL_MODE_BACK_BIT;
-	PipelineInfo.ColorBlendAttachment.BlendEnable = VK_FALSE;
+	std::array< QFAVKPipeline::QFAPipelineColorBlendAttachment, 1> blendAttachments;
+	blendAttachments[0].BlendEnable = VK_FALSE;
 
+
+	PipelineInfo.ColorBlendState.attachmentCount = blendAttachments.size();
+	PipelineInfo.ColorBlendState.pAttachments = blendAttachments.data();
 
 	std::array<VkDynamicState, 2> dynamicStates =
 	{

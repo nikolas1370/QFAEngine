@@ -9,7 +9,7 @@
 #include <Render/UI/Text.h>
 #include <Render/UI/UIParentComponent.h>
 
-
+const float QFAViewport::MinMaxZIndexUI = 1000.0f;
 
 void QFAViewport::WindowAddMe(QFAWindow* window)
 {
@@ -36,7 +36,7 @@ void QFAViewport::Settup(int windowWidth, int windowHeight)
 	if (Height == 0)
 		Height = 1;
 
-	UIProjection = glm::orthoLH_ZO(0.0f, (float)Width, 0.0f, (float)Height, 0.0f, 1.0f);
+	UIProjection = glm::orthoLH_ZO(0.0f, (float)Width, 0.0f, (float)Height, QFAViewport::MinMaxZIndexUI * -1, QFAViewport::MinMaxZIndexUI);
 
 	if (CurentCamera)
 		MatrixPerspective = glm::perspectiveLH_ZO(glm::radians(CurentCamera->Fov), (float)Width / (float)Height, 0.1f, CurentCamera->ViewDistance); // (near) not Less than 0.1f	
@@ -127,7 +127,7 @@ void QFAViewport::SetParameters(float xP, float  yP, float widthP, float heightP
 	if (!CurentCamera)
 		return;
 
-	UIProjection = glm::orthoLH_ZO(0.0f, (float)Width, 0.0f, (float)Height, 0.0f, 1.0f);
+	UIProjection = glm::orthoLH_ZO(0.0f, (float)Width, 0.0f, (float)Height, QFAViewport::MinMaxZIndexUI * -1, QFAViewport::MinMaxZIndexUI);
 	MatrixPerspective = glm::perspectiveLH_ZO(glm::radians(CurentCamera->Fov),
 		(float)Width / (float)Height, 0.1f, CurentCamera->ViewDistance); 
 

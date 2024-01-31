@@ -17,12 +17,12 @@ QFAImage::QFAImage(SImageCreateInfo& ici)
     QFAVKBuffer::transitionImageLayout(TextureImage, ici.format, VK_IMAGE_LAYOUT_UNDEFINED, ici.layout, CommandPool, ici.aspect);
 }
 
-QFAImage::QFAImage( int Width, int Height, unsigned int channelCount,  VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspect )
+QFAImage::QFAImage( int Width, int Height, unsigned int channelCount,  VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspect , VkImageCreateFlags flags)
 {
     ImageFormat = format;
     VkDeviceSize imageSize = Width * Height * channelCount;
     buffer = new QFAVKBuffer(imageSize, nullptr, true);
-    createImage(Width, Height, format, VK_IMAGE_TILING_OPTIMAL, usage);    
+    createImage(Width, Height, format, VK_IMAGE_TILING_OPTIMAL, usage, flags);
     QFAVKBuffer::transitionImageLayout(TextureImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, CommandPool, aspect);
 }
 
@@ -62,7 +62,7 @@ void QFAImage::DeleteImageInCpuSide()
 }
 
 
-void QFAImage::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage)
+void QFAImage::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkImageCreateFlags       flags)
 {
     VkImageCreateInfo imageInfo{};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -78,6 +78,7 @@ void QFAImage::createImage(uint32_t width, uint32_t height, VkFormat format, VkI
     imageInfo.usage = usage;
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    imageInfo.flags = flags;
     
     VmaAllocationCreateInfo allocInfo = {};
     allocInfo.usage = VMA_MEMORY_USAGE_AUTO;

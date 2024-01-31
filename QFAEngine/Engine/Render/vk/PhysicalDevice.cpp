@@ -32,8 +32,8 @@ void QFAVKPhysicalDevice::Init(QFAVKInstance* instance, VkSurfaceKHR surface)
     as.runtimeDescriptorArray = true;
     vkGetPhysicalDeviceFeatures2()
     */
-    
-        
+    //VkPhysicalDeviceFeatures::independentBlend
+ 
 
     for (const auto& device : devices)
     {
@@ -43,6 +43,8 @@ void QFAVKPhysicalDevice::Init(QFAVKInstance* instance, VkSurfaceKHR surface)
             break;
         }
     }
+
+
 
     if (PhysicalDevice == VK_NULL_HANDLE)
         stopExecute("failed to find a suitable GPU!");

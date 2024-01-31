@@ -16,7 +16,7 @@ class QFAImage
 
 	
 	
-	void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage);
+	void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkImageCreateFlags flags = 0);
 	
 	VkFormat ImageFormat;
 	static VkCommandPool CommandPool;
@@ -33,13 +33,14 @@ public:
 		VkFormat format = VK_FORMAT_R8G8B8A8_SRGB;
 		VkImageUsageFlags usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 		VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT;
+		VkImageCreateFlags flags = 0;
 		int Width;
 		int Height;
-		unsigned int channelCount = 4;
+		unsigned int channelCount = 4;		
 	};
 
 	QFAImage(SImageCreateInfo &ici);
-	QFAImage(int Width, int Height, unsigned int channelCount, VkFormat format, VkImageUsageFlags usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT);
+	QFAImage(int Width, int Height, unsigned int channelCount, VkFormat format, VkImageUsageFlags usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT, VkImageCreateFlags flags = 0);
 	QFAImage(const std::string src);
 	~QFAImage();
 	

@@ -51,8 +51,10 @@ private:
     static QFAVKTextureSampler* ImageSampler;
     static VkRenderPass RenderPass;
     static QFAImage* image;
-    static VkDescriptorImageInfo imageInfo;
+
+    static std::array< VkDescriptorImageInfo, 1> imageInfos;
     QFAVKImageView* view;
+
 
     struct ImageShaderVertex
     {

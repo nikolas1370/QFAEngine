@@ -9,7 +9,8 @@
 #include <Render/Pipline/Pipline.h>
 
 QFAImage* QFAPresentImage::image = nullptr;
-VkDescriptorImageInfo QFAPresentImage::imageInfo;
+
+std::array< VkDescriptorImageInfo, 1> QFAPresentImage::imageInfos;
 QFAVKPipeline* QFAPresentImage::Pipeline;
 VkCommandPool QFAPresentImage::commandPool;
 QFAVKTextureSampler* QFAPresentImage::ImageSampler;
@@ -88,7 +89,13 @@ void QFAPresentImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_, 
     
 
     PipelineInfo.Rasterization.CullMode = VK_CULL_MODE_NONE;
-    PipelineInfo.ColorBlendAttachment.BlendEnable = VK_TRUE;
+
+
+    QFAVKPipeline::QFAPipelineColorBlendAttachment blendAttachment;
+    blendAttachment.BlendEnable = VK_FALSE;
+    
+    PipelineInfo.ColorBlendState.attachmentCount = 1;
+    PipelineInfo.ColorBlendState.pAttachments = &blendAttachment;   
     
 
     std::array<VkDynamicState, 2> dynamicStates =
@@ -119,19 +126,24 @@ void QFAPresentImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_, 
     MaxSets[0] = 1;
     PipelineInfo.MaxSets = MaxSets.data();
 
+
+
     Pipeline = new QFAVKPipeline(PipelineInfo);
 
 
     ImageSampler = new QFAVKTextureSampler();
     image = imago;
-    view = new QFAVKImageView(image, aspect);
 
-    imageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-    imageInfo.imageView = view->ImageView;
-    imageInfo.sampler = ImageSampler->textureSampler;
+    view = new QFAVKImageView(image, aspect);// 
+
+
+    imageInfos[0].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+    imageInfos[0].imageView = view->ImageView;
+    imageInfos[0].sampler = ImageSampler->textureSampler;
+
     QFAVKPipeline::QFADescriptorSetInfo info;
     info.dstBinding = 0;
-    info.DescriptorImageInfos = &imageInfo;
+    info.DescriptorImageInfos = imageInfos.data();
     Pipeline->CreateSet(0, &info);
 }
 

@@ -5,6 +5,7 @@ class QFAViewport;
 class QFAWindow;
 class QFAUIUnit;
 
+//QFAUIParentUnit
 class QFAUIParentComponent : public QFAUIUnit
 {
 	friend QFAUIUnit;

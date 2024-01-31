@@ -91,29 +91,32 @@ QFAVKPipeline::QFAVKPipeline(QFAPipelineCreateInfo& PipInfo)
     multisampling.sampleShadingEnable = VK_FALSE;
     multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
-
-    VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-    colorBlendAttachment.colorWriteMask = PipInfo.ColorBlendAttachment.ColorWriteMask;
-    colorBlendAttachment.blendEnable = PipInfo.ColorBlendAttachment.BlendEnable;
-    colorBlendAttachment.srcColorBlendFactor = PipInfo.ColorBlendAttachment.SrcColorBlendFactor;
-    colorBlendAttachment.dstColorBlendFactor = PipInfo.ColorBlendAttachment.DstColorBlendFactor;
-    colorBlendAttachment.colorBlendOp = PipInfo.ColorBlendAttachment.ColorBlendOp;
-    colorBlendAttachment.srcAlphaBlendFactor = PipInfo.ColorBlendAttachment.SrcAlphaBlendFactor;
-    colorBlendAttachment.dstAlphaBlendFactor = PipInfo.ColorBlendAttachment.DstAlphaBlendFactor;
-    colorBlendAttachment.alphaBlendOp = PipInfo.ColorBlendAttachment.AlphaBlendOp;
-
+    
+    std::array< VkPipelineColorBlendAttachmentState, MaxColorBlendAttachment> colorBlendAttachments;
+    
+    for (size_t i = 0; i < PipInfo.ColorBlendState.attachmentCount; i++)
+    {
+        colorBlendAttachments[i].colorWriteMask = PipInfo.ColorBlendState.pAttachments[i].ColorWriteMask;
+        colorBlendAttachments[i].blendEnable = PipInfo.ColorBlendState.pAttachments[i].BlendEnable;
+        colorBlendAttachments[i].srcColorBlendFactor = PipInfo.ColorBlendState.pAttachments[i].SrcColorBlendFactor;
+        colorBlendAttachments[i].dstColorBlendFactor = PipInfo.ColorBlendState.pAttachments[i].DstColorBlendFactor;
+        colorBlendAttachments[i].colorBlendOp = PipInfo.ColorBlendState.pAttachments[i].ColorBlendOp;
+        colorBlendAttachments[i].srcAlphaBlendFactor = PipInfo.ColorBlendState.pAttachments[i].SrcAlphaBlendFactor;
+        colorBlendAttachments[i].dstAlphaBlendFactor = PipInfo.ColorBlendState.pAttachments[i].DstAlphaBlendFactor;
+        colorBlendAttachments[i].alphaBlendOp = PipInfo.ColorBlendState.pAttachments[i].AlphaBlendOp;
+    }
 
     VkPipelineColorBlendStateCreateInfo colorBlending{};
     colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
     colorBlending.logicOpEnable = VK_FALSE;
-    colorBlending.logicOp = VK_LOGIC_OP_COPY;
-    colorBlending.attachmentCount = 1;
-    colorBlending.pAttachments = &colorBlendAttachment;
+    colorBlending.logicOp = VK_LOGIC_OP_COPY;    
+    colorBlending.attachmentCount = PipInfo.ColorBlendState.attachmentCount;    
+    colorBlending.pAttachments = colorBlendAttachments.data();
     colorBlending.blendConstants[0] = 0.0f;
     colorBlending.blendConstants[1] = 0.0f;
     colorBlending.blendConstants[2] = 0.0f;
     colorBlending.blendConstants[3] = 0.0f;
-
+    
     
     VkPipelineDynamicStateCreateInfo dynamicState{};
     dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;

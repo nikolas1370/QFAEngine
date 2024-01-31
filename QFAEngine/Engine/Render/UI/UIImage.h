@@ -73,6 +73,7 @@ private:
     {
         float x;
         float y;
+        float z;
         float textureX;
         float textureY;
     };
@@ -95,15 +96,15 @@ private:
     struct SImageParam
     {
         float opacity;
-        int overflow;
-        float leftTopX;
-        float leftTopY;
-        float rightBottomX;
-        float rightBottomY;
+        UniformOverflow overflow;
     };
 
     void ChangeQuad();
 
+    inline QFAVKPipeline* GetPipeline() override
+    {
+        return Pipeline;
+    }
 protected:
     void ParentEnable() override;
     void ParentDisable() override;

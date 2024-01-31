@@ -33,7 +33,7 @@ void QFAVKLogicalDevice::Init( VkSurfaceKHR surface)
 
     VkPhysicalDeviceFeatures deviceFeatures{};
     deviceFeatures.samplerAnisotropy = VK_TRUE;
-
+    deviceFeatures.independentBlend = true;
     
     VkPhysicalDeviceVulkan12Features features{};
     features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
@@ -54,7 +54,7 @@ void QFAVKLogicalDevice::Init( VkSurfaceKHR surface)
 
     createInfo.enabledExtensionCount = static_cast<uint32_t>(QFAVKPhysicalDevice::deviceExtensions.size());
     createInfo.ppEnabledExtensionNames = QFAVKPhysicalDevice::deviceExtensions.data();
-    
+
     
 #ifdef _DEBUG    
     createInfo.enabledLayerCount = static_cast<uint32_t>(QFAVKInstance::validationLayers.size());

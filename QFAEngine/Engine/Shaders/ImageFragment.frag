@@ -17,9 +17,6 @@ layout(set = 1, binding = 1) uniform UniformBufferTextParam
 
 void main()
 {     
-    
-    
-
     if(imageParam.overflow != 0)
     {
 

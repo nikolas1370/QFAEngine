@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <Math/Vector2D.h>
+#include <Math/Vector.h>
 
 namespace QFAUIType
 {
@@ -59,7 +60,23 @@ class QFAUIUnit
 	friend QFAUIParentComponent;
 	friend QFAUICanvas;
 	friend QFAViewportRoot;	
+
+protected:
+	struct UniformOverflow
+	{		
+		int enable;
+		float leftTopX;
+		float leftTopY;
+		float rightBottomX;
+		float rightBottomY;
+	};
+
+private:
+
 	QFAUISlot::SCanvasSlot l;
+
+
+
 
 	//IsRoot == true only for QFAViewportRoot
 	bool IsRoot = false;
@@ -82,6 +99,9 @@ protected:
 	// 0 == top 
 	int Position_y = 0;	
 	QFAUIParentComponent* Parent = nullptr;
+
+	float Opacity = 1;
+	float ZIndex = 0; 
 
 	// parent set size
 	virtual void SetSizeParent(unsigned int w, unsigned int h) = 0;
@@ -130,6 +150,23 @@ public:
 	{
 		delete this;
 	}
+
+
+	inline void SetOpacity(float opacity)
+	{
+		Opacity = opacity;
+	}
+
+	// min max valude is QFAViewport::MinMaxZIndexUI
+	inline void SetZIndex(float zIndex)
+	{
+		ZIndex = zIndex * -1;
+	}
+
+	inline float  GetZIndex()
+	{
+		return ZIndex * -1;
+	}
 protected:
 	QFAUISlot::SParentSlot Slot;
 
@@ -148,4 +185,8 @@ protected:
 	inline virtual void ParentAttach() {}
 	// call if one of parent was disconect
 	inline virtual void ParentDisconect() {}
+
+
+	void ProcessParentOverflow(UniformOverflow& param, QFAUIParentComponent* parent);
+	float ProcessParentOpacity(float childOpacity , QFAUIParentComponent* parent);
 };

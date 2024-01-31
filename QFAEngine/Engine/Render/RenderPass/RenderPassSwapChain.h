@@ -2,14 +2,14 @@
 #include <vulkan/vulkan.h>
 class QFAWindow;
 
-class QFAVKRenderPass
+class QFAVKRenderPassSwapChain
 {
 
 	friend QFAWindow;
 	VkRenderPass renderPass;	
 public:
-	QFAVKRenderPass(VkFormat imageFormat, bool present);
-	~QFAVKRenderPass();
+	QFAVKRenderPassSwapChain(VkFormat imageFormat, bool present);
+	~QFAVKRenderPassSwapChain();
 
 private:
 
