@@ -75,7 +75,7 @@
     <IncludePath>C:\Assimp\include;$(SolutionDir)..\freetype-master 2.13.2\include;$(SolutionDir)..\glfw-3.3.8\glfw-3.3.8.bin.WIN64\include;$(SolutionDir)..\glm;$(SolutionDir)QFAEngine/Engine;$(SolutionDir)..\stb;C:\VulkanSDK\1.3.275.0\Include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Assimp\include;$(SolutionDir)..\freetype-master 2.13.2\include;$(SolutionDir)..\glfw-3.3.8\glfw-3.3.8.bin.WIN64\include;$(SolutionDir)..\glm;$(SolutionDir)QFAEngine/Engine;$(SolutionDir)..\stb;C:\VulkanSDK\1.3.275.0\Include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Assimp\include;$(SolutionDir)..\freetype-master 2.13.2\include;$(SolutionDir)..\glfw-3.3.8\glfw-3.3.8.bin.WIN64\include;$(SolutionDir)..\glm;$(SolutionDir)QFAEngine/Engine;$(SolutionDir)..\stb;C:\VulkanSDK\1.3.275.0\Include;C:\Users\Juni\Desktop\QFAEngine Root\Shaderc\include\shaderc;$(IncludePath)</IncludePath>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -125,9 +125,8 @@
       <AdditionalLibraryDirectories>C:\Assimp\lib\x64;C:\VulkanSDK\1.3.275.0\Lib;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug;$(SolutionDir)..\glfw-3.3.8\glfw-3.3.8.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Lib>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>
-      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;assimp-vc143-mt.lib;freetype.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.275.0\Lib;$(SolutionDir)..\glfw-3.3.8\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\Assimp\lib\x64;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
@@ -157,9 +156,8 @@
       <AdditionalLibraryDirectories>C:\Assimp\lib\x64;C:\VulkanSDK\1.3.275.0\Lib;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug;$(SolutionDir)..\glfw-3.3.8\glfw-3.3.8.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Lib>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>
-      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;assimp-vc143-mt.lib;freetype.lib;shaderc_shared.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.275.0\Lib;$(SolutionDir)..\glfw-3.3.8\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\Assimp\lib\x64;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -205,6 +203,7 @@
     <ClCompile Include="Engine\Render\Window\QFAViewportRoot.cpp" />
     <ClCompile Include="Engine\Render\Window\Viewport.cpp" />
     <ClCompile Include="Engine\Render\Window\Window.cpp" />
+    <ClCompile Include="Engine\Tools\File\FileSystem.cpp" />
     <ClCompile Include="Engine\Tools\VulkanStuff.cpp" />
     <ClCompile Include="Engine\Object\Actor\Actor.cpp" />
   </ItemGroup>
@@ -253,8 +252,8 @@
     <ClInclude Include="Engine\Render\Window\Viewport.h" />
     <ClInclude Include="Engine\Render\Window\Window.h" />
     <ClInclude Include="Engine\Tools\Array.h" />
+    <ClInclude Include="Engine\Tools\File\FileSystem.h" />
     <ClInclude Include="Engine\Tools\VulkanSuff.h" />
-    <ClInclude Include="Engine\Tools\File\FileLoader.h" />
     <ClInclude Include="Engine\Math\Math.h" />
     <ClInclude Include="Engine\Math\Vector.h" />
     <ClInclude Include="Engine\Math\Vector2D.h" />

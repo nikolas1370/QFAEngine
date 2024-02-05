@@ -197,8 +197,7 @@ private:
 
     static QFAVKPipeline* Pipeline;
     static QFAVKPipeline* OldPipeline;
-    static const std::string VertexShaderPath;
-    static const std::string FragmentShaderPath;
+
 
     static unsigned int CountGlyphInBuffer;
 

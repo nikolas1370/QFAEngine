@@ -1,4 +1,5 @@
 #include "Time.h"
+#include <Tools/VulkanSuff.h>
 uint64_t QTime::StartTime = 0;
 uint64_t QTime::WorkTime = 0;
 double QTime::DeltaTime = 0.0;
@@ -6,7 +7,13 @@ uint64_t QTime::LastTime = 0;
 
 void  QTime::Init()
 {
-	StartTime = glfwGetTimerValue();
+	if(StartTime == 0)
+	{
+		if (!glfwInit())
+			stopExecute("!glfwInit()")
+
+		StartTime = glfwGetTimerValue();
+	}
 }
 
 void QTime::CalcDeltaTime()

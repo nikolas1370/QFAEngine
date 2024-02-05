@@ -6,7 +6,7 @@
 #include <Math/Vector2D.h>
 #include <Object/Actor/Actor.h>
 
-#include <Tools/File/FileLoader.h>
+
 
 
 #include <Object/Actor/Camera/CameraEditor.h>
@@ -20,19 +20,20 @@
 #include <Render/UI/UIImage.h>
     
 #pragma comment(lib, "QFAEngine.lib")
+#include <Tools/File/FilesyStem.h>
 
+
+#include <Render/Time.h>
+
+#include "Editor/EditorOverlord.h"
 
 int main()
 {
+    QFAEditorOverlord::Init();
 
-
-
-    QFAOverlord::Init();
-
-
-    QStaticMesh* Mesh = QFAModelLoader::LoadModel("Model/Arrow.fbx");
-    QStaticMesh* Mesh2 = QFAModelLoader::LoadModel("Model/quad2.obj");
-    QStaticMesh* Mesh3 = QFAModelLoader::LoadModel("Model/anim/dore_1.obj");
+    QStaticMesh* Mesh = QFAModelLoader::LoadModel("SomeModel/Arrow.fbx");
+    QStaticMesh* Mesh2 = QFAModelLoader::LoadModel("SomeModel/quad2.obj");
+    QStaticMesh* Mesh3 = QFAModelLoader::LoadModel("SomeModel/anim/dore_1.obj");
 
     QWorld* mainWorld = new QWorld();
 
@@ -173,8 +174,8 @@ int main()
     can->AddUnit(UIHomy);
 
     
-    
-    QFAOverlord::StartLife();
+
+    QFAEditorOverlord::StartLife();
 
     return 0;
 }

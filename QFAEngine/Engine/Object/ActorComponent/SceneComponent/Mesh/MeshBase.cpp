@@ -190,8 +190,8 @@ void QMeshBaseComponent::CreatePipeline()
 {
 	QFAVKPipeline::QFAPipelineCreateInfo PipelineInfo;
 	PipelineInfo.RenderPass = RenderPass;
-	PipelineInfo.PipelineShaderStages.VertexStage = "Engine/Shaders/MeshVertex.spv";
-	PipelineInfo.PipelineShaderStages.FragmentStage = "Engine/Shaders/MeshFragment.spv";	
+	PipelineInfo.PipelineShaderStages.VertexShaderName = U"Mesh.spvv";
+	PipelineInfo.PipelineShaderStages.FragmentShaderName = U"Mesh.spvf";
 
 	PipelineInfo.VertexInputInfo.VertexBindingDescriptionCount = 1;
 	VkVertexInputBindingDescription bindingDescription{};
@@ -286,8 +286,7 @@ void QMeshBaseComponent::CreateShadowPipline()
 {
 	QFAVKPipeline::QFAPipelineCreateInfo PipelineInfo;
 	PipelineInfo.RenderPass = ShadowRenderPass;
-	PipelineInfo.PipelineShaderStages.VertexStage = "Engine/Shaders/ShadowVertex.spv";
-	PipelineInfo.PipelineShaderStages.FragmentStage = nullptr;
+	PipelineInfo.PipelineShaderStages.VertexShaderName = U"Shadow.spvv";
 
 	PipelineInfo.VertexInputInfo.VertexBindingDescriptionCount = 1;
 	VkVertexInputBindingDescription bindingDescription{};

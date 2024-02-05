@@ -9,11 +9,7 @@
 
 #include <Input/Input.h>
 #include <Render/UI/Text.h>
-#include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
-
-#pragma comment(lib, "vulkan-1.lib")
-#pragma comment(lib, "glfw3.lib")
-#pragma comment(lib, "assimp-vc143-mt.lib")
+#include <Tools/File/FileSystem.h>
 
 bool QFAOverlord::Life = false;
 bool QFAOverlord::isInit = false; 
@@ -39,23 +35,17 @@ void QFAOverlord::EndLife()
 {
     Life = false;    
     
-
+    QFAFile::EndLife();
     QFAText::EndLife();
     //QFAVKBuffer::EndLife();  nee dele all buffer and image before call
-
     glfwTerminate(); 
     
 }
 
-bool QFAOverlord::Init()
+bool QFAOverlord::Init(std::vector<QFAVKPipeline::SShaderData> shaderData)
 {
-    if (!glfwInit())
-    {
-        ASSERT(false);
-        return false;
-    }
-    
     QTime::Init();    
+    QFAVKPipeline::SetShaderData(shaderData);
 
     Window = new QFAWindow(DefaultWidth, DefaultHeight, "QFA");    
     QFAInput::Init(Window->glfWindow);

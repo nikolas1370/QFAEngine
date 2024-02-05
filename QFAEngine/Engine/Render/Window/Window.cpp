@@ -125,8 +125,6 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 	imugo = new QFAPresentImage(commandPool);
 
 	imugo->Init(RenderPassSwapChain->renderPass, commandPool, frameBufferMesh->ColorImage);
-	
-
 }
 
 QFAWindow::~QFAWindow()
@@ -273,6 +271,8 @@ void QFAWindow::SortUIs(QFAViewportRoot* root)
 		}
 	}	
 }
+
+
 
 
 void QFAWindow::AddUnit(QFAUIUnit* unit)

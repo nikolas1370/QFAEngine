@@ -1,6 +1,7 @@
 #pragma once
 #include <Object/World/World.h>
 #include <Object/ActorComponent/SceneComponent/Camera/Camera.h>
+#include <Render/Pipline/Pipline.h>
 class QSceneComponent;
 class QFAWindow;
 
@@ -37,7 +38,7 @@ public:
 	/*
 	return false error
 	*/
-	static bool Init();
+	static bool Init(std::vector<QFAVKPipeline::SShaderData> shaderData);
 
 
 	

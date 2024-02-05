@@ -8,7 +8,6 @@ layout(location = 0) out vec4 out_color;
 
 layout(set = 1,binding = 0) uniform sampler2D glyphTexture[];
 
-
 layout(set = 1, binding = 1) uniform UniformBufferTextParam 
 {    
     vec3 textColor;     

@@ -12,7 +12,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H  
 
-#pragma comment(lib, "freetype.lib")
+
 
 FT_Library QFAText::ft;
 FT_Face QFAText::face;
@@ -20,8 +20,6 @@ QFAText::GlyphShader* QFAText::GlyphInfoData;
 
 QFAVKPipeline* QFAText::Pipeline = nullptr;
 QFAVKPipeline* QFAText::OldPipeline = nullptr;
-const std::string QFAText::VertexShaderPath = "Engine/Shaders/TextVertex.spv";
-const std::string QFAText::FragmentShaderPath = "Engine/Shaders/TextFragment.spv";
 
 VkCommandPool QFAText::commandPool;
 
@@ -65,7 +63,7 @@ void QFAText::Init(VkRenderPass renderPass, VkCommandPool commandPool_)
         return;
     }
 
-    if (FT_New_Face(QFAText::ft, "Font/Roboto-Regular.ttf", 0, &face))
+    if (FT_New_Face(QFAText::ft, "SomeFont/Roboto-Regular.ttf", 0, &face))
     {
         stopExecute("ERROR::FREETYPE: Failed to load font");
         return;
@@ -633,8 +631,8 @@ void QFAText::CreatePipeline()
 {
     QFAVKPipeline::QFAPipelineCreateInfo PipelineInfo;
     PipelineInfo.RenderPass = RenderPass;
-    PipelineInfo.PipelineShaderStages.VertexStage = VertexShaderPath.c_str();
-    PipelineInfo.PipelineShaderStages.FragmentStage = FragmentShaderPath.c_str();
+    PipelineInfo.PipelineShaderStages.VertexShaderName = U"Text.spvv";
+    PipelineInfo.PipelineShaderStages.FragmentShaderName = U"Text.spvf";
 
 
     PipelineInfo.VertexInputInfo.VertexBindingDescriptionCount = 1;

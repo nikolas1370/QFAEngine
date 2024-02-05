@@ -2,57 +2,118 @@
 #include <iostream>
 #include <fstream>
 #include <Render/vk/LogicalDevice.h>
+#include <Render/Time.h>
+#include <Tools/File/FileSystem.h>
+
+std::vector<QFAVKPipeline::SShaderData> QFAVKPipeline::ShaderData;
 
 QFAVKPipeline::QFAVKPipeline(QFAPipelineCreateInfo& PipInfo)
-{
-    std::vector<char> vertShaderCode;
-    std::vector<char> fragShaderCode;
+{  
+    const uint32_t* vertShaderCode;
+    const uint32_t* fragShaderCode;
     uint32_t stageCount = 0;
     
-    VkShaderModule vertShaderModule{};
+    VkShaderModule vertShaderModule{};    
     VkShaderModule fragShaderModule{};
     VkPipelineShaderStageCreateInfo shaderStages[2];
-    if (PipInfo.PipelineShaderStages.SPIR_V_file)
+    
+
+    if (PipInfo.PipelineShaderStages.VertexShaderName.size() > 0 && PipInfo.PipelineShaderStages.FragmentShaderName.size() > 0)
     {
-        if (PipInfo.PipelineShaderStages.VertexStage && PipInfo.PipelineShaderStages.FragmentStage)
+        stageCount = 2;
+        SShaderData *sdVert = nullptr;
+        SShaderData *sdFrag = nullptr;
+        
+        for (size_t i = 0; i < ShaderData.size(); i++)
         {
-            stageCount = 2;
-            vertShaderCode = readFile(PipInfo.PipelineShaderStages.VertexStage);
-            fragShaderCode = readFile(PipInfo.PipelineShaderStages.FragmentStage);
-            vertShaderModule = createShaderModule(vertShaderCode);
-            fragShaderModule = createShaderModule(fragShaderCode);
-
-            shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-            shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-            shaderStages[0].module = vertShaderModule;
-            shaderStages[0].pName = "main";
-            shaderStages[0].pNext = nullptr;
-            shaderStages[0].pSpecializationInfo = nullptr;
-
-            shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-            shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-            shaderStages[1].module = fragShaderModule;
-            shaderStages[1].pName = "main";
-            shaderStages[1].pNext = nullptr;
-            shaderStages[1].pSpecializationInfo = nullptr;
+            if (!sdVert && ShaderData[i].name == PipInfo.PipelineShaderStages.VertexShaderName)
+            {
+                sdVert = &ShaderData[i];
+                if (sdFrag)
+                    break;
+            }
+            else if(!sdFrag && ShaderData[i].name == PipInfo.PipelineShaderStages.FragmentShaderName)
+            {
+                sdFrag = &ShaderData[i];
+                if (sdVert)
+                    break;
+            }
         }
-        else if(PipInfo.PipelineShaderStages.VertexStage)
+
+        if (!sdVert || !sdFrag) 
+            stopExecute("QFAVKPipeline::QFAVKPipeline shader not found");
+
+        if (sdVert->loadFromFile)
         {
-            stageCount = 1;
-            vertShaderCode = readFile(PipInfo.PipelineShaderStages.VertexStage);
-            vertShaderModule = createShaderModule(vertShaderCode);
-            shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-            shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-            shaderStages[0].module = vertShaderModule;
-            shaderStages[0].pName = "main";
-            shaderStages[0].pNext = nullptr;
-            shaderStages[0].pSpecializationInfo = nullptr;
+            QFAFile file;
+            file.DisableAutoDeleteFileData();
+            QFAFileSystem::LoadFile(sdVert->path, &file);
+            sdVert->loadFromFile = false;
+            sdVert->module = (uint32_t*)file.GetData();
+            sdVert->moduleSize = file.GetFileSize();            
         }
-        else
-            stopExecute("QFAVKPipeline::QFAVKPipeline");
+        //std::cout << sdFrag->module << " " << sdVert->module << "\n";
+        if (sdFrag->loadFromFile)
+        {
+            QFAFile file;
+            file.DisableAutoDeleteFileData();
+            QFAFileSystem::LoadFile(sdFrag->path, &file);
+            sdFrag->loadFromFile = false;
+            sdFrag->module = (uint32_t*)file.GetData();
+            sdFrag->moduleSize = file.GetFileSize();
+        }                
+
+        vertShaderModule = createShaderModule(sdVert->module, sdVert->moduleSize);
+        fragShaderModule = createShaderModule(sdFrag->module, sdFrag->moduleSize);
+
+        shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
+        shaderStages[0].module = vertShaderModule;
+        shaderStages[0].pName = "main";
+        shaderStages[0].pNext = nullptr;
+        shaderStages[0].pSpecializationInfo = nullptr;
+
+        shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+        shaderStages[1].module = fragShaderModule;
+        shaderStages[1].pName = "main";
+        shaderStages[1].pNext = nullptr;
+        shaderStages[1].pSpecializationInfo = nullptr;
+    }
+    else if (PipInfo.PipelineShaderStages.VertexShaderName.size())
+    {
+        stageCount = 1;
+        SShaderData* sdVert = nullptr;
+
+        for (size_t i = 0; i < ShaderData.size(); i++)
+            if (!sdVert && ShaderData[i].name == PipInfo.PipelineShaderStages.VertexShaderName)
+                sdVert = &ShaderData[i];
+
+        if (!sdVert )
+            stopExecute("QFAVKPipeline::QFAVKPipeline shader not found");
+
+        if (sdVert->loadFromFile)
+        {
+            QFAFile file;
+            file.DisableAutoDeleteFileData();
+            QFAFileSystem::LoadFile(sdVert->path, &file);
+            sdVert->loadFromFile = false;
+            sdVert->module = (uint32_t*)file.GetData();
+            sdVert->moduleSize = file.GetFileSize();
+        }
+
+        vertShaderModule = createShaderModule(sdVert->module, sdVert->moduleSize);
+
+        shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
+        shaderStages[0].module = vertShaderModule;
+        shaderStages[0].pName = "main";
+        shaderStages[0].pNext = nullptr;
+        shaderStages[0].pSpecializationInfo = nullptr;
     }
     else
-        stopExecute("not SPIR_V_file not support");
+        stopExecute("QFAVKPipeline::QFAVKPipeline");
+    
 
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -171,6 +232,7 @@ QFAVKPipeline::QFAVKPipeline(QFAPipelineCreateInfo& PipInfo)
     vkDestroyShaderModule(QFAVKLogicalDevice::GetDevice(), vertShaderModule, nullptr);    
 
     SetPoolsParameter(PipInfo);
+
 }
 
 
@@ -263,12 +325,12 @@ std::vector<char> QFAVKPipeline::readFile(const std::string& filename)
     return buffer;
 }
 
-VkShaderModule QFAVKPipeline::createShaderModule(const std::vector<char>& code)
+VkShaderModule QFAVKPipeline::createShaderModule(const uint32_t* code, size_t size)
 {
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    createInfo.codeSize = code.size();
-    createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
+    createInfo.codeSize = size;
+    createInfo.pCode = code;
 
     VkShaderModule shaderModule;
     if (vkCreateShaderModule(QFAVKLogicalDevice::GetDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
@@ -289,6 +351,11 @@ void QFAVKPipeline::CreateDescriptorSetLayouts(QFAPipelineCreateInfo& PipInfo)
         if (vkCreateDescriptorSetLayout(QFAVKLogicalDevice::GetDevice(), &layoutInfo, nullptr, &DescriptorSetLayouts[i]) != VK_SUCCESS)
             stopExecute("failed to create descriptor set layout!");
     }
+}
+
+void QFAVKPipeline::SetShaderData(std::vector<SShaderData> shaderData)
+{
+    ShaderData = shaderData;
 }
 
 QFAVKPipeline::~QFAVKPipeline()

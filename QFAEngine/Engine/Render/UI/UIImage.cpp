@@ -299,8 +299,8 @@ void QFAUIImage::CreatePipeline()
 {
     QFAVKPipeline::QFAPipelineCreateInfo PipelineInfo;
     PipelineInfo.RenderPass = RenderPass;
-    PipelineInfo.PipelineShaderStages.VertexStage = "Engine/Shaders/ImageVertex.spv";
-    PipelineInfo.PipelineShaderStages.FragmentStage = "Engine/Shaders/ImageFragment.spv";
+    PipelineInfo.PipelineShaderStages.VertexShaderName = U"Image.spvv";
+    PipelineInfo.PipelineShaderStages.FragmentShaderName = U"Image.spvf";
 
 
     PipelineInfo.VertexInputInfo.VertexBindingDescriptionCount = 1;

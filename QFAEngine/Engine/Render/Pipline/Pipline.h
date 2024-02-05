@@ -4,18 +4,38 @@
 #include <array>
 #include <vector>
 
+class QFAOverlord; // in QFAEditor
 class QFAVKPipeline
 {
+    friend QFAOverlord;
 public:
     static const uint32_t MaxDescriptorSetLayoutCount = 2;// if need more set more    
     static const uint32_t MaxDescriptorPoolSizeCount = 2;        
     static const uint32_t MaxColorBlendAttachment = 2;
 
+
+    /*
+        if loadFromFile == true
+            SPIR-V module load from disk(ShaderData::path)
+        else 
+            SPIR-V module store in ShaderData::module
+    */
+    struct SShaderData
+    {        
+        std::u32string path;
+        std::u32string name; 
+        const uint32_t* module = nullptr;
+        size_t moduleSize;
+        bool loadFromFile;
+    };
+
+    /*
+        VertexStage/FragmentStage name shader file
+    */
     struct QFAPipelineShaderStages
-    {// in future GeomrtryStage 
-        const char* VertexStage = nullptr;
-        const char* FragmentStage = nullptr;
-        bool SPIR_V_file = true;
+    {  
+        std::u32string VertexShaderName;
+        std::u32string FragmentShaderName;
     };
 
     struct QFAVertexInputInfo
@@ -81,13 +101,7 @@ public:
         QFAPipelineShaderStages PipelineShaderStages;
         QFAVertexInputInfo VertexInputInfo;
         QFAPipelineRasterization Rasterization;
-
-        /*
-        
-        
-        */
-        QFAPipelineColorBlendState ColorBlendState; // 
-        //QFAPipelineColorBlendAttachment ColorBlendAttachment; // це в QFAPipelineColorBlendState
+        QFAPipelineColorBlendState ColorBlendState;
         uint32_t DynamicStateCount = 0;
         VkDynamicState* DynamicStates = nullptr;
         QFAPipelineDepthStencil DepthStencil;
@@ -128,6 +142,8 @@ private:
     void CreatePool(uint32_t groupIndex);
     
     void SetPoolsParameter(QFAPipelineCreateInfo& PipInfo);
+
+
 public:    
     QFAVKPipeline(QFAPipelineCreateInfo& PipInfo);
 	~QFAVKPipeline();
@@ -157,7 +173,15 @@ public:
 private:
 
     static std::vector<char> readFile(const std::string& filename);
-    VkShaderModule createShaderModule(const std::vector<char>& code);
+
+    VkShaderModule createShaderModule(const uint32_t* code, size_t size);
 
     void CreateDescriptorSetLayouts(QFAPipelineCreateInfo& PipInfo);
+
+
+    static std::vector<SShaderData> ShaderData;
+    /*
+        call in QFAOverlord::Init
+    */
+    static void SetShaderData(std::vector<SShaderData> shaderData);
 };

@@ -101,7 +101,15 @@ StyleCopReport.xml
 *.scc
 *.rar
 *.spv
+*.spvv
+*.spvf
+*.spvg
+*.spvc
+*.ttf
+*.qfa
 SomeImage/
+SomeModel/
+SomeFont/
 # Chutzpah Test files
 _Chutzpah*
 
