@@ -52,7 +52,7 @@ QFAVKPipeline::QFAVKPipeline(QFAPipelineCreateInfo& PipInfo)
             sdVert->module = (uint32_t*)file.GetData();
             sdVert->moduleSize = file.GetFileSize();            
         }
-        //std::cout << sdFrag->module << " " << sdVert->module << "\n";
+
         if (sdFrag->loadFromFile)
         {
             QFAFile file;

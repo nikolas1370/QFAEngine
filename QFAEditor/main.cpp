@@ -172,7 +172,6 @@ int main()
     imageSlot.y = 0.6;
     UIHomy->SetSlot(&imageSlot);
     can->AddUnit(UIHomy);
-
     
 
     QFAEditorOverlord::StartLife();

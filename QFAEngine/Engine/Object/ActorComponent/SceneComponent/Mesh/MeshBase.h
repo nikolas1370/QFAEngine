@@ -229,8 +229,7 @@ protected:
 	static SShaderDirLight ShaderDL;
 
 private:
-
-	static void StartShadowFrame();
+	static void StartFrame();
 	static void StartShadowFrameViewport(glm::mat4& lmat);
 
 	

@@ -84,8 +84,11 @@ void QMeshBaseComponent::UpdateModelMatrix()
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(AccumulateScale.Y * Scale.Y , AccumulateScale.Z * Scale.Z, AccumulateScale.X * Scale.X));
 }
 
-void QMeshBaseComponent::StartShadowFrame()
+
+
+void QMeshBaseComponent::StartFrame()
 {
+	SetsInUse = 0;
 	ShadowSetsInUse = 0;
 }
 
@@ -110,7 +113,6 @@ void QMeshBaseComponent::StartFrameViewpoet(glm::mat4& viewPortProjection, glm::
 	ubo.directionLightMatrix = directionLightMatrix;
 	
 	memcpy(BuffersVertex[QFAWindow::GetMainWindow()->ViewportProcess]->MapData, &ubo.projection, sizeof(ubo) );
-	SetsInUse = 0;	
 }
 
 void QMeshBaseComponent::createDescriptorSets0()

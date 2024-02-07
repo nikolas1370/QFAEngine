@@ -237,8 +237,8 @@ void QFAWindow::DrawUI()
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
 	VkPipelineStageFlags bit = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	submitInfo.waitSemaphoreCount = 1;
-	submitInfo.pWaitSemaphores = &MainWindow->ActorFinishedSemi[MainWindow->ViewportProcess - 1];	
+	submitInfo.waitSemaphoreCount = MainWindow->ViewportProcess;
+	submitInfo.pWaitSemaphores = MainWindow->ActorFinishedSemi.data();	
 	submitInfo.pWaitDstStageMask = &bit;
 
 	submitInfo.commandBufferCount = 1;
@@ -453,7 +453,8 @@ void QFAWindow::createCommandPool()
 
 
 
-void QFAWindow::StartRenderOff()
+
+void QFAWindow::ShadowRender(QFAViewport* _viewport)
 {
 	vkResetCommandBuffer(MainWindow->ShadowCommandBuffers[ViewportProcess], 0);
 	VkCommandBufferBeginInfo beginInfo{};
@@ -467,20 +468,15 @@ void QFAWindow::StartRenderOff()
 	renderPassInfo.renderPass = MainWindow->RenderPassOffScreen->renderPass;
 	renderPassInfo.framebuffer = ShadowFrameBuffer->Framebuffer;
 	renderPassInfo.renderArea.offset = { 0, 0 };
-	renderPassInfo.renderArea.extent = {(uint32_t)shadowResolution, (uint32_t)shadowResolution };
+	renderPassInfo.renderArea.extent = { (uint32_t)shadowResolution, (uint32_t)shadowResolution };
 
-	std::array<VkClearValue, 1> clearValues{};	
+	std::array<VkClearValue, 1> clearValues{};
 	clearValues[0].depthStencil = { 1.0f, 0 };
 
 	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
 	renderPassInfo.pClearValues = clearValues.data();
 
 	vkCmdBeginRenderPass(MainWindow->ShadowCommandBuffers[ViewportProcess], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-}
-
-void QFAWindow::RenderOff(QFAViewport* _viewport)
-{
-	QMeshBaseComponent::StartShadowFrame();
 
 	// Set depth bias (aka "Polygon offset")
 // Required to avoid shadow mapping artifacts
@@ -517,17 +513,14 @@ void QFAWindow::RenderOff(QFAViewport* _viewport)
 	
 	CurentCameraPosition = _viewport->CurentCamera->WorldPosition;
 	QMeshBaseComponent::StartShadowFrameViewport(liteMat);
-	/*
+		
 	unsigned int countComponentForRender = 0;
 	for (size_t i = 0; i < world->Actors.Length(); i++)
 		countComponentForRender += ProcessMeshComponent(world->Actors[i]->RootComponent, true);
-	*/
-}
-
-void QFAWindow::EndRenderOff()
-{
-	vkCmdEndRenderPass(ShadowCommandBuffers[ViewportProcess]);
 	
+
+	vkCmdEndRenderPass(ShadowCommandBuffers[ViewportProcess]);
+
 	VkImageSubresourceLayers isl;
 	isl.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 	isl.mipLevel = 0;
@@ -539,10 +532,10 @@ void QFAWindow::EndRenderOff()
 	ic.dstSubresource = isl;
 	ic.srcOffset = { 0,0 };
 	ic.dstOffset = { 0,0 };
-	ic.extent = { (uint32_t)shadowResolution, (uint32_t)shadowResolution, 1 };	
-	
+	ic.extent = { (uint32_t)shadowResolution, (uint32_t)shadowResolution, 1 };
+
 	vkCmdCopyImage(MainWindow->ShadowCommandBuffers[ViewportProcess], ShadowFrameBuffer->depthImageQFA->TextureImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, ShadowImage->TextureImage, VK_IMAGE_LAYOUT_GENERAL, 1, &ic);
-	
+
 	if (vkEndCommandBuffer(ShadowCommandBuffers[ViewportProcess]) != VK_SUCCESS)
 		stopExecute("failed to record command buffer!");
 
@@ -550,9 +543,8 @@ void QFAWindow::EndRenderOff()
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
 	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-	//submitInfo.waitSemaphoreCount = ViewportProcess == 0 ? 0 : 1;
-	submitInfo.waitSemaphoreCount = ViewportProcess == 0 ? 0 : 1;
-	submitInfo.pWaitSemaphores = ViewportProcess == 0 ? nullptr : &ActorFinishedSemi[ViewportProcess - 1];
+	submitInfo.waitSemaphoreCount = 0;
+	submitInfo.pWaitSemaphores = nullptr;;
 	submitInfo.pWaitDstStageMask = waitStages;
 
 	submitInfo.commandBufferCount = 1;
@@ -565,8 +557,9 @@ void QFAWindow::EndRenderOff()
 
 	if (vkQueueSubmit(QFAVKLogicalDevice::GetGraphicsQueue(), 1, &submitInfo, nullptr/*inFlightFence*/) != VK_SUCCESS)
 		stopExecute("failed to submit draw command buffer!");
-	
+
 }
+
 
 void QFAWindow::RenderWindow()
 {
@@ -574,25 +567,15 @@ void QFAWindow::RenderWindow()
 	MainWindow->ViewportProcess = 0;
 
 	MainWindow->StartFrame();
-	
-	
+
+	QMeshBaseComponent::StartFrame();
 	for (size_t i = 0; i < MainWindow->Viewports.Length(); i++)
 	{		
-		
-		
-		MainWindow->StartRenderOff();
+		MainWindow->ShadowRender(MainWindow->Viewports[i]);
 
-		MainWindow->RenderOff(MainWindow->Viewports[i]); 
-
-		MainWindow->EndRenderOff();
-
-
-		
 		MainWindow->DrawActors(MainWindow->Viewports[i], i == 0);
-		
-		
+				
 		MainWindow->ViewportProcess++;
-		//vkDeviceWaitIdle(QFAVKLogicalDevice::GetDevice());
 	}
 	
 
@@ -611,19 +594,9 @@ void QFAWindow::RenderWindow()
 
 void QFAWindow::StartFrame()
 {
-	VkResult result = vkAcquireNextImageKHR(QFAVKLogicalDevice::GetDevice(), SwapChain->SwapChain, UINT64_MAX, GetImageSemaphore, nullptr, &imageIndex);
-	if (result == VK_ERROR_OUT_OF_DATE_KHR)
-	{
-		recreateSwapChain();		
-		return;
-	}
-	else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
-		stopExecute("failed to acquire swap chain image!");
-
 	if (WindowSizeChanched)
 	{
 		recreateSwapChain();
-
 
 		Width = NewWidth;
 		Height = NewHeight;
@@ -631,6 +604,16 @@ void QFAWindow::StartFrame()
 		for (int j = 0; j < Viewports.Length(); j++)
 			Viewports[j]->Settup(Width, Height);
 	}
+
+	VkResult result = vkAcquireNextImageKHR(QFAVKLogicalDevice::GetDevice(), SwapChain->SwapChain, UINT64_MAX, GetImageSemaphore, nullptr, &imageIndex);
+	if (result == VK_ERROR_OUT_OF_DATE_KHR)
+	{
+		recreateSwapChain();	
+		StartFrame();
+		return;
+	}
+	else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+		stopExecute("failed to acquire swap chain image!");	
 }
 
 void QFAWindow::PresentFrame()
@@ -639,16 +622,17 @@ void QFAWindow::PresentFrame()
 	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR; 
 	
 	VkSemaphore waitSemaphores[] = { GetImageSemaphore, FinisSemaphore};
-	presentInfo.waitSemaphoreCount = 2;// ViewportProcess + 1;
-	presentInfo.pWaitSemaphores = waitSemaphores;// FinisSemaphore.data();
+	presentInfo.waitSemaphoreCount = 2;
+	presentInfo.pWaitSemaphores = waitSemaphores;
 
 	VkSwapchainKHR swapChains[] = { SwapChain->SwapChain };
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = swapChains;
 
 	presentInfo.pImageIndices = &imageIndex;
-
+	
 	VkResult result = vkQueuePresentKHR(QFAVKLogicalDevice::GetPresentQueue(), &presentInfo);// Present frame
+	
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) 
 	{
@@ -726,8 +710,6 @@ void QFAWindow::DrawActors(QFAViewport* _viewport, bool clear)
 		_viewport->CurentCamera->cameraRotationMatrex,
 		lightMat); 
 	unsigned int countComponentForRender = 0; 
-	
-
 	
 	for (size_t i = 0; i < world->Actors.Length(); i++)
 		countComponentForRender += ProcessMeshComponent(world->Actors[i]->RootComponent, false);

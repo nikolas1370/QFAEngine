@@ -109,11 +109,8 @@ private:
 	
 	QFAVKShadowFrameBuffer* ShadowFrameBuffer;
 
-	
-	void StartRenderOff();
-	void RenderOff(QFAViewport* viewport);
 
-	void EndRenderOff();
+	void ShadowRender(QFAViewport* viewport);
 
 	/*----*/
 
