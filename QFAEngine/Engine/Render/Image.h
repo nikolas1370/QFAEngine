@@ -41,7 +41,9 @@ public:
 
 	QFAImage(SImageCreateInfo &ici);
 	QFAImage(int Width, int Height, unsigned int channelCount, VkFormat format, VkImageUsageFlags usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT, VkImageCreateFlags flags = 0);
+	// remove
 	QFAImage(const std::string src);
+	QFAImage(const std::u32string src);
 	~QFAImage();
 	
 	void DeleteImageInCpuSide();

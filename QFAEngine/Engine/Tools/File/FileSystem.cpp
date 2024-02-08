@@ -115,6 +115,8 @@ QFAFile::Result QFAFileSystem::OpenFile(std::u32string path, QFAFile* file, bool
 		return QFAFile::Result::CannotOpenFile;
 	}	
 
+	
+
 	return QFAFile::Result::Success;	
 }
 

@@ -18,7 +18,7 @@ QFAUICanvas::~QFAUICanvas()
 void QFAUICanvas::NewUnit(QFAUIUnit* unit)
 {
 	QFAUISlot::SCanvasSlot* slot = (QFAUISlot::SCanvasSlot*)&unit->Slot;
-	if (unit->Slot.typeParent != Type)
+	if (unit->Slot.BaseInfo.typeParent != Type)
 	{ 
 		slot->Width = 1.0f;
 		slot->Height = 1.0f;

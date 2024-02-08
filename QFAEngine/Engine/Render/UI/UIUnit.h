@@ -12,18 +12,24 @@ namespace QFAUIType
 		Text = 1,
 		Canvas = 2,
 		ViewportRoot = 3,
-		Image = 4
+		Image = 4,
+		Grid = 5
 	};
 }
 
 namespace QFAUISlot
 {
+	struct SSlotBaseInfo
+	{
+		QFAUIType::Type typeParent;
+		unsigned short structSize;
+	};
+
 	// use for parent slot
 	struct SParentSlot
 	{
-		QFAUIType::Type typeParent;
-		unsigned short structSize = sizeof(SParentSlot);
-		float ParentSloot[4];
+		SSlotBaseInfo BaseInfo{ QFAUIType::NONE, sizeof(QFAUISlot::SParentSlot) };
+		char ParentSloot[16];
 	};
 
 	/* 
@@ -31,8 +37,7 @@ namespace QFAUISlot
 	*/
 	struct SCanvasSlot
 	{
-		QFAUIType::Type typeParent = QFAUIType::Canvas;
-		unsigned short structSize = sizeof(SCanvasSlot);
+		SSlotBaseInfo BaseInfo{ QFAUIType::Canvas, sizeof(QFAUISlot::SCanvasSlot) };
 		float Width;
 		float Height;
 		float x;
@@ -41,8 +46,12 @@ namespace QFAUISlot
 
 	struct SViewportRootSlot
 	{
-		QFAUIType::Type typeParent = QFAUIType::ViewportRoot;
-		unsigned short structSize = sizeof(SViewportRootSlot);
+		SSlotBaseInfo BaseInfo{ QFAUIType::ViewportRoot, sizeof(QFAUISlot::SViewportRootSlot) };
+	};
+
+	struct SGridSlot
+	{
+		SSlotBaseInfo BaseInfo{ QFAUIType::Grid, sizeof(QFAUISlot::SViewportRootSlot) };
 	};
 }
 
@@ -51,7 +60,7 @@ class QFAWindow;
 class QFAUIParentComponent;
 class QFAUICanvas;
 class QFAViewportRoot;
-
+class QFAUIGrid;
 
 class QFAUIUnit
 {
@@ -60,6 +69,7 @@ class QFAUIUnit
 	friend QFAUIParentComponent;
 	friend QFAUICanvas;
 	friend QFAViewportRoot;	
+	friend QFAUIGrid;
 
 protected:
 	struct UniformOverflow
@@ -90,6 +100,7 @@ protected:
 	/*
 	* if true QFAViewportRoot call SetSizeParent or SetPositionParent
 			when QFAViewportRoot resize or move
+			need if Unit::CanBeParent = true
 	*/
 	bool SelfResizable = false;
 

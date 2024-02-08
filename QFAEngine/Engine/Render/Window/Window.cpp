@@ -236,10 +236,9 @@ void QFAWindow::DrawUI()
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-	VkPipelineStageFlags bit = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	submitInfo.waitSemaphoreCount = MainWindow->ViewportProcess;
 	submitInfo.pWaitSemaphores = MainWindow->ActorFinishedSemi.data();	
-	submitInfo.pWaitDstStageMask = &bit;
+	submitInfo.pWaitDstStageMask = ActorFinishedSemiFlags.data();
 
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = &MainWindow->UICommandBuffer;
@@ -398,6 +397,7 @@ void QFAWindow::createSyncObject()
 
 	for (size_t i = 0; i < QFAWindow::MaxActiveViewPort; i++)
 	{
+		ActorFinishedSemiFlags[i] = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 		if (vkCreateSemaphore(QFAVKLogicalDevice::GetDevice(), &semaphoreInfo, nullptr, &ActorFinishedSemi[i]) != VK_SUCCESS ||
 			vkCreateSemaphore(QFAVKLogicalDevice::GetDevice(), &semaphoreInfo, nullptr, &ActorShadowFinishedSemi[i]) != VK_SUCCESS)
 			stopExecute("failed to create Semaphore");

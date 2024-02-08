@@ -28,8 +28,9 @@ void main()
         }        
     }    
 
-    
-    color = vec4(vec3(texture(imageTexture, TexCoords)), imageParam.opacity);
+    vec4 image = texture(imageTexture, TexCoords);
+
+    color = vec4(image.xyz, image.w * imageParam.opacity);
 }  
 
 /*

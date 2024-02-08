@@ -5,6 +5,7 @@
 #include <Render/Buffer/VKBuffer.h>
 #include <Render/vk/PhysicalDevice.h>
 #include <Render/vk/LogicalDevice.h>
+#include <Tools/File/FileSystem.h>
 
 VkCommandPool QFAImage::CommandPool;
 
@@ -39,6 +40,28 @@ QFAImage::QFAImage( const std::string src)
     buffer = new QFAVKBuffer( imageSize, pixels, true);
     stbi_image_free(pixels);
     
+    createImage(texWidth, texHeight, ImageFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+    buffer->copyInImage(this, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), CommandPool);
+
+    ImageView.CreateView(this, VK_IMAGE_ASPECT_COLOR_BIT);
+}
+
+QFAImage::QFAImage(const std::u32string src)
+{
+    ImageFormat = VK_FORMAT_R8G8B8A8_SRGB;
+    int texWidth, texHeight, texChannels;
+    // stbi_load_16  stbi_load_from_memory
+    QFAFile file;
+    QFAFileSystem::LoadFile(src, &file);
+    stbi_uc* pixels = stbi_load_from_memory((const unsigned char*)file.GetData(), file.GetDataSize(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    VkDeviceSize imageSize = texWidth * texHeight * 4;
+
+    if (!pixels)
+        stopExecute("failed to load texture image!");
+
+    buffer = new QFAVKBuffer(imageSize, pixels, true);
+    stbi_image_free(pixels);
+
     createImage(texWidth, texHeight, ImageFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
     buffer->copyInImage(this, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), CommandPool);
 

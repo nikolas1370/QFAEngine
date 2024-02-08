@@ -24,7 +24,7 @@ void QFAUIUnit::SetSlot(void* slot)
 	if (!slot)
 		return;
 
-	memcpy(&Slot, slot, ((QFAUISlot::SParentSlot*)slot)->structSize);
+	memcpy(&Slot, slot, ((QFAUISlot::SParentSlot*)slot)->BaseInfo.structSize);
 	if(Parent)
 		Parent->MySlotChange(this);
 }

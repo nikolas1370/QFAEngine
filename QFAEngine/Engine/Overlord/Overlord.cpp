@@ -16,7 +16,7 @@ bool QFAOverlord::isInit = false;
 QFAWindow* QFAOverlord::Window = nullptr;
 QCameraComponent* QFAOverlord::CurentCamera = nullptr;
 
-int QFAOverlord::DefaultWidth = 600;
+int QFAOverlord::DefaultWidth = 1000;
 int QFAOverlord::DefaultHeight = 600;
 
 bool QFAOverlord::StartLife()

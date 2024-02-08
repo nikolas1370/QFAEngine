@@ -179,6 +179,7 @@
     <ClCompile Include="Engine\Render\Pipline\Pipline.cpp" />
     <ClCompile Include="Engine\Render\RenderPass\RenderPassSwapChain.cpp" />
     <ClCompile Include="Engine\Render\UI\Canvas.cpp" />
+    <ClCompile Include="Engine\Render\UI\Grid.cpp" />
     <ClCompile Include="Engine\Render\UI\UIImage.cpp" />
     <ClCompile Include="Engine\Render\UI\RenderUnit.cpp" />
     <ClCompile Include="Engine\Render\UI\Text.cpp" />
@@ -225,6 +226,7 @@
     <ClInclude Include="Engine\Render\Pipline\Pipline.h" />
     <ClInclude Include="Engine\Render\RenderPass\RenderPassSwapChain.h" />
     <ClInclude Include="Engine\Render\UI\Canvas.h" />
+    <ClInclude Include="Engine\Render\UI\Grid.h" />
     <ClInclude Include="Engine\Render\UI\UIImage.h" />
     <ClInclude Include="Engine\Render\UI\RenderUnit.h" />
     <ClInclude Include="Engine\Render\UI\Text.h" />

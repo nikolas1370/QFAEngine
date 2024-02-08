@@ -26,9 +26,12 @@
 #include <Render/Time.h>
 
 #include "Editor/EditorOverlord.h"
+#include <Render/UI/Grid.h>
 
 int main()
 {
+
+
     QFAEditorOverlord::Init();
 
     QStaticMesh* Mesh = QFAModelLoader::LoadModel("SomeModel/Arrow.fbx");
@@ -97,32 +100,10 @@ int main()
     text->OutlineColor = FVector(0.5f, 0.4f, 0.3f);    
     text->SetTextAlign(QFAText::ETextAlign::TACenter);
 
-    QFAUICanvas* can = new QFAUICanvas;
-    QFAUICanvas* canvas2 = new QFAUICanvas;
-    QFAUICanvas* canvas3 = new QFAUICanvas;
-    can->SetOpacity(1);
-    canvas3->SetOpacity(0.2);
-    canvas2->SetOverflow(QFAUIParentComponent::EOverflow::HiddenHorizon);
-    canvas3->SetOverflow(QFAUIParentComponent::EOverflow::HiddenVertical);
 
-    firstdViewPort->AddUnit(can);
-    can->AddUnit(canvas2);
-    canvas2->AddUnit(canvas3);
-    canvas3->AddUnit(text);
 
-    QFAUISlot::SCanvasSlot canvasSlot;
-    canvasSlot.Height = 0.5;
-    canvasSlot.Width = 0.8;
-    canvasSlot.x = 0.1;
-    canvasSlot.y = 0.0;
-    canvas2->SetSlot(&canvasSlot);
 
-    QFAUISlot::SCanvasSlot canvasSlot2;
-    canvasSlot2.Height = 1.8;
-    canvasSlot2.Width = 1;
-    canvasSlot2.x = -0.1;
-    canvasSlot2.y = 0.0;
-    canvas3->SetSlot(&canvasSlot2);
+
 
     firstdViewPort->AddUnit(text_2);
 
@@ -150,29 +131,38 @@ int main()
     secondViewPort->AddUnit(textViewPort2);
 
 
+
     /*---*/
     
-    QFAImage* dogy = new QFAImage("SomeImage/6213157_0.jpg");
+    QFAImage* dogy = new QFAImage(U"SomeImage/6213157_0.jpg");
     QFAUIImage* UIDogy = new QFAUIImage(dogy);
-    UIDogy->SetZIndex(-1);
-    firstdViewPort->AddUnit(UIDogy);
-    UIDogy->SetPosition(0, 250);
-    UIDogy->SetSize(200, 200);
-
+    
     QFAImage* homy = new QFAImage("SomeImage/relax, Akim Kaliberda.jpg");
     QFAUIImage* UIHomy = new QFAUIImage(homy);
-    UIHomy->SetPosition(0, 400);
-    UIHomy->SetSize(200, 200);
     
+    QFAImage* Crystal = new QFAImage("SomeImage/TankWaterSpiritCrystal.png");
+    QFAUIImage* UICrystal = new QFAUIImage(Crystal);
 
-    QFAUISlot::SCanvasSlot imageSlot;
-    imageSlot.Height = 0.25;
-    imageSlot.Width = 0.25;
-    imageSlot.x = 0.0;
-    imageSlot.y = 0.6;
-    UIHomy->SetSlot(&imageSlot);
-    can->AddUnit(UIHomy);
+    QFAImage* home_2 = new QFAImage(U"SomeImage/Зїли їжака.png");
+    QFAUIImage* UIhome_2 = new QFAUIImage(home_2);
+
+
+    QFAUIGrid grid;
+    grid.SetPositionType(QFAUIGrid::UPTAuto);
+    grid.SetUnitWidth(0);
+
+    grid.AddUnit(UIDogy);
+    grid.AddUnit(UICrystal);
+    grid.AddUnit(UIHomy);
+    grid.AddUnit(text);
+    grid.AddUnit(UIhome_2);
     
+    grid.SetMinMax(100, 200);
+    grid.SetOffsets(10, 10);
+
+
+    firstdViewPort->AddUnit(&grid);
+
 
     QFAEditorOverlord::StartLife();
 

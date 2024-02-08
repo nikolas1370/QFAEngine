@@ -119,6 +119,7 @@ private:
 
 	VkSemaphore GetImageSemaphore;	
 	std::array<VkSemaphore, QFAWindow::MaxActiveViewPort> ActorFinishedSemi;
+	std::array<VkPipelineStageFlags, QFAWindow::MaxActiveViewPort> ActorFinishedSemiFlags;
 	std::array<VkSemaphore, QFAWindow::MaxActiveViewPort> ActorShadowFinishedSemi;
 	VkSemaphore UISemaphore;
 
