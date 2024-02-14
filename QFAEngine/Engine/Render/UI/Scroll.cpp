@@ -169,7 +169,7 @@ void QFAUIScroll::SetSizeParent(unsigned int w, unsigned int h)
 	}
 }
 
-void QFAUIScroll::SetPositionParent(unsigned int x, unsigned int y)
+void QFAUIScroll::SetPositionParent(int x, int y)
 {
 	Position_x = x;
 	Position_y = y;

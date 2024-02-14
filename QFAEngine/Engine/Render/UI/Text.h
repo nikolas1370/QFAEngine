@@ -148,7 +148,7 @@ public:
 private:
 
     void SetSizeParent(unsigned int w, unsigned int h) override;
-    void SetPositionParent(unsigned int x, unsigned int y) override;
+    void SetPositionParent(int x, int y) override;
 
 
     void updateUniformBuffer();

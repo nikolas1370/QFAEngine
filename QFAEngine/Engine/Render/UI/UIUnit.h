@@ -97,7 +97,7 @@ protected:
 	// parent set size
 	virtual void SetSizeParent(unsigned int w, unsigned int h) = 0;
 	// parent set position
-	virtual void SetPositionParent(unsigned int x, unsigned int y) = 0;
+	virtual void SetPositionParent(int x, int y) = 0;
 private:
 
 	QFAUISlot::SCanvasSlot l;
@@ -121,8 +121,8 @@ protected:
 	*/
 	bool SelfResizable = false;
 
-	unsigned int Width = 300;
-	unsigned int Height = 120;
+	int Width = 300;
+	int Height = 120;
 	int Position_x = 0;
 	int Position_y = 0;	
 	QFAUIParent* Parent = nullptr;

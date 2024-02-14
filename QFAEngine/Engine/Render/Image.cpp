@@ -16,6 +16,7 @@ QFAImage::QFAImage(SImageCreateInfo& ici)
     buffer = new QFAVKBuffer(imageSize, nullptr, true);
     createImage(ici.Width, ici.Height, ici.format, VK_IMAGE_TILING_OPTIMAL, ici.usage);
     QFAVKBuffer::transitionImageLayout(TextureImage, ici.format, VK_IMAGE_LAYOUT_UNDEFINED, ici.layout, CommandPool, ici.aspect);
+    ImageView.CreateView(this, ici.aspect);
 }
 
 QFAImage::QFAImage( int Width, int Height, unsigned int channelCount,  VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspect , VkImageCreateFlags flags)
@@ -25,6 +26,7 @@ QFAImage::QFAImage( int Width, int Height, unsigned int channelCount,  VkFormat 
     buffer = new QFAVKBuffer(imageSize, nullptr, true);
     createImage(Width, Height, format, VK_IMAGE_TILING_OPTIMAL, usage, flags);
     QFAVKBuffer::transitionImageLayout(TextureImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, CommandPool, aspect);
+    ImageView.CreateView(this, aspect);
 }
 
 QFAImage::QFAImage( const std::string src)

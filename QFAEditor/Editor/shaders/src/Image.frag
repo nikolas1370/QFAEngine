@@ -5,6 +5,7 @@ layout(location = 0) out vec4 color;
 
 
 layout(set = 1,binding = 0) uniform sampler2D imageTexture;
+
 layout(set = 1, binding = 1) uniform UniformBufferTextParam 
 {    
     float opacity;
@@ -13,6 +14,8 @@ layout(set = 1, binding = 1) uniform UniformBufferTextParam
     float leftTopY;
     float rightBottomX;
     float rightBottomY;
+    int BackgroundEnable;
+    vec4 backgroundColor; 
 } imageParam;
 
 void main()
@@ -28,9 +31,13 @@ void main()
         }        
     }    
 
-    vec4 image = texture(imageTexture, TexCoords);
-
-    color = vec4(image.xyz, image.w * imageParam.opacity);
+    if(imageParam.BackgroundEnable == 1)
+        color = imageParam.backgroundColor;
+    else
+    {
+        vec4 image = texture(imageTexture, TexCoords);
+        color = vec4(image.xyz, image.w * imageParam.opacity);
+    }   
 }  
 
 /*

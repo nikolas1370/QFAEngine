@@ -527,7 +527,7 @@ void QFAText::SetSizeParent(unsigned int w, unsigned int h)
     Height = h;
 }
 
-void QFAText::SetPositionParent(unsigned int x, unsigned int y)
+void QFAText::SetPositionParent(int x, int y)
 {
     TextChange = true;
     Position_x = x;

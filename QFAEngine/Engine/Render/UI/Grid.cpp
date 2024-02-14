@@ -73,21 +73,18 @@ void QFAUIGrid::ProcessChildPosition()
 	int columnCount = 0;
 	for (size_t i = 0; i < Children.Length(); i++)
 	{
+		if (columnCount == 0)
+			roowCount++;
 
 		Children[i]->SetSizeParent(unitWidth, unitWidth * Ratio);
 		Children[i]->SetPositionParent(
 			Position_x + columnCount * (unitWidth + ColumnOffset),
-			Position_y + (roowCount * (unitWidth * Ratio + RowOffset)));
+			Position_y + ((roowCount - 1) * (unitWidth * Ratio + RowOffset)));
 
 		columnCount++;
-		if (columnCount == maxColumnCount )
-		{			
+		if (columnCount == maxColumnCount)
 			columnCount = 0;
-			roowCount++;
-		}		
 	}
-
-	roowCount++;
 }
 
 void QFAUIGrid::SetSizeParent(unsigned int w, unsigned int h)
@@ -97,7 +94,7 @@ void QFAUIGrid::SetSizeParent(unsigned int w, unsigned int h)
 	ProcessChildPosition();
 }
 
-void QFAUIGrid::SetPositionParent(unsigned int x, unsigned int y)
+void QFAUIGrid::SetPositionParent(int x, int y)
 {
 	Position_x = x;
 	Position_y = y;

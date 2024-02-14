@@ -16,7 +16,7 @@ QFAVKTextureSampler* QFAUIImage::ImageSampler;
 VkRenderPass QFAUIImage::RenderPass;
 
 std::vector<QFAUIImage::SImageIndex> QFAUIImage::ImageIndexs;
-
+QFAImage* QFAUIImage::VoidImage = nullptr;
 
 VkDescriptorSet QFAUIImage::CurentDescriptorSetProject;
 
@@ -32,11 +32,13 @@ QFAUIImage::QFAUIImage(QFAImage* image)
 
 void QFAUIImage::Render(VkCommandBuffer comandebuffer)
 {
-    if (!Image || 
-        ImageIndexs[Index].image != this)
+    if (Index < 0 || Index >= ImageIndexs.size())
+        return;
+
+    if ( ImageIndexs[Index].image != this)
     {
         return;
-    }
+    } 
 
     VkDescriptorSet CurentDescriptorSet = Pipeline->GetSet(1, Index);    
 
@@ -55,22 +57,27 @@ void QFAUIImage::Render(VkCommandBuffer comandebuffer)
 
 void QFAUIImage::UpdateUniforms()
 {
-    if (!Image ||
-        ImageIndexs[Index].image != this)
+    if (Index < 0 || Index >= ImageIndexs.size())
+        return;
+
+    if (ImageIndexs[Index].image != this)
     {
         return;
     }
 
     SImageParam ip;
-    ip.opacity = ProcessParentOpacity(Opacity, Parent);
+    ip.opacity = ProcessParentOpacity(Opacity, Parent);    
 
     ip.overflow.enable = 0;
     ip.overflow.leftTopX = 0;
     ip.overflow.leftTopY = 0;
     ip.overflow.rightBottomX = 1000000;
     ip.overflow.rightBottomY = 1000000;
-
     ProcessParentOverflow(ip.overflow, Parent);
+
+    ip.BackgroundEnable = !Image;// ;
+    ip.BackgroundColor = BackgroundColor;
+
     memcpy(ImageIndexs[Index].buffer->MapData, &ip, sizeof(SImageParam));
     memcpy(ImageIndexs[Index].bufferVertex->MapData, &UnitScroll, sizeof(SImageVertexParam));
 }
@@ -82,6 +89,11 @@ void QFAUIImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_)
     commandPool = commandPool_;
     RenderPass = renderPass;    
     ImageSampler = new QFAVKTextureSampler();    
+    QFAImage::SImageCreateInfo ici;
+    ici.Width = 1;
+    ici.Height = 1;
+    ici.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    VoidImage = new QFAImage(ici);
     CreatePipeline();  
 }
 
@@ -92,12 +104,17 @@ QFAUIImage::~QFAUIImage()
 }
 
 void QFAUIImage::SetImage(QFAImage* image)
-{
-    Image = image;
-    if (!image)
+{  
+    if (!image && Image)
         return DisableImage();
 
+    Image = image;
     PrepareSet();
+}
+
+void QFAUIImage::SetBackgroundColor(FVector4D color)
+{
+    BackgroundColor = color;
 }
 
 
@@ -178,13 +195,12 @@ void QFAUIImage::SetSizeParent(unsigned int w, unsigned int h)
     ChangeQuad();
 }
 
-void QFAUIImage::SetPositionParent(unsigned int x, unsigned int y)
+void QFAUIImage::SetPositionParent(int x, int y)
 {
     Position_x = x;
     Position_y = y;
     ChangeQuad();
 }
-
 
 void QFAUIImage::ParentEnable()
 {
@@ -211,15 +227,19 @@ void QFAUIImage::ParentDisconect()
 
 void QFAUIImage::PrepareSet()
 {
-    if (!Image)
-        return;
+    
+        
 
     std::array< QFAVKPipeline::QFADescriptorSetInfo, 3> setInfo;
     VkDescriptorImageInfo imageInfo;
 
     imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfo.imageView = Image->ImageView.ImageView;
     imageInfo.sampler = ImageSampler->textureSampler;
+    if (Image)
+        imageInfo.imageView = Image->ImageView.ImageView;
+    else
+        imageInfo.imageView = VoidImage->ImageView.ImageView;
+    
     setInfo[0].dstBinding = 0;
     setInfo[0].DescriptorImageInfos = &imageInfo;
 

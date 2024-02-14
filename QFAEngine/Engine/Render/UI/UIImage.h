@@ -4,6 +4,8 @@
 #include <Math/Vector.h>
 #include <Render/UI/RenderUnit.h>
 #include <Render/Buffer/VKBuffer.h>
+#include <Math/Vector4D.h>
+
 
 /* ttf type */
 typedef unsigned long  FT_ULong;
@@ -34,9 +36,15 @@ class QFAUIImage : public QFAUIRenderUnit
 
 
     void SetSizeParent(unsigned int w, unsigned int h) override;
-    void SetPositionParent(unsigned int x, unsigned int y) override;
+    void SetPositionParent(int x, int y) override;
 
-    QFAImage* Image;
+    QFAImage* Image = nullptr;
+    /*    
+        if Image == nullptr
+        image be hawe this color
+    */
+    FVector4D BackgroundColor = FVector4D();
+
 
     static QFAVKPipeline* Pipeline;
     static void CreatePipeline();
@@ -51,8 +59,12 @@ public:
     QFAUIImage(QFAImage* image);
     ~QFAUIImage();
 
+    /*
+        if Image == nullptr
+        image area be have color of BackgroundColor
+    */
     void SetImage(QFAImage* image);
-
+    void SetBackgroundColor(FVector4D color);
 
 private: 
     static void Init(VkRenderPass renderPass, VkCommandPool commandPool);
@@ -98,6 +110,8 @@ private:
     {
         float opacity;
         UniformOverflow overflow;
+        int BackgroundEnable = 0;
+        alignas(16)FVector4D BackgroundColor;
     };
 
     struct SImageVertexParam
@@ -120,4 +134,6 @@ protected:
 
     void PrepareSet();
     void DisableImage();
+
+    static QFAImage* VoidImage;
 };

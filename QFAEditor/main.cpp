@@ -1,6 +1,5 @@
 #include "Math/Vector.h"
 
-
 #include <Overlord/Overlord.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
 #include <Math/Vector2D.h>
@@ -28,7 +27,7 @@
 #include "Editor/EditorOverlord.h"
 #include <Render/UI/Grid.h>
 #include <Render/UI/Scroll.h>
-
+    
 
 int main()
 {
@@ -146,6 +145,8 @@ int main()
     QFAImage* home_2 = new QFAImage(U"SomeImage/Зїли їжака.png");
     QFAUIImage* UIhome_2 = new QFAUIImage(home_2);
 
+    QFAUIImage* BackgroundColor = new QFAUIImage(nullptr);
+    BackgroundColor->SetBackgroundColor(FVector4D(1, 1, 1, 0.5));
 
     QFAUIGrid grid;
     grid.SetPositionType(QFAUIGrid::UPTAuto);
@@ -160,9 +161,13 @@ int main()
     grid.AddUnit(UIDogy);
     grid.AddUnit(UICrystal);
     grid.AddUnit(UIHomy);
-    grid.AddUnit(&scroll);
-    grid.AddUnit(UIhome_2);
+    grid.AddUnit(&scroll);    
+    grid.AddUnit(BackgroundColor); 
+    grid.AddUnit(UIhome_2);    
+
     
+    
+
     grid.SetMinMax(100, 200);
     grid.SetOffsets(10, 10);
 

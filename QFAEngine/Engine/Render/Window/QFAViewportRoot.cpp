@@ -25,7 +25,7 @@ void QFAViewportRoot::SetSizeParent(unsigned int w, unsigned int h)
 			Children[i]->SetSizeParent(w, h);
 }
 
-void QFAViewportRoot::SetPositionParent(unsigned int x, unsigned int y)
+void QFAViewportRoot::SetPositionParent(int x, int y)
 {
 	Position_x = x;
 	Position_y = y;
