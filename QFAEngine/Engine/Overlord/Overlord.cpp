@@ -54,14 +54,15 @@ bool QFAOverlord::Init(std::vector<QFAVKPipeline::SShaderData> shaderData)
     return true;
 }
 
-
 void QFAOverlord::MainLoop()
 {
     while (!Window->ShouldClose() && Life)
     {
+
         QTime::CalcDeltaTime();        
         glfwPollEvents();
         QFAInput::NewFrame((float)QTime::GetDeltaTime());        
+        QFAWindow::ProcessUIEvent();
         QWorld::ProcessTicks();
         QFAWindow::RenderWindow();
     }

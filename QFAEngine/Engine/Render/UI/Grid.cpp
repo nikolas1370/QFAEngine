@@ -11,6 +11,18 @@ void QFAUIGrid::NewUnit(QFAUIUnit* unit)
 	ProcessChildPosition();
 }
 
+float QFAUIGrid::UpdateInnerHeight()
+{
+	if (roowCount <= 0)
+		InnerHeight = 0;
+	else if (roowCount == 1)
+		InnerHeight = unitWidth * Ratio;
+	else
+		InnerHeight = (unitWidth * Ratio) * roowCount + (roowCount - 1) * RowOffset;
+
+	return InnerHeight;
+}
+
 #define GetCountUnit(Width, MaxUnitSize) (unsigned int)ceill((float)(Width) / (MaxUnitSize))
 #define GetSizeUnit(Width, MaxUnitSize) ((Width) / GetCountUnit(Width, MaxUnitSize))
 
@@ -44,7 +56,7 @@ int QFAUIGrid::GetSizeUnitCount()
 
 void QFAUIGrid::ProcessChildPosition()
 {
-	int unitWidth;
+	unitWidth = 0;
 	int maxColumnCount = ColumnCount;
 
 	if (PositionTypeType == UnitPositionType::UPTAuto)
@@ -57,7 +69,7 @@ void QFAUIGrid::ProcessChildPosition()
 	else
 		unitWidth = Width;
 
-	int roowCount = 0;
+	roowCount = 0;
 	int columnCount = 0;
 	for (size_t i = 0; i < Children.Length(); i++)
 	{
@@ -74,6 +86,8 @@ void QFAUIGrid::ProcessChildPosition()
 			roowCount++;
 		}		
 	}
+
+	roowCount++;
 }
 
 void QFAUIGrid::SetSizeParent(unsigned int w, unsigned int h)

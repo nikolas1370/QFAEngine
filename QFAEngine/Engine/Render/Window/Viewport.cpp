@@ -7,7 +7,7 @@
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
 #include <Tools/VulkanSuff.h>
 #include <Render/UI/Text.h>
-#include <Render/UI/UIParentComponent.h>
+#include <Render/UI/UIParentMultipleUnit.h>
 
 const float QFAViewport::MinMaxZIndexUI = 1000.0f;
 

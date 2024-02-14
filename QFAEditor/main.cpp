@@ -27,11 +27,11 @@
 
 #include "Editor/EditorOverlord.h"
 #include <Render/UI/Grid.h>
+#include <Render/UI/Scroll.h>
+
 
 int main()
 {
-
-
     QFAEditorOverlord::Init();
 
     QStaticMesh* Mesh = QFAModelLoader::LoadModel("SomeModel/Arrow.fbx");
@@ -104,8 +104,8 @@ int main()
 
 
 
-
-    firstdViewPort->AddUnit(text_2);
+    // recoment
+    //firstdViewPort->AddUnit(text_2);
 
     text_2->SetSize(600, 300);
 
@@ -151,20 +151,30 @@ int main()
     grid.SetPositionType(QFAUIGrid::UPTAuto);
     grid.SetUnitWidth(0);
 
+    QFAUIScroll scroll;
+    scroll.SetUnit(text);
+
+    QFAUIScroll scrollGrid;
+    scrollGrid.SetUnit(&grid);
+    
     grid.AddUnit(UIDogy);
     grid.AddUnit(UICrystal);
     grid.AddUnit(UIHomy);
-    grid.AddUnit(text);
+    grid.AddUnit(&scroll);
     grid.AddUnit(UIhome_2);
     
     grid.SetMinMax(100, 200);
     grid.SetOffsets(10, 10);
 
 
-    firstdViewPort->AddUnit(&grid);
+    firstdViewPort->AddUnit(&scrollGrid);
+    scrollGrid.SetSize(500, 250);
+
 
 
     QFAEditorOverlord::StartLife();
+
+
 
     return 0;
 }

@@ -17,6 +17,18 @@ QFAVKPipeline::QFAVKPipeline(QFAPipelineCreateInfo& PipInfo)
     VkShaderModule fragShaderModule{};
     VkPipelineShaderStageCreateInfo shaderStages[2];
     
+    if (PipInfo.DescriptorSetLayoutCount > MaxDescriptorSetLayoutCount)
+        stopExecute("QFAPipelineCreateInfo::DescriptorSetLayoutCount >  MaxDescriptorSetLayoutCount. Need increase QFAVKPipeline::MaxDescriptorSetLayoutCount");
+    
+    for (size_t i = 0; i < PipInfo.DescriptorSetLayoutCount; i++)
+    {        
+        if (PipInfo.DescriptorSetLayouts[i].BindingCount > MaxDescriptorSetLayoutBinding)
+            stopExecute("QFAPipelineCreateInfo::DescriptorSetLayouts[i].BindingCount > MaxDescriptorSetLayoutBinding. Need increase QFAVKPipeline::MaxDescriptorSetLayoutBinding");
+    }   
+
+    if(PipInfo.ColorBlendState.attachmentCount > MaxColorBlendAttachment)
+        stopExecute("QFAPipelineCreateInfo::ColorBlendState.attachmentCount > MaxColorBlendAttachment. Need increase QFAVKPipeline::MaxColorBlendAttachment")
+
 
     if (PipInfo.PipelineShaderStages.VertexShaderName.size() > 0 && PipInfo.PipelineShaderStages.FragmentShaderName.size() > 0)
     {
@@ -269,11 +281,11 @@ void QFAVKPipeline::CreatePool(uint32_t groupIndex)
 void QFAVKPipeline::CreateSet(uint32_t groupIndex, QFADescriptorSetInfo* descriptorInfo)
 {
     if (Pools[groupIndex].ListPool.size() == 0 || GroupDescriptorPools[groupIndex].DescriptorPoolSizeCount == GroupDescriptorPools[groupIndex].MaxSets)
-    {
+    {        
         CreatePool(groupIndex);
         GroupDescriptorPools[groupIndex].CountSetInLastPool = 0;
     }
-    
+
     VkDescriptorSetAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     allocInfo.descriptorPool = Pools[groupIndex].ListPool.back();
@@ -291,7 +303,7 @@ void QFAVKPipeline::CreateSet(uint32_t groupIndex, QFADescriptorSetInfo* descrip
 
 void QFAVKPipeline::UpdateSet(uint32_t groupIndex, uint32_t setIndex,  QFADescriptorSetInfo* descriptorInfo)
 {
-    std::array<VkWriteDescriptorSet, MaxDescriptorPoolSizeCount> descriptorWrites{};
+    std::array<VkWriteDescriptorSet, MaxDescriptorSetLayoutBinding> descriptorWrites{};
     for (size_t j = 0; j < GroupDescriptorPools[groupIndex].DescriptorPoolSizeCount; j++)
     {
         descriptorWrites[j].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

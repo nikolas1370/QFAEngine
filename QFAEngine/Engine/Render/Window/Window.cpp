@@ -16,8 +16,9 @@
 #include <Render/RenderPass/RenderPassSwapChain.h>
 
 #include <Render/Framebuffer/MeshFrameBuffer.h> 
-#include <Render/UI/UIParentComponent.h>
+#include <Render/UI/UIParentMultipleUnit.h>
 #include <Render/Pipline/Pipline.h>
+#include <Render/UI/UIParentOneUnit.h>
 
 
 QFAWindow* QFAWindow::MainWindow = nullptr;
@@ -36,6 +37,8 @@ VkFormat QFAWindow::depthFormat =  VK_FORMAT_D32_SFLOAT;
 
 QFAWindow::QFAWindow(int width, int height, std::string name)
 {
+	UIEvent.Init(this);
+
 	if (!QFAWindow::MainWindow)
 		QFAWindow::MainWindow = this;
 
@@ -207,7 +210,7 @@ void QFAWindow::DrawUI()
 
 		StartUIRenderViewPort(u);
 
-		SortUIs(&Viewports[u]->Root);
+		SortUIs(&Viewports[u]->Root); // parent should add before children
 		for (size_t i = 0; i < SortUIUnits.Length(); i++)
 		{
 			
@@ -271,22 +274,26 @@ void QFAWindow::SortUIs(QFAViewportRoot* root)
 	}	
 }
 
-
-
-
 void QFAWindow::AddUnit(QFAUIUnit* unit)
 {
 	if (!unit)
 		return;
 
-	SortUIUnits.Add(unit);
+	if (!unit->IsEnable)
+		return;
 
+	SortUIUnits.Add(unit);
 	if (unit->CanBeParent)
 	{
-		QFAUIParentComponent* parent = (QFAUIParentComponent*)unit;
-
-		for (size_t i = 0; i < parent->Children.Length(); i++)
-			AddUnit(parent->Children[i]);
+		QFAUIParent* parent = (QFAUIParent*)unit;
+		if (parent->OneUnit)
+			AddUnit(((QFAUIParentOneUnit*)unit)->Child);
+		else
+		{
+			QFAUIParentMultipleUnit* parentMultiple = (QFAUIParentMultipleUnit*)unit;
+			for (size_t i = 0; i < parentMultiple->Children.Length(); i++)
+				AddUnit(parentMultiple->Children[i]);
+		}
 	}	
 }
 
@@ -563,11 +570,9 @@ void QFAWindow::ShadowRender(QFAViewport* _viewport)
 
 void QFAWindow::RenderWindow()
 {
-
 	MainWindow->ViewportProcess = 0;
 
 	MainWindow->StartFrame();
-
 	QMeshBaseComponent::StartFrame();
 	for (size_t i = 0; i < MainWindow->Viewports.Length(); i++)
 	{		
@@ -590,7 +595,28 @@ void QFAWindow::RenderWindow()
 	
 }
 
+void QFAWindow::ProcessUIEvent()
+{	
 
+	
+
+	double x;
+	double y;
+	glfwGetCursorPos(MainWindow->glfWindow, &x, &y);
+	for (int i = MainWindow->Viewports.Length() - 1; i >= 0; i--)
+	{
+		float xEnd = MainWindow->Viewports[i]->X + MainWindow->Viewports[i]->Width;
+		float yEnd = MainWindow->Viewports[i]->Y + MainWindow->Viewports[i]->Height;
+		if (x >= MainWindow->Viewports[i]->X && y >= MainWindow->Viewports[i]->Y &&
+			x <= xEnd && y <= yEnd )
+		{
+			MainWindow->UIEvent.NewFrame(&MainWindow->Viewports[i]->Root, (float)x, (float)y, QTime::GetDeltaTime());
+			return;
+		}
+	}
+
+	MainWindow->UIEvent.NewFrame(nullptr, (float)x, (float)y, QTime::GetDeltaTime());
+}
 
 void QFAWindow::StartFrame()
 {

@@ -1,5 +1,5 @@
 #include "UIUnit.h"
-#include <Render/UI/UIParentComponent.h>
+#include <Render/UI/UIParentMultipleUnit.h>
 #include <Render/Window/Viewport.h>
 void QFAUIUnit::SetPosition(unsigned int x, unsigned int y)
 {
@@ -15,8 +15,11 @@ void QFAUIUnit::SetSize(unsigned int w, unsigned int h)
 
 QFAUIUnit::~QFAUIUnit()
 {
-	if (Parent)
-		Parent->RemoveUnitWithoutNotify(this);
+    if(IsValid())
+	    if (Parent)
+		    Parent->RemoveUnitWithoutNotify(this);
+
+    UnitValid = false;
 }
 
 void QFAUIUnit::SetSlot(void* slot)
@@ -29,7 +32,7 @@ void QFAUIUnit::SetSlot(void* slot)
 		Parent->MySlotChange(this);
 }
 
-void QFAUIUnit::ProcessParentOverflow(UniformOverflow& param, QFAUIParentComponent* parent)
+void QFAUIUnit::ProcessParentOverflow(UniformOverflow& param, QFAUIParent* parent)
 {
     if (!parent)
         return;
@@ -37,7 +40,7 @@ void QFAUIUnit::ProcessParentOverflow(UniformOverflow& param, QFAUIParentCompone
     FVector2D parentPosition = parent->GetPosition();
     FVector2D parentSize = parent->GetSize();
 
-    if (parent->GetOverflow() == QFAUIParentComponent::Hidden)
+    if (parent->GetOverflow() == QFAUIParent::Hidden)
     {
         param.enable = 1;
         if (parentPosition.X > param.leftTopX)
@@ -54,7 +57,7 @@ void QFAUIUnit::ProcessParentOverflow(UniformOverflow& param, QFAUIParentCompone
         if (tem < param.rightBottomY)
             param.rightBottomY = parentPosition.Y + parentSize.Y;
     }
-    else if (parent->GetOverflow() == QFAUIParentComponent::HiddenHorizon)
+    else if (parent->GetOverflow() == QFAUIParent::HiddenHorizon)
     {
         param.enable = 1;
         if (parentPosition.X > param.leftTopX)
@@ -64,7 +67,7 @@ void QFAUIUnit::ProcessParentOverflow(UniformOverflow& param, QFAUIParentCompone
         if (tem < param.rightBottomX)
             param.rightBottomX = tem;
     }
-    else if (parent->GetOverflow() == QFAUIParentComponent::HiddenVertical)
+    else if (parent->GetOverflow() == QFAUIParent::HiddenVertical)
     {
         param.enable = 1;
         if (parentPosition.Y > param.leftTopY)
@@ -78,7 +81,7 @@ void QFAUIUnit::ProcessParentOverflow(UniformOverflow& param, QFAUIParentCompone
     ProcessParentOverflow(param, parent->GetParent());
 }
 
-float QFAUIUnit::ProcessParentOpacity(float childOpacity, QFAUIParentComponent* parent)
+float QFAUIUnit::ProcessParentOpacity(float childOpacity, QFAUIParent* parent)
 {
     if (!parent)
         return childOpacity;

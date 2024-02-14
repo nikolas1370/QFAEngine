@@ -83,6 +83,7 @@ private:
     struct SImageIndex
     {
         QFAVKBuffer* buffer;
+        QFAVKBuffer* bufferVertex;
         QFAUIImage* image = nullptr;
         unsigned int setIndex;
     };
@@ -97,6 +98,11 @@ private:
     {
         float opacity;
         UniformOverflow overflow;
+    };
+
+    struct SImageVertexParam
+    {
+        float offset;        
     };
 
     void ChangeQuad();

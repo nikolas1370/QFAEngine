@@ -9,10 +9,9 @@ class QFAVKPipeline
 {
     friend QFAOverlord;
 public:
-    static const uint32_t MaxDescriptorSetLayoutCount = 2;// if need more set more    
-    static const uint32_t MaxDescriptorPoolSizeCount = 2;        
+    static const uint32_t MaxDescriptorSetLayoutCount = 2;// if need more SetLayout
+    static const uint32_t MaxDescriptorSetLayoutBinding = 3; // if need more VkDescriptorSetLayoutBinding in SetLayout
     static const uint32_t MaxColorBlendAttachment = 2;
-
 
     /*
         if loadFromFile == true
@@ -120,7 +119,7 @@ public:
 private:
     struct QFAGroupPools
     {
-        VkDescriptorPoolSize DescriptorPoolSizes[QFAVKPipeline::MaxDescriptorPoolSizeCount];
+        VkDescriptorPoolSize DescriptorPoolSizes[QFAVKPipeline::MaxDescriptorSetLayoutBinding];
         uint32_t DescriptorPoolSizeCount = 0;
         uint32_t MaxSets = 0;
         uint32_t CountSetInLastPool = 0;

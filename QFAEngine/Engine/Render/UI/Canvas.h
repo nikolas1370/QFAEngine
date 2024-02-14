@@ -1,8 +1,8 @@
 #pragma once
-#include <Render/UI/UIParentComponent.h>
+#include <Render/UI/UIParentMultipleUnit.h>
 #include <Math/Vector2D.h>
 
-class QFAUICanvas : public QFAUIParentComponent
+class QFAUICanvas : public QFAUIParentMultipleUnit
 {
 
 
@@ -16,6 +16,8 @@ protected:
 	void SetSizeParent(unsigned int w, unsigned int h) override;
 	void SetPositionParent(unsigned int x, unsigned int y) override;
 	void UpdatePositionSizeChildren();
+
+	float UpdateInnerHeight() override;
 public:
 	QFAUICanvas();
 	~QFAUICanvas();

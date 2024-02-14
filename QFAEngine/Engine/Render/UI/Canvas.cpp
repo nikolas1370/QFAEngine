@@ -61,3 +61,8 @@ void QFAUICanvas::UpdatePositionSizeChildren()
 	}
 }
 
+float QFAUICanvas::UpdateInnerHeight()
+{	
+	return Height;
+}
+

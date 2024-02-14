@@ -3,11 +3,12 @@
 #define PI 					(3.1415926535897932f)	
 #define DOUBLE_PI		    (3.141592653589793238462643383279502884197169399)
 
-#define EqualFloats(value1, value2) (value1 - value2 < 0.00001)
-#define EqualToZero(value) (value < 0.00001)
 
-//#define GLM_FORCE_RADIANS
-//#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+
+#define EqualFloats(value1, value2) (abs((value1) - (value2)) < 0.00001)
+#define EqualToZero(value) (abs(value) < 0.00001)
+#define NotEqualToZero(value) !(abs(value) < 0.00001)
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>

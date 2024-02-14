@@ -20,12 +20,6 @@ std::vector<QFAUIImage::SImageIndex> QFAUIImage::ImageIndexs;
 
 VkDescriptorSet QFAUIImage::CurentDescriptorSetProject;
 
-
-
-
-
-
-
 QFAUIImage::QFAUIImage(QFAImage* image)
 {
     CanRender = true;
@@ -43,14 +37,6 @@ void QFAUIImage::Render(VkCommandBuffer comandebuffer)
     {
         return;
     }
-
-    /*
-    
-        якшо ця штукк є то є баг де другий вюпорт появляється на першом
-        убере рядок і нема бага
-    
-    */
-    
 
     VkDescriptorSet CurentDescriptorSet = Pipeline->GetSet(1, Index);    
 
@@ -86,6 +72,7 @@ void QFAUIImage::UpdateUniforms()
 
     ProcessParentOverflow(ip.overflow, Parent);
     memcpy(ImageIndexs[Index].buffer->MapData, &ip, sizeof(SImageParam));
+    memcpy(ImageIndexs[Index].bufferVertex->MapData, &UnitScroll, sizeof(SImageVertexParam));
 }
 
 
@@ -150,14 +137,14 @@ void QFAUIImage::ChangeQuad()
     quad[0].textureY = 0;
     quad[0].x = Position_x;
     quad[0].y = Position_y;
-    quad[0].z = ZIndex;
+    quad[0].z = (float)ZIndex;
 
     // left bottom
     quad[1].textureX = 0;
     quad[1].textureY = 1;
     quad[1].x = Position_x;
     quad[1].y = Position_y + Height;
-    quad[1].z = ZIndex;
+    quad[1].z = (float)ZIndex;
 
 
     // right top
@@ -166,7 +153,7 @@ void QFAUIImage::ChangeQuad()
     quad[2].textureY = 0;
     quad[2].x = Position_x + Width;
     quad[2].y = Position_y;
-    quad[2].z = ZIndex;
+    quad[2].z = (float)ZIndex;
 
     // right bottom
     quad[3];
@@ -174,7 +161,7 @@ void QFAUIImage::ChangeQuad()
     quad[3].textureY = 1;
     quad[3].x = Position_x + Width;
     quad[3].y = Position_y + Height;
-    quad[3].z = ZIndex;
+    quad[3].z = (float)ZIndex;
 
     quad[4] = quad[2];
 
@@ -227,7 +214,7 @@ void QFAUIImage::PrepareSet()
     if (!Image)
         return;
 
-    std::array< QFAVKPipeline::QFADescriptorSetInfo, 2> setInfo;
+    std::array< QFAVKPipeline::QFADescriptorSetInfo, 3> setInfo;
     VkDescriptorImageInfo imageInfo;
 
     imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -243,10 +230,19 @@ void QFAUIImage::PrepareSet()
         BufferInfo.buffer = ImageIndexs[Index].buffer->Buffer;
         BufferInfo.offset = 0;
         BufferInfo.range = sizeof(SImageParam);
+
+        VkDescriptorBufferInfo BufferInfoVertex;
+        BufferInfoVertex.buffer = ImageIndexs[Index].bufferVertex->Buffer;
+        BufferInfoVertex.offset = 0;
+        BufferInfoVertex.range = sizeof(SImageVertexParam);
+
         setInfo[1].dstBinding = 1;
         setInfo[1].DescriptorBufferInfos = &BufferInfo;
+        setInfo[2].dstBinding = 2;
+        setInfo[2].DescriptorBufferInfos = &BufferInfoVertex;
         Pipeline->UpdateSet(1, Index, setInfo.data());
         UpdateUniforms();
+
         return;
     }
 
@@ -261,10 +257,19 @@ void QFAUIImage::PrepareSet()
             BufferInfo.buffer = ImageIndexs[i].buffer->Buffer;
             BufferInfo.offset = 0;
             BufferInfo.range = sizeof(SImageParam);
+
+            VkDescriptorBufferInfo BufferInfoVertex;
+            BufferInfoVertex.buffer = ImageIndexs[Index].bufferVertex->Buffer;
+            BufferInfoVertex.offset = 0;
+            BufferInfoVertex.range = sizeof(SImageVertexParam);
+
             setInfo[1].dstBinding = 1;
             setInfo[1].DescriptorBufferInfos = &BufferInfo;
+            setInfo[2].dstBinding = 2;
+            setInfo[2].DescriptorBufferInfos = &BufferInfoVertex;
             Pipeline->UpdateSet(1, Index, setInfo.data());
             UpdateUniforms();
+
             return;
         }
     }
@@ -273,6 +278,7 @@ void QFAUIImage::PrepareSet()
     Index = ImageIndexs.size();
     SImageIndex ii;
     ii.buffer = new QFAVKBuffer(sizeof(SImageParam), nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+    ii.bufferVertex = new QFAVKBuffer(sizeof(SImageVertexParam), nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
     ii.image = this;
     ii.setIndex = Index;
     ImageIndexs.push_back(ii);
@@ -282,8 +288,16 @@ void QFAUIImage::PrepareSet()
     BufferInfo.buffer = ImageIndexs[Index].buffer->Buffer;
     BufferInfo.offset = 0;
     BufferInfo.range = sizeof(SImageParam);
+
+    VkDescriptorBufferInfo BufferInfoVertex;
+    BufferInfoVertex.buffer = ImageIndexs[Index].bufferVertex->Buffer;
+    BufferInfoVertex.offset = 0;
+    BufferInfoVertex.range = sizeof(SImageVertexParam);
+
     setInfo[1].dstBinding = 1;
     setInfo[1].DescriptorBufferInfos = &BufferInfo;
+    setInfo[2].dstBinding = 2;
+    setInfo[2].DescriptorBufferInfos = &BufferInfoVertex;
     UpdateUniforms();
     Pipeline->CreateSet(1, setInfo.data());
 }
@@ -351,7 +365,7 @@ void QFAUIImage::CreatePipeline()
     firsLayout[0].pImmutableSamplers = nullptr;
     firsLayout[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
-    std::array<VkDescriptorSetLayoutBinding, 2> secondLayout;
+    std::array<VkDescriptorSetLayoutBinding, 3> secondLayout;
     secondLayout[0].binding = 0;
     secondLayout[0].descriptorCount = 1;
     secondLayout[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -362,6 +376,12 @@ void QFAUIImage::CreatePipeline()
     secondLayout[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     secondLayout[1].pImmutableSamplers = nullptr;
     secondLayout[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    secondLayout[2].binding = 2;
+    secondLayout[2].descriptorCount = 1;
+    secondLayout[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    secondLayout[2].pImmutableSamplers = nullptr;
+    secondLayout[2].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
 
     DescriptorSetLayouts[0].BindingCount = firsLayout.size();
     DescriptorSetLayouts[1].BindingCount = secondLayout.size();

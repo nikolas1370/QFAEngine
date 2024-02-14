@@ -1,7 +1,7 @@
 #pragma once
-#include "UIParentComponent.h"
+#include "UIParentMultipleUnit.h"
 
-class  QFAUIGrid : public QFAUIParentComponent
+class  QFAUIGrid : public QFAUIParentMultipleUnit
 {
 public:
 	/*
@@ -47,6 +47,9 @@ private:
 	unsigned int MaxUnitSize = 1;	
 	float Ratio = 1; 
 
+	// not for setup grid
+	int roowCount = 0;
+	int unitWidth = 0;
 
 	int GetSizeUnitAuto(int& columnCount);
 	int GetSizeUnitCount();
@@ -59,4 +62,6 @@ private:
 	void NewUnit(QFAUIUnit* unit) override;
 	// child call if his slot change
 	void MySlotChange(QFAUIUnit* unit) override {};
+
+	float UpdateInnerHeight() override;
 };

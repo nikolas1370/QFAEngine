@@ -1,9 +1,9 @@
 #pragma once
-#include <Render/UI/UIParentComponent.h>
+#include <Render/UI/UIParentMultipleUnit.h>
 
 class QFAViewport;
 class QFAWindow;
-class QFAViewportRoot : public QFAUIParentComponent
+class QFAViewportRoot : public QFAUIParentMultipleUnit
 {
 	friend QFAViewport;
 	friend QFAWindow;
@@ -22,6 +22,6 @@ public:
 
 
 private:
-
+	float UpdateInnerHeight() override;
 };
 

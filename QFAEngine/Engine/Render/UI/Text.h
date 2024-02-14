@@ -220,6 +220,7 @@ private:
     static VkDescriptorSet CurentDescriptorSetProject;
 
     static std::vector<QFAVKBuffer*> textParamBuffers;
+    static std::vector<QFAVKBuffer*> textVertexParamBuffers;
     
     static std::vector<VkDescriptorImageInfo> DII;
 
@@ -231,7 +232,7 @@ private:
     static void CreateTextProjectionSets();
 
     static void CreateTextParameterSet();
-    static void RecreateTextParameterSet(VkBuffer buffer);
+    static void RecreateTextParameterSet(VkBuffer buffer, VkBuffer VertexBuffer);
 
     static const int AmountSetsInTextParamPool = 20;
     static int maxTextInframe;
@@ -244,6 +245,11 @@ private:
         alignas(16) FVector outlineColor;
         alignas(4) float opacity;
         UniformOverflow overflow;
+    };
+
+    struct UniformBufferTextParamVertex
+    {
+        float offset;
     };
 
     inline QFAVKPipeline* GetPipeline() override

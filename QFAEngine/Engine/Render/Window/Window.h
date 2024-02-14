@@ -22,6 +22,8 @@
 #include <Render/RenderPass/TextRenderPass.h>
 #include <Render/vk/PresentImage.h>
 #include <Render/UI/UIUnit.h>
+
+#include <Render/Window/UIEvent.h>
 struct UniformBufferObject
 {// more detail https://fvcaputo.github.io/2019/02/06/memory-alignment.html
 	/*
@@ -56,6 +58,7 @@ class QFAWindow
 	friend QFAUIImage;
 	friend QFAOverlord;
 	friend QMeshBaseComponent;
+
 	static QFAWindow* MainWindow;
 	GLFWwindow* glfWindow;
 	
@@ -82,8 +85,9 @@ class QFAWindow
 	QFAArray<QFAViewport*> Viewports;
 
 
-
+	static void ProcessUIEvent();
 	void StartFrame();
+	
 
 	bool framebufferResized = false;
 	static void RenderWindow();	
@@ -240,8 +244,11 @@ private:
 
 	FVector CurentCameraPosition;
 
+	//in start of array number bigger
 	QFAArray<QFAUIUnit*> SortUIUnits;
 
 	void SortUIs(QFAViewportRoot* root);
 	void AddUnit(QFAUIUnit* unit);
+
+	QFAUIEvent UIEvent;
 };

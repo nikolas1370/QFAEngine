@@ -6,7 +6,7 @@
 #include <Render/vk/ImageView.h>
 #include <Render/vk/TextureSampler.h>
 #include <Render/Window/Window.h>
-#include <Render/UI/UIParentComponent.h>
+#include <Render/UI/UIParentMultipleUnit.h>
 #include <Render/Pipline/Pipline.h>
 
 #include <ft2build.h>
@@ -28,6 +28,7 @@ QFAArray<QFAText::PrepareData> QFAText::SymbolsForRender;
 std::vector<QFAText::SGlyphAtlas> QFAText::GlyphAtlasList;
 std::vector<VkDescriptorImageInfo> QFAText::DII;
 std::vector<QFAVKBuffer*> QFAText::textParamBuffers;
+std::vector<QFAVKBuffer*> QFAText::textVertexParamBuffers;
 
 VkRenderPass QFAText::RenderPass;
 QFAVKTextureSampler* QFAText::AtlassSampler;
@@ -171,6 +172,7 @@ void QFAText::AddGlyph(FT_ULong symbol)
 
 void QFAText::ProcessText()
 {
+    InnerHeight = 0;
     QFAText::SymbolsForRender.Clear();
 
     unsigned int numRow = 0;
@@ -320,13 +322,16 @@ void QFAText::PrepareSymbolsToGpu()
             float temY = start_y + (float)(gi->MaxAscender - gi->bitmap_top) * tem;
             float temYEnd = temY + (float)gi->height * tem;
 
-            QFAText::GlyphInfoData[i].leftBottom_1 = GlyphShaderVertex{ temX, temY , ZIndex,   gi->x, gi->y,  (int)gi->atlasIndex };
-            GlyphInfoData[i].rightBottom_1 = { temX, temYEnd,   ZIndex, gi->x, gi->yEnd,(int)gi->atlasIndex };
-            GlyphInfoData[i].rightTop_1 = { temXEnd, temYEnd,   ZIndex, gi->xEnd, gi->yEnd, (int)gi->atlasIndex };
+            QFAText::GlyphInfoData[i].leftBottom_1 = GlyphShaderVertex{ temX, temY , (float)ZIndex,   gi->x, gi->y,  (int)gi->atlasIndex };
+            GlyphInfoData[i].rightBottom_1 = { temX, temYEnd,   (float)ZIndex, gi->x, gi->yEnd,(int)gi->atlasIndex };
+            GlyphInfoData[i].rightTop_1 = { temXEnd, temYEnd,   (float)ZIndex, gi->xEnd, gi->yEnd, (int)gi->atlasIndex };
 
             GlyphInfoData[i].leftBottom_2 = GlyphInfoData[i].leftBottom_1;
             GlyphInfoData[i].rightTop_2 = GlyphInfoData[i].rightTop_1;
-            GlyphInfoData[i].leftTop_2 = GlyphShaderVertex{ temXEnd, temY,  ZIndex,  gi->xEnd, gi->y, (int)gi->atlasIndex };
+            GlyphInfoData[i].leftTop_2 = GlyphShaderVertex{ temXEnd, temY,  (float)ZIndex,  gi->xEnd, gi->y, (int)gi->atlasIndex };
+
+            if(temYEnd - Position_y > InnerHeight)
+                InnerHeight = temYEnd - Position_y;
 
             w += (int)((float)gi->advance_x * tem);
         }
@@ -365,13 +370,16 @@ void QFAText::PrepareSymbolsToGpu()
                 float temY = start_y + (float)(gi->MaxAscender - gi->bitmap_top) * tem;
                 float temYEnd = temY + (float)gi->height * tem;
 
-                QFAText::GlyphInfoData[i].leftBottom_1 = GlyphShaderVertex{ temX, temY ,  ZIndex,  gi->x, gi->y,  (int)gi->atlasIndex };
-                GlyphInfoData[i].rightBottom_1 = { temX, temYEnd,  ZIndex,  gi->x, gi->yEnd, (int)gi->atlasIndex };
-                GlyphInfoData[i].rightTop_1 = { temXEnd, temYEnd,   ZIndex, gi->xEnd, gi->yEnd, (int)gi->atlasIndex };
+                QFAText::GlyphInfoData[i].leftBottom_1 = GlyphShaderVertex{ temX, temY ,  (float)ZIndex,  gi->x, gi->y,  (int)gi->atlasIndex };
+                GlyphInfoData[i].rightBottom_1 = { temX, temYEnd,  (float)ZIndex,  gi->x, gi->yEnd, (int)gi->atlasIndex };
+                GlyphInfoData[i].rightTop_1 = { temXEnd, temYEnd,   (float)ZIndex, gi->xEnd, gi->yEnd, (int)gi->atlasIndex };
 
                 GlyphInfoData[i].leftBottom_2 = GlyphInfoData[i].leftBottom_1;
                 GlyphInfoData[i].rightTop_2 = GlyphInfoData[i].rightTop_1;
-                GlyphInfoData[i].leftTop_2 = GlyphShaderVertex{ temXEnd, temY,  ZIndex,  gi->xEnd, gi->y, (int)gi->atlasIndex };
+                GlyphInfoData[i].leftTop_2 = GlyphShaderVertex{ temXEnd, temY,  (float)ZIndex,  gi->xEnd, gi->y, (int)gi->atlasIndex };
+
+                if (temYEnd - Position_y > InnerHeight)
+                    InnerHeight = temYEnd - Position_y;
 
                 w += (int)((float)gi->advance_x * tem);
             }
@@ -417,13 +425,16 @@ void QFAText::PrepareSymbolsToGpu()
             float temY = start_y + (float)(gi->MaxAscender - gi->bitmap_top) * tem;
             float temYEnd = temY + (float)gi->height * tem;
 
-            QFAText::GlyphInfoData[i].leftBottom_1 = GlyphShaderVertex{ temX, temY ,  ZIndex,  gi->x, gi->y,  (int)gi->atlasIndex };
-            GlyphInfoData[i].rightBottom_1 = { temX, temYEnd,   ZIndex, gi->x, gi->yEnd,  (int)gi->atlasIndex };
-            GlyphInfoData[i].rightTop_1 = { temXEnd, temYEnd,   ZIndex, gi->xEnd, gi->yEnd, (int)gi->atlasIndex };
+            QFAText::GlyphInfoData[i].leftBottom_1 = GlyphShaderVertex{ temX, temY ,  (float)ZIndex,  gi->x, gi->y,  (int)gi->atlasIndex };
+            GlyphInfoData[i].rightBottom_1 = { temX, temYEnd,   (float)ZIndex, gi->x, gi->yEnd,  (int)gi->atlasIndex };
+            GlyphInfoData[i].rightTop_1 = { temXEnd, temYEnd,   (float)ZIndex, gi->xEnd, gi->yEnd, (int)gi->atlasIndex };
 
             GlyphInfoData[i].leftBottom_2 = GlyphInfoData[i].leftBottom_1;
             GlyphInfoData[i].rightTop_2 = GlyphInfoData[i].rightTop_1;
-            GlyphInfoData[i].leftTop_2 = GlyphShaderVertex{ temXEnd, temY,  ZIndex,  gi->xEnd, gi->y,  (int)gi->atlasIndex };
+            GlyphInfoData[i].leftTop_2 = GlyphShaderVertex{ temXEnd, temY,  (float)ZIndex,  gi->xEnd, gi->y,  (int)gi->atlasIndex };
+
+            if (temYEnd - Position_y > InnerHeight)
+                InnerHeight = temYEnd - Position_y;
 
             w -= (int)((float)gi->advance_x * tem);
         }
@@ -538,7 +549,9 @@ void QFAText::updateUniformBuffer()
     tem.overflow.rightBottomY = 1000000;
     
     ProcessParentOverflow(tem.overflow, Parent);
+
     memcpy(textParamBuffers[NumberTextInFrame]->MapData, &tem, sizeof(UniformBufferTextParam));
+    memcpy(textVertexParamBuffers[NumberTextInFrame]->MapData, &UnitScroll, sizeof(UniformBufferTextParamVertex));
 }
 
 
@@ -572,7 +585,7 @@ void QFAText::RecreatePipeline()
     vkCmdBindPipeline(QFAWindow::MainWindow->UICommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, Pipeline->GetPipeline());
 
     for (size_t i = 0; i < textParamBuffers.size(); i++)
-        RecreateTextParameterSet(textParamBuffers[i]->Buffer);
+        RecreateTextParameterSet(textParamBuffers[i]->Buffer, textVertexParamBuffers[i]->Buffer);
 }
 
 void QFAText::CreateTextProjectionSets()
@@ -595,36 +608,54 @@ void QFAText::CreateTextProjectionSets()
 void QFAText::CreateTextParameterSet()
 {    
     textParamBuffers.push_back( new QFAVKBuffer(sizeof(QFAText::UniformBufferTextParam), nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT));
+    textVertexParamBuffers.push_back(new QFAVKBuffer(sizeof(QFAText::UniformBufferTextParamVertex), nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT));
 
     VkDescriptorBufferInfo BufferInfo;
     BufferInfo.buffer = textParamBuffers.back()->Buffer;
     BufferInfo.offset = 0;
     BufferInfo.range = sizeof(QFAText::UniformBufferTextParam);
 
-    std::array< QFAVKPipeline::QFADescriptorSetInfo, 2> descriptorSetInfo;
+    VkDescriptorBufferInfo BufferInfo_Vertex;
+    BufferInfo_Vertex.buffer = textVertexParamBuffers.back()->Buffer;
+    BufferInfo_Vertex.offset = 0;
+    BufferInfo_Vertex.range = sizeof(QFAText::UniformBufferTextParamVertex);
+
+    std::array< QFAVKPipeline::QFADescriptorSetInfo, 3> descriptorSetInfo;
     descriptorSetInfo[0].dstBinding = 0;
     descriptorSetInfo[0].DescriptorImageInfos = QFAText::DII.data();
     descriptorSetInfo[1].dstBinding = 1;
     descriptorSetInfo[1].DescriptorBufferInfos= &BufferInfo;
+    descriptorSetInfo[2].dstBinding = 2;
+    descriptorSetInfo[2].DescriptorBufferInfos = &BufferInfo_Vertex;
 
     Pipeline->CreateSet(1, descriptorSetInfo.data());
     maxTextInframe++;  
 }
 
-void QFAText::RecreateTextParameterSet(VkBuffer buffer)
+void QFAText::RecreateTextParameterSet(VkBuffer buffer, VkBuffer VertexBuffer)
 {
     VkDescriptorBufferInfo BufferInfo;
     BufferInfo.buffer = buffer;
     BufferInfo.offset = 0;
     BufferInfo.range = sizeof(QFAText::UniformBufferTextParam);
 
+    VkDescriptorBufferInfo BufferInfo_Vertex;
+    BufferInfo_Vertex.buffer = VertexBuffer;
+    BufferInfo_Vertex.offset = 0;
+    BufferInfo_Vertex.range = sizeof(QFAText::UniformBufferTextParamVertex);
+
     std::array< QFAVKPipeline::QFADescriptorSetInfo, 2> descriptorSetInfo;
     descriptorSetInfo[0].dstBinding = 0;
     descriptorSetInfo[0].DescriptorImageInfos = QFAText::DII.data();
     descriptorSetInfo[1].dstBinding = 1;
     descriptorSetInfo[1].DescriptorBufferInfos = &BufferInfo;
+    descriptorSetInfo[2].dstBinding = 2;
+    descriptorSetInfo[2].DescriptorBufferInfos = &BufferInfo_Vertex;
+
 
     Pipeline->CreateSet(1, descriptorSetInfo.data());
+
+    
 }
 
 void QFAText::CreatePipeline()
@@ -688,7 +719,7 @@ void QFAText::CreatePipeline()
     firsLayout[0].pImmutableSamplers = nullptr;
     firsLayout[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     
-    std::array<VkDescriptorSetLayoutBinding, 2> secondLayout;
+    std::array<VkDescriptorSetLayoutBinding, 3> secondLayout;
     secondLayout[0].binding = 0;
     secondLayout[0].descriptorCount = QFAText::MaxAttlas;
     secondLayout[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -698,7 +729,12 @@ void QFAText::CreatePipeline()
     secondLayout[1].descriptorCount = 1;
     secondLayout[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     secondLayout[1].pImmutableSamplers = nullptr;
-    secondLayout[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    secondLayout[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;    
+    secondLayout[2].binding = 2;
+    secondLayout[2].descriptorCount = 1;
+    secondLayout[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    secondLayout[2].pImmutableSamplers = nullptr;
+    secondLayout[2].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
     DescriptorSetLayouts[0].BindingCount = firsLayout.size();
     DescriptorSetLayouts[1].BindingCount = secondLayout.size();
@@ -726,6 +762,8 @@ void QFAText::CreatePipeline()
 
     /*------*/
     CreateTextProjectionSets();
+
+
 
     GlyphAtlasList.resize(MaxAttlas);
     DII.resize(MaxAttlas);

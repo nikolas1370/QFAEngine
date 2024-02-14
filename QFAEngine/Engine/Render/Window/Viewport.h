@@ -11,14 +11,14 @@ class QWorld;
 class QMeshBaseComponent;
 
 class QFAUIUnit;
-class QFAUIParentComponent;
+class QFAUIParentMultipleUnit;
 
 class QFAViewport
 {
 
 
 	friend QFAWindow;
-	friend QFAUIParentComponent;
+	friend QFAUIParentMultipleUnit;
 	friend QFAUIUnit;
 
 	QFAWindow* Window;

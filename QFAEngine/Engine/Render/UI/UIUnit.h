@@ -13,7 +13,8 @@ namespace QFAUIType
 		Canvas = 2,
 		ViewportRoot = 3,
 		Image = 4,
-		Grid = 5
+		Grid = 5,
+		Scroll = 6
 	};
 }
 
@@ -53,23 +54,35 @@ namespace QFAUISlot
 	{
 		SSlotBaseInfo BaseInfo{ QFAUIType::Grid, sizeof(QFAUISlot::SViewportRootSlot) };
 	};
+
+	struct SScrollSlot
+	{
+		SSlotBaseInfo BaseInfo{ QFAUIType::Scroll, sizeof(QFAUISlot::SScrollSlot) };
+	};
 }
 
 class QFAViewport;
 class QFAWindow;
-class QFAUIParentComponent;
+class QFAUIParentMultipleUnit;
 class QFAUICanvas;
 class QFAViewportRoot;
 class QFAUIGrid;
+class QFAUIEvent;
+class QFAUIParentOneUnit;
+class QFAUIParent;
+class QFAUIScroll;
 
 class QFAUIUnit
 {
 	friend QFAViewport;
 	friend QFAWindow;
-	friend QFAUIParentComponent;
+	friend QFAUIParentMultipleUnit;
 	friend QFAUICanvas;
 	friend QFAViewportRoot;	
 	friend QFAUIGrid;
+	friend QFAUIEvent;
+	friend QFAUIParentOneUnit;
+	friend QFAUIScroll;
 
 protected:
 	struct UniformOverflow
@@ -81,6 +94,10 @@ protected:
 		float rightBottomY;
 	};
 
+	// parent set size
+	virtual void SetSizeParent(unsigned int w, unsigned int h) = 0;
+	// parent set position
+	virtual void SetPositionParent(unsigned int x, unsigned int y) = 0;
 private:
 
 	QFAUISlot::SCanvasSlot l;
@@ -91,7 +108,7 @@ private:
 	//IsRoot == true only for QFAViewportRoot
 	bool IsRoot = false;
 protected:
-	bool IsActive = true;
+	bool IsEnable = true;
 
 	bool CanBeParent = false;
 	QFAUIType::Type Type = QFAUIType::NONE;
@@ -107,18 +124,20 @@ protected:
 	unsigned int Width = 300;
 	unsigned int Height = 120;
 	int Position_x = 0;
-	// 0 == top 
 	int Position_y = 0;	
-	QFAUIParentComponent* Parent = nullptr;
+	QFAUIParent* Parent = nullptr;
 
 	float Opacity = 1;
-	float ZIndex = 0; 
+	int ZIndex = 0; // ZIndex store forward == 1, set forvard -1
 
-	// parent set size
-	virtual void SetSizeParent(unsigned int w, unsigned int h) = 0;
-	// parent set position
-	virtual void SetPositionParent(unsigned int x, unsigned int y) = 0;	
+	bool UnitValid = true;
 public:
+	bool IsValid()
+	{
+		return this && UnitValid;
+	}
+
+
 	/*
 		Position be change if parent is RootUnit
 		in other case use Slot
@@ -130,7 +149,7 @@ public:
 	*/
 	virtual void SetSize(unsigned int w, unsigned int h);
 
-	~QFAUIUnit();
+	virtual ~QFAUIUnit();
 
 	inline FVector2D GetPosition() 
 	{
@@ -145,7 +164,7 @@ public:
 	*/
 	void SetSlot(void* slot);
 
-	inline QFAUIParentComponent* GetParent()
+	inline QFAUIParent* GetParent()
 	{
 		return Parent;
 	}
@@ -155,11 +174,24 @@ public:
 		return IsRoot;
 	}
 	
+	inline bool GetEnable()
+	{
+		return IsEnable;
+	}
+
+	inline void SetEnable(bool enable)
+	{
+		IsEnable = enable;
+	}
 
 	/*-----*/
 	inline void Destroy()
 	{
-		delete this;
+		if (IsValid())
+		{
+			UnitValid = false;
+			delete this;
+		}
 	}
 
 
@@ -167,17 +199,19 @@ public:
 	{
 		Opacity = opacity;
 	}
-
+	
 	// min max valude is QFAViewport::MinMaxZIndexUI
-	inline void SetZIndex(float zIndex)
+	inline void SetZIndex(int zIndex)
 	{
 		ZIndex = zIndex * -1;
 	}
 
-	inline float  GetZIndex()
+	inline int GetZIndex()
 	{
 		return ZIndex * -1;
 	}
+	
+	std::string UnitName;
 protected:
 	QFAUISlot::SParentSlot Slot;
 
@@ -190,14 +224,25 @@ protected:
 	inline virtual void ParentDisable() {}
 
 	/*
-	* call if one of parent was attach.
+	* call if this unit was disconect or one of parent was attach.
 	* call if parent change.
 	*/
 	inline virtual void ParentAttach() {}
-	// call if one of parent was disconect
+	/*
+		call if this unit was disconect or one of parent was disconect 
+		if Parent == null this unit be disconect from parent
+	*/
 	inline virtual void ParentDisconect() {}
 
 
-	void ProcessParentOverflow(UniformOverflow& param, QFAUIParentComponent* parent);
-	float ProcessParentOpacity(float childOpacity , QFAUIParentComponent* parent);
+	void ProcessParentOverflow(UniformOverflow& param, QFAUIParent* parent);
+	float ProcessParentOpacity(float childOpacity , QFAUIParent* parent);
+
+
+	/*
+		need for Scroll
+		Height inside unit
+		if innerHeight < Height, Scroll use Height
+	*/
+	unsigned int InnerHeight = 0;
 };

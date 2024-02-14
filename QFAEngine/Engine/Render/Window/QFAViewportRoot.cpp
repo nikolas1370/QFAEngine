@@ -10,6 +10,11 @@ QFAViewportRoot::~QFAViewportRoot()
 {
 }
 
+float QFAViewportRoot::UpdateInnerHeight()
+{
+	return Height;
+}
+
 
 void QFAViewportRoot::SetSizeParent(unsigned int w, unsigned int h)
 {
