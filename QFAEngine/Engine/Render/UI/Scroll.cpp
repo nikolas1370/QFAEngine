@@ -57,9 +57,6 @@ void QFAUIScroll::ProcessScroll(float delta,  float addValue)
 		childHeight = child->InnerHeight < child->Height ? child->Height : child->InnerHeight;
 	}
 
-	if (Child->UnitName.length() > 0)
-		std::cout << Child->UnitName << " " << childHeight << "\n";
-
 	if (Height >= childHeight)
 		return;
 

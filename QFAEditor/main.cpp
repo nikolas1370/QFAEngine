@@ -150,40 +150,73 @@ int main()
     QFAUIImage* BackgroundColor = new QFAUIImage(nullptr);
     BackgroundColor->SetBackgroundColor(FVector4D(1, 1, 1, 0.5));
 
-    QFAUIGrid grid;
-    grid.SetPositionType(QFAUIGrid::UPTAuto);
-    grid.SetUnitWidth(0);
+    QFAUIGrid* grid = new QFAUIGrid();
+    grid->SetPositionType(QFAUIGrid::UPTAuto);
+    grid->SetUnitWidth(0);
+    grid->SetMinMax(100, 200);
+    grid->SetOffsets(10, 10);
 
-    QFAUIScroll scroll;
-    scroll.SetUnit(text);
-    scroll.SetBackgroundImage(OldWell);
-    scroll.SetBackgroundType(EBackgroundType::BTImage);
+    QFAUIScroll* scroll = new QFAUIScroll;
+    scroll->SetUnit(text);
+    scroll->SetBackgroundImage(OldWell);
+    scroll->SetBackgroundType(EBackgroundType::BTImage);
 
 
-    QFAUIScroll scrollGrid;
-    scrollGrid.SetUnit(&grid);
-    scrollGrid.SetBackgroundType(EBackgroundType::BTColor);
-    scrollGrid.SetBackgroundColor(FVector4D(1, 0, 0, 0.5));
+    QFAUIScroll* scrollGrid = new QFAUIScroll;
+    scrollGrid->SetUnit(grid);
+    scrollGrid->SetBackgroundType(EBackgroundType::BTColor);
+    scrollGrid->SetBackgroundColor(FVector4D(1, 0, 0, 0.5));
     
-    grid.AddUnit(UIDogy);
-    grid.AddUnit(UICrystal);
-    grid.AddUnit(UIHomy);
-    grid.AddUnit(&scroll);    
-    grid.AddUnit(BackgroundColor); 
-    grid.AddUnit(UIhome_2);    
+    grid->AddUnit(UIDogy);
+    grid->AddUnit(UICrystal);
+    grid->AddUnit(UIHomy);
+    grid->AddUnit(scroll);    
+    grid->AddUnit(BackgroundColor); 
+    grid->AddUnit(UIhome_2);    
 
     
     
+    
 
-    grid.SetMinMax(100, 200);
-    grid.SetOffsets(10, 10);
+    firstdViewPort->AddUnit(scrollGrid);
+    scrollGrid->SetSize(500, 250);
 
+    
+    grid->UnitName = "grid";
+    UIDogy->UnitName = "Dogy";
+    UICrystal->UnitName = "Crystal";
+    UIHomy->UnitName = "Homy";
+    scroll->UnitName = "scroll"; 
+    BackgroundColor->UnitName = "BackgroundColor";
+    UIhome_2->UnitName = "home_2";
+    scrollGrid->UnitName = "scrollGrid";
+    
+    
+    
+    grid->Events.SetInFocusFunction([grid](QFAUIUnit* unit) { std::cout << "->my name " << grid->UnitName << " Focus unit name " << unit->UnitName << "\n"; });
+    grid->Events.SetOutFocusFunction([grid]() { std::cout << "<-fous out " << grid->UnitName << "\n"; });    
 
-    firstdViewPort->AddUnit(&scrollGrid);
-    scrollGrid.SetSize(500, 250);
+    UIDogy->Events.SetInFocusFunction([UIDogy](QFAUIUnit* unit) {std::cout << "->my name " << UIDogy->UnitName << " Focus unit name " << unit->UnitName << "\n"; });
+    UIDogy->Events.SetOutFocusFunction([UIDogy]() {std::cout << "<-fous out " << UIDogy->UnitName << "\n"; });
 
+    UICrystal->Events.SetInFocusFunction([UICrystal](QFAUIUnit* unit) {std::cout << "->my name " << UICrystal->UnitName << " Focus unit name " << unit->UnitName << "\n"; });
+    UICrystal->Events.SetOutFocusFunction([UICrystal]() {std::cout << "<-fous out " << UICrystal->UnitName << "\n"; });
 
+    UIHomy->Events.SetInFocusFunction([UIHomy](QFAUIUnit* unit) {std::cout << "->my name " << UIHomy->UnitName << " Focus unit name " << unit->UnitName << "\n"; });
+    UIHomy->Events.SetOutFocusFunction([UIHomy]() {std::cout << "<-fous out " << UIHomy->UnitName << "\n"; });
 
+    BackgroundColor->Events.SetInFocusFunction([BackgroundColor](QFAUIUnit* unit) {std::cout << "->my name " << BackgroundColor->UnitName << " Focus unit name " << unit->UnitName << "\n"; });
+    BackgroundColor->Events.SetOutFocusFunction([BackgroundColor]() {std::cout << "<-fous out " << BackgroundColor->UnitName << "\n"; });
+
+    UIhome_2->Events.SetInFocusFunction([UIhome_2](QFAUIUnit* unit) {std::cout << "->my name " << UIhome_2->UnitName << " Focus unit name " << unit->UnitName << "\n"; });
+    UIhome_2->Events.SetOutFocusFunction([UIhome_2]() {std::cout << "<-fous out " << UIhome_2->UnitName << "\n"; });
+    
+    scrollGrid->Events.SetInFocusFunction([scrollGrid](QFAUIUnit* unit) {std::cout << "->my name " << scrollGrid->UnitName << " Focus unit name " << unit->UnitName << "\n"; });
+    scrollGrid->Events.SetOutFocusFunction([scrollGrid]() {std::cout << "<-fous out " << scrollGrid->UnitName << "\n"; });
+    
+    scroll->Events.SetInFocusFunction([scroll](QFAUIUnit* unit) {std::cout << "->my name " << scroll->UnitName << " Focus unit name " << unit->UnitName << "\n"; });
+    scroll->Events.SetOutFocusFunction([scroll]() {std::cout << "<-fous out " << scroll->UnitName << "\n"; });
+    
     QFAEditorOverlord::StartLife();
 
 

@@ -3,7 +3,7 @@
 #include <cstring>
 #include <Math/Vector2D.h>
 #include <Math/Vector.h>
-
+#include <functional>
 namespace QFAUIType
 {
 	enum Type : unsigned char
@@ -71,7 +71,7 @@ class QFAUIEvent;
 class QFAUIParentOneUnit;
 class QFAUIParent;
 class QFAUIScroll;
-
+class QFAViewportRoot;
 class QFAUIUnit
 {
 	friend QFAViewport;
@@ -132,6 +132,23 @@ protected:
 
 	bool UnitValid = true;
 public:
+
+	class EventFunctions
+	{
+		friend QFAUIUnit;
+		std::function<void(QFAUIUnit* unitInFocus)> FunInFocus;
+		std::function<void()> FunOutFocus;
+		EventFunctions() {};		
+	public:
+		/*
+			QFAUIUnit* == parent get child in focus
+		*/
+		void SetInFocusFunction(std::function<void(QFAUIUnit*)> fun);
+		void SetOutFocusFunction(std::function<void()> fun);
+	};
+
+	
+
 	bool IsValid()
 	{
 		return this && UnitValid;
@@ -212,6 +229,16 @@ public:
 	}
 	
 	std::string UnitName;
+
+	/*
+		return null if viewport Root not found
+
+		countUnit == amount parentsUnit of this unit plus one
+	*/
+	QFAViewportRoot* GetViewportRoot(unsigned int& countUnit);
+	
+	
+	EventFunctions Events;
 protected:
 	QFAUISlot::SParentSlot Slot;
 
@@ -245,4 +272,19 @@ protected:
 		if innerHeight < Height, Scroll use Height
 	*/
 	unsigned int InnerHeight = 0;
+
+	
+
+	/*		
+		Notify this unit and all parents of infocus event
+			call FunInFocus
+	*/
+	void NotifyInFocus();
+	/*
+		Notify this unit and all parents of outfocus event
+			call FunOutFocus
+
+		if onlyOneUnit == true Notify only this unit
+	*/
+	void NotifyOutFocus(bool onlyOneUnit);
 };

@@ -28,6 +28,8 @@ private:
 	QFAInput Input;
 
 	float ScrollValue = 0.0f;
+
+	QFAUIUnit* FocusUnit = nullptr;
 };
 
 

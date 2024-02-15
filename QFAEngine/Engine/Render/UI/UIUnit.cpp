@@ -32,6 +32,36 @@ void QFAUIUnit::SetSlot(void* slot)
 		Parent->MySlotChange(this);
 }
 
+QFAViewportRoot* QFAUIUnit::GetViewportRoot(unsigned int& countUnit)
+{
+    countUnit = 0;
+
+    QFAUIUnit* parent = this;
+    while (true)
+    {        
+        if (!parent)
+            return nullptr;
+        
+        countUnit++;
+        if (parent->Type == QFAUIType::Type::ViewportRoot)
+            return (QFAViewportRoot*)parent;
+        else
+            parent = parent->Parent;
+    }
+
+    return nullptr;
+}
+
+void QFAUIUnit::EventFunctions::SetInFocusFunction(std::function<void(QFAUIUnit*)> fun)
+{
+    FunInFocus = fun;
+}
+
+void QFAUIUnit::EventFunctions::SetOutFocusFunction(std::function<void()> fun)
+{
+    FunOutFocus = fun;
+}
+
 void QFAUIUnit::ProcessParentOverflow(UniformOverflow& param, QFAUIParent* parent)
 {
     if (!parent)
@@ -87,4 +117,42 @@ float QFAUIUnit::ProcessParentOpacity(float childOpacity, QFAUIParent* parent)
         return childOpacity;
 
     return ProcessParentOpacity(childOpacity * parent->Opacity, parent->GetParent());
+}
+
+void QFAUIUnit::NotifyInFocus()
+{
+    QFAUIUnit* parent = this;
+    while (true)
+    {
+        if (!parent)
+            return;
+
+   
+        if (parent->Events.FunInFocus)
+            parent->Events.FunInFocus(this);
+
+        parent = parent->Parent;
+    }
+}
+
+void QFAUIUnit::NotifyOutFocus(bool onlyOneUnit)
+{
+    if (onlyOneUnit)
+    {
+        if (this->Events.FunInFocus)
+            this->Events.FunOutFocus();
+        return;
+    }
+
+    QFAUIUnit* parent = this;
+    while (true)
+    {
+        if (!parent)
+            return;
+
+        if (parent->Events.FunInFocus)
+            parent->Events.FunOutFocus();
+
+        parent = parent->Parent;
+    }
 }
