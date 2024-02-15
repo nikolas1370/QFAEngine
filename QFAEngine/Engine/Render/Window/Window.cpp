@@ -38,7 +38,7 @@ VkFormat QFAWindow::depthFormat =  VK_FORMAT_D32_SFLOAT;
 QFAWindow::QFAWindow(int width, int height, std::string name)
 {
 	UIEvent.Init(this);
-
+	
 	if (!QFAWindow::MainWindow)
 		QFAWindow::MainWindow = this;
 
@@ -56,10 +56,6 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 		ASSERT(false);
 		return;
 	}
-
-	QFAViewport* vp = new QFAViewport;
-	AddViewport(vp);
-	vp->Settup(width, height);
 
 	if (!QFAWindow::Init)
 	{
@@ -83,9 +79,19 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 
 	QFAVKLogicalDevice::Init(surface);
 	QFAVKBuffer::Init(Instance->instance);
+	
+	
+
+
+	
 
 	createCommandPool();
+
+
+
+
 	QFAImage::Init(commandPool);
+
 	SwapChain = new QFAVKSwapChain(glfWindow, surface, commandPool);
 	RenderPassSwapChain = new QFAVKRenderPassSwapChain(SwapChain->swapChainImageFormat, true);
 	RenderPass = new QFAVKRenderPass(VK_FORMAT_R8G8B8A8_SRGB, true);
@@ -113,6 +119,9 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 	
 	QFAUIImage::Init(TextRenderPass->renderPass, commandPool);
 	
+
+
+
 	ShadowFrameBuffer = new QFAVKShadowFrameBuffer(commandPool, RenderPassOffScreen->renderPass);
 
 
@@ -128,6 +137,11 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 	imugo = new QFAPresentImage(commandPool);
 
 	imugo->Init(RenderPassSwapChain->renderPass, commandPool, frameBufferMesh->ColorImage);
+
+
+	QFAViewport* vp = new QFAViewport;	
+	AddViewport(vp);
+	vp->Settup(width, height);
 }
 
 QFAWindow::~QFAWindow()
@@ -212,8 +226,7 @@ void QFAWindow::DrawUI()
 
 		SortUIs(&Viewports[u]->Root); // parent should add before children
 		for (size_t i = 0; i < SortUIUnits.Length(); i++)
-		{
-			
+		{			
 			if (SortUIUnits[i]->CanRender)
 			{
 				if (pipeline != ((QFAUIRenderUnit*)SortUIUnits[i])->GetPipeline())
@@ -223,6 +236,16 @@ void QFAWindow::DrawUI()
 				}
 
 				((QFAUIRenderUnit*)SortUIUnits[i])->Render(UICommandBuffer);
+			}
+			else if (SortUIUnits[i]->CanBeParent)
+			{
+				if (pipeline != ((QFAUIParent*)SortUIUnits[i])->GetBackgroundPipeline())
+				{
+					pipeline = ((QFAUIParent*)SortUIUnits[i])->GetBackgroundPipeline();
+					vkCmdBindPipeline(UICommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetPipeline());
+				}
+
+				((QFAUIParent*)SortUIUnits[i])->RenderBackground(UICommandBuffer);
 			}
 		}
 	}	

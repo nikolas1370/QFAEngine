@@ -56,8 +56,8 @@ private:
 
 	void ProcessChildPosition();
 	
-	void SetSizeParent(unsigned int w, unsigned int h) override;
-	void SetPositionParent(int x, int y) override;
+	void ChangeSize(unsigned int w, unsigned int h) override;
+	void ChangePosition(int x, int y) override;
 
 	void NewUnit(QFAUIUnit* unit) override;
 	// child call if his slot change

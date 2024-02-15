@@ -25,13 +25,14 @@ class QFAVKTextureImage;
 class QFAVKImageView;
 class QFAVKTextureSampler;
 
-
+class QFAUIParent;
 class QFAVKPipeline;
 
 class QFAUIImage : public QFAUIRenderUnit
 {
     
     friend QFAWindow;
+    friend QFAUIParent;
     
 
 

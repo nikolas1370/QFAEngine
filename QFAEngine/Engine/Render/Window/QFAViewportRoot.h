@@ -9,8 +9,8 @@ class QFAViewportRoot : public QFAUIParentMultipleUnit
 	friend QFAWindow;
 	QFAViewport* Viewport;
 
-	void SetSizeParent(unsigned int w, unsigned int h) final;
-	void SetPositionParent(int x, int y) final;
+	void ChangeSize(unsigned int w, unsigned int h) final;
+	void ChangePosition(int x, int y) final;
 
 	void NewUnit(QFAUIUnit* unit) final;
 	void MySlotChange(QFAUIUnit* unit) final;

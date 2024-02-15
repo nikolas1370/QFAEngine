@@ -87,14 +87,14 @@ void QFAUIGrid::ProcessChildPosition()
 	}
 }
 
-void QFAUIGrid::SetSizeParent(unsigned int w, unsigned int h)
+void QFAUIGrid::ChangeSize(unsigned int w, unsigned int h)
 {
 	Width = w;
 	Height = h;
 	ProcessChildPosition();
 }
 
-void QFAUIGrid::SetPositionParent(int x, int y)
+void QFAUIGrid::ChangePosition(int x, int y)
 {
 	Position_x = x;
 	Position_y = y;

@@ -35,7 +35,7 @@ void QFAUICanvas::MySlotChange(QFAUIUnit* unit)
 	NewUnit(unit);
 }
 
-void QFAUICanvas::SetSizeParent(unsigned int w, unsigned int h)
+void QFAUICanvas::ChangeSize(unsigned int w, unsigned int h)
 {
 	Width = w;
 	Height = h;
@@ -43,7 +43,7 @@ void QFAUICanvas::SetSizeParent(unsigned int w, unsigned int h)
 	UpdatePositionSizeChildren();	
 }
 
-void QFAUICanvas::SetPositionParent(int x, int y)
+void QFAUICanvas::ChangePosition(int x, int y)
 {
 	Position_x = x;
 	Position_y = y;

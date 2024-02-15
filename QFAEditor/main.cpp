@@ -145,6 +145,8 @@ int main()
     QFAImage* home_2 = new QFAImage(U"SomeImage/Зїли їжака.png");
     QFAUIImage* UIhome_2 = new QFAUIImage(home_2);
 
+    QFAImage* OldWell = new QFAImage(U"SomeImage/Old Water Well.png");    
+
     QFAUIImage* BackgroundColor = new QFAUIImage(nullptr);
     BackgroundColor->SetBackgroundColor(FVector4D(1, 1, 1, 0.5));
 
@@ -154,9 +156,14 @@ int main()
 
     QFAUIScroll scroll;
     scroll.SetUnit(text);
+    scroll.SetBackgroundImage(OldWell);
+    scroll.SetBackgroundType(EBackgroundType::BTImage);
+
 
     QFAUIScroll scrollGrid;
     scrollGrid.SetUnit(&grid);
+    scrollGrid.SetBackgroundType(EBackgroundType::BTColor);
+    scrollGrid.SetBackgroundColor(FVector4D(1, 0, 0, 0.5));
     
     grid.AddUnit(UIDogy);
     grid.AddUnit(UICrystal);

@@ -155,7 +155,7 @@ void QFAUIScroll::MySlotChange(QFAUIUnit* unit)
 {
 }
 
-void QFAUIScroll::SetSizeParent(unsigned int w, unsigned int h)
+void QFAUIScroll::ChangeSize(unsigned int w, unsigned int h)
 {
 	Width = w;
 	Height = h;
@@ -169,7 +169,7 @@ void QFAUIScroll::SetSizeParent(unsigned int w, unsigned int h)
 	}
 }
 
-void QFAUIScroll::SetPositionParent(int x, int y)
+void QFAUIScroll::ChangePosition(int x, int y)
 {
 	Position_x = x;
 	Position_y = y;

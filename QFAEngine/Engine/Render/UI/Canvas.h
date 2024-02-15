@@ -13,8 +13,8 @@ protected:
 	void MySlotChange(QFAUIUnit* unit) override;
 
 
-	void SetSizeParent(unsigned int w, unsigned int h) override;
-	void SetPositionParent(int x, int y) override;
+	void ChangeSize(unsigned int w, unsigned int h) override;
+	void ChangePosition(int x, int y) override;
 	void UpdatePositionSizeChildren();
 
 	float UpdateInnerHeight() override;

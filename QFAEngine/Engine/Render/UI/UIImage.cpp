@@ -100,7 +100,6 @@ void QFAUIImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_)
 QFAUIImage::~QFAUIImage()
 {
     delete vertexBufer;
-    delete ImageSampler;
 }
 
 void QFAUIImage::SetImage(QFAImage* image)
