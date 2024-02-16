@@ -3,6 +3,7 @@
 #include <Render/Window/Window.h>
 #include <Render/UI/Scroll.h>
 #include <functional>
+#include <Render/Time.h>
 
 QFAUIEvent::QFAUIEvent()
 {
@@ -19,6 +20,27 @@ void QFAUIEvent::Init(QFAWindow* window)
 		{
 			this->ScrollValue = axis;			
 		});
+
+	Input.AddKeyPress(EKey::MOUSE_LEFT, "LMD", [this](EKey::Key key)
+		{
+			LeftMouseDown = true;
+		});
+
+	Input.AddKeyPress(EKey::MOUSE_RIGHT, "RMD", [this](EKey::Key key)
+		{
+			RightMouseDown = true;
+		});
+
+	Input.AddKeyRelease(EKey::MOUSE_LEFT, "LMU", [this](EKey::Key key)
+		{
+			LeftMouseUp = true;
+		});
+
+	Input.AddKeyRelease(EKey::MOUSE_RIGHT, "RMU", [this](EKey::Key key)
+		{
+			RightMouseUp = true;
+		});
+
 }
 
 void QFAUIEvent::AddUnitToSortList(QFAUIUnit* unit)
@@ -65,15 +87,22 @@ void QFAUIEvent::SortUIs(QFAViewportRoot* root)
 	}
 }
 
-
-
 void QFAUIEvent::NewFrame(QFAViewportRoot* root, float mousePosX, float mousePosY, float delta)
 {	
 	QFAUIUnit* unitUnderFocus = nullptr;
 	QFAUIScroll* scrollUnit = nullptr;
+	FindUnitUnderFocus(root, unitUnderFocus, scrollUnit, mousePosX, mousePosY);
+
+	ScrollEvent(root, scrollUnit, delta);
+	FocusEvent(unitUnderFocus);
+	MouseButtonEvent(unitUnderFocus);
+}
+
+void QFAUIEvent::FindUnitUnderFocus(QFAViewportRoot* root, QFAUIUnit*& unitUnderFocus, QFAUIScroll*& scrollUnit, float mousePosX, float mousePosY)
+{
 	if (root)
 	{
-		SortUIs(root);	
+		SortUIs(root);
 		for (size_t i = 0; i < SortUIUnits.Length(); i++)
 		{
 			float xStart = SortUIUnits[i]->Position_x;
@@ -103,44 +132,54 @@ void QFAUIEvent::NewFrame(QFAViewportRoot* root, float mousePosX, float mousePos
 			if (mousePosX >= xStart && mousePosY >= yStart &&
 				mousePosX <= xEnd && mousePosY <= yEnd)
 			{
-
 				if (!unitUnderFocus)
 				{
 					unitUnderFocus = SortUIUnits[i];
 					if (unitUnderFocus && scrollUnit)
 						break;
 				}
-				
+
 				if (!scrollUnit && SortUIUnits[i]->Type == QFAUIType::Scroll)
 				{
 					scrollUnit = (QFAUIScroll*)SortUIUnits[i];
 					if (unitUnderFocus && scrollUnit)
 						break;
-				}				
+				}
 			}
 		}
 	}
+}
 
-	if (FocusUnit && unitUnderFocus)
+void QFAUIEvent::ScrollEvent( QFAViewportRoot* root, QFAUIScroll* scrollUnit, float delta)
+{
+	if (scrollUnit && scrollUnit->Type == QFAUIType::Type::Scroll)
+		QFAUIScroll::NewFrame(scrollUnit, delta, root ? ScrollValue : 0.0f);
+
+	ScrollValue = 0;
+}
+
+void QFAUIEvent::FocusEvent(QFAUIUnit* newUnitUnderFocus)
+{
+	if (FocusUnit && newUnitUnderFocus)
 	{
-		if (FocusUnit != unitUnderFocus)
+		if (FocusUnit != newUnitUnderFocus)
 		{
 			unsigned int lastFocusParentCount;
 			unsigned int curentFocusParentCount;
 			QFAViewportRoot* rootLast = FocusUnit->GetViewportRoot(lastFocusParentCount);
-			QFAViewportRoot* rootCurent = unitUnderFocus->GetViewportRoot(curentFocusParentCount);
+			QFAViewportRoot* rootCurent = newUnitUnderFocus->GetViewportRoot(curentFocusParentCount);
 
 			if (rootLast == rootCurent)
 			{
 				QFAUIUnit* last = FocusUnit;
-				QFAUIUnit* curent = unitUnderFocus;				
+				QFAUIUnit* curent = newUnitUnderFocus;
 				while (true) // search common ancestor
-				{					
+				{
 					if (lastFocusParentCount == curentFocusParentCount)
-					{						
+					{
 						if (last == curent)
-						{										
-							unitUnderFocus->NotifyInFocus();
+						{
+							newUnitUnderFocus->NotifyInFocus();
 							last = FocusUnit;
 							while (true)
 							{
@@ -159,7 +198,7 @@ void QFAUIEvent::NewFrame(QFAViewportRoot* root, float mousePosX, float mousePos
 							curent = curent->Parent;
 						}
 					}
-					else if(lastFocusParentCount > curentFocusParentCount)
+					else if (lastFocusParentCount > curentFocusParentCount)
 					{
 						last = last->Parent;
 						lastFocusParentCount--;
@@ -171,21 +210,64 @@ void QFAUIEvent::NewFrame(QFAViewportRoot* root, float mousePosX, float mousePos
 					}
 				}
 			}
-			else 
+			else
 			{
 				FocusUnit->NotifyOutFocus(false);
-				unitUnderFocus->NotifyInFocus();
+				newUnitUnderFocus->NotifyInFocus();
 			}
-		}		
+		}
 	}
-	else if(FocusUnit && !unitUnderFocus)
+	else if (FocusUnit && !newUnitUnderFocus)
 		FocusUnit->NotifyOutFocus(false);
-	else if (!FocusUnit && unitUnderFocus)
-		unitUnderFocus->NotifyInFocus();
-	
-	FocusUnit = unitUnderFocus;
-	if(scrollUnit && scrollUnit->Type == QFAUIType::Type::Scroll)
-		QFAUIScroll::NewFrame(scrollUnit, delta, root ? ScrollValue : 0.0f);
+	else if (!FocusUnit && newUnitUnderFocus)
+		newUnitUnderFocus->NotifyInFocus();
 
-	ScrollValue = 0;
+	FocusUnit = newUnitUnderFocus;
+}
+
+void QFAUIEvent::MouseButtonEvent(QFAUIUnit* unitUnderFocus)
+{
+	if (LeftMouseDown)
+	{
+		LeftMouseDown = false;
+		if (unitUnderFocus)
+		{
+			unitUnderFocus->NotifyLeftMouseDown();
+			LeftMouseUnit = unitUnderFocus;
+		}
+	}
+	else if(LeftMouseUp)
+	{
+		LeftMouseUp = false;
+		if (unitUnderFocus)
+		{
+			unitUnderFocus->NotifyLeftMouseUp();
+			if (LeftMouseUnit == unitUnderFocus)
+				LeftMouseUnit->NotifyLeftMouseDownUp();
+		}
+
+		LeftMouseUnit = nullptr;
+	}
+
+	if (RightMouseDown)
+	{
+		RightMouseDown = false;
+		if (unitUnderFocus)
+		{
+			unitUnderFocus->NotifyRightMouseDown();
+			RightMouseUnit = unitUnderFocus;
+		}
+	}
+	else if(RightMouseUp)
+	{
+		RightMouseUp = false;
+		if (unitUnderFocus)
+		{
+			unitUnderFocus->NotifyRightMouseUp();
+			if (RightMouseUnit == unitUnderFocus)
+				unitUnderFocus->NotifyRightMouseDownUp();
+		}
+
+		RightMouseUnit = nullptr;
+	}
 }

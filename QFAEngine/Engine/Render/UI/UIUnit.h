@@ -135,16 +135,54 @@ public:
 
 	class EventFunctions
 	{
+		/*
+			replace std::function to Function pointer + (void* userData)
+		*/
 		friend QFAUIUnit;
-		std::function<void(QFAUIUnit* unitInFocus)> FunInFocus;
-		std::function<void()> FunOutFocus;
+		std::function<void(QFAUIUnit* unitInFocus)> InFocus;
+		std::function<void()> OutFocus;
+
+		std::function<void(QFAUIUnit* unitUnderCursor)> LeftMouseDown;
+		std::function<void(QFAUIUnit* unitUnderCursor)> LeftMouseUp;
+		std::function<void(QFAUIUnit* unitUnderCursor)> RightMouseDown;
+		std::function<void(QFAUIUnit* unitUnderCursor)> RightMouseUp;
+
+		std::function<void(QFAUIUnit* unitUnderCursor)> LeftMouseDownUp;
+		std::function<void(QFAUIUnit* unitUnderCursor)> RightMouseDownUp;
 		EventFunctions() {};		
 	public:
 		/*
-			QFAUIUnit* == parent get child in focus
+			if child have focus parents also have focus
+			QFAUIUnit* unit in focus
 		*/
-		void SetInFocusFunction(std::function<void(QFAUIUnit*)> fun);
-		void SetOutFocusFunction(std::function<void()> fun);
+		void SetInFocus(std::function<void(QFAUIUnit*)> fun);
+		/*		
+			if child have outfocus parents 
+			also have outfocus only if parent
+			not have other child in focus.
+			if parents have new child focus
+			parents get event InFocus with new focus unit
+		*/
+		void SetOutFocus(std::function<void()> fun);
+
+		/*
+			parents also notified
+		*/
+		void SetLeftMouseDown(std::function<void(QFAUIUnit*)> fun);		
+		void SetLeftMouseUp(std::function<void(QFAUIUnit*)> fun);
+		void SetRightMouseDown(std::function<void(QFAUIUnit*)> fun);
+		void SetRightMouseUp(std::function<void(QFAUIUnit*)> fun);
+
+		/*
+			call if Left Mouse button press and release at same unit
+			parents also notified
+		*/
+		void SetLeftMouseDownUp(std::function<void(QFAUIUnit*)> fun);
+		/*
+			call if Right Mouse button press and release at same unit
+			parents also notified
+		*/
+		void SetRightMouseDownUp(std::function<void(QFAUIUnit*)> fun);
 	};
 
 	
@@ -287,4 +325,14 @@ protected:
 		if onlyOneUnit == true Notify only this unit
 	*/
 	void NotifyOutFocus(bool onlyOneUnit);
+
+
+	void NotifyLeftMouseDown();
+	void NotifyLeftMouseUp();
+	void NotifyRightMouseDown();
+	void NotifyRightMouseUp();
+
+	void NotifyLeftMouseDownUp();
+	void NotifyRightMouseDownUp();
+
 };
