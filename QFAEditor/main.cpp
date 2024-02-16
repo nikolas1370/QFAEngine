@@ -27,7 +27,43 @@
 #include "Editor/EditorOverlord.h"
 #include <Render/UI/Grid.h>
 #include <Render/UI/Scroll.h>
-    
+
+void LeftMouseDown(QFAUIUnit* unitUnderCursor, void* userData)
+{
+    QFAUIUnit* parent = (QFAUIUnit*)userData;
+    std::cout << "Left Down " << unitUnderCursor->UnitName << " Parent Name " << parent->UnitName << "\n";
+}
+
+void LeftMouseUp(QFAUIUnit* unitUnderCursor, void* userData)
+{
+    QFAUIUnit* parent = (QFAUIUnit*)userData;
+    std::cout << "Left Up " << unitUnderCursor->UnitName << " Parent Name " << parent->UnitName << "\n";
+}
+
+void LeftMouseDownUp(QFAUIUnit* unitUnderCursor, void* userData)
+{
+    QFAUIUnit* parent = (QFAUIUnit*)userData;
+    std::cout << "Left Down Up " << unitUnderCursor->UnitName << " Parent Name " << parent->UnitName << "\n";
+}
+
+void RightMouseDown(QFAUIUnit* unitUnderCursor, void* userData)
+{
+    QFAUIUnit* parent = (QFAUIUnit*)userData;
+    std::cout << "right Down " << unitUnderCursor->UnitName << " Parent Name " << parent->UnitName << "\n";
+}
+
+void RightMouseUp(QFAUIUnit* unitUnderCursor, void* userData)
+{
+    QFAUIUnit* parent = (QFAUIUnit*)userData;
+    std::cout << "right Up " << unitUnderCursor->UnitName << " Parent Name " << parent->UnitName << "\n";
+}
+
+void RightMouseDownUp(QFAUIUnit* unitUnderCursor, void* userData)
+{
+    QFAUIUnit* parent = (QFAUIUnit*)userData;
+    std::cout << "right Down Up" << unitUnderCursor->UnitName << " Parent Name " << parent->UnitName << "\n";
+}
+
 
 int main()
 {
@@ -191,15 +227,16 @@ int main()
     UIhome_2->UnitName = "home_2";
     scrollGrid->UnitName = "scrollGrid";
     
+
     
-    grid->Events.SetLeftMouseDown([](QFAUIUnit* unitUnderCursor) {std::cout << "Left Down " << unitUnderCursor->UnitName << "\n"; });
-    grid->Events.SetLeftMouseUp([](QFAUIUnit* unitUnderCursor) {std::cout << "Left Up " << unitUnderCursor->UnitName << "\n"; });
-    grid->Events.SetLeftMouseDownUp([](QFAUIUnit* unitUnderCursor) {std::cout << "Left Down Up " << unitUnderCursor->UnitName << "\n"; });
+    grid->Events.SetLeftMouseDown(LeftMouseDown, grid);
+    grid->Events.SetLeftMouseUp(LeftMouseUp, grid);
+    grid->Events.SetLeftMouseDownUp(LeftMouseDownUp, grid);
 
-    grid->Events.SetRightMouseDown([](QFAUIUnit* unitUnderCursor) {std::cout << "right Down " << unitUnderCursor->UnitName << "\n"; });
-    grid->Events.SetRightMouseUp([](QFAUIUnit* unitUnderCursor) {std::cout << "right Up " << unitUnderCursor->UnitName << "\n"; });
-    grid->Events.SetRightMouseDownUp([](QFAUIUnit* unitUnderCursor) {std::cout << "right Down Up" << unitUnderCursor->UnitName << "\n"; });
-
+    grid->Events.SetRightMouseDown(RightMouseDown, grid);
+    grid->Events.SetRightMouseUp(RightMouseUp, grid);
+    grid->Events.SetRightMouseDownUp(RightMouseDownUp, grid);
+    
     QFAEditorOverlord::StartLife();
 
 

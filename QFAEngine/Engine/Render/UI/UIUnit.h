@@ -135,27 +135,36 @@ public:
 
 	class EventFunctions
 	{
-		/*
-			replace std::function to Function pointer + (void* userData)
-		*/
+		struct Callback
+		{
+			void (*fun)(void* userData) = nullptr;
+			void* userData = nullptr;
+		};
+
+		struct CallbackWithUnit
+		{
+			void (*fun)(QFAUIUnit* unitInFocus, void* userData) = nullptr;
+			void* userData = nullptr;
+		};// 
+
 		friend QFAUIUnit;
-		std::function<void(QFAUIUnit* unitInFocus)> InFocus;
-		std::function<void()> OutFocus;
+		CallbackWithUnit InFocus;
+		Callback OutFocus;
 
-		std::function<void(QFAUIUnit* unitUnderCursor)> LeftMouseDown;
-		std::function<void(QFAUIUnit* unitUnderCursor)> LeftMouseUp;
-		std::function<void(QFAUIUnit* unitUnderCursor)> RightMouseDown;
-		std::function<void(QFAUIUnit* unitUnderCursor)> RightMouseUp;
+		CallbackWithUnit LeftMouseDown;
+		CallbackWithUnit LeftMouseUp;
+		CallbackWithUnit RightMouseDown;
+		CallbackWithUnit RightMouseUp;
 
-		std::function<void(QFAUIUnit* unitUnderCursor)> LeftMouseDownUp;
-		std::function<void(QFAUIUnit* unitUnderCursor)> RightMouseDownUp;
+		CallbackWithUnit LeftMouseDownUp;
+		CallbackWithUnit RightMouseDownUp;
 		EventFunctions() {};		
 	public:
 		/*
 			if child have focus parents also have focus
 			QFAUIUnit* unit in focus
 		*/
-		void SetInFocus(std::function<void(QFAUIUnit*)> fun);
+		void SetInFocus(void (*fun)(QFAUIUnit*, void*), void* userData = nullptr);
 		/*		
 			if child have outfocus parents 
 			also have outfocus only if parent
@@ -163,26 +172,26 @@ public:
 			if parents have new child focus
 			parents get event InFocus with new focus unit
 		*/
-		void SetOutFocus(std::function<void()> fun);
+		void SetOutFocus(void (*fun)(void*), void* userData = nullptr);
 
 		/*
 			parents also notified
 		*/
-		void SetLeftMouseDown(std::function<void(QFAUIUnit*)> fun);		
-		void SetLeftMouseUp(std::function<void(QFAUIUnit*)> fun);
-		void SetRightMouseDown(std::function<void(QFAUIUnit*)> fun);
-		void SetRightMouseUp(std::function<void(QFAUIUnit*)> fun);
+		void SetLeftMouseDown(void (*fun)(QFAUIUnit*, void*), void* userData = nullptr);
+		void SetLeftMouseUp(void (*fun)(QFAUIUnit*, void*), void* userData = nullptr);
+		void SetRightMouseDown(void (*fun)(QFAUIUnit*, void*), void* userData = nullptr);
+		void SetRightMouseUp(void (*fun)(QFAUIUnit*, void*), void* userData = nullptr);
 
 		/*
 			call if Left Mouse button press and release at same unit
 			parents also notified
 		*/
-		void SetLeftMouseDownUp(std::function<void(QFAUIUnit*)> fun);
+		void SetLeftMouseDownUp(void (*fun)(QFAUIUnit*, void*), void* userData = nullptr);
 		/*
 			call if Right Mouse button press and release at same unit
 			parents also notified
 		*/
-		void SetRightMouseDownUp(std::function<void(QFAUIUnit*)> fun);
+		void SetRightMouseDownUp(void (*fun)(QFAUIUnit*, void*), void* userData = nullptr);
 	};
 
 	
