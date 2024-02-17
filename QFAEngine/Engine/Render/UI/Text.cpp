@@ -206,13 +206,13 @@ void QFAText::ProcessText()
 
         if (OverflowWrap == EOverflowWrap::OWSymbol)
         {
-            if (Width < glyphWidth)
+            if (Width < (int)glyphWidth)
             {
                 QFAText::SymbolsForRender.Add(PrepareData{ (unsigned int)symI, numRow });
                 numRow++;
                 x = 0;
             }
-            else if (x + glyphBitmap_left + glyphWidth >= Width)
+            else if (x + glyphBitmap_left + (int)glyphWidth >= Width)
             {
                 numRow++;
                 x = 0;
@@ -241,7 +241,7 @@ void QFAText::ProcessText()
                     wordW -= spaceS;
                 }
 
-                if (Width < wordW)
+                if (Width < (int)wordW)
                 {
                     if (x != 0)
                         numRow++;
@@ -252,7 +252,7 @@ void QFAText::ProcessText()
                     numRow++;
                     x = 0;
                 }
-                else if (x + wordW <= Width)
+                else if (x + (int)wordW <= Width)
                 {
                     for (size_t j = wordStart; j < wordStart + wordLen; j++)
                         QFAText::SymbolsForRender[j].row = numRow;
@@ -331,7 +331,7 @@ void QFAText::PrepareSymbolsToGpu()
             GlyphInfoData[i].leftTop_2 = GlyphShaderVertex{ temXEnd, temY,  (float)ZIndex,  gi->xEnd, gi->y, (int)gi->atlasIndex };
 
             if(temYEnd - Position_y > InnerHeight)
-                InnerHeight = temYEnd - Position_y;
+                InnerHeight = (unsigned int)((int)temYEnd - Position_y);
 
             w += (int)((float)gi->advance_x * tem);
         }
@@ -379,7 +379,7 @@ void QFAText::PrepareSymbolsToGpu()
                 GlyphInfoData[i].leftTop_2 = GlyphShaderVertex{ temXEnd, temY,  (float)ZIndex,  gi->xEnd, gi->y, (int)gi->atlasIndex };
 
                 if (temYEnd - Position_y > InnerHeight)
-                    InnerHeight = temYEnd - Position_y;
+                    InnerHeight = (unsigned int)((int)temYEnd - Position_y);
 
                 w += (int)((float)gi->advance_x * tem);
             }
@@ -434,7 +434,7 @@ void QFAText::PrepareSymbolsToGpu()
             GlyphInfoData[i].leftTop_2 = GlyphShaderVertex{ temXEnd, temY,  (float)ZIndex,  gi->xEnd, gi->y,  (int)gi->atlasIndex };
 
             if (temYEnd - Position_y > InnerHeight)
-                InnerHeight = temYEnd - Position_y;
+                InnerHeight = (unsigned int)((int)temYEnd - Position_y);
 
             w -= (int)((float)gi->advance_x * tem);
         }
@@ -447,7 +447,7 @@ void QFAText::Destroy()
     delete this;
 }
 
-void QFAText::SetText(std::wstring  text)
+void QFAText::SetText(std::u32string  text)
 {
     if (text.length() > CountGlyphInBuffer)
     {
@@ -675,7 +675,7 @@ void QFAText::CreatePipeline()
     
 
     std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
-    PipelineInfo.VertexInputInfo.VertexAttributeDescriptionCount = attributeDescriptions.size();
+    PipelineInfo.VertexInputInfo.VertexAttributeDescriptionCount = (uint32_t)attributeDescriptions.size();
     attributeDescriptions[0].binding = 0;
     attributeDescriptions[0].location = 0;
     attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
@@ -698,7 +698,7 @@ void QFAText::CreatePipeline()
     std::array< QFAVKPipeline::QFAPipelineColorBlendAttachment, 1> blendAttachments;
     blendAttachments[0].BlendEnable = VK_TRUE;
 
-    PipelineInfo.ColorBlendState.attachmentCount = blendAttachments.size();
+    PipelineInfo.ColorBlendState.attachmentCount = (uint32_t)blendAttachments.size();
     PipelineInfo.ColorBlendState.pAttachments = blendAttachments.data();
     
 
@@ -708,7 +708,7 @@ void QFAText::CreatePipeline()
         VK_DYNAMIC_STATE_SCISSOR
     };
     PipelineInfo.DynamicStates = dynamicStates.data();
-    PipelineInfo.DynamicStateCount = dynamicStates.size();
+    PipelineInfo.DynamicStateCount = (uint32_t)dynamicStates.size();
 
 
     std::array< QFAVKPipeline::QFADescriptorSetLayout, 2> DescriptorSetLayouts;    
@@ -736,12 +736,12 @@ void QFAText::CreatePipeline()
     secondLayout[2].pImmutableSamplers = nullptr;
     secondLayout[2].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
-    DescriptorSetLayouts[0].BindingCount = firsLayout.size();
-    DescriptorSetLayouts[1].BindingCount = secondLayout.size();
+    DescriptorSetLayouts[0].BindingCount = (uint32_t)firsLayout.size();
+    DescriptorSetLayouts[1].BindingCount = (uint32_t)secondLayout.size();
     DescriptorSetLayouts[0].Bindings = firsLayout.data();
     DescriptorSetLayouts[1].Bindings = secondLayout.data();
 
-    PipelineInfo.DescriptorSetLayoutCount = DescriptorSetLayouts.size();
+    PipelineInfo.DescriptorSetLayoutCount = (uint32_t)DescriptorSetLayouts.size();
     PipelineInfo.DescriptorSetLayouts = DescriptorSetLayouts.data();
 
 
@@ -767,7 +767,7 @@ void QFAText::CreatePipeline()
 
     GlyphAtlasList.resize(MaxAttlas);
     DII.resize(MaxAttlas);
-    for (size_t i = 0; i < MaxAttlas; i++) // create atlas if need
+    for (int i = 0; i < (int)MaxAttlas; i++) // create atlas if need
     {
         if (GlyphAtlasList[i].atlasIndex >= 0)
             continue;

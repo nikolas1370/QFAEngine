@@ -16,8 +16,8 @@ class QDirectionLight : public QObject
 	unsigned int VAOSuper;
 
 	// in vulkan coordinate
-	FVector Direction = FVector(0,0,1);	
-	FVector Ambient = FVector(0.1);
+	FVector Direction = FVector(0.0f, 0.0f, 1.0f);
+	FVector Ambient = FVector(0.1f);
 	FVector Diffuse = FVector(1);
 	FVector Specular = FVector(1);
 	bool CastShadows = true;

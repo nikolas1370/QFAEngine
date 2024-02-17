@@ -104,7 +104,7 @@ void QFAPresentImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_, 
         VK_DYNAMIC_STATE_SCISSOR
     };
     PipelineInfo.DynamicStates = dynamicStates.data();
-    PipelineInfo.DynamicStateCount = dynamicStates.size();
+    PipelineInfo.DynamicStateCount = (uint32_t)dynamicStates.size();
 
 
     std::array< QFAVKPipeline::QFADescriptorSetLayout, 1> DescriptorSetLayouts;        
@@ -115,10 +115,10 @@ void QFAPresentImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_, 
     bindingsFragment[0].pImmutableSamplers = nullptr;
     bindingsFragment[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     
-    DescriptorSetLayouts[0].BindingCount = bindingsFragment.size();
+    DescriptorSetLayouts[0].BindingCount = (uint32_t)bindingsFragment.size();
     DescriptorSetLayouts[0].Bindings = bindingsFragment.data();
 
-    PipelineInfo.DescriptorSetLayoutCount = DescriptorSetLayouts.size();
+    PipelineInfo.DescriptorSetLayoutCount = (uint32_t)DescriptorSetLayouts.size();
     PipelineInfo.DescriptorSetLayouts = DescriptorSetLayouts.data();
 
 

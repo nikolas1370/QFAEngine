@@ -12,7 +12,7 @@ QFAViewportRoot::~QFAViewportRoot()
 
 float QFAViewportRoot::UpdateInnerHeight()
 {
-	return Height;
+	return (float)Height;
 }
 
 

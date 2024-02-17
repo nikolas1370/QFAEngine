@@ -5,7 +5,6 @@
 template<typename T> class TVector2D;
 using DVector2D = TVector2D<double>;
 using FVector2D = TVector2D<float>;
-
 /*
 rewrite like TVector
 
@@ -19,6 +18,7 @@ public:
     T Y;
 
     TVector2D(){}
+
     TVector2D(T InF);
     TVector2D(T X, T Y);
 

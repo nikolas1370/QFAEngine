@@ -36,7 +36,7 @@ void QFAUIScroll::ChangedUnit(QFAUIUnit* unit)
 	ScrollValueFinal = 0;
 }
 
-void QFAUIScroll::ProcessScroll(float delta,  float addValue)
+void QFAUIScroll::ProcessScroll(double delta,  float addValue)
 {
 	if (!Child) 
 	{
@@ -49,15 +49,15 @@ void QFAUIScroll::ProcessScroll(float delta,  float addValue)
 	if (Child->CanBeParent)
 	{
 		QFAUIParent* child = (QFAUIParent*)Child;
-		childHeight = child->UpdateInnerHeight();
+		childHeight = (unsigned int)child->UpdateInnerHeight();
 	}
 	else
 	{
 		QFAUIRenderUnit * child = (QFAUIRenderUnit*)Child;
-		childHeight = child->InnerHeight < child->Height ? child->Height : child->InnerHeight;
+		childHeight = child->InnerHeight < (unsigned int)child->Height ? (unsigned int)child->Height : child->InnerHeight;
 	}
 
-	if (Height >= childHeight)
+	if (Height >= (int)childHeight)
 		return;
 
 	if (NotEqualToZero(addValue))
@@ -81,7 +81,7 @@ void QFAUIScroll::ProcessScroll(float delta,  float addValue)
 	else
 		ScrollTimeToEnd -= delta;
 
-	float pixels = ScrollValue * (delta * Ratio);
+	float pixels = ScrollValue * (float)(delta * Ratio);
 	float finalscroll = ScrollValueFinal + pixels;	 
 	if (finalscroll > 0)
 	{
@@ -124,7 +124,7 @@ void QFAUIScroll::ChangeScrollValueInside(float value)
 		((QFAUIRenderUnit*)Child)->UnitScroll = ScrollValueFinal;
 }
 
-void QFAUIScroll::NewFrame(QFAUIScroll* scrollUndeCursor, float delta, float addValue)
+void QFAUIScroll::NewFrame(QFAUIScroll* scrollUndeCursor, double delta, float addValue)
 {
 	for (size_t i = 0; i < Scrolls.size(); i++)
 	{
@@ -140,12 +140,12 @@ float QFAUIScroll::UpdateInnerHeight()
 	if (Child->CanBeParent)
 	{
 		QFAUIParent* child = (QFAUIParent*)Child;
-		InnerHeight = child->UpdateInnerHeight();
+		InnerHeight = (unsigned int)child->UpdateInnerHeight();
 	}
 	else
 		InnerHeight = Child->InnerHeight;
 
-	return InnerHeight;
+	return (float)InnerHeight;
 }
 
 void QFAUIScroll::MySlotChange(QFAUIUnit* unit)
@@ -173,7 +173,7 @@ void QFAUIScroll::ChangePosition(int x, int y)
 	if (Child)
 	{
 		if (Child->CanBeParent)
-			((QFAUIParent*)Child)->SetPositionParent(x, y + ScrollValueFinal);
+			((QFAUIParent*)Child)->SetPositionParent(x, y + (int)ScrollValueFinal);
 		else
 			((QFAUIRenderUnit*)Child)->SetPositionParent(x, y);
 	}

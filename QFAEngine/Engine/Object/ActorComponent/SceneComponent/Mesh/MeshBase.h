@@ -213,10 +213,10 @@ public:
 
 	struct SShaderDirLight
 	{
-		alignas(16) FVector direction = FVector(0, 0, 1);
-		alignas(16) FVector ambient = FVector(0.1);
-		alignas(16) FVector diffuse = FVector(1);
-		alignas(16) FVector specular = FVector(1);
+		alignas(16) FVector direction = FVector(0.0f, 0.0f, 1.0f);
+		alignas(16) FVector ambient = FVector(0.1f);
+		alignas(16) FVector diffuse = FVector(1.0f);
+		alignas(16) FVector specular = FVector(1.0f);
 	};
 
 	struct UBOFragment

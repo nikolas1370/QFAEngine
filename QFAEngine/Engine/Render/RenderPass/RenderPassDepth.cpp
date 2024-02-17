@@ -49,7 +49,7 @@ QFAVKRenderPassDepth::QFAVKRenderPassDepth()
     renderPassInfo.pAttachments = &depthAttachment;
     renderPassInfo.subpassCount = 1;
     renderPassInfo.pSubpasses = &subpass;
-    renderPassInfo.dependencyCount = dependencies.size();
+    renderPassInfo.dependencyCount = (uint32_t)dependencies.size();
     renderPassInfo.pDependencies = dependencies.data();
     
 

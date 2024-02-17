@@ -24,7 +24,7 @@ private:
 	void AddUnitToSortList(QFAUIUnit* unit);
 	void SortUIs(QFAViewportRoot* root);
 
-	void NewFrame(QFAViewportRoot* root, float mousePosX, float mousePosY, float delta);
+	void NewFrame(QFAViewportRoot* root, float mousePosX, float mousePosY, double delta);
 	QFAInput Input;
 
 	float ScrollValue = 0.0f;
@@ -41,7 +41,7 @@ private:
 
 	void FindUnitUnderFocus(QFAViewportRoot* root, QFAUIUnit*& unitUnderFocus, QFAUIScroll*& scrollUnit, float mousePosX, float mousePosY);
 
-	void ScrollEvent(QFAViewportRoot* root, QFAUIScroll* scrollUnit, float delta);
+	void ScrollEvent(QFAViewportRoot* root, QFAUIScroll* scrollUnit, double delta);
 	void FocusEvent(QFAUIUnit* unitUnderFocus);	
 	void MouseButtonEvent(QFAUIUnit* newUnitUnderFocus);
 };

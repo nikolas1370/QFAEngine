@@ -135,7 +135,7 @@ public:
     QFAText();
     ~QFAText();
 
-    void SetText(std::wstring  text);
+    void SetText(std::u32string  text);
 
     void SetTextSize(unsigned int height);
     /*----*/
@@ -176,7 +176,7 @@ private:
 
     ETextAlign TextAlign = ETextAlign::TALeft;
 
-    std::wstring  Text;
+    std::u32string  Text;
 
     unsigned int FontHeight = -1;// curent text height
     unsigned int CountGlyphInGUP = 100;

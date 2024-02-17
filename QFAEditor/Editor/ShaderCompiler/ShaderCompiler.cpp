@@ -77,7 +77,7 @@ void QFAShaderCompiler::ProcessShaders()
             int indexInList = -1; // -1 == need add file in list
 
             size_t last = QFAFileSystem::LastWriteTime(filePaths[i]);
-            for (size_t j = 0; j < sp.size(); j++)
+            for (int j = 0; j < (int)sp.size(); j++)
             {
                 if (sp[j].path == filePaths[i])
                 {

@@ -16,11 +16,11 @@ float QFAUIGrid::UpdateInnerHeight()
 	if (roowCount <= 0)
 		InnerHeight = 0;
 	else if (roowCount == 1)
-		InnerHeight = unitWidth * Ratio;
+		InnerHeight = (unsigned int)((float)unitWidth * Ratio);
 	else
-		InnerHeight = (unitWidth * Ratio) * roowCount + (roowCount - 1) * RowOffset;
+		InnerHeight = (unsigned int)(((float)unitWidth * Ratio) * roowCount + (roowCount - 1) * RowOffset);
 
-	return InnerHeight;
+	return (float)InnerHeight;
 }
 
 #define GetCountUnit(Width, MaxUnitSize) (unsigned int)ceill((float)(Width) / (MaxUnitSize))
@@ -35,7 +35,7 @@ int QFAUIGrid::GetSizeUnitAuto(int& columnCount)
 
 	int  offsetCount = (GetCountUnit(Width, MaxUnitSize + ColumnOffset) - 1);
 	int widthWithoutOffset = Width - ColumnOffset * offsetCount;
-	int unitWidth = GetSizeUnit(widthWithoutOffset, MaxUnitSize);
+	unsigned int unitWidth = GetSizeUnit(widthWithoutOffset, MaxUnitSize);
 	if (unitWidth >= MinUnitSize)
 	{
 		columnCount = GetCountUnit(widthWithoutOffset, MaxUnitSize);
@@ -76,10 +76,10 @@ void QFAUIGrid::ProcessChildPosition()
 		if (columnCount == 0)
 			roowCount++;
 
-		Children[i]->SetSizeParent(unitWidth, unitWidth * Ratio);
+		Children[i]->SetSizeParent((unsigned int)unitWidth, (unsigned int)((float)unitWidth * Ratio));
 		Children[i]->SetPositionParent(
-			Position_x + columnCount * (unitWidth + ColumnOffset),
-			Position_y + ((roowCount - 1) * (unitWidth * Ratio + RowOffset)));
+			Position_x + columnCount * (unitWidth + (int)ColumnOffset),
+			Position_y + (int)((float)(roowCount - 1) * ((float)unitWidth * Ratio + (float)RowOffset)));
 
 		columnCount++;
 		if (columnCount == maxColumnCount)

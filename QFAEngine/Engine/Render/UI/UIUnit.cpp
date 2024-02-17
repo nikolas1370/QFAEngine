@@ -59,7 +59,7 @@ void QFAUIUnit::ProcessParentOverflow(UniformOverflow& param, QFAUIParent* paren
     if (!parent)
         return;
 
-    FVector2D parentPosition = parent->GetPosition();
+    FVector2D parentPosition = FVector2D(parent->GetPosition());
     FVector2D parentSize = parent->GetSize();
 
     if (parent->GetOverflow() == QFAUIParent::Hidden)

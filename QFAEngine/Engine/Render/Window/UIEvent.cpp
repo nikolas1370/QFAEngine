@@ -72,10 +72,10 @@ void QFAUIEvent::SortUIs(QFAViewportRoot* root)
 	SortUIUnits.Clear();
 	for (size_t i = 0; i < root->Children.Length(); i++)
 		AddUnitToSortList(root->Children[i]);
-
-	for (int i = SortUIUnits.Length() - 2; i > 0; i--)
+	// don't replase int because in "i" can be minus value 
+	for (int i = (int)SortUIUnits.Length() - 2; i > 0; i--)
 	{
-		for (size_t j = 0; j <= i; j++)
+		for (int j = 0; j <= i; j++)
 		{ // in start of array number smaller
 			if (SortUIUnits[j]->ZIndex > SortUIUnits[j + 1]->ZIndex) // ZIndex forward == 1 
 			{
@@ -87,7 +87,7 @@ void QFAUIEvent::SortUIs(QFAViewportRoot* root)
 	}
 }
 
-void QFAUIEvent::NewFrame(QFAViewportRoot* root, float mousePosX, float mousePosY, float delta)
+void QFAUIEvent::NewFrame(QFAViewportRoot* root, float mousePosX, float mousePosY, double delta)
 {	
 	QFAUIUnit* unitUnderFocus = nullptr;
 	QFAUIScroll* scrollUnit = nullptr;
@@ -105,10 +105,10 @@ void QFAUIEvent::FindUnitUnderFocus(QFAViewportRoot* root, QFAUIUnit*& unitUnder
 		SortUIs(root);
 		for (size_t i = 0; i < SortUIUnits.Length(); i++)
 		{
-			float xStart = SortUIUnits[i]->Position_x;
-			float yStart = SortUIUnits[i]->Position_y;
-			float xEnd = SortUIUnits[i]->Position_x + SortUIUnits[i]->Width;
-			float yEnd = SortUIUnits[i]->Position_y + SortUIUnits[i]->Height;
+			float xStart = (float)SortUIUnits[i]->Position_x;
+			float yStart = (float)SortUIUnits[i]->Position_y;
+			float xEnd = (float)(SortUIUnits[i]->Position_x + SortUIUnits[i]->Width);
+			float yEnd = (float)(SortUIUnits[i]->Position_y + SortUIUnits[i]->Height);
 			QFAUIUnit::UniformOverflow over;
 			over.enable = 0;
 			over.leftTopX = 0;
@@ -150,7 +150,7 @@ void QFAUIEvent::FindUnitUnderFocus(QFAViewportRoot* root, QFAUIUnit*& unitUnder
 	}
 }
 
-void QFAUIEvent::ScrollEvent( QFAViewportRoot* root, QFAUIScroll* scrollUnit, float delta)
+void QFAUIEvent::ScrollEvent( QFAViewportRoot* root, QFAUIScroll* scrollUnit, double delta)
 {
 	if (scrollUnit && scrollUnit->Type == QFAUIType::Type::Scroll)
 		QFAUIScroll::NewFrame(scrollUnit, delta, root ? ScrollValue : 0.0f);

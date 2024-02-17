@@ -204,7 +204,7 @@ void QMeshBaseComponent::CreatePipeline()
 
 
 	std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
-	PipelineInfo.VertexInputInfo.VertexAttributeDescriptionCount = attributeDescriptions.size();
+	PipelineInfo.VertexInputInfo.VertexAttributeDescriptionCount = (uint32_t)attributeDescriptions.size();
 	attributeDescriptions[0].binding = 0;
 	attributeDescriptions[0].location = 0;
 	attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
@@ -227,7 +227,7 @@ void QMeshBaseComponent::CreatePipeline()
 	blendAttachments[0].BlendEnable = VK_FALSE;
 
 
-	PipelineInfo.ColorBlendState.attachmentCount = blendAttachments.size();
+	PipelineInfo.ColorBlendState.attachmentCount = (uint32_t)blendAttachments.size();
 	PipelineInfo.ColorBlendState.pAttachments = blendAttachments.data();
 
 	std::array<VkDynamicState, 2> dynamicStates =
@@ -236,7 +236,7 @@ void QMeshBaseComponent::CreatePipeline()
 		VK_DYNAMIC_STATE_SCISSOR
 	};
 	PipelineInfo.DynamicStates = dynamicStates.data();
-	PipelineInfo.DynamicStateCount = dynamicStates.size();
+	PipelineInfo.DynamicStateCount = (uint32_t)dynamicStates.size();
 
 
 	PipelineInfo.DepthStencil.DepthTestEnable = VK_TRUE;
@@ -268,12 +268,12 @@ void QMeshBaseComponent::CreatePipeline()
 	secondLayout[1].pImmutableSamplers = nullptr;
 	secondLayout[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-	DescriptorSetLayouts[0].BindingCount = firsLayout.size();
-	DescriptorSetLayouts[1].BindingCount = secondLayout.size();
+	DescriptorSetLayouts[0].BindingCount = (uint32_t)firsLayout.size();
+	DescriptorSetLayouts[1].BindingCount = (uint32_t)secondLayout.size();
 	DescriptorSetLayouts[0].Bindings = firsLayout.data();
 	DescriptorSetLayouts[1].Bindings = secondLayout.data();
 
-	PipelineInfo.DescriptorSetLayoutCount = DescriptorSetLayouts.size();
+	PipelineInfo.DescriptorSetLayoutCount = (uint32_t)DescriptorSetLayouts.size();
 	PipelineInfo.DescriptorSetLayouts = DescriptorSetLayouts.data();
 
 
@@ -317,7 +317,7 @@ void QMeshBaseComponent::CreateShadowPipline()
 		VK_DYNAMIC_STATE_DEPTH_BIAS
 	};
 	PipelineInfo.DynamicStates = dynamicStates.data();
-	PipelineInfo.DynamicStateCount = dynamicStates.size();
+	PipelineInfo.DynamicStateCount = (uint32_t)dynamicStates.size();
 
 
 	std::array< QFAVKPipeline::QFADescriptorSetLayout, 1> DescriptorSetLayouts;
@@ -328,10 +328,10 @@ void QMeshBaseComponent::CreateShadowPipline()
 	bindingsFragment[0].pImmutableSamplers = nullptr;
 	bindingsFragment[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
-	DescriptorSetLayouts[0].BindingCount = bindingsFragment.size();
+	DescriptorSetLayouts[0].BindingCount = (uint32_t)bindingsFragment.size();
 	DescriptorSetLayouts[0].Bindings = bindingsFragment.data();
 
-	PipelineInfo.DescriptorSetLayoutCount = DescriptorSetLayouts.size();
+	PipelineInfo.DescriptorSetLayoutCount = (uint32_t)DescriptorSetLayouts.size();
 	PipelineInfo.DescriptorSetLayouts = DescriptorSetLayouts.data();
 	
 	PipelineInfo.DepthStencil.DepthTestEnable = VK_TRUE;

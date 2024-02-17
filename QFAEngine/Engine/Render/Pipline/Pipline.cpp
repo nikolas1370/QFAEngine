@@ -9,8 +9,8 @@ std::vector<QFAVKPipeline::SShaderData> QFAVKPipeline::ShaderData;
 
 QFAVKPipeline::QFAVKPipeline(QFAPipelineCreateInfo& PipInfo)
 {  
-    const uint32_t* vertShaderCode;
-    const uint32_t* fragShaderCode;
+    const uint32_t* vertShaderCode = nullptr;
+    const uint32_t* fragShaderCode = nullptr;
     uint32_t stageCount = 0;
     
     VkShaderModule vertShaderModule{};    
@@ -297,7 +297,7 @@ void QFAVKPipeline::CreateSet(uint32_t groupIndex, QFADescriptorSetInfo* descrip
         stopExecute("failed to allocate descriptor sets!");
 
     Pools[groupIndex].ListSet.push_back(set);
-    UpdateSet(groupIndex, Pools[groupIndex].ListSet.size() - 1, descriptorInfo);
+    UpdateSet(groupIndex, (uint32_t)Pools[groupIndex].ListSet.size() - 1, descriptorInfo);
     GroupDescriptorPools[groupIndex].CountSetInLastPool++;
 }
 

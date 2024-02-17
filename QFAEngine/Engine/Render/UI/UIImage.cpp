@@ -148,35 +148,32 @@ void QFAUIImage::CreateTextProjectionSets()
 void QFAUIImage::ChangeQuad()
 {
     // left top
-    quad[0];
-    quad[0].textureX = 0;
-    quad[0].textureY = 0;
-    quad[0].x = Position_x;
-    quad[0].y = Position_y;
+    quad[0].textureX = 0.0f;
+    quad[0].textureY = 0.0f;
+    quad[0].x = (float)Position_x;
+    quad[0].y = (float)Position_y;
     quad[0].z = (float)ZIndex;
 
     // left bottom
-    quad[1].textureX = 0;
-    quad[1].textureY = 1;
-    quad[1].x = Position_x;
-    quad[1].y = Position_y + Height;
+    quad[1].textureX = 0.0f;
+    quad[1].textureY = 1.0f;
+    quad[1].x = (float)Position_x;
+    quad[1].y = (float)Position_y + Height;
     quad[1].z = (float)ZIndex;
 
 
     // right top
-    quad[2];
-    quad[2].textureX = 1;
-    quad[2].textureY = 0;
-    quad[2].x = Position_x + Width;
-    quad[2].y = Position_y;
+    quad[2].textureX = 1.0f;
+    quad[2].textureY = 0.0f;
+    quad[2].x = (float)(Position_x + Width);
+    quad[2].y = (float)Position_y;
     quad[2].z = (float)ZIndex;
 
     // right bottom
-    quad[3];
-    quad[3].textureX = 1;
-    quad[3].textureY = 1;
-    quad[3].x = Position_x + Width;
-    quad[3].y = Position_y + Height;
+    quad[3].textureX = 1.0f;
+    quad[3].textureY = 1.0f;
+    quad[3].x = (float)(Position_x + Width);
+    quad[3].y = (float)(Position_y + Height);
     quad[3].z = (float)ZIndex;
 
     quad[4] = quad[2];
@@ -265,7 +262,7 @@ void QFAUIImage::PrepareSet()
         return;
     }
 
-    for (size_t i = 0; i < ImageIndexs.size(); i++)
+    for (unsigned int i = 0; i < ImageIndexs.size(); i++)
     {
         if (!ImageIndexs[i].image)
         {
@@ -294,7 +291,7 @@ void QFAUIImage::PrepareSet()
     }
 
 
-    Index = ImageIndexs.size();
+    Index = (unsigned int)ImageIndexs.size();
     SImageIndex ii;
     ii.buffer = new QFAVKBuffer(sizeof(SImageParam), nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
     ii.bufferVertex = new QFAVKBuffer(sizeof(SImageVertexParam), nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
@@ -345,7 +342,7 @@ void QFAUIImage::CreatePipeline()
 
 
     std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
-    PipelineInfo.VertexInputInfo.VertexAttributeDescriptionCount = attributeDescriptions.size();
+    PipelineInfo.VertexInputInfo.VertexAttributeDescriptionCount = (uint32_t)attributeDescriptions.size();
     attributeDescriptions[0].binding = 0;
     attributeDescriptions[0].location = 0;
     attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT; // 
@@ -373,7 +370,7 @@ void QFAUIImage::CreatePipeline()
         VK_DYNAMIC_STATE_SCISSOR
     };
     PipelineInfo.DynamicStates = dynamicStates.data();
-    PipelineInfo.DynamicStateCount = dynamicStates.size();
+    PipelineInfo.DynamicStateCount = (uint32_t)dynamicStates.size();
 
 
     std::array< QFAVKPipeline::QFADescriptorSetLayout, 2> DescriptorSetLayouts;
@@ -402,12 +399,12 @@ void QFAUIImage::CreatePipeline()
     secondLayout[2].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
 
-    DescriptorSetLayouts[0].BindingCount = firsLayout.size();
-    DescriptorSetLayouts[1].BindingCount = secondLayout.size();
+    DescriptorSetLayouts[0].BindingCount = (uint32_t)firsLayout.size();
+    DescriptorSetLayouts[1].BindingCount = (uint32_t)secondLayout.size();
     DescriptorSetLayouts[0].Bindings = firsLayout.data();
     DescriptorSetLayouts[1].Bindings = secondLayout.data();
 
-    PipelineInfo.DescriptorSetLayoutCount = DescriptorSetLayouts.size();
+    PipelineInfo.DescriptorSetLayoutCount = (uint32_t)DescriptorSetLayouts.size();
     PipelineInfo.DescriptorSetLayouts = DescriptorSetLayouts.data();
 
     PipelineInfo.DepthStencil.DepthTestEnable = VK_TRUE;

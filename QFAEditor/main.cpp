@@ -118,7 +118,7 @@ int main()
 
     QFAText* text = new QFAText();
     QFAText* text_2 = new QFAText();
-    text_2->SetText(L"Viewport 1 supre test");
+    text_2->SetText(U"Viewport 1 supre test");
 
 
     text_2->SetPosition(0, 0);
@@ -128,7 +128,7 @@ int main()
 
     text->SetPosition(0, 25);
 
-    text->SetText(L"З'їли Їжака This tutorial will teach you the basics of using the Vulkan graphics and compute API. Vulkan is a new API by the Khronos group (known for OpenGL) that provides a much better abstraction of modern graphics cards. This new interface allows you to better describe what your application intends to do, which can lead to better performance and less surprising driver behavior compared to existing APIs like OpenGL and Direct3D. The ideas behind Vulkan are similar to those of Direct3D 12 and Metal, but Vulkan has the advantage of being fully cross-platform and allows you to develop for Windows, Linux and Android at the same time.");
+    text->SetText(U"З'їли Їжака This tutorial will teach you the basics of using the Vulkan graphics and compute API. Vulkan is a new API by the Khronos group (known for OpenGL) that provides a much better abstraction of modern graphics cards. This new interface allows you to better describe what your application intends to do, which can lead to better performance and less surprising driver behavior compared to existing APIs like OpenGL and Direct3D. The ideas behind Vulkan are similar to those of Direct3D 12 and Metal, but Vulkan has the advantage of being fully cross-platform and allows you to develop for Windows, Linux and Android at the same time.");
 
     text->Color = FVector(1, 0, 0.3f);
     text->Outline = false;
@@ -153,10 +153,10 @@ int main()
 
     ACameraActor* secondCamera = new ACameraActor();
     mainWorld->AddActor(secondCamera);
-    secondCamera->SetActorPosition(FVector(-609.397, -752.392, -4.68553));
-    secondCamera->SetActorRotation(FVector(0, -1.8, 49.5));
+    secondCamera->SetActorPosition(FVector(-609.397f, -752.392f, -4.68553f));
+    secondCamera->SetActorRotation(FVector(0.0f, -1.8f, 49.5f));
     QFAText* textViewPort2 = new QFAText();
-    textViewPort2->SetText(L"ViewPort 2");
+    textViewPort2->SetText(U"ViewPort 2");
     textViewPort2->SetTextSize(30);
     textViewPort2->SetPosition(0, 0);
 
@@ -240,7 +240,7 @@ int main()
     QFAEditorOverlord::StartLife();
 
 
-
+    
     return 0;
 }
 

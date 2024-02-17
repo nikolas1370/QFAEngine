@@ -215,13 +215,13 @@ public:
 
 	virtual ~QFAUIUnit();
 
-	inline FVector2D GetPosition() 
+	inline FVector2D GetPosition()
 	{
-		return FVector2D(Position_x, Position_y);
+		return FVector2D((float)Position_x, (float)Position_y);
 	}
 	FVector2D GetSize()
 	{
-		return FVector2D(Width, Height);
+		return FVector2D((float)Width, (float)Height);
 	}
 	/*
 		all posible slot searsh in namespace QFAUISlot

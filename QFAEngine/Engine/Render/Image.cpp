@@ -55,7 +55,7 @@ QFAImage::QFAImage(const std::u32string src)
     // stbi_load_16  stbi_load_from_memory
     QFAFile file;
     QFAFileSystem::LoadFile(src, &file);
-    stbi_uc* pixels = stbi_load_from_memory((const unsigned char*)file.GetData(), file.GetDataSize(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    stbi_uc* pixels = stbi_load_from_memory((const unsigned char*)file.GetData(), (int)file.GetDataSize(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
     VkDeviceSize imageSize = texWidth * texHeight * 4;
 
     if (!pixels)
@@ -109,8 +109,6 @@ void QFAImage::createImage(uint32_t width, uint32_t height, VkFormat format, VkI
     allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
     allocInfo.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
 
-
-    VmaAllocationInfo AllocationInfo;
     VkResult res = vmaCreateImage(QFAVKBuffer::allocator,
         &imageInfo,
         &allocInfo,

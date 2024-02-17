@@ -163,7 +163,7 @@ void QFAWindow::createCommandBuffer()
 	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	allocInfo.commandPool = commandPool;
 	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	allocInfo.commandBufferCount = comb.size();
+	allocInfo.commandBufferCount = (uint32_t)comb.size();
 
 	if (vkAllocateCommandBuffers(QFAVKLogicalDevice::GetDevice(), &allocInfo, comb.data()) != VK_SUCCESS)
 		stopExecute("failed to allocate command buffers!");
@@ -206,13 +206,13 @@ void QFAWindow::DrawUI()
 	QFAText::StartTextRender();
 	QFAVKPipeline* pipeline = nullptr;
 
-	for (size_t u = 0; u < Viewports.Length(); u++)
+	for (int u = 0; u < Viewports.Length(); u++)
 	{
 		VkViewport viewport{};
-		viewport.x = Viewports[u]->X;
-		viewport.y = Viewports[u]->Y;
-		viewport.width = Viewports[u]->Width;
-		viewport.height = Viewports[u]->Height;
+		viewport.x = (float)Viewports[u]->X;
+		viewport.y = (float)Viewports[u]->Y;
+		viewport.width = (float)Viewports[u]->Width;
+		viewport.height = (float)Viewports[u]->Height;
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 		vkCmdSetViewport(UICommandBuffer, 0, 1, &viewport); // can in start render viewport do 
@@ -282,10 +282,10 @@ void QFAWindow::SortUIs(QFAViewportRoot* root)
 	SortUIUnits.Clear();
 	for (size_t i = 0; i < root->Children.Length(); i++)
 		AddUnit(root->Children[i]);
-	
-	for (int i = SortUIUnits.Length() - 2; i > 0; i--)
+	// don't replase int because in "i" can be minus value 
+	for (int i = (int)SortUIUnits.Length() - 2; i > 0; i--)
 	{
-		for (size_t j = 0; j <= i; j++)
+		for (int j = 0; j <= i; j++)
 		{ // in start of array number bigger
 			if (SortUIUnits[j + 1]->ZIndex > SortUIUnits[j]->ZIndex) // ZIndex forward == 1 
 			{
@@ -357,10 +357,10 @@ void QFAWindow::DrawOffscreenBuffer()
 	vkCmdBeginRenderPass(MainWindow->FinisCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 	VkViewport viewport{};
-	viewport.x = 0;
-	viewport.y = 0;
-	viewport.width = Width;
-	viewport.height = Height;
+	viewport.x = 0.0f;
+	viewport.y = 0.0f;
+	viewport.width = (float)Width;
+	viewport.height = (float)Height;
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 	vkCmdSetViewport(MainWindow->FinisCommandBuffer, 0, 1, &viewport); // can in start render viewport do 
@@ -626,10 +626,11 @@ void QFAWindow::ProcessUIEvent()
 	double x;
 	double y;
 	glfwGetCursorPos(MainWindow->glfWindow, &x, &y);
-	for (int i = MainWindow->Viewports.Length() - 1; i >= 0; i--)
+	// don't replase int because in "i" can be minus value 
+	for (int i = (int)MainWindow->Viewports.Length() - 1; i >= 0; i--)
 	{
-		float xEnd = MainWindow->Viewports[i]->X + MainWindow->Viewports[i]->Width;
-		float yEnd = MainWindow->Viewports[i]->Y + MainWindow->Viewports[i]->Height;
+		float xEnd = (float)(MainWindow->Viewports[i]->X + MainWindow->Viewports[i]->Width);
+		float yEnd = (float)(MainWindow->Viewports[i]->Y + MainWindow->Viewports[i]->Height);
 		if (x >= MainWindow->Viewports[i]->X && y >= MainWindow->Viewports[i]->Y &&
 			x <= xEnd && y <= yEnd )
 		{
@@ -738,10 +739,10 @@ void QFAWindow::DrawActors(QFAViewport* _viewport, bool clear)
 	vkCmdBindPipeline(MainWindow->MeshCommandBuffers[ViewportProcess], VK_PIPELINE_BIND_POINT_GRAPHICS, QMeshBaseComponent::Pipeline->GetPipeline());
 
 	VkViewport viewport{};
-	viewport.x = _viewport->X;
-	viewport.y = _viewport->Y;
-	viewport.width = _viewport->Width;
-	viewport.height = _viewport->Height;
+	viewport.x = (float)_viewport->X;
+	viewport.y = (float)_viewport->Y;
+	viewport.width = (float)_viewport->Width;
+	viewport.height = (float)_viewport->Height;
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 	vkCmdSetViewport(MainWindow->MeshCommandBuffers[ViewportProcess], 0, 1, &viewport); // can in start render viewport do 
@@ -830,7 +831,7 @@ void QFAWindow::recordCommandBufferMesh(QMeshBaseComponent* mesh, bool shadow)
 
 		auto nextSets = mesh->GetNextSets();
 		vkCmdBindDescriptorSets(MeshCommandBuffers[ViewportProcess], VK_PIPELINE_BIND_POINT_GRAPHICS,
-			QMeshBaseComponent::Pipeline->GetPipelineLayout(), 0, nextSets.size(), nextSets.data(), 0, nullptr);
+			QMeshBaseComponent::Pipeline->GetPipelineLayout(), 0, (uint32_t)nextSets.size(), nextSets.data(), 0, nullptr);
 
 		vkCmdDrawIndexed(MeshCommandBuffers[ViewportProcess], static_cast<uint32_t>(mesh->GetIndexCount()), 1, 0, 0, 0);
 	}	

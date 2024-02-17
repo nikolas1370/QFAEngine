@@ -39,7 +39,7 @@ QFAVKTextRenderPass::QFAVKTextRenderPass(VkFormat swapChainImageFormat)
 
     VkSubpassDescription subpass{};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = colorAttachmentRefs.size();
+    subpass.colorAttachmentCount = (uint32_t)colorAttachmentRefs.size();
     subpass.pColorAttachments = colorAttachmentRefs.data();
     subpass.pDepthStencilAttachment = &depthAttachmentRef;
 

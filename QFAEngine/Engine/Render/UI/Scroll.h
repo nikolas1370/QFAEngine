@@ -19,17 +19,17 @@ private:
 	
 	
 	const float ScrollTime = 0.2f; 
-	float ScrollTimeToEnd = 0.0f;
+	double ScrollTimeToEnd = 0.0f;
 	float ScrollValue = 0.0f; // 
 	float ScrollValueToEnd = 0.0f;
 	float ScrollSpeed = 40.0f; // 40
-	const float Ratio = 1 / ScrollTime;
+	const double Ratio = 1 / ScrollTime;
 	/*	
 		value by which child be shifted relative to top this unit
 	*/
 	float ScrollValueFinal = 0.0f; 
 
-	void ProcessScroll(float delta, float addValue = 0.0f);
+	void ProcessScroll(double delta, float addValue = 0.0f);
 
 
 	void MySlotChange(QFAUIUnit* unit) override;
@@ -44,6 +44,6 @@ private:
 
 	static std::vector<QFAUIScroll*> Scrolls;
 	
-	static void NewFrame(QFAUIScroll* scrollUndeCursor, float delta, float addValue = 0.0f);
+	static void NewFrame(QFAUIScroll* scrollUndeCursor, double delta, float addValue = 0.0f);
 	float UpdateInnerHeight() override;
 };
