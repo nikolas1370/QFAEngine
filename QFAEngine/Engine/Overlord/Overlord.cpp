@@ -10,7 +10,7 @@
 #include <Input/Input.h>
 #include <Render/UI/Text.h>
 #include <Tools/File/FileSystem.h>
-
+#include <Windows.h>
 bool QFAOverlord::Life = false;
 bool QFAOverlord::isInit = false; 
 QFAWindow* QFAOverlord::Window = nullptr;
@@ -65,6 +65,9 @@ void QFAOverlord::MainLoop()
         QFAWindow::ProcessUIEvent();
         QWorld::ProcessTicks();
         QFAWindow::RenderWindow();
+
+        
+        //Sleep(16);
     }
     
 

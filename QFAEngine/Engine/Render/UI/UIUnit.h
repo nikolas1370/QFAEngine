@@ -14,7 +14,8 @@ namespace QFAUIType
 		ViewportRoot = 3,
 		Image = 4,
 		Grid = 5,
-		Scroll = 6
+		Scroll = 6,
+		TextInput = 7
 	};
 }
 

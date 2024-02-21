@@ -57,7 +57,8 @@ class QFAWindow
 	friend QFAText;; 
 	friend QFAUIImage;
 	friend QFAOverlord;
-	friend QMeshBaseComponent;
+	friend QMeshBaseComponent;	
+
 
 	static QFAWindow* MainWindow;
 	GLFWwindow* glfWindow;

@@ -72,7 +72,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Assimp\include;$(SolutionDir)..\freetype-master 2.13.2\include;$(SolutionDir)..\glfw-3.3.8\glfw-3.3.8.bin.WIN64\include;$(SolutionDir)..\glm;$(SolutionDir)QFAEngine/Engine;$(SolutionDir)..\stb;C:\VulkanSDK\1.3.275.0\Include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Assimp\include;$(SolutionDir)..\freetype-master 2.13.2\include;$(SolutionDir)..\glfw-3.3.9.bin.WIN64\include;$(SolutionDir)..\glm;$(SolutionDir)QFAEngine/Engine;$(SolutionDir)..\stb;C:\VulkanSDK\1.3.275.0\Include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>C:\Assimp\include;$(SolutionDir)..\freetype-master 2.13.2\include;$(SolutionDir)..\glfw-3.3.8\glfw-3.3.8.bin.WIN64\include;$(SolutionDir)..\glm;$(SolutionDir)QFAEngine/Engine;$(SolutionDir)..\stb;C:\VulkanSDK\1.3.275.0\Include;C:\Users\Juni\Desktop\QFAEngine Root\Shaderc\include\shaderc;$(IncludePath)</IncludePath>
@@ -108,7 +108,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
@@ -126,7 +126,7 @@
     </Link>
     <Lib>
       <AdditionalDependencies>vulkan-1.lib;glfw3.lib;assimp-vc143-mt.lib;freetype.lib;</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.275.0\Lib;$(SolutionDir)..\glfw-3.3.8\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\Assimp\lib\x64;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.275.0\Lib;$(SolutionDir)..\glfw-3.3.9.bin.WIN64\lib-vc2022;C:\Assimp\lib\x64;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
@@ -181,12 +181,14 @@
     <ClCompile Include="Engine\Render\UI\Canvas.cpp" />
     <ClCompile Include="Engine\Render\UI\Grid.cpp" />
     <ClCompile Include="Engine\Render\UI\Scroll.cpp" />
+    <ClCompile Include="Engine\Render\UI\TextInput.cpp" />
     <ClCompile Include="Engine\Render\UI\UIImage.cpp" />
     <ClCompile Include="Engine\Render\UI\RenderUnit.cpp" />
     <ClCompile Include="Engine\Render\UI\Text.cpp" />
     <ClCompile Include="Engine\Render\Time.cpp" />
     <ClCompile Include="Engine\Render\Buffer\IndexBuffer.cpp" />
     <ClCompile Include="Engine\Render\UI\UIParent.cpp" />
+    <ClCompile Include="Engine\Render\UI\UIParentHiddenChild.cpp" />
     <ClCompile Include="Engine\Render\UI\UIParentMultipleUnit.cpp" />
     <ClCompile Include="Engine\Render\UI\UIParentOneUnit.cpp" />
     <ClCompile Include="Engine\Render\UI\UIUnit.cpp" />
@@ -232,11 +234,13 @@
     <ClInclude Include="Engine\Render\UI\Canvas.h" />
     <ClInclude Include="Engine\Render\UI\Grid.h" />
     <ClInclude Include="Engine\Render\UI\Scroll.h" />
+    <ClInclude Include="Engine\Render\UI\TextInput.h" />
     <ClInclude Include="Engine\Render\UI\UIImage.h" />
     <ClInclude Include="Engine\Render\UI\RenderUnit.h" />
     <ClInclude Include="Engine\Render\UI\Text.h" />
     <ClInclude Include="Engine\Render\Time.h" />
     <ClInclude Include="Engine\Render\UI\UIParent.h" />
+    <ClInclude Include="Engine\Render\UI\UIParentHiddenChild.h" />
     <ClInclude Include="Engine\Render\UI\UIParentMultipleUnit.h" />
     <ClInclude Include="Engine\Render\UI\UIParentOneUnit.h" />
     <ClInclude Include="Engine\Render\UI\UIUnit.h" />

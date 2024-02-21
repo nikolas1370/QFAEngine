@@ -25,7 +25,15 @@ protected:
 
 	/*
 		write to shader
+		only one closest parent can write
 	*/
-	float UnitScroll = 0;
+	float UnitScroll = 0.0f; // offset y
+	
+	/*
+		only one closest parent can write
+		onli for text
+	*/
+	float UnitOffsetX = 0.0f;
+
 };
 

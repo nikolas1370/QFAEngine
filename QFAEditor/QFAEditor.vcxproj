@@ -74,7 +74,7 @@
     <IncludePath>C:\Assimp\include;C:\VulkanSDK\1.3.275.0\Include;C:\Users\Juni\Desktop\QFAEngine Root\QFAEngine\QFAEngine\Engine;C:\Users\Juni\Desktop\QFAEngine Root\glfw-3.3.8\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Assimp\include;C:\VulkanSDK\1.3.275.0\Include;C:\Users\Juni\Desktop\QFAEngine Root\QFAEngine\QFAEngine\Engine;C:\Users\Juni\Desktop\QFAEngine Root\glfw-3.3.8\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\glfw-3.3.9.bin.WIN64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Assimp\include;C:\VulkanSDK\1.3.275.0\Include;C:\Users\Juni\Desktop\QFAEngine Root\QFAEngine\QFAEngine\Engine;C:\Users\Juni\Desktop\QFAEngine Root\glfw-3.3.9\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -106,7 +106,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
@@ -115,7 +115,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\Juni\Desktop\QFAEngine Root\Shaderc\lib;$(SolutionDir)..\QFAEngine\x64\Debug;C:\VulkanSDK\1.3.275.0\Lib;$(SolutionDir)..\glfw-3.3.8\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\Assimp\lib\x64;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\Juni\Desktop\QFAEngine Root\Shaderc\lib;$(SolutionDir)..\QFAEngine\x64\Debug;C:\VulkanSDK\1.3.275.0\Lib;$(SolutionDir)..\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\Assimp\lib\x64;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);shaderc_sharedd.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

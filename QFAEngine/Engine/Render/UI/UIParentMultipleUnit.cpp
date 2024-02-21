@@ -4,7 +4,7 @@
 
 QFAUIParentMultipleUnit::QFAUIParentMultipleUnit()
 {
-
+	ParentType = EParentType::MultipleChild;
 }
 
 QFAUIParentMultipleUnit::~QFAUIParentMultipleUnit()

@@ -25,6 +25,7 @@ class QFAUIParent : public QFAUIUnit
 	friend QFAUIEvent;
 	friend QFAUIScroll;
 
+
 public:
 	enum EOverflow : unsigned char
 	{
@@ -34,9 +35,17 @@ public:
 		HiddenVertical = 3
 	};
 
-	
+	enum EParentType : unsigned char
+	{
+		NONEChild,
+		MultipleChild,
+		OneChild,
+		HiddenChild
+	};
 
 protected:
+
+
 	// child call if his slot change
 	virtual void MySlotChange(QFAUIUnit* unit) = 0;
 	/*
@@ -58,10 +67,14 @@ protected:
 
 	EOverflow Overflow = EOverflow::Visible;
 
+	/*	
+		parent call if need heve new InnerHeight
+		write new valude in this->InnerHeight and return it
+	*/
 	virtual float UpdateInnerHeight() = 0;
 
-	// if true parent can have one child
-	bool OneUnit = false;
+
+	EParentType ParentType = EParentType::NONEChild;
 
 
 	void SetSizeParent(unsigned int w, unsigned int h) final;
@@ -88,6 +101,11 @@ public:
 
 	void SetBackgroundImage(QFAImage* image);
 	void SetBackgroundColor(FVector4D color);
+
+	inline EParentType GetParentType()
+	{
+		return ParentType;
+	}
 protected:
 	EBackgroundType BackgroundType = EBackgroundType::BTNONE;
 	QFAUIImage BackgroundImage = QFAUIImage(nullptr);

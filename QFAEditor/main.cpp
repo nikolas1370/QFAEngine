@@ -27,51 +27,15 @@
 #include "Editor/EditorOverlord.h"
 #include <Render/UI/Grid.h>
 #include <Render/UI/Scroll.h>
-
-void LeftMouseDown(QFAUIUnit* unitUnderCursor, void* userData)
-{
-    QFAUIUnit* parent = (QFAUIUnit*)userData;
-    std::cout << "Left Down " << unitUnderCursor->UnitName << " Parent Name " << parent->UnitName << "\n";
-}
-
-void LeftMouseUp(QFAUIUnit* unitUnderCursor, void* userData)
-{
-    QFAUIUnit* parent = (QFAUIUnit*)userData;
-    std::cout << "Left Up " << unitUnderCursor->UnitName << " Parent Name " << parent->UnitName << "\n";
-}
-
-void LeftMouseDownUp(QFAUIUnit* unitUnderCursor, void* userData)
-{
-    QFAUIUnit* parent = (QFAUIUnit*)userData;
-    std::cout << "Left Down Up " << unitUnderCursor->UnitName << " Parent Name " << parent->UnitName << "\n";
-}
-
-void RightMouseDown(QFAUIUnit* unitUnderCursor, void* userData)
-{
-    QFAUIUnit* parent = (QFAUIUnit*)userData;
-    std::cout << "right Down " << unitUnderCursor->UnitName << " Parent Name " << parent->UnitName << "\n";
-}
-
-void RightMouseUp(QFAUIUnit* unitUnderCursor, void* userData)
-{
-    QFAUIUnit* parent = (QFAUIUnit*)userData;
-    std::cout << "right Up " << unitUnderCursor->UnitName << " Parent Name " << parent->UnitName << "\n";
-}
-
-void RightMouseDownUp(QFAUIUnit* unitUnderCursor, void* userData)
-{
-    QFAUIUnit* parent = (QFAUIUnit*)userData;
-    std::cout << "right Down Up" << unitUnderCursor->UnitName << " Parent Name " << parent->UnitName << "\n";
-}
-
+#include <Render/UI/TextInput.h>
 
 int main()
 {
     QFAEditorOverlord::Init();
 
-    QStaticMesh* Mesh = QFAModelLoader::LoadModel("SomeModel/Arrow.fbx");
-    QStaticMesh* Mesh2 = QFAModelLoader::LoadModel("SomeModel/quad2.obj");
-    QStaticMesh* Mesh3 = QFAModelLoader::LoadModel("SomeModel/anim/dore_1.obj");
+   // QStaticMesh* Mesh = QFAModelLoader::LoadModel("SomeModel/Arrow.fbx");
+    //QStaticMesh* Mesh2 = QFAModelLoader::LoadModel("SomeModel/quad2.obj");
+    //QStaticMesh* Mesh3 = QFAModelLoader::LoadModel("SomeModel/anim/dore_1.obj");
 
     QWorld* mainWorld = new QWorld();
 
@@ -82,13 +46,13 @@ int main()
     QActor* floorActor = new QActor();
     QActor* animActor = new QActor();
 
-    firstActor->SetRootComponent(Mesh2);
+    //firstActor->SetRootComponent(Mesh2);
 
-    Mesh->AttachComponent(Mesh3);
-    Mesh3->SetRelativePosition(FVector(0, 0, -100));
+    //Mesh->AttachComponent(Mesh3);
+    //Mesh3->SetRelativePosition(FVector(0, 0, -100));
 
 
-    secondActor->SetRootComponent(Mesh);
+    //secondActor->SetRootComponent(Mesh);
     secondActor->SetActorPosition(FVector(0, 0, -50));
     firstActor->SetActorPosition(FVector(0, 0, 100));
     secondActor->SetActorRotation(FVector(0, 0, 0));
@@ -117,6 +81,7 @@ int main()
 
 
     QFAText* text = new QFAText();
+    text->SetTextSize(30);
     QFAText* text_2 = new QFAText();
     text_2->SetText(U"Viewport 1 supre test");
 
@@ -127,8 +92,8 @@ int main()
     /*-----*/
 
     text->SetPosition(0, 25);
-
-    text->SetText(U"З'їли Їжака This tutorial will teach you the basics of using the Vulkan graphics and compute API. Vulkan is a new API by the Khronos group (known for OpenGL) that provides a much better abstraction of modern graphics cards. This new interface allows you to better describe what your application intends to do, which can lead to better performance and less surprising driver behavior compared to existing APIs like OpenGL and Direct3D. The ideas behind Vulkan are similar to those of Direct3D 12 and Metal, but Vulkan has the advantage of being fully cross-platform and allows you to develop for Windows, Linux and Android at the same time.");
+    // spaece respawn
+    text->SetText(U"З'їли jЇжака This tutorial will teach you the basics of using the Vulkan graphics and compute API. Vulkan is a new API by the Khronos group (known for OpenGL) that provides a much better abstraction of modern graphics cards. This new interface allows you to better describe what your application intends to do, which can lead to better performance and less surprising driver behavior compared to existing APIs like OpenGL and Direct3D. The ideas behind Vulkan are similar to those of Direct3D 12 and Metal, but Vulkan has the advantage of being fully cross-platform and allows you to develop for Windows, Linux and Android at the same time.");
 
     text->Color = FVector(1, 0, 0.3f);
     text->Outline = false;
@@ -139,7 +104,7 @@ int main()
 
 
 
-    // recoment
+    
     //firstdViewPort->AddUnit(text_2);
 
     text_2->SetSize(600, 300);
@@ -157,13 +122,13 @@ int main()
     secondCamera->SetActorRotation(FVector(0.0f, -1.8f, 49.5f));
     QFAText* textViewPort2 = new QFAText();
     textViewPort2->SetText(U"ViewPort 2");
-    textViewPort2->SetTextSize(30);
+    textViewPort2->SetTextSize(29);
     textViewPort2->SetPosition(0, 0);
 
     secondCamera->ActivateCamera(secondViewPort);
     mainWindow->AddViewport(secondViewPort);
     secondViewPort->SetParameters(0.5f, 0.66666f, 0.5f, 0.33333f);
-    secondViewPort->AddUnit(textViewPort2);
+  
 
 
 
@@ -203,40 +168,35 @@ int main()
     scrollGrid->SetBackgroundType(EBackgroundType::BTColor);
     scrollGrid->SetBackgroundColor(FVector4D(1, 0, 0, 0.5));
     
-    grid->AddUnit(UIDogy);
-    grid->AddUnit(UICrystal);
-    grid->AddUnit(UIHomy);
-    grid->AddUnit(scroll);    
-    grid->AddUnit(BackgroundColor); 
-    grid->AddUnit(UIhome_2);    
-
+    QFAUITextInput* textInput = new QFAUITextInput;
     
+    grid->AddUnit(UICrystal);
+    grid->AddUnit(UIDogy);
+    grid->AddUnit(UIHomy);
+     
+    grid->AddUnit(BackgroundColor); 
+    //grid->AddUnit(UIhome_2); 
+    grid->AddUnit(textInput);
+    grid->AddUnit(scroll);
+    
+
+    secondViewPort->AddUnit(textViewPort2);
     
     
 
     firstdViewPort->AddUnit(scrollGrid);
     scrollGrid->SetSize(500, 250);
 
-    
     grid->UnitName = "grid";
     UIDogy->UnitName = "Dogy";
     UICrystal->UnitName = "Crystal";
     UIHomy->UnitName = "Homy";
-    scroll->UnitName = "scroll"; 
+    scroll->UnitName = "scroll";
     BackgroundColor->UnitName = "BackgroundColor";
     UIhome_2->UnitName = "home_2";
     scrollGrid->UnitName = "scrollGrid";
-    
+    text->UnitName = "text in scroll";
 
-    
-    grid->Events.SetLeftMouseDown(LeftMouseDown, grid);
-    grid->Events.SetLeftMouseUp(LeftMouseUp, grid);
-    grid->Events.SetLeftMouseDownUp(LeftMouseDownUp, grid);
-
-    grid->Events.SetRightMouseDown(RightMouseDown, grid);
-    grid->Events.SetRightMouseUp(RightMouseUp, grid);
-    grid->Events.SetRightMouseDownUp(RightMouseDownUp, grid);
-    
     QFAEditorOverlord::StartLife();
 
 

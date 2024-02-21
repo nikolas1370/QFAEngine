@@ -19,6 +19,7 @@
 #include <Render/UI/UIParentMultipleUnit.h>
 #include <Render/Pipline/Pipline.h>
 #include <Render/UI/UIParentOneUnit.h>
+#include <Render/UI/UIParentHiddenChild.h>
 
 
 QFAWindow* QFAWindow::MainWindow = nullptr;
@@ -37,7 +38,7 @@ VkFormat QFAWindow::depthFormat =  VK_FORMAT_D32_SFLOAT;
 
 QFAWindow::QFAWindow(int width, int height, std::string name)
 {
-	UIEvent.Init(this);
+
 	
 	if (!QFAWindow::MainWindow)
 		QFAWindow::MainWindow = this;
@@ -47,6 +48,7 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	glfWindow = glfwCreateWindow(width, height, name.c_str(), NULL, NULL);
+	UIEvent.Init(this, glfWindow);
 	glfwSetWindowUserPointer(glfWindow, this);
 	glfwSetFramebufferSizeCallback(glfWindow, framebufferResizeCallback);
 
@@ -246,6 +248,17 @@ void QFAWindow::DrawUI()
 				}
 
 				((QFAUIParent*)SortUIUnits[i])->RenderBackground(UICommandBuffer);
+
+				if (((QFAUIParent*)SortUIUnits[i])->GetParentType() == QFAUIParent::HiddenChild)
+				{
+					if (pipeline != ((QFAParentHiddenChild*)SortUIUnits[i])->GetChildPipeline())
+					{
+						pipeline = ((QFAParentHiddenChild*)SortUIUnits[i])->GetChildPipeline();
+						vkCmdBindPipeline(UICommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetPipeline());
+					}
+
+					((QFAParentHiddenChild*)SortUIUnits[i])->RenderChild(UICommandBuffer);
+				}
 			}
 		}
 	}	
@@ -309,9 +322,11 @@ void QFAWindow::AddUnit(QFAUIUnit* unit)
 	if (unit->CanBeParent)
 	{
 		QFAUIParent* parent = (QFAUIParent*)unit;
-		if (parent->OneUnit)
+		if (parent->GetParentType() == QFAUIParent::EParentType::OneChild)
 			AddUnit(((QFAUIParentOneUnit*)unit)->Child);
-		else
+		else if (parent->GetParentType() == QFAUIParent::EParentType::OneChild)
+			AddUnit(((QFAParentHiddenChild*)parent)->GetChild());
+		else  if (parent->GetParentType() == QFAUIParent::EParentType::MultipleChild)
 		{
 			QFAUIParentMultipleUnit* parentMultiple = (QFAUIParentMultipleUnit*)unit;
 			for (size_t i = 0; i < parentMultiple->Children.Length(); i++)

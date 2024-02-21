@@ -19,6 +19,7 @@ layout(set = 1, binding = 1) uniform UniformBufferTextParam
     float leftTopY;
     float rightBottomX;
     float rightBottomY;
+    int pen;
 } textParam;
 
 
@@ -41,7 +42,11 @@ void main()
         }        
     }
 
-    
+    if(textParam.pen == 1 )
+    {
+        out_color = vec4(textParam.textColor.rgb, textParam. opacity);
+        return;
+    }
 
     int qw = int(round(AtlasIndex));
 

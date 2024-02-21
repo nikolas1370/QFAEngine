@@ -3,7 +3,7 @@
 
 QFAUIParentOneUnit::QFAUIParentOneUnit()
 {
-	OneUnit = true;
+	ParentType = EParentType::OneChild;
 }
 
 QFAUIParentOneUnit::~QFAUIParentOneUnit()

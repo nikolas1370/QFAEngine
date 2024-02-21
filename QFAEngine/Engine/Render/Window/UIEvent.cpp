@@ -4,6 +4,9 @@
 #include <Render/UI/Scroll.h>
 #include <functional>
 #include <Render/Time.h>
+#include <Render/UI/TextInput.h>
+
+QFAUIEvent::SEvent QFAUIEvent::MainEvent;
 
 QFAUIEvent::QFAUIEvent()
 {
@@ -13,9 +16,11 @@ QFAUIEvent::~QFAUIEvent()
 {
 }
 
-void QFAUIEvent::Init(QFAWindow* window)
+void QFAUIEvent::Init(QFAWindow* window, GLFWwindow* _glfWindow)
 {
 	Window = window;
+	glfWindow = _glfWindow;
+	MainEvent = { this, _glfWindow };
 	Input.SetWheelAxis([this](float axis)
 		{
 			this->ScrollValue = axis;			
@@ -41,7 +46,28 @@ void QFAUIEvent::Init(QFAWindow* window)
 			RightMouseUp = true;
 		});
 
+	glfwSetCharCallback(glfWindow, QFAUIEvent::CharCallback);
+	Input.AddKeyPress(EKey::LEFT, "left", [this](EKey::Key key)
+		{			
+			if (MainEvent.event->TextInput->IsValid())
+					MainEvent.event->TextInput->PenLeft();
+		});
+
+	Input.AddKeyPress(EKey::RIGHT, "right", [this](EKey::Key key)
+		{
+			if (MainEvent.event->TextInput->IsValid())
+				MainEvent.event->TextInput->PenRight();
+		});
+
+	Input.AddKeyPress(EKey::BACKSPACE, "BACKSPACE", [this](EKey::Key key)
+		{
+			if (MainEvent.event->TextInput->IsValid())
+				MainEvent.event->TextInput->RemoveChar();
+		});
 }
+
+
+
 
 void QFAUIEvent::AddUnitToSortList(QFAUIUnit* unit)
 {
@@ -54,14 +80,16 @@ void QFAUIEvent::AddUnitToSortList(QFAUIUnit* unit)
 	if (unit->CanBeParent)
 	{
 		QFAUIParent* parent = (QFAUIParent*)unit;
-		if (parent->OneUnit)
-			AddUnitToSortList(((QFAUIParentOneUnit*)unit)->Child);
-		else
+		if (parent->GetParentType() == QFAUIParent::EParentType::OneChild)
+			AddUnitToSortList(((QFAUIParentOneUnit*)unit)->Child);	
+		else if (parent->GetParentType() == QFAUIParent::EParentType::MultipleChild)
 		{
 			QFAUIParentMultipleUnit* parent = (QFAUIParentMultipleUnit*)unit;
 			for (size_t i = 0; i < parent->Children.Length(); i++)
 				AddUnitToSortList(parent->Children[i]);
-		}		
+		}// if parent type HiddenChild do nothing
+		else if (parent->GetParentType() != QFAUIParent::EParentType::HiddenChild)
+			stopExecute("QFAUIEvent::AddUnitToSortList undefined parent type");
 	}
 
 	SortUIUnits.Add(unit);// parent should add after children
@@ -96,6 +124,10 @@ void QFAUIEvent::NewFrame(QFAViewportRoot* root, float mousePosX, float mousePos
 	ScrollEvent(root, scrollUnit, delta);
 	FocusEvent(unitUnderFocus);
 	MouseButtonEvent(unitUnderFocus);
+
+	if (TextInput)
+		TextInput->NewFrame(delta);
+
 }
 
 void QFAUIEvent::FindUnitUnderFocus(QFAViewportRoot* root, QFAUIUnit*& unitUnderFocus, QFAUIScroll*& scrollUnit, float mousePosX, float mousePosY)
@@ -227,6 +259,8 @@ void QFAUIEvent::FocusEvent(QFAUIUnit* newUnitUnderFocus)
 
 void QFAUIEvent::MouseButtonEvent(QFAUIUnit* unitUnderFocus)
 {
+	InputFocusEvent(unitUnderFocus);
+	/* process mose press and release */	
 	if (LeftMouseDown)
 	{
 		LeftMouseDown = false;
@@ -270,4 +304,31 @@ void QFAUIEvent::MouseButtonEvent(QFAUIUnit* unitUnderFocus)
 
 		RightMouseUnit = nullptr;
 	}
+}
+
+void QFAUIEvent::InputFocusEvent(QFAUIUnit* newUnitUnderFocus)
+{
+	if (LeftMouseDown)
+	{
+		double x, y;
+		glfwGetCursorPos(glfWindow, &x, &y);
+		QFAUITextInput* oldInput = TextInput;
+		if (newUnitUnderFocus && newUnitUnderFocus->Type == QFAUIType::TextInput)
+		{
+			((QFAUITextInput*)newUnitUnderFocus)->InInputfocus(x, y);
+			TextInput = (QFAUITextInput*)newUnitUnderFocus;
+		}
+		else
+			TextInput = nullptr;
+
+		if (oldInput->IsValid() && oldInput != (QFAUITextInput*)newUnitUnderFocus)
+			oldInput->OutInputfocus();
+	}
+}
+
+void QFAUIEvent::CharCallback(GLFWwindow* window, unsigned int codepoint)
+{
+	if (MainEvent.glfWindow == window)
+		if (MainEvent.event->TextInput->IsValid())
+			MainEvent.event->TextInput->AddChar(codepoint);
 }

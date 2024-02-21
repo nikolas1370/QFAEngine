@@ -25,14 +25,14 @@ class QFAVKPipeline;
 
 class QFAVKImageView;
 class QFAVKTextureSampler;
-
+class QFAUITextInput;
 class QFAText : public QFAUIRenderUnit
 {
     friend QFAViewport;
     friend QFAOverlord;
     friend QFAWindow;
     friend QFAVKPipeline;
-
+    friend QFAUITextInput;
 
     struct SGlyphAtlasListRow
     {
@@ -44,14 +44,13 @@ class QFAText : public QFAUIRenderUnit
     {
         // add size between base line searsh in ttf lib and add it
 //unsigned int FontHeight; // value in FT_Set_Pixel_Sizes
-        //unsigned int symbol;// now only ascii
         float x; // start in atlass persent
         float y; // start in atlass persent
         float xEnd; // end in atlass persent
         float yEnd; // end in atlass persent
         unsigned int width;// count pixel in atlas
         unsigned int height;// count pixel in atlas            
-        int advance_x; // count pixel from left side to right side 
+        int advance_x; // count pixel from left side to right side
         int bitmap_left; // offset from leftbase line to first glyph pixel
         int bitmap_top; // offset from base line to last glyph pixel
         int bitmap_bottom; // offset base line to last glyph pixel (most positive or 0)
@@ -65,7 +64,13 @@ class QFAText : public QFAUIRenderUnit
         */
         float HeightMultiplier;
 
-        float ratio; // Width / Height
+        float ratio;
+        /*
+            difference between face->glyph->bitmap.width
+            before FT_Render_Glyph and after
+            necessary for calculate the position of the pen
+        */
+        float differenceWidth; 
     };
 
     struct Symbol
@@ -76,24 +81,24 @@ class QFAText : public QFAUIRenderUnit
 
     struct GlyphShaderVertex
     {
-        float x;
-        float y;
-        float z;
-        float texture_x;
-        float texture_y;
-        int AtlasNum;
+        float x ;
+        float y ;
+        float z ;
+        float texture_x = 0;
+        float texture_y = 0;
+        int AtlasNum = 0;
     };
 
     struct GlyphShader
     {
         /* first triangle */
+        GlyphShaderVertex leftTop_1;
         GlyphShaderVertex leftBottom_1;
         GlyphShaderVertex rightBottom_1;
-        GlyphShaderVertex rightTop_1;
         /* second triangle */
-        GlyphShaderVertex leftBottom_2;
-        GlyphShaderVertex rightTop_2;
         GlyphShaderVertex leftTop_2;
+        GlyphShaderVertex rightBottom_2;
+        GlyphShaderVertex rightTop_2;
     };
     struct PrepareData
     {
@@ -154,12 +159,13 @@ private:
     void updateUniformBuffer();
     void PrepareSymbolsToGpu();
     void ProcessText();
-    void AddGlyph(FT_ULong symbol);
+    static void AddGlyph(FT_ULong symbol);
 
-    static bool ReTextRender;
+
 
 
     void Render(VkCommandBuffer comandebuffer) override;
+    void RenderPen(VkCommandBuffer comandebuffer);
     static void StartTextRender();
 
 
@@ -171,17 +177,20 @@ private:
     bool TextChange;
 
     QFAVKVertexBuffer* vertexBufer;
+    static QFAVKVertexBuffer* PenVertexBufer;
 
     EOverflowWrap OverflowWrap = EOverflowWrap::OWWord;
 
-    ETextAlign TextAlign = ETextAlign::TALeft;
+    //ETextAlign TextAlign = ETextAlign::TALeft;
+    ETextAlign TextAlign = ETextAlign::TACenter;
+    
+    
 
-    std::u32string  Text;
 
     unsigned int FontHeight = -1;// curent text height
     unsigned int CountGlyphInGUP = 100;
-    unsigned int CountSymbolForRender = 0;
-
+    unsigned int CountSymbolForRender = 0; // replase to TextMetadata.size()
+    
 
     static QFAArray<Symbol> Symbols;
     static const unsigned int FontLoadCharHeight = 50;// 'j' == 47/50(Height) after render 62
@@ -201,9 +210,14 @@ private:
 
     static unsigned int CountGlyphInBuffer;
 
+    /*
+        use for all non textinput text
+        textinput have own exemplar
+    */
     static GlyphShader* GlyphInfoData;
-    // need for PrepareSymbolsToGpu, it symbol be process in GlyphShader
-    static QFAArray<PrepareData> SymbolsForRender;
+    
+    // not use directly get from TextMetadata
+    static QFAArray<PrepareData> SymbolsForRender_; // remove '_'
 
     static VkCommandPool commandPool;
 
@@ -216,6 +230,7 @@ private:
     static unsigned int MaxAttlas;
     static std::vector<SGlyphAtlas> GlyphAtlasList;
 
+    
     static VkDescriptorSet CurentDescriptorSet;
     static VkDescriptorSet CurentDescriptorSetProject;
 
@@ -238,6 +253,7 @@ private:
     static int maxTextInframe;
 
     static int NumberTextInFrame;
+    static const int MinNumberTextInFrame = 1;// zero index reserv fore pen set
     struct UniformBufferTextParam
     {
         alignas(16) FVector textColor;
@@ -245,11 +261,13 @@ private:
         alignas(16) FVector outlineColor;
         alignas(4) float opacity;
         UniformOverflow overflow;
+        int pen = 0;
     };
 
     struct UniformBufferTextParamVertex
     {
-        float offset;
+        float offset; 
+        float offsetX;
     };
 
     inline QFAVKPipeline* GetPipeline() override
@@ -257,6 +275,93 @@ private:
         return Pipeline;
     }
 
+protected:
+    struct SText
+    {
+        SText() {}
+        SText(std::u32string& string)
+        {
+            text = string;
+        }
+
+        std::u32string text;
+        char32_t* pText = nullptr; // need for textInput
+        size_t pTextSize = 0; // if pTextSize == 0 use std::u32string text
+        size_t maxSize;  // set in textInput
+        bool penEnable = false;
+        bool inputFocus = false; // if input have focus for text input
+        bool CanSeePen = false;
+        // symbol index when pan stay
+        unsigned int pen = 0; // carriage
+        inline size_t size()
+        {
+            return pTextSize == 0 ? text.size() : pTextSize;
+        }
+
+        inline char32_t operator[](size_t index) const
+        {
+            return pTextSize == 0 ? text[index] : pText[index];
+        }
+    };
+    SText Text;
+
+    /*    
+        store list symbol with metadata( struct PrepareData ) for second render step
+        and for calculate pen
+
+        for all non textinput text use one block memory
+        each textinput have own metadata block memory
+    */
+    struct STextMetadata
+    {// QFAArray<PrepareData> SymbolsForRender_;
+        friend QFAText;
+        bool onlyText = true; 
+        size_t count = 0;
+        PrepareData* inputData = nullptr;
+        inline size_t size()
+        {
+            return count;
+        }
+
+        inline PrepareData& operator[](size_t index) const
+        {
+            return onlyText ? SymbolsForRender_[index] : inputData[index];
+        }
+
+        void Add(PrepareData pd)
+        {
+            if (onlyText)
+                SymbolsForRender_.Add(pd);
+            else
+                inputData[count] = pd;
+
+            count++;
+        }
+
+        void Clear()
+        {
+            count = 0;
+            if (onlyText)
+                SymbolsForRender_.Clear();
+        }
+    };
+
+    
+    STextMetadata TextMetadata;
+    unsigned int countTextRow = 0;
+
+    void GetPenPosition(QFAText::GlyphShader& gs);
+    void WritePenInfo();
+
+    UniformBufferTextParam TextUniformParam;
+    static VkDescriptorSet PenDescriptorSet;
+    // set pointer to input text
+    void SetInputText(char32_t* pText, size_t pTextSize, size_t maxSize);
+
+
 };
-
-
+/*
+float tem = ((float)FontHeight / (float)FontLoadCharHeight);
+if (Symbols[SymbolsForRender[Text.pen - 1].symbolIndex].symbol == U' ')
+    std::cout << Symbols[SymbolsForRender[Text.pen - 1].symbolIndex].Glyph.advance_x * tem << "\n";
+*/
