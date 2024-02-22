@@ -75,7 +75,7 @@
     <IncludePath>C:\Assimp\include;$(SolutionDir)..\freetype-master 2.13.2\include;$(SolutionDir)..\glfw-3.3.9.bin.WIN64\include;$(SolutionDir)..\glm;$(SolutionDir)QFAEngine/Engine;$(SolutionDir)..\stb;C:\VulkanSDK\1.3.275.0\Include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Assimp\include;$(SolutionDir)..\freetype-master 2.13.2\include;$(SolutionDir)..\glfw-3.3.8\glfw-3.3.8.bin.WIN64\include;$(SolutionDir)..\glm;$(SolutionDir)QFAEngine/Engine;$(SolutionDir)..\stb;C:\VulkanSDK\1.3.275.0\Include;C:\Users\Juni\Desktop\QFAEngine Root\Shaderc\include\shaderc;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Assimp\include;$(SolutionDir)..\freetype-master 2.13.2\include;$(SolutionDir)..\glfw-3.3.9.bin.WIN64\include;$(SolutionDir)..\glm;$(SolutionDir)QFAEngine/Engine;$(SolutionDir)..\stb;C:\VulkanSDK\1.3.275.0\Include;$(IncludePath)</IncludePath>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -134,7 +134,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -147,6 +147,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -157,7 +158,7 @@
     </Link>
     <Lib>
       <AdditionalDependencies>vulkan-1.lib;glfw3.lib;assimp-vc143-mt.lib;freetype.lib;shaderc_shared.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.275.0\Lib;$(SolutionDir)..\glfw-3.3.8\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\Assimp\lib\x64;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.275.0\Lib;$(SolutionDir)..\glfw-3.3.9.bin.WIN64\lib-vc2022;C:\Assimp\lib\x64;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>

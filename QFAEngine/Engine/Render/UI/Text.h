@@ -181,11 +181,8 @@ private:
 
     EOverflowWrap OverflowWrap = EOverflowWrap::OWWord;
 
-    //ETextAlign TextAlign = ETextAlign::TALeft;
-    ETextAlign TextAlign = ETextAlign::TACenter;
-    
-    
-
+    ETextAlign TextAlign = ETextAlign::TALeft;
+   
 
     unsigned int FontHeight = -1;// curent text height
     unsigned int CountGlyphInGUP = 100;

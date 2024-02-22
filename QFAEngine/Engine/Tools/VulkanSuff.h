@@ -19,5 +19,6 @@ while (true);   \
     ASSERT(GLLogCall(#x, __FILE__, __LINE__)) 
 
 
-
+// delay in millisecond
+void QFASleep(float delay);
 

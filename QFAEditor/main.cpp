@@ -169,6 +169,7 @@ int main()
     scrollGrid->SetBackgroundColor(FVector4D(1, 0, 0, 0.5));
     
     QFAUITextInput* textInput = new QFAUITextInput;
+    textInput->SetBackgroundImage(OldWell);
     
     grid->AddUnit(UICrystal);
     grid->AddUnit(UIDogy);

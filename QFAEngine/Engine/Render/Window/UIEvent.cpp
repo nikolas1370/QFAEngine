@@ -127,7 +127,6 @@ void QFAUIEvent::NewFrame(QFAViewportRoot* root, float mousePosX, float mousePos
 
 	if (TextInput)
 		TextInput->NewFrame(delta);
-
 }
 
 void QFAUIEvent::FindUnitUnderFocus(QFAViewportRoot* root, QFAUIUnit*& unitUnderFocus, QFAUIScroll*& scrollUnit, float mousePosX, float mousePosY)
@@ -186,6 +185,8 @@ void QFAUIEvent::ScrollEvent( QFAViewportRoot* root, QFAUIScroll* scrollUnit, do
 {
 	if (scrollUnit && scrollUnit->Type == QFAUIType::Type::Scroll)
 		QFAUIScroll::NewFrame(scrollUnit, delta, root ? ScrollValue : 0.0f);
+	else
+		QFAUIScroll::NewFrame(nullptr, delta, 0.0f);
 
 	ScrollValue = 0;
 }

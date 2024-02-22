@@ -11,6 +11,7 @@
 #include <Render/UI/Text.h>
 #include <Tools/File/FileSystem.h>
 #include <Windows.h>
+#include <Tools/VulkanSuff.h>
 bool QFAOverlord::Life = false;
 bool QFAOverlord::isInit = false; 
 QFAWindow* QFAOverlord::Window = nullptr;
@@ -29,19 +30,7 @@ bool QFAOverlord::StartLife()
 	return true;
 }
 
-
-
-void QFAOverlord::EndLife()
-{
-    Life = false;    
-    
-    QFAFile::EndLife();
-    QFAText::EndLife();
-    //QFAVKBuffer::EndLife();  nee dele all buffer and image before call
-    glfwTerminate(); 
-    
-}
-
+#pragma comment(lib, "Winmm.lib")  // for timeBeginPeriod , timeEndPeriod
 bool QFAOverlord::Init(std::vector<QFAVKPipeline::SShaderData> shaderData)
 {
     QTime::Init();    
@@ -50,26 +39,58 @@ bool QFAOverlord::Init(std::vector<QFAVKPipeline::SShaderData> shaderData)
     Window = new QFAWindow(DefaultWidth, DefaultHeight, "QFA");    
     QFAInput::Init(Window->glfWindow);
 
+    timecaps_tag ptc{};
+    timeGetDevCaps(
+        &ptc,
+        sizeof(LPTIMECAPS)
+    );// before window 10 version 2004 timeBeginPeriod use for whole system
+    timeBeginPeriod(ptc.wPeriodMin); // for Sleep
+
     isInit = true;
     return true;
 }
 
+void QFAOverlord::EndLife()
+{
+    Life = false;
+
+    QFAFile::EndLife();
+    QFAText::EndLife();
+    //QFAVKBuffer::EndLife();  nee dele all buffer and image before call
+    glfwTerminate();
+
+    timecaps_tag ptc{};
+    timeGetDevCaps(
+        &ptc,
+        sizeof(LPTIMECAPS)
+    );
+    timeEndPeriod(ptc.wPeriodMin); // need call after timeBeginPeriod
+}
+
+
+
+
 void QFAOverlord::MainLoop()
 {
+    const float frameCount = 60.0f;
+    const float frameTime = 1000 / frameCount;
+    bool limit = true;
+
     while (!Window->ShouldClose() && Life)
     {
-
-        QTime::CalcDeltaTime();        
+        auto t = QTime::GetSystemTime();
+        QTime::CalcDeltaTime();
         glfwPollEvents();
-        QFAInput::NewFrame((float)QTime::GetDeltaTime());        
+        QFAInput::NewFrame((float)QTime::GetDeltaTime());
         QFAWindow::ProcessUIEvent();
         QWorld::ProcessTicks();
         QFAWindow::RenderWindow();
 
-        
-        //Sleep(16);
-    }
-    
+        float timePassed = (float)(QTime::GetSystemTime() - t) / 10000.0f;
+        if(limit && timePassed < frameTime)
+            QFASleep(frameTime - timePassed);
+    }    
+
 
     if (Life)
         QFAOverlord::EndLife();

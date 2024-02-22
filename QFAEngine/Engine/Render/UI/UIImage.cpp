@@ -40,6 +40,8 @@ void QFAUIImage::Render(VkCommandBuffer comandebuffer)
         return;
     } 
 
+    UpdateUniforms();
+
     VkDescriptorSet CurentDescriptorSet = Pipeline->GetSet(1, Index);    
 
     VkBuffer vertexBuffers[] = { vertexBufer->GpuSideBuffer->Buffer };

@@ -136,6 +136,8 @@ void QFAUITextInput::PenLeft()
 	{
 		Text.Text.pen--;
 		UpdateUnitOffset();
+		PenTime = MaxPenTime;
+		Text.Text.CanSeePen = true;
 	}
 }
 
@@ -145,6 +147,8 @@ void QFAUITextInput::PenRight()
 	{
 		Text.Text.pen++;
 		UpdateUnitOffset();
+		PenTime = MaxPenTime;
+		Text.Text.CanSeePen = true;
 	}
 }
 
