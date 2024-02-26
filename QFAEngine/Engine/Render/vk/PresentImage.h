@@ -35,22 +35,22 @@ class QFAPresentImage
 public:
   
 
-    QFAPresentImage(VkCommandPool _commandPool);
+    QFAPresentImage(VkCommandPool _commandPool, VkRenderPass renderPass, QFAImage* image, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT);
     ~QFAPresentImage();
 
 
 private: 
-    void Init(VkRenderPass renderPass, VkCommandPool commandPool, QFAImage* imago, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT);
+    
     static void EndLife();
 
     
 
     QFAVKVertexBuffer* vertexBufer;
-    static QFAVKPipeline* Pipeline;
+    QFAVKPipeline* Pipeline; // one QFAPresentImage one pipeline
     static VkCommandPool commandPool;
     static QFAVKTextureSampler* ImageSampler;
-    static VkRenderPass RenderPass;
-    static QFAImage* image;
+
+
 
     static std::array< VkDescriptorImageInfo, 1> imageInfos;
     QFAVKImageView* view;

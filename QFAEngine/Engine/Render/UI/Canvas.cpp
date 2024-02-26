@@ -28,8 +28,6 @@ void QFAUICanvas::NewUnit(QFAUIUnit* unit)
 
 	unit->SetPositionParent((int)(slot->x * (float)Width + (float)Position_x),
 							(int)(slot->y * (float)Height + (float)Position_y));
-	unit->SetSizeParent((int)(slot->Width * (float)Width),
-						(int)(slot->Height * (float)Height));
 }
 
 void QFAUICanvas::MySlotChange(QFAUIUnit* unit)

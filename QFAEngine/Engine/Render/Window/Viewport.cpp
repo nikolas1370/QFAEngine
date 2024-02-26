@@ -11,6 +11,16 @@
 
 const float QFAViewport::MinMaxZIndexUI = 1000.0f;
 
+std::vector<QFAVKBuffer*> QFAViewport::MeshVertexBuffers;
+
+QWorld* QFAViewport::GetWorld()
+{
+	if (CurentCamera->IsValid())
+		return CurentCamera->GetWorld();
+	else
+		return nullptr;
+}
+
 void QFAViewport::WindowAddMe(QFAWindow* window)
 {
 	Window = window;	
@@ -74,15 +84,12 @@ inline void QFAViewport::ActivateCamera()
 
 void QFAViewport::DeactivateCamera()
 {	
-	Root.ParentDisable();
+
 }
 
 void QFAViewport::CameraChangeParameter(int param)
 {	
-	if (param == 1)
-		Root.ParentEnable();
-	else if(param == 2)		
-		Root.ParentDisable();
+
 }
 
 void QFAViewport::ChangeCamera(QCameraComponent* camera)
@@ -90,28 +97,16 @@ void QFAViewport::ChangeCamera(QCameraComponent* camera)
 	CurentCamera = camera;
 	if (CurentCamera->IsValid())
 	{
-		CurentCamera->Viewport = this;		
+		CurentCamera->Viewport = this;
 		MatrixPerspective = glm::perspectiveLH_ZO(glm::radians(CurentCamera->Fov),
 			(float)Width / (float)Height, 0.1f, CurentCamera->ViewDistance);
-
-		if (CurentCamera->IsActive)
-		{
-			if (Window)
-				Root.ParentEnable();
-		}
-		else
-			Root.ParentDisable();
-				
 	}
-	else
-		Root.ParentDisable();
+
+
 }
 
 void QFAViewport::SetParameters(float xP, float  yP, float widthP, float heightP)
 {
-	
-		
-
 	XP = xP;
 	YP = yP;
 	WidthP = widthP;
@@ -124,12 +119,11 @@ void QFAViewport::SetParameters(float xP, float  yP, float widthP, float heightP
 	if (Height == 0)
 		Height = 1;
 
+	// need change if camera not set
+	UIProjection = glm::orthoLH_ZO(0.0f, (float)Width, 0.0f, (float)Height, QFAViewport::MinMaxZIndexUI * -1, QFAViewport::MinMaxZIndexUI);
 	if (!CurentCamera)
 		return;
-
-	UIProjection = glm::orthoLH_ZO(0.0f, (float)Width, 0.0f, (float)Height, QFAViewport::MinMaxZIndexUI * -1, QFAViewport::MinMaxZIndexUI);
+	
 	MatrixPerspective = glm::perspectiveLH_ZO(glm::radians(CurentCamera->Fov),
-		(float)Width / (float)Height, 0.1f, CurentCamera->ViewDistance); 
-
-
+		(float)Width / (float)Height, 0.1f, CurentCamera->ViewDistance);
 }

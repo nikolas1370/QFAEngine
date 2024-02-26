@@ -51,6 +51,7 @@ class QFAText;
 class QFAUIUnit;
 class QFAUIImage;
 class QFAVKRenderPassSwapChain;
+class QFAInput;
 class QFAWindow
 {
 
@@ -58,96 +59,119 @@ class QFAWindow
 	friend QFAUIImage;
 	friend QFAOverlord;
 	friend QMeshBaseComponent;	
+	friend QFAInput;
+	friend QFAVKSwapChain;
+	friend QFAImage;
+	friend QWorld;
 
-
-	static QFAWindow* MainWindow;
+	static std::vector<QFAWindow*> Windows;
+	//static QFAWindow* MainWindow;
+	static QFAWindow* CurentProcessWindow;
 	GLFWwindow* glfWindow;
 	
-	static bool Init;
+
 	int Width;
 	int Height;
 	int NewHeight;
 	int NewWidth;
 	bool WindowSizeChanched = false;
-	QFAVKInstance*Instance;
+	//static QFAVKInstance*Instance;
+	static QFAVKInstance* Instance;
 	VkSurfaceKHR surface;	
 	QFAVKSwapChain *SwapChain;
-	QFAVKRenderPassSwapChain* RenderPassSwapChain;
-	QFAVKRenderPass* RenderPass;
-	QFAVKRenderPassDepth* RenderPassOffScreen;
 
-	QFAVKTextRenderPass* TextRenderPass;
 
-	int countFarame;
-	double acumulateDeltatime;
-	
+	static QFAVKRenderPassSwapChain* RenderPassSwapChain;
+	static QFAVKRenderPass* RenderPass;
+	static QFAVKRenderPassDepth* RenderPassOffScreen;
+	static QFAVKTextRenderPass* TextRenderPass;
+
+
 
 
 	QFAArray<QFAViewport*> Viewports;
 
-
+	// call Overloed
 	static void ProcessUIEvent();
 	void StartFrame();
 	
 
 	bool framebufferResized = false;
-	static void RenderWindow();	
-
-
-	/*----*/
-	QFAImage* imagu;
-
-
-	//VkImage swapChainImages;
-	VkImageView swapChainImageViews; /// color image
-
-
-
-	// VkImage ;
-
+	// call Overlord
+	static void RenderWindows();
+	void RenderWindow(bool lastWindow);
 
 public:
-	static const int MaxActiveViewPort = 10;
-	unsigned int ViewportProcess = 0;
+	/*
+	
+	
+	убрать
+	
+	
+	*/
+	//static const int MaxActiveViewPort = 10;
+
+	
+
 	
 private:
-	
-	QFAVKShadowFrameBuffer* ShadowFrameBuffer;
-
+	static int ViewportProcess;
+	// all windows use same ShadowFrameBuffer
+	static QFAVKShadowFrameBuffer* ShadowFrameBuffer;
+	static QFAVKImageView* ShadowImagesView;
+	static QFAVKTextureSampler* ShadowSampler;
+	static VkFormat depthFormat; // VK_FORMAT_D32_SFLOAT
 
 	void ShadowRender(QFAViewport* viewport);
 
 	/*----*/
 
-	VkCommandPool commandPool;
+	static VkCommandPool commandPool;
 
+	struct SViewportSemi
+	{
+		VkSemaphore Actor;
+		VkSemaphore ActorShadow;
+		VkSemaphore Ui;
+	};
+	struct SViewportComandBuffer
+	{
+		VkCommandBuffer ActorShadow;
+		VkCommandBuffer Actor;
+		VkCommandBuffer Ui;
+	};
 
-	VkSemaphore GetImageSemaphore;	
-	std::array<VkSemaphore, QFAWindow::MaxActiveViewPort> ActorFinishedSemi;
-	std::array<VkPipelineStageFlags, QFAWindow::MaxActiveViewPort> ActorFinishedSemiFlags;
-	std::array<VkSemaphore, QFAWindow::MaxActiveViewPort> ActorShadowFinishedSemi;
-	VkSemaphore UISemaphore;
+	struct SViewportBuffers
+	{   // this buffer attach to text/image pipline sets0 
+		QFAVKBuffer* uiProjectionBuffer;
+		// this buffer attach to mesh pipline sets0 
+		QFAVKBuffer* worldProjectionBuffer;
+		QFAVKBuffer* shadowBuffer;
+	};
 
+	struct SViewportStuff
+	{
+		SViewportSemi semaphore;
+		SViewportComandBuffer comandBuffer;
+		SViewportBuffers buffers;
+	};
 
-	VkSemaphore FinisSemaphore;
-
-	std::array<VkCommandBuffer, QFAWindow::MaxActiveViewPort> ShadowCommandBuffers;
-	std::array<VkCommandBuffer, QFAWindow::MaxActiveViewPort> MeshCommandBuffers;
-	VkCommandBuffer UICommandBuffer;
-	VkCommandBuffer FinisCommandBuffer;
-	
 	/*
-	ActorFinishedSemaphore  redu in DrawText
-	
+		this use only for viewports in windows.
+		In process of drawing when execute RenderWindow
 	*/
+	static std::vector<SViewportStuff> ViewportStuff;
+	VkSemaphore FinisSemaphore;
+	VkSemaphore FinisSemiOtherWindow;
+	VkSemaphore GetImageSemaphore;
+	VkCommandBuffer FinisCommandBuffer;
 
-	static VkSemaphore imageAvailableSemaphore; 
-	static VkSemaphore renderFinishedSemaphores;
 
+	//std::array<SViewportBuffers, MaxActiveViewPort> ViewportBuffers;
 
-	static VkSemaphore imageAvailableSemaphoreMesh;
-	static VkSemaphore renderFinishedSemaphoresMesh;
+	void CreateViewPortStuff();
 
+	bool NeedClose = false;
 public:
 	QFAWindow(int width, int height, std::string name);
 	~QFAWindow();
@@ -167,13 +191,37 @@ public:
 	}
 	inline bool ShouldClose()
 	{
-		return glfwWindowShouldClose(glfWindow);
+		return glfwWindowShouldClose(glfWindow) || NeedClose;
 	}
 
+
+	/*
+	
+	закоментуй і дивись
+	
+	*/
 	inline static QFAWindow* GetMainWindow()
 	{
-		return MainWindow;
+		return Windows[0];
 	}
+	
+
+	inline void Close()
+	{
+		NeedClose = true;
+	}
+
+	/*
+		returns position of cursor, in window coordinates,
+		relative to the upper-left corner of the content 
+		area of the specified window.		
+
+		return true if mouse on window
+		return false if mouse out window
+	*/
+	bool GetMousePosition(double& x, double& y);
+
+
 private:
 	uint32_t imageIndex; // next image in sqp shain
 	
@@ -181,16 +229,15 @@ private:
 	
 	void recreateSwapChain();
 
-	void DrawActors(QFAViewport* viewport, bool clear);
-	void recordCommandBufferMesh(QMeshBaseComponent* text, bool shadow);
+	void DrawActors(QFAViewport* viewport, bool clear, int viewportIndex);
 
 	unsigned int ProcessMeshComponent(QSceneComponent* component, bool shadow);
 
 
-	void DrawUI();
+	void DrawUI(QFAViewport* viewport, int viewportIndex);
 
 
-	void DrawOffscreenBuffer();
+	void DrawOffscreenBuffer(bool lastWindow);
 	void recordCommandBufferTestImege();
 
 
@@ -201,7 +248,7 @@ private:
 	void PresentFrame();
 	
 
-	QFAPresentImage* imugo;
+	QFAPresentImage* PresentImage;
 
 	/*----*/
 
@@ -214,11 +261,9 @@ private:
 
 
 
-	void StartUIRenderViewPort( int viewportIndex);
+	void StartUIRenderViewPort(int viewportIndex);
 public:
-	QFAVKImageView* ShadowImagesView;
-	QFAVKTextureSampler* ShadowSampler;
-	static VkFormat depthFormat; // VK_FORMAT_D32_SFLOAT
+
 private:
 	const float shadowResolution = 2000;
 	// VkFormat
@@ -226,22 +271,18 @@ private:
 
 
 
-	QFAVKMeshFrameBuffer* frameBufferMesh; // ont only mesh
+	QFAVKMeshFrameBuffer* frameBuffer; 
 
 	/*---*/
 	
-	QFAImage* ShadowImage;
+	static QFAImage* ShadowImage;
 	
 	
 
-	struct SViewportBuffers
-	{
-		QFAVKBuffer* uiProjectionBuffer;
-	};
-	std::array<SViewportBuffers, MaxActiveViewPort> ViewportBuffers;
+	
 
 	void CreateShadow();
-	void CreateViewtortsBuffers();
+
 
 	FVector CurentCameraPosition;
 
@@ -251,5 +292,14 @@ private:
 	void SortUIs(QFAViewportRoot* root);
 	void AddUnit(QFAUIUnit* unit);
 
-	QFAUIEvent UIEvent;
+	QFAUIEvent *UIEvent;
+
+	bool CursorOnWindow = false;
+
+
+	VkCommandBuffer CurentComandBuffer = nullptr;
+
+	static VkSemaphore* NextWaitSemi;
+
+
 };

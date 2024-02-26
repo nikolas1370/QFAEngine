@@ -1,6 +1,6 @@
 #pragma once
 #include <Math/Math.h>
-
+#include <Object/World/World.h>
 #include <Tools/Array.h>
 #include <Render/Window/QFAViewportRoot.h>
 class QCameraComponent;
@@ -88,11 +88,30 @@ public:
 	}
 
 	static const float MinMaxZIndexUI;
+
+	inline QFAWindow* GetWindow()
+	{
+		return Window;
+	}
 	
+	
+	QWorld* GetWorld();
+
+	inline QFAViewportRoot* GetRoot()
+	{
+		return &Root;
+	}
+
 protected:
 
 
 
 	void WindowAddMe(QFAWindow* window);
 	void WindowRemoveMe();
+
+	/*
+		in this buffer store  QMeshBaseComponent::UBOVertex
+		use for render mesh
+	*/
+	static std::vector<QFAVKBuffer*> MeshVertexBuffers;
 };

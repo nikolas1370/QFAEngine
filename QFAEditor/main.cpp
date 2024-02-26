@@ -29,30 +29,36 @@
 #include <Render/UI/Scroll.h>
 #include <Render/UI/TextInput.h>
 
+
 int main()
 {
+
+
+
+
     QFAEditorOverlord::Init();
 
-   // QStaticMesh* Mesh = QFAModelLoader::LoadModel("SomeModel/Arrow.fbx");
-    //QStaticMesh* Mesh2 = QFAModelLoader::LoadModel("SomeModel/quad2.obj");
-    //QStaticMesh* Mesh3 = QFAModelLoader::LoadModel("SomeModel/anim/dore_1.obj");
+    QStaticMesh* Mesh = QFAModelLoader::LoadModel("SomeModel/Arrow.fbx");
+    QStaticMesh* Mesh2 = QFAModelLoader::LoadModel("SomeModel/quad2.obj");
+    QStaticMesh* Mesh3 = QFAModelLoader::LoadModel("SomeModel/anim/dore_1.obj");
 
     QWorld* mainWorld = new QWorld();
+
 
     QActor* firstActor = new QActor();
     QActor* secondActor = new QActor();
 
-    QActor* someActor = new QActor();
+
     QActor* floorActor = new QActor();
     QActor* animActor = new QActor();
 
-    //firstActor->SetRootComponent(Mesh2);
+    firstActor->SetRootComponent(Mesh2);
+        
+    Mesh->AttachComponent(Mesh3);
+    Mesh3->SetRelativePosition(FVector(0, 0, -100));
 
-    //Mesh->AttachComponent(Mesh3);
-    //Mesh3->SetRelativePosition(FVector(0, 0, -100));
 
-
-    //secondActor->SetRootComponent(Mesh);
+    secondActor->SetRootComponent(Mesh);
     secondActor->SetActorPosition(FVector(0, 0, -50));
     firstActor->SetActorPosition(FVector(0, 0, 100));
     secondActor->SetActorRotation(FVector(0, 0, 0));
@@ -69,26 +75,34 @@ int main()
     QFAWindow* mainWindow = QFAWindow::GetMainWindow();
     QFAViewport* firstdViewPort = mainWindow->GetViewport(0);
 
+    
+    
 
 
 
 
-    Camera.ActivateCamera(firstdViewPort);
 
-
-    firstdViewPort->SetParameters(0, 0, 0.5, 1);
-    //   firstdViewPort->SetParameters(0, 0, 1, 1);    
+    firstdViewPort->SetParameters(0, 0, 0.5, 1);    
 
 
     QFAText* text = new QFAText();
     text->SetTextSize(30);
     QFAText* text_2 = new QFAText();
     text_2->SetText(U"Viewport 1 supre test");
-
-
     text_2->SetPosition(0, 0);
     text_2->SetTextSize(30);    
     text_2->Color = FVector(1, 0.5, 0);
+    text_2->SetSize(600, 300);
+
+
+    QFAText* text_2_2 = new QFAText();
+    text_2_2->SetText(U"Viewport 1 supre test");
+    text_2_2->SetPosition(0, 0);
+    text_2_2->SetTextSize(30);
+    text_2_2->Color = FVector(1, 0.5, 0);
+    text_2_2->SetSize(600, 300);
+
+    firstdViewPort->AddUnit(text_2_2);
     /*-----*/
 
     text->SetPosition(0, 25);
@@ -105,9 +119,9 @@ int main()
 
 
     
-    //firstdViewPort->AddUnit(text_2);
+   
 
-    text_2->SetSize(600, 300);
+
 
 
 
@@ -126,10 +140,14 @@ int main()
     textViewPort2->SetPosition(0, 0);
 
     secondCamera->ActivateCamera(secondViewPort);
-    mainWindow->AddViewport(secondViewPort);
-    secondViewPort->SetParameters(0.5f, 0.66666f, 0.5f, 0.33333f);
-  
 
+
+    mainWindow->AddViewport(secondViewPort);
+
+
+    secondViewPort->SetParameters(0.5f, 0.66666f, 0.5f, 0.33333f);
+    secondViewPort->AddUnit(textViewPort2);
+    
 
 
     /*---*/
@@ -176,16 +194,16 @@ int main()
     grid->AddUnit(UIHomy);
      
     grid->AddUnit(BackgroundColor); 
-    //grid->AddUnit(UIhome_2); 
+    grid->AddUnit(UIhome_2); 
     grid->AddUnit(textInput);
     grid->AddUnit(scroll);
     
 
-    secondViewPort->AddUnit(textViewPort2);
+
     
     
 
-    firstdViewPort->AddUnit(scrollGrid);
+    //firstdViewPort->AddUnit(scrollGrid);
     scrollGrid->SetSize(500, 250);
 
     grid->UnitName = "grid";
@@ -197,6 +215,37 @@ int main()
     UIhome_2->UnitName = "home_2";
     scrollGrid->UnitName = "scrollGrid";
     text->UnitName = "text in scroll";
+    firstdViewPort->GetRoot()->UnitName = "firstdViewPort root";
+    secondViewPort->GetRoot()->UnitName = "secondViewPort root";
+    text_2->UnitName = "text_2";
+    text_2_2->UnitName = "text_2_2";
+    text->UnitName = "text";
+    textInput->UnitName = "textInput";
+    /*  window 2  */
+    QFAWindow* secondWindow = new QFAWindow(600, 600, "QFA 2");
+    QFAViewport* secondWindowsViewport = secondWindow->GetViewport(0);
+    secondWindowsViewport->GetRoot()->UnitName = "secondWindowsViewport root";
+
+  
+    ACameraEditor Camera2;
+    Camera2.SetActorPosition(FVector(-1400, 450, 70));
+    Camera2.SetActorRotation(FVector(0, 0, -20));
+    
+ 
+    mainWorld->AddActor(&Camera2);
+    Camera.ActivateCamera(firstdViewPort);
+
+    Camera2.ActivateCamera(secondWindowsViewport);
+    secondWindowsViewport->AddUnit(text_2);
+    secondWindowsViewport->AddUnit(scrollGrid);
+
+
+    QFAInput* qinput = new QFAInput(secondWindow);
+    qinput->AddKeyHold(EKey::Q, "secondQ", 0.5781 , [](EKey::Key)
+        {
+            std::cout << "second Window hold\n";
+        });
+
 
     QFAEditorOverlord::StartLife();
 

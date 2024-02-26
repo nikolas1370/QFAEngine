@@ -6,12 +6,14 @@ class QFAWindow;
 class QFAText;
 class QFAUIImage;
 class QFAUITextInput;
+class QMeshBaseComponent;
 class QFAVKVertexBuffer
 {
 	friend QFAWindow;
 	friend QFAText;
 	friend QFAUIImage;
 	friend QFAUITextInput;
+	friend QMeshBaseComponent;
 	QFAVKBuffer* CpuSideBuffer;
 	QFAVKBuffer* GpuSideBuffer;
 	VkCommandPool CommandPool;

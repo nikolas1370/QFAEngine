@@ -24,11 +24,7 @@ VkDescriptorSet QMeshBaseComponent::descriptorSetShadow;
 
 std::vector<QMeshBaseComponent::SSet1Buffers> QMeshBaseComponent::Set1Buffers;
 unsigned int QMeshBaseComponent::SetsInUse = 0;
-unsigned int QMeshBaseComponent::ShadowSetsInUse = 0;
 std::vector<VkDescriptorSet> QMeshBaseComponent::ShadowDescriptorSets;
-std::vector<QFAVKBuffer*> QMeshBaseComponent::ShadowSetBuffers;
-
-std::array<QFAVKBuffer*, QFAWindow::MaxActiveViewPort> QMeshBaseComponent::BuffersVertex;
 
 MeshData::MeshData(int uniqueIndexCount, int indexCount, int materialCount)
 {
@@ -89,12 +85,40 @@ void QMeshBaseComponent::UpdateModelMatrix()
 void QMeshBaseComponent::StartFrame()
 {
 	SetsInUse = 0;
-	ShadowSetsInUse = 0;
 }
 
 void QMeshBaseComponent::StartShadowFrameViewport(glm::mat4& lmat)
 {
 	LightMatrix = lmat;
+}
+
+void QMeshBaseComponent::Render(VkCommandBuffer commandBuffer, bool shadow, FVector cameraPosition)
+{
+	UpdateBuffers(0, shadow, cameraPosition);
+
+
+	VkDeviceSize offsets[] = { 0 };
+	if (shadow)
+	{
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &VertexBufer->GpuSideBuffer->Buffer, offsets);
+		vkCmdBindIndexBuffer(commandBuffer, IndexBuffer->GpuSideBuffer->Buffer, 0, VK_INDEX_TYPE_UINT32);
+		auto nextSet = GetShadowNextSet();
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+			ShadowPipline->GetPipelineLayout(), 0, 1, &nextSet, 0, nullptr);
+
+		vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(GetIndexCount()), 1, 0, 0, 0);
+	}
+	else
+	{
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &VertexBufer->GpuSideBuffer->Buffer, offsets);
+		vkCmdBindIndexBuffer(commandBuffer, IndexBuffer->GpuSideBuffer->Buffer, 0, VK_INDEX_TYPE_UINT32);
+
+		auto nextSets = GetNextSets();
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+			Pipeline->GetPipelineLayout(), 0, (uint32_t)nextSets.size(), nextSets.data(), 0, nullptr);
+
+		vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(GetIndexCount()), 1, 0, 0, 0);
+	}
 }
 
 void QMeshBaseComponent::CreateVertexIndexBuffers()
@@ -103,46 +127,50 @@ void QMeshBaseComponent::CreateVertexIndexBuffers()
 	IndexBuffer = new QFAVKIndexBuffer(Mf->GetIndexCount() * sizeof(int), Mf->GetIndexData(), commandPool);
 }
 
-void QMeshBaseComponent::StartFrameViewpoet(glm::mat4& viewPortProjection, glm::mat3& cameraRotationMatrix, glm::mat4& directionLightMatrix)
+
+void QMeshBaseComponent::StartFrameViewpoet(glm::mat4& viewPortProjection, glm::mat3& cameraRotationMatrix, glm::mat4& directionLightMatrix, int viewportIndex)
 {
 	QMeshBaseComponent::UBOVertex ubo{};
 
 	ubo.projection = viewPortProjection;
 	
 	ubo.cameraR = glm::mat4(cameraRotationMatrix);
-	ubo.directionLightMatrix = directionLightMatrix;
-	
-	memcpy(BuffersVertex[QFAWindow::GetMainWindow()->ViewportProcess]->MapData, &ubo.projection, sizeof(ubo) );
+	ubo.directionLightMatrix = directionLightMatrix;	
+	memcpy(QFAWindow::ViewportStuff[QFAWindow::ViewportProcess].buffers.worldProjectionBuffer->MapData, &ubo.projection, sizeof(ubo) );
 }
 
-void QMeshBaseComponent::createDescriptorSets0()
+void QMeshBaseComponent::createDescriptorSet0(VkBuffer buffer, VkBuffer shadeowBuffer)
 {
-	QFAWindow* window = QFAWindow::GetMainWindow();
-	VkDeviceSize bufferSize = sizeof(UBOVertex);
-	for (size_t i = 0; i < QFAWindow::MaxActiveViewPort; i++)
-	{
-		BuffersVertex[i] = new QFAVKBuffer(bufferSize, nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+	VkDescriptorBufferInfo bufferInfoVertex{};
+	bufferInfoVertex.buffer = buffer;
+	bufferInfoVertex.offset = 0;
+	bufferInfoVertex.range = sizeof(UBOVertex);
 
-		VkDescriptorBufferInfo bufferInfoVertex{};
-		bufferInfoVertex.buffer = BuffersVertex[i]->Buffer;
-		bufferInfoVertex.offset = 0;
-		bufferInfoVertex.range = sizeof(UBOVertex);
-
-		std::array< QFAVKPipeline::QFADescriptorSetInfo, 2 > SetsInfo;
-		SetsInfo[0].dstBinding = 0;
-		SetsInfo[0].DescriptorBufferInfos = &bufferInfoVertex;
+	std::array< QFAVKPipeline::QFADescriptorSetInfo, 2 > SetsInfo;
+	SetsInfo[0].dstBinding = 0;
+	SetsInfo[0].DescriptorBufferInfos = &bufferInfoVertex;
 
 
-		VkDescriptorImageInfo IF;// 
-		IF.imageLayout = VK_IMAGE_LAYOUT_GENERAL;// VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		IF.imageView = window->ShadowImagesView->ImageView;
-		IF.sampler = window->ShadowSampler->textureSampler;
+	VkDescriptorImageInfo IF;// 
+	IF.imageLayout = VK_IMAGE_LAYOUT_GENERAL;// VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	IF.imageView = QFAWindow::ShadowImagesView->ImageView;
+	IF.sampler = QFAWindow::ShadowSampler->textureSampler;
 
-		SetsInfo[1].dstBinding = 1;
-		SetsInfo[1].DescriptorImageInfos = &IF;
+	SetsInfo[1].dstBinding = 1;
+	SetsInfo[1].DescriptorImageInfos = &IF;
 
-		Pipeline->CreateSet(0, SetsInfo.data());
-	}
+	Pipeline->CreateSet(0, SetsInfo.data());
+	/*---*/
+	VkDescriptorBufferInfo bufferInfo;
+	bufferInfo.buffer = shadeowBuffer;
+	bufferInfo.offset = 0;
+	bufferInfo.range = sizeof(UBOShadowVertex);
+
+	QFAVKPipeline::QFADescriptorSetInfo setInfos;
+	setInfos.dstBinding = 0;
+	setInfos.DescriptorBufferInfos = &bufferInfo;
+
+	ShadowPipline->CreateSet(0, &setInfos);
 }
 
 void QMeshBaseComponent::createDescriptorSet1()
@@ -185,7 +213,6 @@ void QMeshBaseComponent::Init(VkRenderPass renderPass, VkRenderPass shadowRender
 	CreatePipeline();
 	
 	CreateShadowPipline();
-	createDescriptorSets0();
 }
 
 void QMeshBaseComponent::CreatePipeline()
@@ -278,8 +305,8 @@ void QMeshBaseComponent::CreatePipeline()
 
 
 	std::array< uint32_t, 2> MaxSets;
-	MaxSets[0] = QFAWindow::MaxActiveViewPort;
-	MaxSets[1] = DescriptorSets1Amount;
+	MaxSets[0] = DescriptorSets0Amount;
+	MaxSets[1] = DescriptorSets0Amount;
 	PipelineInfo.MaxSets = MaxSets.data();
 	Pipeline = new QFAVKPipeline(PipelineInfo);
 }
@@ -339,23 +366,10 @@ void QMeshBaseComponent::CreateShadowPipline()
 	PipelineInfo.DepthStencil.DepthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
 
 	std::array< uint32_t, 1> MaxSets;
-	MaxSets[0] = QFAWindow::MaxActiveViewPort;
+	MaxSets[0] = DescriptorSets0Amount;
 	PipelineInfo.MaxSets = MaxSets.data();
 	ShadowPipline = new QFAVKPipeline(PipelineInfo);
 	VkDeviceSize bufferSize = sizeof(UBOShadowVertex);
 	
-	for (size_t i = 0; i < QFAWindow::MaxActiveViewPort; i++)
-	{
-		ShadowSetBuffers.push_back(new QFAVKBuffer(bufferSize, nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT));
-		VkDescriptorBufferInfo bufferInfo;		
-		bufferInfo.buffer = ShadowSetBuffers[i]->Buffer;
-		bufferInfo.offset = 0;
-		bufferInfo.range = sizeof(UBOShadowVertex);
 
-		QFAVKPipeline::QFADescriptorSetInfo setInfos;
-		setInfos.dstBinding = 0;
-		setInfos.DescriptorBufferInfos = &bufferInfo;
-		
-		ShadowPipline->CreateSet(0, &setInfos);
-	}
 }

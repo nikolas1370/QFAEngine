@@ -9,18 +9,6 @@
 #include <Render/vk/ImageView.h>
 #include <Render/Pipline/Pipline.h>
 
-/*
-
-
-remove 
-ShadowDescriptorSets
-
-
-*/
-
-
-
-
 struct VertexMaterial// 
 {
 	FVector Position;
@@ -192,22 +180,23 @@ public:
 	}
 
 	inline void* GetShadowBuffer()
-	{	
-		return ShadowSetBuffers[ShadowSetsInUse]->MapData;		
+	{			
+		return QFAWindow::ViewportStuff[QFAWindow::ViewportProcess].buffers.shadowBuffer->MapData;
 	}
+
 
  	inline std::array<VkDescriptorSet, 2> GetNextSets()
 	{
 		return std::array<VkDescriptorSet, 2>
 		{
-			Pipeline->GetSet(0, QFAWindow::GetMainWindow()->ViewportProcess),
+			Pipeline->GetSet(0, QFAWindow::CurentProcessWindow->ViewportProcess),
 			Pipeline->GetSet(1, SetsInUse++)
 		};
 	}
 
 	inline VkDescriptorSet GetShadowNextSet()
-	{
-		return ShadowPipline->GetSet(0, ShadowSetsInUse++);		
+	{ 
+		return ShadowPipline->GetSet(0, QFAWindow::CurentProcessWindow->ViewportProcess);
 	}
 
 
@@ -236,7 +225,7 @@ private:
 	static void EndLife();
 
 	
-	static void createDescriptorSets0();
+	static void createDescriptorSet0(VkBuffer buffer, VkBuffer shadeowBuffer);
 	static void createDescriptorSet1();
 
 
@@ -267,14 +256,7 @@ private:
 		void* BufferVertexMapped;
 	};
 
-	static std::array<QFAVKBuffer*, QFAWindow::MaxActiveViewPort> BuffersVertex;
-
-	
-
 	static  VkDescriptorSet descriptorSetShadow; 
-
-	
-
 
 	QFAVKVertexBuffer* VertexBufer;
 	QFAVKIndexBuffer* IndexBuffer;
@@ -285,23 +267,16 @@ private:
 		QFAVKBuffer* fragmentBuffer;
 	};
 
-
-
-
 	static unsigned int SetsInUse ; // in one frame
 	
 	static const unsigned int DescriptorSets1Amount = 100;
+	static const unsigned int DescriptorSets0Amount = 10; // for viewport set
 
 	static std::vector<SSet1Buffers> Set1Buffers;
 
-	static unsigned int ShadowSetsInUse; 
 	static std::vector<VkDescriptorSet> ShadowDescriptorSets;
-	static std::vector<QFAVKBuffer*> ShadowSetBuffers;
-	
-	
 
-	
-
+	void Render(VkCommandBuffer commandBuffer, bool shadow, FVector cameraPosition);
 protected:
 
 	static glm::mat4 LightMatrix;
@@ -322,9 +297,8 @@ protected:
 		alignas(64) glm::mat4 depthMVP;
 	};
 
-
 	void CreateVertexIndexBuffers();
 
-	static void StartFrameViewpoet(glm::mat4& viewPortProjection, glm::mat3& cameraRotationMatrix,  glm::mat4& directionLightMatrix);
+	static void StartFrameViewpoet(glm::mat4& viewPortProjection, glm::mat3& cameraRotationMatrix,  glm::mat4& directionLightMatrix, int viewportIndex);
 
 };

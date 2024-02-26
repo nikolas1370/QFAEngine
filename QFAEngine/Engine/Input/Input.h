@@ -150,12 +150,13 @@ struct GLFWwindow;
 class QFAInputAxis1D;
 class QFAInputAxis2D;
 class QFAInputAxis3D;
-
+class QFAWindow;
 /*
 	Event process before Tick
 */
 class QFAInput
 {
+	friend QFAWindow; // remove and see
 	struct SKeyFunction
 	{		
 		std::function<void(EKey::Key)> fun;
@@ -264,11 +265,31 @@ class QFAInput
 	*/
 	static void Scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 	static void MouseMove_callback(GLFWwindow* window, float xoffset, float yoffset);
-	static void Init(GLFWwindow* window);
-	static void ProcessKey(int key, int scancode, int action, int mods);
+	static void ProcessKey(GLFWwindow* _window, int key, int scancode, int action, int mods);
+	/*
+		call when QFAWindow was created
+	*/
+	static void WindowCreated(QFAWindow* window);
+	/*
+		call when QFAWindow was closed
+	*/
+	static void WindowClosed(QFAWindow* window);
 	
-	static GLFWwindow* Window;	
-	static QFAArray<QFAInput*> Inputs;
+	struct Sinput 
+	{
+		QFAWindow* window;
+		QFAInput *input;
+		QFAInput* operator->() const
+		{
+			return input;
+		}
+	};
+
+	static std::vector<QFAWindow*> WindowList;
+	GLFWwindow* Window;
+	GLFWwindow* GlfWindow;		
+	static QFAArray<Sinput> Inputs;
+	bool InputValid = true;
 	
 	QFAArray<SKeyFunction> KeyPressList;
 	QFAArray<SKeyFunction> KeyReleaseList;
@@ -285,9 +306,13 @@ class QFAInput
 	static FVector2D LastMousePosition;
 public:
 	/*
-		Event process before Tick
+		input attach to main window
 	*/
 	QFAInput();
+	/*
+		input attach to *window
+	*/
+	QFAInput(QFAWindow* window);
 	~QFAInput();
 
 	void ActiveInput(bool activate)
@@ -353,6 +378,11 @@ public:
 	QFAInputAxis3D CreateAxis3D(std::string id, std::function<void(FVector)> fun);
 	void RemoveAxis3D(std::string id);
 
+
+	inline bool IsValide()
+	{
+		return this && InputValid;
+	}
 private:
 	/*
 		fun be call every frame even when button not push

@@ -7,24 +7,14 @@ class QFAWindow;
 
 class QFAOverlord 
 {
-
-
-
-	static QCameraComponent* CurentCamera;
 	static bool Life;
 	static bool isInit;
 
-	static QFAWindow* Window;
 
 	static int DefaultWidth;
 	static int DefaultHeight;
 
 
-	
-	
-	
-	// call only from QCameraComponent.Activate()
-	//static void SetCamera(QCameraComponent* camera);
 public:
 	/*
 		start processing world 

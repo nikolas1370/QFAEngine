@@ -2,10 +2,11 @@
 #include <Tools/VulkanSuff.h>
 #include <Render/Buffer/VKBuffer.h>
 
-
+class QMeshBaseComponent;
 class QFAVKIndexBuffer
 {
 	friend QFAWindow;
+	friend QMeshBaseComponent;
 	QFAVKBuffer* GpuSideBuffer;
 public:
 	//VkBuffer IndexBuffer;

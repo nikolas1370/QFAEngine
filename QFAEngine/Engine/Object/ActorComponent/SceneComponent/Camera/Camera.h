@@ -53,8 +53,6 @@ public:
 	void SetFov(float fov);
 	void SetViewDistance(float viewDistance);
 
-	QWorld* GetWorld();
-
 	inline bool GetStatus()
 	{
 		return IsActive;

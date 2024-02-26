@@ -12,10 +12,13 @@
 #include <Tools/File/FileSystem.h>
 #include <Windows.h>
 #include <Tools/VulkanSuff.h>
+
+#pragma comment(lib, "Winmm.lib")  // for timeBeginPeriod , timeEndPeriod
+
 bool QFAOverlord::Life = false;
 bool QFAOverlord::isInit = false; 
-QFAWindow* QFAOverlord::Window = nullptr;
-QCameraComponent* QFAOverlord::CurentCamera = nullptr;
+
+
 
 int QFAOverlord::DefaultWidth = 1000;
 int QFAOverlord::DefaultHeight = 600;
@@ -25,19 +28,19 @@ bool QFAOverlord::StartLife()
 	if (Life || !isInit)
 		return false;	
 
+    std::cout << "Engine load time " << (QTime::GetTime() / 10000) << '\n';
 	Life = true;
 	QFAOverlord::MainLoop();
 	return true;
 }
 
-#pragma comment(lib, "Winmm.lib")  // for timeBeginPeriod , timeEndPeriod
+
 bool QFAOverlord::Init(std::vector<QFAVKPipeline::SShaderData> shaderData)
 {
     QTime::Init();    
     QFAVKPipeline::SetShaderData(shaderData);
 
-    Window = new QFAWindow(DefaultWidth, DefaultHeight, "QFA");    
-    QFAInput::Init(Window->glfWindow);
+    new QFAWindow(DefaultWidth, DefaultHeight, "QFA");      
 
     timecaps_tag ptc{};
     timeGetDevCaps(
@@ -50,9 +53,59 @@ bool QFAOverlord::Init(std::vector<QFAVKPipeline::SShaderData> shaderData)
     return true;
 }
 
+void QFAOverlord::MainLoop()
+{
+    const float frameCount = 60.0f;
+    const float frameTime = 1000 / frameCount;
+    bool limit = false; // 
+
+    while ( Life)
+    {
+        for (int i = QFAWindow::Windows.size() - 1; i >= 0; i--)
+        {
+            if (QFAWindow::Windows[i]->ShouldClose())
+            {
+                if (i == 0)
+                {
+                    QFAOverlord::EndLife();
+                    return;
+                }
+
+                delete QFAWindow::Windows[i];
+                QFAWindow::Windows.erase(QFAWindow::Windows.begin() + i);
+            }
+        }
+
+        
+        QTime::CalcDeltaTime();
+        glfwPollEvents();
+        QFAInput::NewFrame((float)QTime::GetDeltaTime());
+        
+        QFAWindow::ProcessUIEvent();        
+        QWorld::ProcessTicks();
+        auto t = QTime::GetSystemTime();
+        QFAWindow::RenderWindows();
+
+        
+        float timePassed = (float)(QTime::GetSystemTime() - t) / 10000.0f;
+        //std::cout << timePassed << "\n";
+        
+
+        if (limit && timePassed < frameTime)
+            QFASleep(frameTime - timePassed);
+
+    }
+
+    
+}
+
+
 void QFAOverlord::EndLife()
 {
     Life = false;
+
+    for (size_t i = 0; i < QFAWindow::Windows.size(); i++)
+        delete QFAWindow::Windows[i];
 
     QFAFile::EndLife();
     QFAText::EndLife();
@@ -70,29 +123,4 @@ void QFAOverlord::EndLife()
 
 
 
-void QFAOverlord::MainLoop()
-{
-    const float frameCount = 60.0f;
-    const float frameTime = 1000 / frameCount;
-    bool limit = true;
-
-    while (!Window->ShouldClose() && Life)
-    {
-        auto t = QTime::GetSystemTime();
-        QTime::CalcDeltaTime();
-        glfwPollEvents();
-        QFAInput::NewFrame((float)QTime::GetDeltaTime());
-        QFAWindow::ProcessUIEvent();
-        QWorld::ProcessTicks();
-        QFAWindow::RenderWindow();
-
-        float timePassed = (float)(QTime::GetSystemTime() - t) / 10000.0f;
-        if(limit && timePassed < frameTime)
-            QFASleep(frameTime - timePassed);
-    }    
-
-
-    if (Life)
-        QFAOverlord::EndLife();
-}
 

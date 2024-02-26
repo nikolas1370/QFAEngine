@@ -71,7 +71,7 @@ private:
     static void Init(VkRenderPass renderPass, VkCommandPool commandPool);
     static void EndLife();
 
-    static void CreateTextProjectionSets();
+    static void CreateProjectionSet(VkBuffer buffer);
 
     QFAVKVertexBuffer* vertexBufer;
     static QFAVKPipeline* QFAVKPipline;

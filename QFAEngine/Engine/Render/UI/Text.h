@@ -166,7 +166,7 @@ private:
 
     void Render(VkCommandBuffer comandebuffer) override;
     void RenderPen(VkCommandBuffer comandebuffer);
-    static void StartTextRender();
+    static void StartFrame();
 
 
     static void Init(VkRenderPass renderPass, VkCommandPool commandPool);
@@ -241,7 +241,7 @@ private:
     static void RecreatePipeline();
 
 
-    static void CreateTextProjectionSets();
+    static void CreateTextProjectionSet(VkBuffer buffer);
 
     static void CreateTextParameterSet();
     static void RecreateTextParameterSet(VkBuffer buffer, VkBuffer VertexBuffer);
@@ -354,11 +354,4 @@ protected:
     static VkDescriptorSet PenDescriptorSet;
     // set pointer to input text
     void SetInputText(char32_t* pText, size_t pTextSize, size_t maxSize);
-
-
 };
-/*
-float tem = ((float)FontHeight / (float)FontLoadCharHeight);
-if (Symbols[SymbolsForRender[Text.pen - 1].symbolIndex].symbol == U' ')
-    std::cout << Symbols[SymbolsForRender[Text.pen - 1].symbolIndex].Glyph.advance_x * tem << "\n";
-*/

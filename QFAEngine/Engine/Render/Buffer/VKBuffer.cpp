@@ -61,7 +61,8 @@ void QFAVKBuffer::CreateBufferInside(VkDeviceSize size, VkBufferUsageFlags usage
     allocInfo.flags = InHost ? VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT
                              : VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
 
-    vmaCreateBuffer(allocator, &bufferInfo, &allocInfo, &Buffer, &allocation, nullptr);
+    if(VkResult res = vmaCreateBuffer(allocator, &bufferInfo, &allocInfo, &Buffer, &allocation, nullptr))
+       stopExecute(res)    
 
     if(InHost)
         vmaMapMemory(allocator, allocation, &MapData);

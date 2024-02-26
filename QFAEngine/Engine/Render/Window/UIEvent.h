@@ -1,6 +1,7 @@
 #pragma once
 #include <Tools/Array.h>
 #include <Input/Input.h>
+#include <vector>
 
 class QFAUIUnit;
 class QFAViewportRoot;
@@ -11,22 +12,12 @@ class QFAUIEvent
 {
 	friend QFAWindow;
 	QFAWindow* Window;
-	struct SEvent
-	{
-		QFAUIEvent* event;
-		GLFWwindow* glfWindow;
-	};
 
-	static SEvent MainEvent;
-public:
-	QFAUIEvent();
+	static std::vector<QFAUIEvent*> Events;
+
+	QFAUIEvent(QFAWindow* window, GLFWwindow* _glfWindow);
 	~QFAUIEvent();
-
-
-	
-
 private:
-	void Init(QFAWindow* window, GLFWwindow* _glfWindow);
 	GLFWwindow* glfWindow;
 	//in start of array number smaller
 	QFAArray<QFAUIUnit*> SortUIUnits;
@@ -34,7 +25,7 @@ private:
 	void SortUIs(QFAViewportRoot* root);
 
 	void NewFrame(QFAViewportRoot* root, float mousePosX, float mousePosY, double delta);
-	QFAInput Input;
+	QFAInput* Input;
 
 	float ScrollValue = 0.0f;
 

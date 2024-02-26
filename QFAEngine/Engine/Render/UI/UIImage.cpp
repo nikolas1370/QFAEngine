@@ -126,21 +126,18 @@ void QFAUIImage::EndLife()
     delete ImageSampler;
 }
 
-void QFAUIImage::CreateTextProjectionSets()
+void QFAUIImage::CreateProjectionSet(VkBuffer buffer)
 {
-    for (size_t i = 0; i < QFAWindow::MaxActiveViewPort; i++)
-    {
-        VkDescriptorBufferInfo bufferInfo;
-        bufferInfo.buffer = QFAWindow::MainWindow->ViewportBuffers[i].uiProjectionBuffer->Buffer;
-        bufferInfo.offset = 0;
-        bufferInfo.range = sizeof(glm::mat4);
+    VkDescriptorBufferInfo bufferInfo;
+    bufferInfo.buffer = buffer;
+    bufferInfo.offset = 0;
+    bufferInfo.range = sizeof(glm::mat4);
 
-        std::array< QFAVKPipeline::QFADescriptorSetInfo, 1> descriptorSetInfo;
-        descriptorSetInfo[0].dstBinding = 0;
-        descriptorSetInfo[0].DescriptorBufferInfos = &bufferInfo;
+    std::array< QFAVKPipeline::QFADescriptorSetInfo, 1> descriptorSetInfo;
+    descriptorSetInfo[0].dstBinding = 0;
+    descriptorSetInfo[0].DescriptorBufferInfos = &bufferInfo;
 
-        Pipeline->CreateSet(0, descriptorSetInfo.data());
-    }
+    Pipeline->CreateSet(0, descriptorSetInfo.data());
 }
 
 
@@ -414,11 +411,9 @@ void QFAUIImage::CreatePipeline()
     PipelineInfo.DepthStencil.DepthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
 
     std::array< uint32_t, 2> MaxSets;
-    MaxSets[0] = QFAWindow::MaxActiveViewPort;
+    MaxSets[0] = 10;// view port set
     MaxSets[1] = QFAUIImage::AmountSetsInImageParamPool;
     PipelineInfo.MaxSets = MaxSets.data();
 
     Pipeline = new QFAVKPipeline(PipelineInfo);
-
-    CreateTextProjectionSets();
 }

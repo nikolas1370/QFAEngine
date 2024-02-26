@@ -1,5 +1,7 @@
 #include "SceneComponent.h"
 #include <Object/Actor/Actor.h>
+#include <Object/World/World.h>
+
 
 QSceneComponent::QSceneComponent()
 {
@@ -265,4 +267,13 @@ QActor* QSceneComponent::GetActor(QSceneComponent* component)
 		else
 			tem = tem->ParentActorComponent;
 	}
+}
+
+QWorld* QSceneComponent::GetWorld()
+{
+	QActor* actor = GetActor();
+	if (actor->IsValid() && actor->GetWorld()->IsValid())
+		return actor->GetWorld();	
+
+	return nullptr;
 }

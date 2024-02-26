@@ -2,6 +2,8 @@
 #include <Object/Actor/Actor.h>
 #include <Overlord/Overlord.h>
 #include <Render/Time.h>
+#include <Render/Window/Viewport.h>
+#include <Render/Window/Window.h>
 
 QFAArray<QWorld*> QWorld::Worlds;
 
@@ -17,18 +19,33 @@ void QWorld::ForgetActor(QActor* actor)
 void QWorld::ProcessTicks()
 {	
 	float delta = (float)QTime::GetDeltaTime();
-	for (size_t i = 0; i < Worlds.Length(); i++)
-	{
-		if (!Worlds[i]->IsValid())
-			continue;
-
-		for (int j = 0; j < Worlds[i]->Actors.Length(); j++)
+	for (size_t i = 0; i < Worlds.Length(); i++) // search active world		
+	{// world active if at least one viewport connect
+		bool worldProcess = false; // viewport connect to world by camera
+		for (size_t j = 0; j < QFAWindow::Windows.size(); j++)
 		{
-			if (Worlds[i]->Actors[j]->IsValid() && Worlds[i]->Actors[j]->CanTick)
+			for (size_t k = 0; k < QFAWindow::Windows[j]->Viewports.Length(); k++)
 			{
-				Worlds[i]->Actors[j]->Tick(delta);
-				ProcessSceneComponentTick(Worlds[i]->Actors[j]->RootComponent);
+				if (QFAWindow::Windows[j]->Viewports[k]->GetWorld() == Worlds[i])
+				{
+					for (int o = 0; j < Worlds[i]->Actors.Length(); o++)
+					{
+						if (Worlds[i]->Actors[o]->IsValid() && Worlds[i]->Actors[o]->CanTick)
+						{
+							Worlds[i]->Actors[o]->Tick(delta);
+							ProcessSceneComponentTick(Worlds[i]->Actors[o]->RootComponent);
+							worldProcess = true;
+							break;
+						}
+					}
+
+					if (worldProcess)
+						break;
+				}
 			}
+
+			if (worldProcess)
+				break;
 		}
 	}
 }

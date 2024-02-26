@@ -8,16 +8,16 @@
 #include <Render/vk/TextureSampler.h>
 #include <Render/Pipline/Pipline.h>
 
-QFAImage* QFAPresentImage::image = nullptr;
+
 
 std::array< VkDescriptorImageInfo, 1> QFAPresentImage::imageInfos;
-QFAVKPipeline* QFAPresentImage::Pipeline;
+
 VkCommandPool QFAPresentImage::commandPool;
-QFAVKTextureSampler* QFAPresentImage::ImageSampler;
-VkRenderPass QFAPresentImage::RenderPass;
+
+QFAVKTextureSampler* QFAPresentImage::ImageSampler = nullptr;
 
 
-QFAPresentImage::QFAPresentImage(VkCommandPool _commandPool)
+QFAPresentImage::QFAPresentImage(VkCommandPool _commandPool, VkRenderPass renderPass, QFAImage* image, VkImageAspectFlags aspect)
 {
     commandPool = _commandPool;
     // left top
@@ -56,17 +56,10 @@ QFAPresentImage::QFAPresentImage(VkCommandPool _commandPool)
 
 
     vertexBufer = new QFAVKVertexBuffer(sizeof(ImageShaderVertex) * 6, &quad, commandPool);
-}
 
-void QFAPresentImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_, QFAImage* imago, VkImageAspectFlags aspect)
-{
-    commandPool = commandPool_;
-    RenderPass = renderPass;
- 
-    
-    
+
     QFAVKPipeline::QFAPipelineCreateInfo PipelineInfo;
-    PipelineInfo.RenderPass = RenderPass;
+    PipelineInfo.RenderPass = renderPass;
     PipelineInfo.PipelineShaderStages.VertexShaderName = U"PresentImage.spvv";
     PipelineInfo.PipelineShaderStages.FragmentShaderName = U"PresentImage.spvf";
 
@@ -77,7 +70,7 @@ void QFAPresentImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_, 
     bindingDescription.stride = sizeof(float) * 4;
     bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
     PipelineInfo.VertexInputInfo.VertexBindingDescriptions = &bindingDescription;
-    
+
 
     PipelineInfo.VertexInputInfo.VertexAttributeDescriptionCount = 1;
     std::array<VkVertexInputAttributeDescription, 1> attributeDescriptions{};
@@ -86,17 +79,17 @@ void QFAPresentImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_, 
     attributeDescriptions[0].format = VK_FORMAT_R32G32B32A32_SFLOAT;
     attributeDescriptions[0].offset = 0;
     PipelineInfo.VertexInputInfo.VertexAttributeDescriptions = attributeDescriptions.data();
-    
+
 
     PipelineInfo.Rasterization.CullMode = VK_CULL_MODE_NONE;
 
 
     QFAVKPipeline::QFAPipelineColorBlendAttachment blendAttachment;
     blendAttachment.BlendEnable = VK_FALSE;
-    
+
     PipelineInfo.ColorBlendState.attachmentCount = 1;
-    PipelineInfo.ColorBlendState.pAttachments = &blendAttachment;   
-    
+    PipelineInfo.ColorBlendState.pAttachments = &blendAttachment;
+
 
     std::array<VkDynamicState, 2> dynamicStates =
     {
@@ -107,14 +100,14 @@ void QFAPresentImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_, 
     PipelineInfo.DynamicStateCount = (uint32_t)dynamicStates.size();
 
 
-    std::array< QFAVKPipeline::QFADescriptorSetLayout, 1> DescriptorSetLayouts;        
+    std::array< QFAVKPipeline::QFADescriptorSetLayout, 1> DescriptorSetLayouts;
     std::array<VkDescriptorSetLayoutBinding, 1> bindingsFragment;
     bindingsFragment[0].binding = 0;
     bindingsFragment[0].descriptorCount = 1;
     bindingsFragment[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     bindingsFragment[0].pImmutableSamplers = nullptr;
     bindingsFragment[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    
+
     DescriptorSetLayouts[0].BindingCount = (uint32_t)bindingsFragment.size();
     DescriptorSetLayouts[0].Bindings = bindingsFragment.data();
 
@@ -127,15 +120,13 @@ void QFAPresentImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_, 
     PipelineInfo.MaxSets = MaxSets.data();
 
 
-    
+
     Pipeline = new QFAVKPipeline(PipelineInfo);
 
+    if(!ImageSampler)
+        ImageSampler = new QFAVKTextureSampler();
 
-    ImageSampler = new QFAVKTextureSampler();
-    image = imago;
-
-    view = new QFAVKImageView(image, aspect);// 
-
+    view = new QFAVKImageView(image, aspect);
 
     imageInfos[0].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
     imageInfos[0].imageView = view->ImageView;
@@ -150,14 +141,10 @@ void QFAPresentImage::Init(VkRenderPass renderPass, VkCommandPool commandPool_, 
 QFAPresentImage::~QFAPresentImage()
 {
     delete vertexBufer;
-    delete ImageSampler;
     delete Pipeline;
 }
 
-
-
 void QFAPresentImage::EndLife()
 {    
-    delete Pipeline;
     delete ImageSampler;
 }

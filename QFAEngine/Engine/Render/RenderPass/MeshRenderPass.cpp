@@ -29,7 +29,7 @@ void QFAVKMeshRenderPass::CreateRenderPass(bool Clear)
     colorAttachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     colorAttachments[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     colorAttachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    colorAttachments[0].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;// VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    colorAttachments[0].finalLayout = VK_IMAGE_LAYOUT_GENERAL;// VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 
     VkAttachmentDescription depthAttachment{};
@@ -53,7 +53,7 @@ void QFAVKMeshRenderPass::CreateRenderPass(bool Clear)
     else
     {
         colorAttachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
-        colorAttachments[0].initialLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        colorAttachments[0].initialLayout = VK_IMAGE_LAYOUT_GENERAL;
 
         depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; // if one view port render in more then 1 comadbuffer change value
         depthAttachment.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;

@@ -33,6 +33,8 @@ private:
 	bool IsActive = true;
 	static void ProcessTicks();
 	static void ProcessSceneComponentTick(QSceneComponent* component);
+
+	QFAViewport* Viewport = nullptr;
 public:
 	
 

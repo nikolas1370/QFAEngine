@@ -19,8 +19,8 @@ class QFAImage
 	void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkImageCreateFlags flags = 0);
 	
 	VkFormat ImageFormat;
-	static VkCommandPool CommandPool;
-	static void Init(VkCommandPool commandPool);
+
+
 public:
 	VkImage TextureImage;
 	QFAVKImageView ImageView;

@@ -1,18 +1,47 @@
 #include "Input.h"
 #include <iostream>
+#include <Tools/VulkanSuff.h>
+#include <Render/Window/Window.h>
+std::vector<QFAWindow*> QFAInput::WindowList;
 
-GLFWwindow* QFAInput::Window = nullptr;
-QFAArray<QFAInput*> QFAInput::Inputs;
+QFAArray<QFAInput::Sinput> QFAInput::Inputs;
 FVector2D QFAInput::LastMousePosition;
 
 QFAInput::QFAInput()
 {
-	QFAInput::Inputs.Add(this);
+	if (WindowList.size() == 0)
+		stopExecute("QFAWindow not init or all window deleted");
+
+	this->Window = WindowList[0]->glfWindow;
+	QFAInput::Inputs.Add({ WindowList[0], this});
+}
+
+QFAInput::QFAInput(QFAWindow* window)
+{
+	for (size_t i = 0; i < WindowList.size(); i++)
+	{
+		if (WindowList[i] == window)
+		{
+			this->Window = WindowList[0]->glfWindow;
+			QFAInput::Inputs.Add({ window, this });
+			return;
+		}
+	}
+
+	stopExecute("window not valid")
 }
 
 QFAInput::~QFAInput()
 {
-	QFAInput::Inputs.Remove(this);
+	InputValid = false;
+	for (size_t i = 0; i < QFAInput::Inputs.Length(); i++)
+	{
+		if (QFAInput::Inputs[i].input == this)
+		{
+			QFAInput::Inputs.RemoveAt(i);
+			return;
+		}
+	}
 }
 
 void QFAInput::NewFrame(float delta)
@@ -90,20 +119,21 @@ void QFAInput::MouseMove_callback(GLFWwindow* window, float xoffset, float yoffs
 {
 	for (int i = 0; i < Inputs.Length(); i++)
 	{
-		if (Inputs[i]->BlockInput || !Inputs[i]->MouseMove.active)
+		if (Inputs[i]->Window != window || Inputs[i]->BlockInput || !Inputs[i]->MouseMove.active)
 			continue;
+
+		
 
 		if (Inputs[i]->MouseMove.fun)
 			Inputs[i]->MouseMove.fun(FVector2D(xoffset, yoffset));
 	}
 	
 	double x, y;
-	glfwGetCursorPos(Window, &x, &y);
+	glfwGetCursorPos(window, &x, &y);
 	LastMousePosition = FVector2D((float)x - LastMousePosition.X, (float)y - LastMousePosition.Y);
 	for (int i = 0; i < Inputs.Length(); i++)
-	{
-		
-		if (Inputs[i]->BlockInput || !Inputs[i]->MouseMoveAxis.active)
+	{		
+		if (Inputs[i]->Window != window || Inputs[i]->BlockInput || !Inputs[i]->MouseMoveAxis.active)
 			continue;
 
 		if (Inputs[i]->MouseMoveAxis.fun)
@@ -113,35 +143,57 @@ void QFAInput::MouseMove_callback(GLFWwindow* window, float xoffset, float yoffs
 	LastMousePosition = FVector2D((float)x, (float)y);		
 }
 
-void QFAInput::Init(GLFWwindow* window)
-{
-	Window = window;
-	glfwSetKeyCallback(window, [ ](GLFWwindow* window, int key, int scancode, int action, int mods)
-		{			
-			QFAInput::ProcessKey(key, scancode, action, mods);
+void QFAInput::WindowCreated(QFAWindow* window)
+{	
+	WindowList.push_back(window );
+	glfwSetKeyCallback(window->glfWindow, [](GLFWwindow* _window, int key, int scancode, int action, int mods)
+		{
+			QFAInput::ProcessKey(_window, key, scancode, action, mods);
 		});
 
-	glfwSetMouseButtonCallback(Window, [](GLFWwindow* window, int button, int action, int mods)
+	glfwSetMouseButtonCallback(window->glfWindow, [](GLFWwindow* _window, int button, int action, int mods)
 		{
-			QFAInput::ProcessKey(button, 0, action, mods);
-		});	
-	
-	glfwSetScrollCallback(Window, [](GLFWwindow* window, double xoffset, double yoffset)
-		{
-			QFAInput::Scroll_callback(window, xoffset, yoffset);
+			QFAInput::ProcessKey(_window, button, 0, action, mods);
 		});
 
-	glfwSetCursorPosCallback(Window, [](GLFWwindow* window, double xpos, double ypos)
+	glfwSetScrollCallback(window->glfWindow, [](GLFWwindow* _window, double xoffset, double yoffset)
 		{
-			QFAInput::MouseMove_callback(window, (float)xpos, (float)ypos);
+			QFAInput::Scroll_callback(_window, xoffset, yoffset);
 		});
+
+	glfwSetCursorPosCallback(window->glfWindow, [](GLFWwindow* _window, double xpos, double ypos)
+		{
+			QFAInput::MouseMove_callback(_window, (float)xpos, (float)ypos);
+		});
+
 }
 
-void QFAInput::ProcessKey(int key, int scancode, int action, int mods)
+void QFAInput::WindowClosed(QFAWindow* window)
+{
+	for (size_t i = 0; i < WindowList.size(); i++)
+	{
+		if (WindowList[i] == window) 
+		{
+			WindowList.erase(WindowList.begin() + i);
+			for (int j = Inputs.Length() - 1; j >= 0 ; j--)
+			{
+				if (Inputs[j].window == window)
+				{					
+					Inputs[j].input->InputValid = false;
+					Inputs.RemoveAt(j);
+				}
+			}
+
+			return;
+		}
+	}
+}
+
+void QFAInput::ProcessKey(GLFWwindow* _window, int key, int scancode, int action, int mods)
 {
 	for (int i = 0; i < Inputs.Length(); i++)
 	{
-		if (!Inputs[i]->BlockInput && Inputs[i]->Any.active && Inputs[i]->Any.fun)
+		if (Inputs[i].window->glfWindow == _window && !Inputs[i]->BlockInput && Inputs[i]->Any.active && Inputs[i]->Any.fun)
 		{
 			Inputs[i]->Any.active = false;
 			Inputs[i]->Any.fun((EKey::Key)key);
@@ -150,11 +202,10 @@ void QFAInput::ProcessKey(int key, int scancode, int action, int mods)
 	
 	if (action == GLFW_PRESS)
 	{
-		
 		for (int i = 0; i < Inputs.Length(); i++)
 		{
-			if (Inputs[i]->BlockInput)
-				continue;
+			if (Inputs[i].window->glfWindow != _window || Inputs[i]->BlockInput)
+				continue;			
 
 			for (int j = 0; j < Inputs[i]->KeyPressList.Length(); j++)
 				if (Inputs[i]->KeyPressList[j].key == (EKey::Key)key && Inputs[i]->KeyPressList[j].fun) // && check if fun valide
@@ -190,7 +241,7 @@ void QFAInput::ProcessKey(int key, int scancode, int action, int mods)
 	{
 		for (int i = 0; i < Inputs.Length(); i++)
 		{
-			if (Inputs[i]->BlockInput)
+			if (Inputs[i].window->glfWindow != _window || Inputs[i]->BlockInput)
 				continue;
 
 			for (int j = 0; j < Inputs[i]->KeyReleaseList.Length(); j++)
@@ -332,7 +383,7 @@ void QFAInput::AddKeyHold(EKey::Key key, std::string id, float holdTime, std::fu
 			return;
 		}
 	}
-
+	
 	KeyHoldList.Add(SKeyHold{ fun, key, id, holdTime});
 }
 

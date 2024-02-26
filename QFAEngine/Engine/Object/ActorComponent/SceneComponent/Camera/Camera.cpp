@@ -99,11 +99,3 @@ void QCameraComponent::SetViewDistance(float viewDistance)
 	ViewDistance = viewDistance;
 }
 
-QWorld* QCameraComponent::GetWorld()
-{
-	QActor* actor = GetActor();
-	if (actor->IsValid())
-		return actor->GetWorld();
-	else
-		return nullptr;
-}

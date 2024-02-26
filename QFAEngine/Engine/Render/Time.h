@@ -61,6 +61,7 @@ public:
 		return glfwGetTime();
 	}
 	*/
+	// in 1/10 microseconds
 private:
 
 };

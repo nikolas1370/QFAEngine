@@ -531,7 +531,7 @@ void QFAText::SetTextAlign(ETextAlign aligh)
     TextAlign = aligh;
 }
 
-void QFAText::StartTextRender()
+void QFAText::StartFrame()
 {
     NumberTextInFrame = MinNumberTextInFrame;
     if (OldPipeline)
@@ -658,27 +658,24 @@ void QFAText::RecreatePipeline()
 
     MaxAttlas *= 2;    
     CreatePipeline();    
-    vkCmdBindPipeline(QFAWindow::MainWindow->UICommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, Pipeline->GetPipeline());
+    vkCmdBindPipeline(QFAWindow::ViewportStuff[QFAWindow::ViewportProcess].comandBuffer.Ui, VK_PIPELINE_BIND_POINT_GRAPHICS, Pipeline->GetPipeline());
 
     for (size_t i = 0; i < textParamBuffers.size(); i++)
         RecreateTextParameterSet(textParamBuffers[i]->Buffer, textVertexParamBuffers[i]->Buffer);
 }
 
-void QFAText::CreateTextProjectionSets()
+void QFAText::CreateTextProjectionSet(VkBuffer buffer)
 {
-    for (size_t i = 0; i < QFAWindow::MaxActiveViewPort; i++)
-    {
-        VkDescriptorBufferInfo bufferInfo;
-        bufferInfo.buffer = QFAWindow::MainWindow->ViewportBuffers[i].uiProjectionBuffer->Buffer;
-        bufferInfo.offset = 0;
-        bufferInfo.range = sizeof(glm::mat4);
+    VkDescriptorBufferInfo bufferInfo;
+    bufferInfo.buffer = buffer;
+    bufferInfo.offset = 0;
+    bufferInfo.range = sizeof(glm::mat4);
 
-        std::array< QFAVKPipeline::QFADescriptorSetInfo, 1> descriptorSetInfo;
-        descriptorSetInfo[0].dstBinding = 0;
-        descriptorSetInfo[0].DescriptorBufferInfos = &bufferInfo;
+    std::array< QFAVKPipeline::QFADescriptorSetInfo, 1> descriptorSetInfo;
+    descriptorSetInfo[0].dstBinding = 0;
+    descriptorSetInfo[0].DescriptorBufferInfos = &bufferInfo;
 
-        Pipeline->CreateSet(0, descriptorSetInfo.data());
-    }
+    Pipeline->CreateSet(0, descriptorSetInfo.data());
 }
 
 void QFAText::CreateTextParameterSet()
@@ -891,14 +888,13 @@ void QFAText::CreatePipeline()
  
 
     std::array< uint32_t, 2> MaxSets;
-    MaxSets[0] = QFAWindow::MaxActiveViewPort;
+    MaxSets[0] = 10; // this set for viewport
     MaxSets[1] = QFAText::AmountSetsInTextParamPool;
     PipelineInfo.MaxSets = MaxSets.data();
 
     
     Pipeline = new QFAVKPipeline(PipelineInfo);
-    /*------*/
-    CreateTextProjectionSets();
+    /*------*/    
 
     GlyphAtlasList.resize(MaxAttlas);
     DII.resize(MaxAttlas);

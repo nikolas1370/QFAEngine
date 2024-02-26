@@ -12,6 +12,7 @@ public:
     
     void SetMesh(MeshData* meshData);
 
+    // remove startFrameTime
     void UpdateBuffers( uint64_t startFrameTime, bool isShadow, const FVector& cameraPos) override;
 
     int GetIndexCount() override;

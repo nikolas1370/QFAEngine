@@ -41,6 +41,9 @@ void ACameraEditor::Tick(float delta)
 	if (!Camera.GetStatus())
 		return;
 
+
+
+
 	if (mosePress)
 	{
 		FVector rot = GetActorRotation();

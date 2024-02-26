@@ -37,7 +37,6 @@ void QFAViewportRoot::ChangePosition(int x, int y)
 void QFAViewportRoot::NewUnit(QFAUIUnit* unit)
 {	
 	unit->SetPositionParent(Position_x, Position_y);
-	unit->SetSizeParent(Width, Height);	
 }
 
 void QFAViewportRoot::MySlotChange(QFAUIUnit* unit)

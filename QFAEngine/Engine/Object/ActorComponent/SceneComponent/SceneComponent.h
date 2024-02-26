@@ -194,6 +194,10 @@ public:
 		можливо зроблю шоб при добавляні компонента актор давався
 	*/
 	static QActor* GetActor( QSceneComponent* component) ;
+
+	QWorld* GetWorld();
+	
+
 private:
 
 	

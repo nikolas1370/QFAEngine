@@ -6,68 +6,63 @@
 #include <Render/Time.h>
 #include <Render/UI/TextInput.h>
 
-QFAUIEvent::SEvent QFAUIEvent::MainEvent;
+std::vector<QFAUIEvent*> QFAUIEvent::Events;
 
-QFAUIEvent::QFAUIEvent()
-{
-}
-
-QFAUIEvent::~QFAUIEvent()
-{
-}
-
-void QFAUIEvent::Init(QFAWindow* window, GLFWwindow* _glfWindow)
+QFAUIEvent::QFAUIEvent(QFAWindow* window, GLFWwindow* _glfWindow)
 {
 	Window = window;
 	glfWindow = _glfWindow;
-	MainEvent = { this, _glfWindow };
-	Input.SetWheelAxis([this](float axis)
+	Events.push_back(this);
+	Input = new QFAInput(window);
+	Input->SetWheelAxis([this](float axis)
 		{
-			this->ScrollValue = axis;			
+			this->ScrollValue = axis;
 		});
 
-	Input.AddKeyPress(EKey::MOUSE_LEFT, "LMD", [this](EKey::Key key)
+	Input->AddKeyPress(EKey::MOUSE_LEFT, "LMD", [this](EKey::Key key)
 		{
 			LeftMouseDown = true;
 		});
 
-	Input.AddKeyPress(EKey::MOUSE_RIGHT, "RMD", [this](EKey::Key key)
+	Input->AddKeyPress(EKey::MOUSE_RIGHT, "RMD", [this](EKey::Key key)
 		{
 			RightMouseDown = true;
 		});
 
-	Input.AddKeyRelease(EKey::MOUSE_LEFT, "LMU", [this](EKey::Key key)
+	Input->AddKeyRelease(EKey::MOUSE_LEFT, "LMU", [this](EKey::Key key)
 		{
 			LeftMouseUp = true;
 		});
 
-	Input.AddKeyRelease(EKey::MOUSE_RIGHT, "RMU", [this](EKey::Key key)
+	Input->AddKeyRelease(EKey::MOUSE_RIGHT, "RMU", [this](EKey::Key key)
 		{
 			RightMouseUp = true;
 		});
 
 	glfwSetCharCallback(glfWindow, QFAUIEvent::CharCallback);
-	Input.AddKeyPress(EKey::LEFT, "left", [this](EKey::Key key)
-		{			
-			if (MainEvent.event->TextInput->IsValid())
-					MainEvent.event->TextInput->PenLeft();
+	Input->AddKeyPress(EKey::LEFT, "left", [this](EKey::Key key)
+		{
+			if (this->TextInput->IsValid())
+				this->TextInput->PenLeft();
 		});
 
-	Input.AddKeyPress(EKey::RIGHT, "right", [this](EKey::Key key)
+	Input->AddKeyPress(EKey::RIGHT, "right", [this](EKey::Key key)
 		{
-			if (MainEvent.event->TextInput->IsValid())
-				MainEvent.event->TextInput->PenRight();
+			if (this->TextInput->IsValid())
+				this->TextInput->PenRight();
 		});
 
-	Input.AddKeyPress(EKey::BACKSPACE, "BACKSPACE", [this](EKey::Key key)
+	Input->AddKeyPress(EKey::BACKSPACE, "BACKSPACE", [this](EKey::Key key)
 		{
-			if (MainEvent.event->TextInput->IsValid())
-				MainEvent.event->TextInput->RemoveChar();
+			if (this->TextInput->IsValid())
+				this->TextInput->RemoveChar();
 		});
 }
 
-
-
+QFAUIEvent::~QFAUIEvent()
+{
+	delete Input;
+}
 
 void QFAUIEvent::AddUnitToSortList(QFAUIUnit* unit)
 {
@@ -77,6 +72,7 @@ void QFAUIEvent::AddUnitToSortList(QFAUIUnit* unit)
 	if (!unit->IsEnable)
 		return;
 
+	SortUIUnits.Add(unit);
 	if (unit->CanBeParent)
 	{
 		QFAUIParent* parent = (QFAUIParent*)unit;
@@ -90,9 +86,7 @@ void QFAUIEvent::AddUnitToSortList(QFAUIUnit* unit)
 		}// if parent type HiddenChild do nothing
 		else if (parent->GetParentType() != QFAUIParent::EParentType::HiddenChild)
 			stopExecute("QFAUIEvent::AddUnitToSortList undefined parent type");
-	}
-
-	SortUIUnits.Add(unit);// parent should add after children
+	}	
 }
 
 void QFAUIEvent::SortUIs(QFAViewportRoot* root)
@@ -116,7 +110,7 @@ void QFAUIEvent::SortUIs(QFAViewportRoot* root)
 }
 
 void QFAUIEvent::NewFrame(QFAViewportRoot* root, float mousePosX, float mousePosY, double delta)
-{	
+{		
 	QFAUIUnit* unitUnderFocus = nullptr;
 	QFAUIScroll* scrollUnit = nullptr;
 	FindUnitUnderFocus(root, unitUnderFocus, scrollUnit, mousePosX, mousePosY);
@@ -134,7 +128,7 @@ void QFAUIEvent::FindUnitUnderFocus(QFAViewportRoot* root, QFAUIUnit*& unitUnder
 	if (root)
 	{
 		SortUIs(root);
-		for (size_t i = 0; i < SortUIUnits.Length(); i++)
+		for (int i = SortUIUnits.Length() - 1; i >= 0 ; i--)
 		{
 			float xStart = (float)SortUIUnits[i]->Position_x;
 			float yStart = (float)SortUIUnits[i]->Position_y;
@@ -164,18 +158,13 @@ void QFAUIEvent::FindUnitUnderFocus(QFAViewportRoot* root, QFAUIUnit*& unitUnder
 				mousePosX <= xEnd && mousePosY <= yEnd)
 			{
 				if (!unitUnderFocus)
-				{
 					unitUnderFocus = SortUIUnits[i];
-					if (unitUnderFocus && scrollUnit)
-						break;
-				}
 
 				if (!scrollUnit && SortUIUnits[i]->Type == QFAUIType::Scroll)
-				{
 					scrollUnit = (QFAUIScroll*)SortUIUnits[i];
-					if (unitUnderFocus && scrollUnit)
-						break;
-				}
+
+				if (unitUnderFocus && scrollUnit)
+					break;
 			}
 		}
 	}
@@ -315,7 +304,7 @@ void QFAUIEvent::InputFocusEvent(QFAUIUnit* newUnitUnderFocus)
 		glfwGetCursorPos(glfWindow, &x, &y);
 		QFAUITextInput* oldInput = TextInput;
 		if (newUnitUnderFocus && newUnitUnderFocus->Type == QFAUIType::TextInput)
-		{
+		{			
 			((QFAUITextInput*)newUnitUnderFocus)->InInputfocus(x, y);
 			TextInput = (QFAUITextInput*)newUnitUnderFocus;
 		}
@@ -329,7 +318,14 @@ void QFAUIEvent::InputFocusEvent(QFAUIUnit* newUnitUnderFocus)
 
 void QFAUIEvent::CharCallback(GLFWwindow* window, unsigned int codepoint)
 {
-	if (MainEvent.glfWindow == window)
-		if (MainEvent.event->TextInput->IsValid())
-			MainEvent.event->TextInput->AddChar(codepoint);
+	for (size_t i = 0; i < Events.size(); i++)
+	{
+		if (Events[i]->glfWindow == window)
+		{
+			if (Events[i]->TextInput->IsValid())
+				Events[i]->TextInput->AddChar(codepoint);
+
+			return;
+		}
+	}
 }

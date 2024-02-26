@@ -6,8 +6,8 @@
 #include <Render/vk/PhysicalDevice.h>
 #include <Render/vk/LogicalDevice.h>
 #include <Tools/File/FileSystem.h>
+#include <Render/Window/Window.h>
 
-VkCommandPool QFAImage::CommandPool;
 
 QFAImage::QFAImage(SImageCreateInfo& ici)
 {
@@ -15,7 +15,7 @@ QFAImage::QFAImage(SImageCreateInfo& ici)
     VkDeviceSize imageSize = ici.Width * ici.Height * ici.channelCount;
     buffer = new QFAVKBuffer(imageSize, nullptr, true);
     createImage(ici.Width, ici.Height, ici.format, VK_IMAGE_TILING_OPTIMAL, ici.usage);
-    QFAVKBuffer::transitionImageLayout(TextureImage, ici.format, VK_IMAGE_LAYOUT_UNDEFINED, ici.layout, CommandPool, ici.aspect);
+    QFAVKBuffer::transitionImageLayout(TextureImage, ici.format, VK_IMAGE_LAYOUT_UNDEFINED, ici.layout, QFAWindow::QFAWindow::commandPool, ici.aspect);
     ImageView.CreateView(this, ici.aspect);
 }
 
@@ -25,7 +25,7 @@ QFAImage::QFAImage( int Width, int Height, unsigned int channelCount,  VkFormat 
     VkDeviceSize imageSize = Width * Height * channelCount;
     buffer = new QFAVKBuffer(imageSize, nullptr, true);
     createImage(Width, Height, format, VK_IMAGE_TILING_OPTIMAL, usage, flags);
-    QFAVKBuffer::transitionImageLayout(TextureImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, CommandPool, aspect);
+    QFAVKBuffer::transitionImageLayout(TextureImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, QFAWindow::QFAWindow::commandPool, aspect);
     ImageView.CreateView(this, aspect);
 }
 
@@ -43,7 +43,7 @@ QFAImage::QFAImage( const std::string src)
     stbi_image_free(pixels);
     
     createImage(texWidth, texHeight, ImageFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
-    buffer->copyInImage(this, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), CommandPool);
+    buffer->copyInImage(this, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), QFAWindow::commandPool);
 
     ImageView.CreateView(this, VK_IMAGE_ASPECT_COLOR_BIT);
 }
@@ -65,7 +65,7 @@ QFAImage::QFAImage(const std::u32string src)
     stbi_image_free(pixels);
 
     createImage(texWidth, texHeight, ImageFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
-    buffer->copyInImage(this, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), CommandPool);
+    buffer->copyInImage(this, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), QFAWindow::commandPool);
 
     ImageView.CreateView(this, VK_IMAGE_ASPECT_COLOR_BIT);
 }
@@ -115,9 +115,4 @@ void QFAImage::createImage(uint32_t width, uint32_t height, VkFormat format, VkI
         &TextureImage,
         &ImageAllocation,
         nullptr);
-}
-
-void QFAImage::Init(VkCommandPool commandPool)
-{
-    CommandPool = commandPool;
 }
