@@ -24,6 +24,9 @@ void QWorld::ProcessTicks()
 		bool worldProcess = false; // viewport connect to world by camera
 		for (size_t j = 0; j < QFAWindow::Windows.size(); j++)
 		{
+			if (!QFAWindow::Windows[j]->ProcessTickIfWindowsMinimized && QFAWindow::Windows[j]->minimized)
+				continue;
+
 			for (size_t k = 0; k < QFAWindow::Windows[j]->Viewports.Length(); k++)
 			{
 				if (QFAWindow::Windows[j]->Viewports[k]->GetWorld() == Worlds[i])

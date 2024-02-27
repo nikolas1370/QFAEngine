@@ -66,18 +66,7 @@ QFAVKSwapChain::QFAVKSwapChain(GLFWwindow* window, VkSurfaceKHR surface, VkComma
 
 QFAVKSwapChain::~QFAVKSwapChain()
 {
-    if(!glfwWindowShouldClose(Window))
-    {
-        int width = 0, height = 0;
-        glfwGetFramebufferSize(Window, &width, &height);
-        while (width == 0 || height == 0)
-        {
-            glfwGetFramebufferSize(Window, &width, &height);
-            glfwWaitEvents();
-        }
-    }
-
-    vkDeviceWaitIdle(QFAVKLogicalDevice::GetDevice());
+    
     for (auto framebuffer : swapChainFramebuffers)
         vkDestroyFramebuffer(QFAVKLogicalDevice::GetDevice(), framebuffer, nullptr);
 

@@ -1,5 +1,30 @@
 #include "Math/Vector.h"
 
+/*
+one viewport three command buffer
+one window one command buffer for present frame
+
+before 
+    R     D
+  1120  520
+  0.9   1.85
+    one window
+  1760  918
+  0.56  1.08
+
+
+one viewport one command buffer
+one command buffer for all windows
+after
+    R     D
+  1310  700
+  0.76  1.4
+    one window
+  2080  1240
+  0.48  0.85
+*/
+
+
 #include <Overlord/Overlord.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
 #include <Math/Vector2D.h>
@@ -32,10 +57,6 @@
 
 int main()
 {
-
-
-
-
     QFAEditorOverlord::Init();
 
     QStaticMesh* Mesh = QFAModelLoader::LoadModel("SomeModel/Arrow.fbx");
@@ -227,7 +248,7 @@ int main()
     secondWindowsViewport->GetRoot()->UnitName = "secondWindowsViewport root";
 
   
-    ACameraEditor Camera2;
+    ACameraActor Camera2;
     Camera2.SetActorPosition(FVector(-1400, 450, 70));
     Camera2.SetActorRotation(FVector(0, 0, -20));
     
@@ -245,7 +266,6 @@ int main()
         {
             std::cout << "second Window hold\n";
         });
-
 
     QFAEditorOverlord::StartLife();
 

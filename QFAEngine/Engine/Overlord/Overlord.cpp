@@ -53,11 +53,15 @@ bool QFAOverlord::Init(std::vector<QFAVKPipeline::SShaderData> shaderData)
     return true;
 }
 
+static int count = 0;
+static double deltaAcum = 0;
+
+
 void QFAOverlord::MainLoop()
 {
     const float frameCount = 60.0f;
     const float frameTime = 1000 / frameCount;
-    bool limit = false; // 
+    bool limit = false; 
 
     while ( Life)
     {
@@ -76,27 +80,27 @@ void QFAOverlord::MainLoop()
             }
         }
 
-        
+        auto t = QTime::GetSystemTime();
         QTime::CalcDeltaTime();
         glfwPollEvents();
         QFAInput::NewFrame((float)QTime::GetDeltaTime());
-        
-        QFAWindow::ProcessUIEvent();        
+        QFAWindow::ProcessUIEvent();
         QWorld::ProcessTicks();
-        auto t = QTime::GetSystemTime();
         QFAWindow::RenderWindows();
-
         
+        count++;
+        deltaAcum += QTime::GetDeltaTime();
+        if (deltaAcum >= 1.0)
+        {
+            std::cout << "fps " << count <<" deltatime " << 1.0 / (double)count << "\n";
+            count = 0;
+            deltaAcum = 0.0;
+        }
+
         float timePassed = (float)(QTime::GetSystemTime() - t) / 10000.0f;
-        //std::cout << timePassed << "\n";
-        
-
         if (limit && timePassed < frameTime)
             QFASleep(frameTime - timePassed);
-
     }
-
-    
 }
 
 

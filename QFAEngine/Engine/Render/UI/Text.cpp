@@ -658,7 +658,7 @@ void QFAText::RecreatePipeline()
 
     MaxAttlas *= 2;    
     CreatePipeline();    
-    vkCmdBindPipeline(QFAWindow::ViewportStuff[QFAWindow::ViewportProcess].comandBuffer.Ui, VK_PIPELINE_BIND_POINT_GRAPHICS, Pipeline->GetPipeline());
+    vkCmdBindPipeline(QFAWindow::ViewportStuff[QFAWindow::ViewportProcess].comandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, Pipeline->GetPipeline());
 
     for (size_t i = 0; i < textParamBuffers.size(); i++)
         RecreateTextParameterSet(textParamBuffers[i]->Buffer, textVertexParamBuffers[i]->Buffer);

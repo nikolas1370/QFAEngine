@@ -96,22 +96,11 @@ class QFAWindow
 	void StartFrame();
 	
 
-	bool framebufferResized = false;
 	// call Overlord
-	static void RenderWindows();
+	static void RenderWindows();	
 	void RenderWindow(bool lastWindow);
-
+	static void PresentWindows();
 public:
-	/*
-	
-	
-	убрать
-	
-	
-	*/
-	//static const int MaxActiveViewPort = 10;
-
-	
 
 	
 private:
@@ -122,6 +111,9 @@ private:
 	static QFAVKTextureSampler* ShadowSampler;
 	static VkFormat depthFormat; // VK_FORMAT_D32_SFLOAT
 
+
+	void BeginCommandBuffer();
+	void EndCommandBufferAndQueueSubmit();
 	void ShadowRender(QFAViewport* viewport);
 
 	/*----*/
@@ -134,12 +126,7 @@ private:
 		VkSemaphore ActorShadow;
 		VkSemaphore Ui;
 	};
-	struct SViewportComandBuffer
-	{
-		VkCommandBuffer ActorShadow;
-		VkCommandBuffer Actor;
-		VkCommandBuffer Ui;
-	};
+
 
 	struct SViewportBuffers
 	{   // this buffer attach to text/image pipline sets0 
@@ -152,7 +139,7 @@ private:
 	struct SViewportStuff
 	{
 		SViewportSemi semaphore;
-		SViewportComandBuffer comandBuffer;
+		VkCommandBuffer comandBuffer;
 		SViewportBuffers buffers;
 	};
 
@@ -164,10 +151,7 @@ private:
 	VkSemaphore FinisSemaphore;
 	VkSemaphore FinisSemiOtherWindow;
 	VkSemaphore GetImageSemaphore;
-	VkCommandBuffer FinisCommandBuffer;
-
-
-	//std::array<SViewportBuffers, MaxActiveViewPort> ViewportBuffers;
+	static VkCommandBuffer FinisCommandBuffer;
 
 	void CreateViewPortStuff();
 
@@ -176,11 +160,6 @@ public:
 	QFAWindow(int width, int height, std::string name);
 	~QFAWindow();
 
-	static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
-	{
-		auto app = reinterpret_cast<QFAWindow*>(glfwGetWindowUserPointer(window));
-		app->framebufferResized = true;
-	}
 
 	void AddViewport(QFAViewport* viewport);
 	void RemoveViewport(QFAViewport* viewport);
@@ -221,10 +200,15 @@ public:
 	*/
 	bool GetMousePosition(double& x, double& y);
 
-
+	inline void SetProcessTickIfWindowsMinimized(bool processTickIfWindowsMinimized)
+	{
+		ProcessTickIfWindowsMinimized = processTickIfWindowsMinimized;
+	}
 private:
 	uint32_t imageIndex; // next image in sqp shain
-	
+	bool minimized = false;
+	bool ProcessTickIfWindowsMinimized = false;
+
 	void createCommandPool();
 	
 	void recreateSwapChain();
@@ -237,15 +221,15 @@ private:
 	void DrawUI(QFAViewport* viewport, int viewportIndex);
 
 
-	void DrawOffscreenBuffer(bool lastWindow);
+	void DrawOffscreenBuffer();
 	void recordCommandBufferTestImege();
 
-
+	static void QueueSubmitPresent(std::vector<VkSemaphore> &listSemi);
 
 	void createSyncObject();
 	void createCommandBuffer();
 
-	void PresentFrame();
+	void PresentFrame(VkSemaphore finishSemi);
 	
 
 	QFAPresentImage* PresentImage;
