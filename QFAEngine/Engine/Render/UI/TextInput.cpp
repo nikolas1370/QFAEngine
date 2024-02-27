@@ -176,3 +176,5 @@ void QFAUITextInput::NewFrame(float delta)
 		Text.Text.CanSeePen = !Text.Text.CanSeePen;
 	}
 }
+
+

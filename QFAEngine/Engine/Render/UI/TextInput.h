@@ -14,6 +14,10 @@ public:
 	QFAUITextInput();
 	~QFAUITextInput();
 
+	inline bool SetFont(QFAText::SFont* font)
+	{
+		return Text.SetFont(font);
+	}
 protected:
 	inline QFAVKPipeline* GetChildPipeline() override
 	{

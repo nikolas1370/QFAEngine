@@ -150,7 +150,146 @@ public:
     void SetTextAlign(ETextAlign aligh);
 
 
+
+    class QFAStringConventor
+    {
+
+    public:
+        static std::u32string ToU32String(const char* str)
+        {
+            if (!str)
+                return std::u32string();
+
+            std::u32string string;
+            size_t strL = strlen(str);
+            string.resize(strL);
+            for (size_t i = 0; i < strL; i++)
+                string[i] = (char32_t)str[i];
+
+            return string;
+        }
+    };
+
+    
+
+    struct SFont
+    {
+        friend QFAText;
+
+        std::u32string GetFamilyName()
+        {
+            return familyName;
+        }
+
+        std::u32string GetStyleName()
+        {
+            return styleName;
+        }
+
+        /*
+        
+        return false if in newFamilyName exist font with styleName
+        */
+        bool SetFamilyName(std::u32string newFamilyName)
+        {
+            for (size_t i = 0; i < Fonts.size(); i++)
+            {
+                if (Fonts[i] == this)
+                    continue;
+
+                if (Fonts[i]->familyName == newFamilyName && Fonts[i]->styleName == styleName)
+                    return false;
+            }
+
+            familyName = newFamilyName;
+            return true;
+        }
+
+        /*  
+        
+        return false if font with newStyleName in familyName exist
+        */
+        bool SetStyleName(std::u32string newStyleName)
+        {
+            for (size_t i = 0; i < Fonts.size(); i++)
+            {
+                if (Fonts[i] == this)
+                    continue;
+
+                if (Fonts[i]->familyName == familyName && Fonts[i]->styleName == newStyleName)
+                    return false;
+            }
+
+            styleName = newStyleName;
+            return true;
+        }
+
+    private:        
+        SFont()
+        {
+
+        }
+        std::u32string familyName;
+        std::u32string styleName; 
+        FT_Face face;
+        QFAArray<Symbol> Symbols;
+    };
+    
+    enum ELoadFontResult
+    {
+        LRFSucceed = 0,
+        LRFLoadError = 1,
+        LRFFontStyleNameExist = 2,
+        LRFFontFamilyNameNotFound = 3,// if ib font FamilyName == null, not return if in familyName not void
+        LRFFontStyleNameNotFound = 4,// if ib font StyleName == null, not return if in styleName not void
+        LRFPathWasNull = 5,
+        LRFFreeTypeError = 6, //Could not init FreeType Library
+        LRFEngineNotInit = 7 // if LoadFont called before Engine was initialized
+    };
+    
+    static ELoadFontResult LoadFont(const char* fontPath, SFont*& outFont, std::u32string* familyName = nullptr, std::u32string* styleName = nullptr);
+    inline static SFont* GetFont(size_t index)
+    {
+        return Fonts[index];
+    }
+
+    static SFont* GetFont(std::u32string familyName, std::u32string styleName)
+    {
+        for (size_t i = 0; i < Fonts.size(); i++)
+            if (Fonts[i]->familyName == familyName && Fonts[i]->styleName == styleName)
+                return Fonts[i];
+
+        return nullptr;
+    }
+
+    inline static size_t GetFontCount()
+    {
+        return Fonts.size();
+    }
+
+    bool SetFont(SFont* font)
+    {
+        if (!font)
+            return false;
+
+        for (size_t i = 0; i < Fonts.size(); i++)
+        {
+            if (Fonts[i] == font)
+            {
+                CurentFontIndex = i;
+                TextChange = true;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 private:
+    static std::vector<SFont*> Fonts;
+
+    size_t CurentFontIndex;// store font for this text
+
 
     void SetSizeParent(unsigned int w, unsigned int h) override;
     void SetPositionParent(int x, int y) override;
@@ -159,7 +298,7 @@ private:
     void updateUniformBuffer();
     void PrepareSymbolsToGpu();
     void ProcessText();
-    static void AddGlyph(FT_ULong symbol);
+    static void AddGlyph(FT_ULong symbol, SFont* font);
 
 
 
@@ -189,12 +328,12 @@ private:
     unsigned int CountSymbolForRender = 0; // replase to TextMetadata.size()
     
 
-    static QFAArray<Symbol> Symbols;
+
     static const unsigned int FontLoadCharHeight = 50;// 'j' == 47/50(Height) after render 62
     static const unsigned int AtlasRowHeight = (unsigned int)((float)FontLoadCharHeight * 1.4f); // after call FT_Render_Glyph Glyph becomes bigger
     static const int OffsetBetweenGlyph = 2;//  
     static FT_Library ft;
-    static FT_Face face;
+
     static const unsigned int defaultTextSize = 30;
     static const int GlyphAtlasHeight = 1000;
     static const int GlyphAtlasWidth = 1000;

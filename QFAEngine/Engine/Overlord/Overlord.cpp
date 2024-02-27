@@ -27,6 +27,9 @@ bool QFAOverlord::StartLife()
 {
 	if (Life || !isInit)
 		return false;	
+    
+    if (QFAText::Fonts.size() == 0)
+        stopExecute("before call StartLife need add font, for it call ELoadFontResult LoadFont");
 
     std::cout << "Engine load time " << (QTime::GetTime() / 10000) << '\n';
 	Life = true;
