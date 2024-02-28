@@ -70,7 +70,12 @@ void QFAUIImage::UpdateUniforms()
     ip.overflow.leftTopY = 0;
     ip.overflow.rightBottomX = 1000000;
     ip.overflow.rightBottomY = 1000000; // if this image use like background need start get overflow in parent->parent
-    ProcessParentOverflow(ip.overflow, IBackground ? ((QFAUIUnit*)Parent)->GetParent() : Parent);
+
+    QFAUIParent* parent = Parent;
+    if (((QFAUIUnit*)Parent)->GetUnitType() != QFAUIType::Scroll || IBackground)
+        parent = ((QFAUIUnit*)parent)->GetParent();
+
+    ProcessParentOverflow(ip.overflow, parent);
 
     ip.BackgroundEnable = !Image;// ;
     ip.BackgroundColor = BackgroundColor;
@@ -308,7 +313,6 @@ void QFAUIImage::PrepareSet()
     setInfo[1].DescriptorBufferInfos = &BufferInfo;
     setInfo[2].dstBinding = 2;
     setInfo[2].DescriptorBufferInfos = &BufferInfoVertex;
-    UpdateUniforms();
     Pipeline->CreateSet(1, setInfo.data());
 }
 

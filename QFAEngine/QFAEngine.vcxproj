@@ -188,6 +188,7 @@
     <ClCompile Include="Engine\Render\UI\Text.cpp" />
     <ClCompile Include="Engine\Render\Time.cpp" />
     <ClCompile Include="Engine\Render\Buffer\IndexBuffer.cpp" />
+    <ClCompile Include="Engine\Render\UI\UIList.cpp" />
     <ClCompile Include="Engine\Render\UI\UIParent.cpp" />
     <ClCompile Include="Engine\Render\UI\UIParentHiddenChild.cpp" />
     <ClCompile Include="Engine\Render\UI\UIParentMultipleUnit.cpp" />
@@ -240,6 +241,7 @@
     <ClInclude Include="Engine\Render\UI\RenderUnit.h" />
     <ClInclude Include="Engine\Render\UI\Text.h" />
     <ClInclude Include="Engine\Render\Time.h" />
+    <ClInclude Include="Engine\Render\UI\UIList.h" />
     <ClInclude Include="Engine\Render\UI\UIParent.h" />
     <ClInclude Include="Engine\Render\UI\UIParentHiddenChild.h" />
     <ClInclude Include="Engine\Render\UI\UIParentMultipleUnit.h" />

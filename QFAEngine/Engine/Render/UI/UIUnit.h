@@ -15,7 +15,8 @@ namespace QFAUIType
 		Image = 4,
 		Grid = 5,
 		Scroll = 6,
-		TextInput = 7
+		TextInput = 7,
+		List = 8
 	};
 }
 
@@ -60,6 +61,15 @@ namespace QFAUISlot
 	{
 		SSlotBaseInfo BaseInfo{ QFAUIType::Scroll, sizeof(QFAUISlot::SScrollSlot) };
 	};
+
+	struct SListSlot
+	{
+		SSlotBaseInfo BaseInfo{ QFAUIType::List, sizeof(QFAUISlot::SListSlot) };
+		int marginLeft;
+		int marginTop;
+	};
+
+	
 }
 
 class QFAViewport;
@@ -73,6 +83,7 @@ class QFAUIParentOneUnit;
 class QFAUIParent;
 class QFAUIScroll;
 class QFAViewportRoot;
+class QFAUIList;
 class QFAUIUnit
 {
 	friend QFAViewport;
@@ -84,6 +95,7 @@ class QFAUIUnit
 	friend QFAUIEvent;
 	friend QFAUIParentOneUnit;
 	friend QFAUIScroll;
+	friend QFAUIList;
 
 protected:
 	struct UniformOverflow
@@ -232,6 +244,11 @@ public:
 	inline QFAUIParent* GetParent()
 	{
 		return Parent;
+	}
+
+	inline void* GetSlot()
+	{
+		return &Slot;
 	}
 
 	inline bool GetIsRoot()

@@ -571,7 +571,7 @@ void QFAText::Render(VkCommandBuffer comandebuffer)
     if (NumberTextInFrame >= maxTextInframe)
         CreateTextParameterSet();
 
-    if (TextChange)
+    if (TextChange && Text.size() > 0)
         ProcessText();
 
     CurentDescriptorSet = Pipeline->GetSet(1, NumberTextInFrame);

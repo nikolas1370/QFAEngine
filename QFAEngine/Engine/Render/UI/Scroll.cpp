@@ -39,6 +39,7 @@ void QFAUIScroll::ChangedUnit(QFAUIUnit* unit)
 
 void QFAUIScroll::ProcessScroll(double delta,  float addValue, bool shiftDown)
 {
+
 	if (!Child) 
 	{
 		ScrollValueVertical = 0;
@@ -132,7 +133,6 @@ void QFAUIScroll::ProcessScrollVerticalInside(double delta, float addValue)
 
 void QFAUIScroll::ProcessScrollHorizonInside(double delta, float addValue)
 {
-
 	unsigned int childWidth;
 
 	if (Child->CanBeParent)
@@ -151,9 +151,9 @@ void QFAUIScroll::ProcessScrollHorizonInside(double delta, float addValue)
 		QFAUIRenderUnit* child = (QFAUIRenderUnit*)Child;
 		childWidth = child->InnerWidth < (unsigned int)child->Width ? (unsigned int)child->Width : child->InnerWidth;
 	}
-
+	
 	if (Width >= (int)childWidth)
-		return;
+		return;	
 
 	if (NotEqualToZero(addValue))
 	{
@@ -165,7 +165,7 @@ void QFAUIScroll::ProcessScrollHorizonInside(double delta, float addValue)
 	else if (EqualToZero(ScrollTimeToEndHorizon))
 		return;
 	else if (EqualToZero(ScrollValueHorizon))
-		return;
+		return;	
 
 	if (delta > ScrollTimeToEndHorizon)
 	{
@@ -263,7 +263,7 @@ void QFAUIScroll::ChangeScrollValueHorizonInside(float value)
 }
 
 void QFAUIScroll::NewFrame(QFAUIScroll* scrollUndeCursor, double delta, float addValue, bool shiftDown)
-{
+{	
 	for (size_t i = 0; i < Scrolls.size(); i++)
 	{
 		if (Scrolls[i] == scrollUndeCursor)
@@ -323,14 +323,9 @@ void QFAUIScroll::ChangePosition(int x, int y)
 	Position_y = y;
 	if (Child)
 	{
-		/*
-		
-		перев≥р€й чи ≥нпут ≥ €кшо так то дай т≥ки х ≥ y
-		
-		*/
 
 		if (Child->CanBeParent)
-			((QFAUIParent*)Child)->SetPositionParent(x, y + (int)ScrollValueFinalVertical);
+			((QFAUIParent*)Child)->SetPositionParent(x + (int)ScrollValueFinalHorizon, y + (int)ScrollValueFinalVertical);
 		else
 			((QFAUIRenderUnit*)Child)->SetPositionParent(x, y);
 	}

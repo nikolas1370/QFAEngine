@@ -117,6 +117,7 @@ void QFAOverlord::MainLoop()
 
 void QFAOverlord::EndLife()
 {
+    vkQueueWaitIdle(QFAVKLogicalDevice::GetGraphicsQueue());
     Life = false;
 
     for (size_t i = 0; i < QFAWindow::Windows.size(); i++)
