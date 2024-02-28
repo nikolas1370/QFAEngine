@@ -57,6 +57,30 @@ QFAUIEvent::QFAUIEvent(QFAWindow* window, GLFWwindow* _glfWindow)
 			if (this->TextInput->IsValid())
 				this->TextInput->RemoveChar();
 		});
+
+
+	Input->AddKeyPress(EKey::LEFT_SHIFT, "DLSH", [this](EKey::Key key)
+		{
+			LeftShiftDown = true;
+		});
+
+	Input->AddKeyRelease(EKey::LEFT_SHIFT, "ULSH", [this](EKey::Key key)
+		{
+			LeftShiftDown = false;
+		});
+
+	Input->AddKeyPress(EKey::RIGHT_SHIFT, "DRSH", [this](EKey::Key key)
+		{
+			RightShiftDown = true;
+		});
+
+	Input->AddKeyRelease(EKey::RIGHT_SHIFT, "URSH", [this](EKey::Key key)
+		{
+			RightShiftDown = false;
+		});
+
+
+	// 
 }
 
 QFAUIEvent::~QFAUIEvent()
@@ -173,7 +197,7 @@ void QFAUIEvent::FindUnitUnderFocus(QFAViewportRoot* root, QFAUIUnit*& unitUnder
 void QFAUIEvent::ScrollEvent( QFAViewportRoot* root, QFAUIScroll* scrollUnit, double delta)
 {
 	if (scrollUnit && scrollUnit->Type == QFAUIType::Type::Scroll)
-		QFAUIScroll::NewFrame(scrollUnit, delta, root ? ScrollValue : 0.0f);
+		QFAUIScroll::NewFrame(scrollUnit, delta, root ? ScrollValue : 0.0f, (LeftShiftDown || RightShiftDown ? true : false));
 	else
 		QFAUIScroll::NewFrame(nullptr, delta, 0.0f);
 

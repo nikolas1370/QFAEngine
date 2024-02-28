@@ -3,9 +3,11 @@
 #include <Render/UI/Text.h>
 
 class QFAUIEvent;
+class QFAUIScroll;
 class QFAUITextInput : public QFAParentHiddenChild
 {
 	friend QFAUIEvent;
+	friend QFAUIScroll;
 	static const int MaxTextCount = 256;
 	QFAText Text;
 	char32_t Texts[MaxTextCount];
@@ -39,6 +41,7 @@ protected:
 	void ChangeSize(unsigned int w, unsigned int h) override;
 	void ChangePosition(int x, int y) override;
 	float UpdateInnerHeight() override;
+	float UpdateInnerWidth() override;
 
 	void InInputfocus(unsigned int cursorX, unsigned int cursorY);
 	void OutInputfocus();

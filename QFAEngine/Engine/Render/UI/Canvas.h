@@ -18,6 +18,7 @@ protected:
 	void UpdatePositionSizeChildren();
 
 	float UpdateInnerHeight() override;
+	float UpdateInnerWidth() override;
 public:
 	QFAUICanvas();
 	~QFAUICanvas();

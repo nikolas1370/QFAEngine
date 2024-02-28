@@ -72,6 +72,7 @@ protected:
 		write new valude in this->InnerHeight and return it
 	*/
 	virtual float UpdateInnerHeight() = 0;
+	virtual float UpdateInnerWidth() = 0;
 
 
 	EParentType ParentType = EParentType::NONEChild;

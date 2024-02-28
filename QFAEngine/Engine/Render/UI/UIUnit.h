@@ -287,6 +287,12 @@ public:
 	
 	
 	EventFunctions Events;
+
+
+	inline QFAUIType::Type GetUnitType()
+	{
+		return Type;
+	}
 protected:
 	QFAUISlot::SParentSlot Slot;
 
@@ -320,6 +326,7 @@ protected:
 		if innerHeight < Height, Scroll use Height
 	*/
 	unsigned int InnerHeight = 0;
+	unsigned int InnerWidth = 0;
 
 	
 

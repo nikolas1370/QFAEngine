@@ -35,8 +35,13 @@ void QFAUITextInput::ChangePosition(int x, int y)
 
 float QFAUITextInput::UpdateInnerHeight()
 {
-	InnerHeight = Text.InnerHeight;
-	return InnerHeight;
+	return Text.InnerHeight;
+}
+
+float QFAUITextInput::UpdateInnerWidth()
+{
+	InnerWidth = Text.InnerWidth;
+	return InnerWidth;
 }
 
 void QFAUITextInput::InInputfocus(unsigned int cursorX, unsigned int cursorY)
@@ -48,11 +53,6 @@ void QFAUITextInput::InInputfocus(unsigned int cursorX, unsigned int cursorY)
 
 	Text.Text.inputFocus = true;
 
-	/*
-	
-		need rework
-	
-	*/
 
 	QFAText::GlyphShader *gs = (QFAText::GlyphShader*)Text.vertexBufer->CpuSideBuffer->MapData;
 	int index = 0;

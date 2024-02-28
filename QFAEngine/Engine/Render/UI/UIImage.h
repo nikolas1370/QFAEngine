@@ -54,6 +54,8 @@ class QFAUIImage : public QFAUIRenderUnit
     void UpdateUniforms();
     static VkDescriptorSet CurentDescriptorSetProject;
 
+    // if this image use for Background image
+    bool IBackground = false;
 public:
   
 

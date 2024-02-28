@@ -64,7 +64,8 @@ void QFAOverlord::MainLoop()
 {
     const float frameCount = 60.0f;
     const float frameTime = 1000 / frameCount;
-    bool limit = false; 
+    bool limit = true;
+    float timePassedAcum = 0;
 
     while ( Life)
     {
@@ -91,16 +92,23 @@ void QFAOverlord::MainLoop()
         QWorld::ProcessTicks();
         QFAWindow::RenderWindows();
         
+
+
+
         count++;
         deltaAcum += QTime::GetDeltaTime();
+        float timePassed = (float)(QTime::GetSystemTime() - t) / 10000.0f;
+        timePassedAcum += timePassed;
+
         if (deltaAcum >= 1.0)
-        {
-            std::cout << "fps " << count <<" deltatime " << 1.0 / (double)count << "\n";
+        {            
+            std::cout << "fps " << count <<" deltatime " << 1.0 / (double)count << " " << timePassedAcum / count << "\n";
+            timePassedAcum = 0;
             count = 0;
             deltaAcum = 0.0;
         }
 
-        float timePassed = (float)(QTime::GetSystemTime() - t) / 10000.0f;
+       
         if (limit && timePassed < frameTime)
             QFASleep(frameTime - timePassed);
     }

@@ -23,5 +23,6 @@ public:
 
 private:
 	float UpdateInnerHeight() override;
+	float UpdateInnerWidth() override;
 };
 

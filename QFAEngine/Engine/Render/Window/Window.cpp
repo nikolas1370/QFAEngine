@@ -594,6 +594,7 @@ void QFAWindow::ShadowRender(QFAViewport* _viewport)
 
 void QFAWindow::RenderWindows()
 { 
+	vkQueueWaitIdle(QFAVKLogicalDevice::GetGraphicsQueue()); // Wait before render
 	ViewportProcess = 0;
 	QMeshBaseComponent::StartFrame();
 	QFAText::StartFrame();
@@ -620,7 +621,6 @@ void QFAWindow::RenderWindows()
 	}
 
 	PresentWindows();
-	vkQueueWaitIdle(QFAVKLogicalDevice::GetGraphicsQueue());
 }
 
 void QFAWindow::RenderWindow(bool lastWindow)

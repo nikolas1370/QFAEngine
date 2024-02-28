@@ -64,4 +64,6 @@ private:
 	void MySlotChange(QFAUIUnit* unit) override {};
 
 	float UpdateInnerHeight() override;
+	// grid always return own Width
+	float UpdateInnerWidth() override;
 };

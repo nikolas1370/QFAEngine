@@ -59,23 +59,18 @@ void QFAUIImage::Render(VkCommandBuffer comandebuffer)
 
 void QFAUIImage::UpdateUniforms()
 {
-    if (Index < 0 || Index >= ImageIndexs.size())
+    if (Index < 0 || Index >= ImageIndexs.size() || ImageIndexs[Index].image != this)
         return;
-
-    if (ImageIndexs[Index].image != this)
-    {
-        return;
-    }
 
     SImageParam ip;
     ip.opacity = ProcessParentOpacity(Opacity, Parent);    
-
+    
     ip.overflow.enable = 0;
     ip.overflow.leftTopX = 0;
     ip.overflow.leftTopY = 0;
     ip.overflow.rightBottomX = 1000000;
-    ip.overflow.rightBottomY = 1000000;
-    ProcessParentOverflow(ip.overflow, Parent);
+    ip.overflow.rightBottomY = 1000000; // if this image use like background need start get overflow in parent->parent
+    ProcessParentOverflow(ip.overflow, IBackground ? ((QFAUIUnit*)Parent)->GetParent() : Parent);
 
     ip.BackgroundEnable = !Image;// ;
     ip.BackgroundColor = BackgroundColor;

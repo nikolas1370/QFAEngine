@@ -17,6 +17,7 @@ QFAUIParent::QFAUIParent()
 {
 	CanBeParent = true;
 	BackgroundImage.Parent = this;
+	BackgroundImage.IBackground = true;
 }
 
 QFAUIParent::~QFAUIParent()
@@ -32,6 +33,10 @@ void QFAUIParent::SetBackgroundImage(QFAImage* image)
 
 void QFAUIParent::RenderBackground(VkCommandBuffer comandebuffer)
 {
+	if (Parent->Type == QFAUIType::Scroll)
+		if (Parent->Position_x != BackgroundImage.Position_x || Parent->Position_y != BackgroundImage.Position_y)
+			BackgroundImage.SetPositionParent(Parent->Position_x, Parent->Position_y);
+
 	BackgroundImage.SetZIndex(ZIndex);
 	BackgroundImage.Render(comandebuffer);
 }

@@ -175,24 +175,31 @@ int main()
     scroll->SetBackgroundImage(OldWell);
     scroll->SetBackgroundType(EBackgroundType::BTImage);
 
-
     QFAUIScroll* scrollGrid = new QFAUIScroll;
     scrollGrid->SetUnit(grid);
     scrollGrid->SetBackgroundType(EBackgroundType::BTColor);
     scrollGrid->SetBackgroundColor(FVector4D(1, 0, 0, 0.5));
     
+    
     QFAUITextInput* textInput = new QFAUITextInput;
     textInput->SetBackgroundImage(OldWell);
-    
+    QFAUIScroll* scrollInputText = new QFAUIScroll;
+    scrollInputText->SetScrollType(QFAUIScroll::STBoth);
+    scrollInputText->SetUnit(textInput);
+
     grid->AddUnit(UICrystal);
     grid->AddUnit(UIDogy);
     grid->AddUnit(UIHomy);
      
     grid->AddUnit(BackgroundColor); 
+    grid->AddUnit(scrollInputText);
+
     grid->AddUnit(UIhome_2); 
-    grid->AddUnit(textInput);
-    grid->AddUnit(scroll);
     
+
+    grid->AddUnit(scroll);
+
+
 
 
     
@@ -249,6 +256,7 @@ int main()
 
     QFAEditorOverlord::StartLife();
 
+    // scrollGrid->SetScrollType(QFAUIScroll::EScrollTYpe::STHorizon);
 
     
     return 0;

@@ -23,6 +23,11 @@ float QFAUIGrid::UpdateInnerHeight()
 	return (float)InnerHeight;
 }
 
+float QFAUIGrid::UpdateInnerWidth()
+{
+	return (float)Width;
+}
+
 #define GetCountUnit(Width, MaxUnitSize) (unsigned int)ceill((float)(Width) / (MaxUnitSize))
 #define GetSizeUnit(Width, MaxUnitSize) ((Width) / GetCountUnit(Width, MaxUnitSize))
 

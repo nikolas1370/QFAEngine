@@ -26,6 +26,7 @@ class QFAVKPipeline;
 class QFAVKImageView;
 class QFAVKTextureSampler;
 class QFAUITextInput;
+class QFAUIScroll;
 class QFAText : public QFAUIRenderUnit
 {
     friend QFAViewport;
@@ -33,6 +34,7 @@ class QFAText : public QFAUIRenderUnit
     friend QFAWindow;
     friend QFAVKPipeline;
     friend QFAUITextInput;
+    friend QFAUIScroll;
 
     struct SGlyphAtlasListRow
     {

@@ -298,6 +298,9 @@ void QFAText::PrepareSymbolsToGpu()
     if (CountSymbolForRender == 0)
         return;
 
+    int minLeftSymbolPos = 0;
+    int maxRightSymbolPos = 0;
+
     unsigned int temCountSymbolForRender = CountSymbolForRender;
 
     int w = 0;
@@ -305,6 +308,9 @@ void QFAText::PrepareSymbolsToGpu()
     float tem = ((float)FontHeight / (float)FontLoadCharHeight);
     if (TextAlign == ETextAlign::TALeft)
     {
+        minLeftSymbolPos = Position_x;
+        maxRightSymbolPos = Position_x;
+
         for (size_t i = 0; i < CountSymbolForRender; i++)
         {
             if (row != TextMetadata[i].row)
@@ -338,11 +344,20 @@ void QFAText::PrepareSymbolsToGpu()
             if(temYEnd - Position_y > InnerHeight)
                 InnerHeight = (unsigned int)((int)temYEnd - Position_y);
 
+            if (GlyphInfoData[i].leftTop_1.x < minLeftSymbolPos)
+                minLeftSymbolPos = GlyphInfoData[i].leftTop_1.x;
+
+            if (GlyphInfoData[i].rightTop_2.x > maxRightSymbolPos)
+                maxRightSymbolPos = GlyphInfoData[i].rightTop_2.x;
+
             w += (int)((float)gi->advance_x * tem);
         }
     }
     else if (TextAlign == ETextAlign::TACenter)
     {
+        minLeftSymbolPos = Position_x + (Width / 2);
+        maxRightSymbolPos = minLeftSymbolPos;
+
         int rowLen = 0;
         for (size_t startRow = 0; startRow < CountSymbolForRender; startRow += rowLen)
         {
@@ -389,12 +404,21 @@ void QFAText::PrepareSymbolsToGpu()
                 if (temYEnd - Position_y > InnerHeight)
                     InnerHeight = (unsigned int)((int)temYEnd - Position_y);
 
+                if (GlyphInfoData[i].leftTop_1.x < minLeftSymbolPos)
+                    minLeftSymbolPos = GlyphInfoData[i].leftTop_1.x;
+
+                if (GlyphInfoData[i].rightTop_2.x > maxRightSymbolPos)
+                    maxRightSymbolPos = GlyphInfoData[i].rightTop_2.x;
+
                 w += (int)((float)gi->advance_x * tem);
             }
         }
     }
     else if (TextAlign == ETextAlign::TARight)
     {// do revers
+        minLeftSymbolPos = Position_x + Width;
+        maxRightSymbolPos = minLeftSymbolPos;
+
         int statrtFor = 0;// if last symbol space(' ') symbol past and if pen not be render
         if (Fonts[CurentFontIndex]->Symbols[TextMetadata[CountSymbolForRender - 1].symbolIndex].symbol == U' ' &&
             !(Text.penEnable && Text.inputFocus)) 
@@ -450,10 +474,18 @@ void QFAText::PrepareSymbolsToGpu()
             if (temYEnd - Position_y > InnerHeight)
                 InnerHeight = (unsigned int)((int)temYEnd - Position_y);
 
+            if (GlyphInfoData[i].leftTop_1.x < minLeftSymbolPos)
+                minLeftSymbolPos = GlyphInfoData[i].leftTop_1.x;
+
+            if (GlyphInfoData[i].rightTop_2.x > maxRightSymbolPos)
+                maxRightSymbolPos = GlyphInfoData[i].rightTop_2.x;
+
             w -= (int)((float)gi->advance_x * tem);
         }
     }
-}
+
+    InnerWidth = maxRightSymbolPos - minLeftSymbolPos;
+}                
 
 
 void QFAText::Destroy()
@@ -658,7 +690,10 @@ void QFAText::updateUniformBuffer()
     TextUniformParam.pen = 0;
     memcpy(textParamBuffers[NumberTextInFrame]->MapData, &TextUniformParam, sizeof(UniformBufferTextParam));
 
-    UniformBufferTextParamVertex ubtpv = { UnitScroll , UnitOffsetX };
+    UniformBufferTextParamVertex ubtpv = { UnitScroll , UnitOffsetX };    
+    if (InnerWidth > Width && TextAlign == ETextAlign::TARight)
+        ubtpv.offsetX *= -1;
+
     memcpy(textVertexParamBuffers[NumberTextInFrame]->MapData, &ubtpv, sizeof(UniformBufferTextParamVertex));
 }
 

@@ -15,6 +15,11 @@ float QFAViewportRoot::UpdateInnerHeight()
 	return (float)Height;
 }
 
+float QFAViewportRoot::UpdateInnerWidth()
+{
+	return (float)Width;
+}
+
 
 void QFAViewportRoot::ChangeSize(unsigned int w, unsigned int h)
 {

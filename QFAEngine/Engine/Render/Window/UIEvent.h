@@ -35,6 +35,10 @@ private:
 	bool LeftMouseUp = false; 
 	bool RightMouseDown = false;
 	bool RightMouseUp = false;	
+
+	bool LeftShiftDown = false;
+	bool RightShiftDown = false;
+
 	QFAUIUnit* LeftMouseUnit = nullptr;
 	QFAUIUnit* RightMouseUnit = nullptr;
 	QFAUITextInput* TextInput = nullptr;

@@ -1,6 +1,7 @@
 #include "Scroll.h"
 #include <Math/Math.h>
 #include <Render/UI/RenderUnit.h>
+#include "TextInput.h"
 
 std::vector<QFAUIScroll*> QFAUIScroll::Scrolls;
 
@@ -33,27 +34,49 @@ void QFAUIScroll::ChangedUnit(QFAUIUnit* unit)
 	if(Child->CanRender)
 		((QFAUIRenderUnit*)Child)->UnitScroll = 0;;
 
-	ScrollValueFinal = 0;
+	ScrollValueFinalVertical = 0;
 }
 
-void QFAUIScroll::ProcessScroll(double delta,  float addValue)
+void QFAUIScroll::ProcessScroll(double delta,  float addValue, bool shiftDown)
 {
 	if (!Child) 
 	{
-		ScrollValue = 0;
+		ScrollValueVertical = 0;
+		ScrollValueHorizon = 0;
 		return;
 	}
+
+	if (ScrollType == STVertical)
+		ProcessScrollVerticalInside(delta, addValue);
+	else if (ScrollType == STHorizon)
+		ProcessScrollHorizonInside(delta, addValue);
+	else if (ScrollType == STBoth)
+	{
+		ProcessScrollVerticalInside(delta, shiftDown ? 0.0f : addValue);
+		ProcessScrollHorizonInside(delta, shiftDown ? addValue: 0.0f);
+	}	
+}
+
+void QFAUIScroll::ProcessScrollVerticalInside(double delta, float addValue)
+{
+
 
 	unsigned int childHeight;
 
 	if (Child->CanBeParent)
 	{
-		QFAUIParent* child = (QFAUIParent*)Child;
-		childHeight = (unsigned int)child->UpdateInnerHeight();
+		if (Child->Type == QFAUIType::TextInput)
+		{
+			QFAUITextInput* input = (QFAUITextInput*)Child;
+			ScrollValueFinalVertical = input->Text.UnitScroll;				
+		}
+
+		QFAUIParent* child = (QFAUIParent*)Child;		
+		childHeight = (unsigned int)child->UpdateInnerHeight();			
 	}
 	else
 	{
-		QFAUIRenderUnit * child = (QFAUIRenderUnit*)Child;
+		QFAUIRenderUnit* child = (QFAUIRenderUnit*)Child;
 		childHeight = child->InnerHeight < (unsigned int)child->Height ? (unsigned int)child->Height : child->InnerHeight;
 	}
 
@@ -62,74 +85,189 @@ void QFAUIScroll::ProcessScroll(double delta,  float addValue)
 
 	if (NotEqualToZero(addValue))
 	{
-		ScrollValue = ScrollValueToEnd;
-		ScrollValue += (addValue * ScrollSpeed);
-		ScrollValueToEnd = ScrollValue;
-		ScrollTimeToEnd = ScrollTime;
+		ScrollValueVertical = ScrollValueToEndVertical;
+		ScrollValueVertical += (addValue * ScrollSpeed);
+		ScrollValueToEndVertical = ScrollValueVertical;
+		ScrollTimeToEndVertical = ScrollTime;
 	}
-	else if (EqualToZero(ScrollTimeToEnd))
+	else if (EqualToZero(ScrollTimeToEndVertical))
 		return;
-	else if (EqualToZero(ScrollValue))
+	else if (EqualToZero(ScrollValueVertical))
 		return;
 
-	if (delta > ScrollTimeToEnd)
+	if (delta > ScrollTimeToEndVertical)
 	{
-		delta = ScrollTimeToEnd;
-		ScrollTimeToEnd = 0.0f;
-		ScrollValue = 0.0f;
+		delta = ScrollTimeToEndVertical;
+		ScrollTimeToEndVertical = 0.0f;
+		ScrollValueVertical = 0.0f;
 	}
 	else
-		ScrollTimeToEnd -= delta;
+		ScrollTimeToEndVertical -= delta;
 
-	float pixels = ScrollValue * (float)(delta * Ratio);
-	float finalscroll = ScrollValueFinal + pixels;	 
+	float pixels = ScrollValueVertical * (float)(delta * Ratio);
+	float finalscroll = ScrollValueFinalVertical + pixels;
 	if (finalscroll > 0)
 	{
-		ChangeScrollValueInside(0.0f);
-		ScrollTimeToEnd = 0;
-		ScrollValue = 0;
-		ScrollValueFinal = 0;
-		ScrollValueToEnd = 0;
+		ChangeScrollValueVerticalInside(0.0f);
+		ScrollTimeToEndVertical = 0;
+		ScrollValueVertical = 0;
+		ScrollValueFinalVertical = 0;
+		ScrollValueToEndVertical = 0;
 		return;
 	}
 	else if (finalscroll < ((float)childHeight - (float)Height) * -1)
 	{
-		ChangeScrollValueInside(((float)childHeight - (float)Height) * -1);
-		ScrollTimeToEnd = 0;
-		ScrollValue = 0;
-		ScrollValueToEnd = 0;
+		ChangeScrollValueVerticalInside(((float)childHeight - (float)Height) * -1);
+		ScrollTimeToEndVertical = 0;
+		ScrollValueVertical = 0;
+		ScrollValueToEndVertical = 0;
 		return;
 	}
-	
+
 	if (EqualToZero(pixels))
 		return;
 
-	AddScrollValueInside(pixels);
+	AddScrollValueVerticalInside(pixels);
 }
 
-
-void QFAUIScroll::AddScrollValueInside(float value)
+void QFAUIScroll::ProcessScrollHorizonInside(double delta, float addValue)
 {
-	ScrollValueFinal += value;
-	ScrollValueToEnd -= value;
-	ChangeScrollValueInside(ScrollValueFinal);
-}
 
-void QFAUIScroll::ChangeScrollValueInside(float value)
-{
-	ScrollValueFinal = value;
+	unsigned int childWidth;
+
 	if (Child->CanBeParent)
-		SetPositionParent(Position_x, Position_y);
+	{
+		if (Child->Type == QFAUIType::TextInput)
+		{
+			QFAUITextInput* input = (QFAUITextInput*)Child;
+			ScrollValueFinalHorizon = input->Text.UnitOffsetX;
+		}
+
+		QFAUIParent* child = (QFAUIParent*)Child;
+		childWidth = (unsigned int)child->UpdateInnerWidth();
+	}
 	else
-		((QFAUIRenderUnit*)Child)->UnitScroll = ScrollValueFinal;
+	{
+		QFAUIRenderUnit* child = (QFAUIRenderUnit*)Child;
+		childWidth = child->InnerWidth < (unsigned int)child->Width ? (unsigned int)child->Width : child->InnerWidth;
+	}
+
+	if (Width >= (int)childWidth)
+		return;
+
+	if (NotEqualToZero(addValue))
+	{
+		ScrollValueHorizon = ScrollValueToEndHorizon;
+		ScrollValueHorizon += (addValue * ScrollSpeed);
+		ScrollValueToEndHorizon = ScrollValueHorizon;
+		ScrollTimeToEndHorizon = ScrollTime;
+	}
+	else if (EqualToZero(ScrollTimeToEndHorizon))
+		return;
+	else if (EqualToZero(ScrollValueHorizon))
+		return;
+
+	if (delta > ScrollTimeToEndHorizon)
+	{
+		delta = ScrollTimeToEndHorizon;
+		ScrollTimeToEndHorizon = 0.0f;
+		ScrollValueHorizon = 0.0f;
+	}
+	else
+		ScrollTimeToEndHorizon -= delta;
+	
+	float pixels = ScrollValueHorizon * (float)(delta * Ratio);
+	float finalscroll = ScrollValueFinalHorizon + pixels;
+	if (finalscroll > 0)
+	{
+		ChangeScrollValueHorizonInside(0.0f);
+		ScrollTimeToEndHorizon = 0;
+		ScrollValueHorizon = 0;
+		ScrollValueFinalHorizon = 0;
+		ScrollValueToEndHorizon = 0;
+		return;
+	}
+	else if (finalscroll < ((float)childWidth - (float)Width) * -1)
+	{
+		ChangeScrollValueHorizonInside(((float)childWidth - (float)Width) * -1);
+		ScrollTimeToEndHorizon = 0;
+		ScrollValueHorizon = 0;
+		ScrollValueToEndHorizon = 0;
+		return;
+	}
+
+	if (EqualToZero(pixels))
+		return;
+
+	AddScrollValueHorizonInside(pixels);
 }
 
-void QFAUIScroll::NewFrame(QFAUIScroll* scrollUndeCursor, double delta, float addValue)
+
+void QFAUIScroll::AddScrollValueVerticalInside(float value)
+{
+	ScrollValueFinalVertical += value;
+	ScrollValueToEndVertical -= value;
+	ChangeScrollValueVerticalInside(ScrollValueFinalVertical);
+}
+
+void QFAUIScroll::ChangeScrollValueVerticalInside(float value)
+{
+	float difference = ScrollValueFinalVertical - value;
+	ScrollValueFinalVertical = value;
+	if (Child->CanBeParent)
+	{
+		if (Child->Type == QFAUIType::TextInput)
+		{
+			QFAUITextInput* input = (QFAUITextInput*)Child;
+			if ((ScrollValueFinalVertical * -1) >= (input->Text.InnerHeight + difference - input->Height))
+				ScrollValueFinalVertical = input->Text.UnitScroll;
+			else
+			{
+				input->Text.UnitScroll = ScrollValueFinalVertical;
+			}
+		}
+		else
+			SetPositionParent(Position_x, Position_y);
+	}
+	else
+		((QFAUIRenderUnit*)Child)->UnitScroll = ScrollValueFinalVertical;
+}
+
+void QFAUIScroll::AddScrollValueHorizonInside(float value)
+{
+	ScrollValueFinalHorizon += value;
+	ScrollValueToEndHorizon -= value;
+	ChangeScrollValueHorizonInside(ScrollValueFinalHorizon);
+}
+
+void QFAUIScroll::ChangeScrollValueHorizonInside(float value)
+{
+	float difference = ScrollValueFinalHorizon - value;
+	ScrollValueFinalHorizon = value;
+	if (Child->CanBeParent)
+	{
+		if (Child->Type == QFAUIType::TextInput)
+		{
+			QFAUITextInput* input = (QFAUITextInput*)Child;
+			if ((ScrollValueFinalHorizon * -1) >= (input->Text.InnerWidth + difference - input->Width))
+				ScrollValueFinalHorizon = input->Text.UnitOffsetX;
+			else
+				input->Text.UnitOffsetX = ScrollValueFinalHorizon;
+		}
+		else
+			SetPositionParent(Position_x, Position_y);
+	}
+		
+	else
+		((QFAUIRenderUnit*)Child)->UnitOffsetX = ScrollValueFinalHorizon;
+}
+
+void QFAUIScroll::NewFrame(QFAUIScroll* scrollUndeCursor, double delta, float addValue, bool shiftDown)
 {
 	for (size_t i = 0; i < Scrolls.size(); i++)
 	{
 		if (Scrolls[i] == scrollUndeCursor)
-			scrollUndeCursor->ProcessScroll(delta, addValue);
+			scrollUndeCursor->ProcessScroll(delta, addValue, shiftDown);
 		else
 			Scrolls[i]->ProcessScroll(delta);
 	}
@@ -148,6 +286,19 @@ float QFAUIScroll::UpdateInnerHeight()
 	return (float)InnerHeight;
 }
 
+float QFAUIScroll::UpdateInnerWidth()
+{
+	if (Child->CanBeParent)
+	{
+		QFAUIParent* child = (QFAUIParent*)Child;
+		InnerWidth = (unsigned int)child->UpdateInnerWidth();
+	}
+	else
+		InnerWidth = Child->InnerWidth;
+
+	return (float)InnerWidth;
+}
+
 void QFAUIScroll::MySlotChange(QFAUIUnit* unit)
 {
 }
@@ -161,7 +312,7 @@ void QFAUIScroll::ChangeSize(unsigned int w, unsigned int h)
 		Child->SetSizeParent(w, h);
 		if (Child->CanRender)
 		{
-			((QFAUIRenderUnit*)Child)->UnitScroll = ScrollValueFinal;
+			((QFAUIRenderUnit*)Child)->UnitScroll = ScrollValueFinalVertical;
 		}
 	}
 }
@@ -172,8 +323,14 @@ void QFAUIScroll::ChangePosition(int x, int y)
 	Position_y = y;
 	if (Child)
 	{
+		/*
+		
+		перев≥р€й чи ≥нпут ≥ €кшо так то дай т≥ки х ≥ y
+		
+		*/
+
 		if (Child->CanBeParent)
-			((QFAUIParent*)Child)->SetPositionParent(x, y + (int)ScrollValueFinal);
+			((QFAUIParent*)Child)->SetPositionParent(x, y + (int)ScrollValueFinalVertical);
 		else
 			((QFAUIRenderUnit*)Child)->SetPositionParent(x, y);
 	}

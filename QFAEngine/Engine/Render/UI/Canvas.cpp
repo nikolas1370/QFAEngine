@@ -68,3 +68,8 @@ float QFAUICanvas::UpdateInnerHeight()
 	return (float)Height;
 }
 
+float QFAUICanvas::UpdateInnerWidth()
+{
+	return (float)Width;
+}
+
