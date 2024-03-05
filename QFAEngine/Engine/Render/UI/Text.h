@@ -5,6 +5,7 @@
 #include <Render/UI/RenderUnit.h>
 #include <Render/Buffer/VKBuffer.h>
 #include <Render/Window/Window.h>
+#include <Tools/Color.h>
 
 /* ttf type */
 typedef unsigned long  FT_ULong;
@@ -119,13 +120,14 @@ class QFAText : public QFAUIRenderUnit
         QFAVKImageView* view;
     };
 
-
+    QFAColorF Color = QFAColor(255).GetColorF();
 public:
     enum EOverflowWrap
     {
         OWNone,
         OWSymbol,
-        OWWord// if word bigger than Width word will go out of bounds
+        OWWord,// if word bigger than Width word will go out of bounds
+        OWWordBreak // if word bigger than Width word will break
     };
 
     enum ETextAlign
@@ -135,8 +137,8 @@ public:
         TARight
     };
 
-    FVector Color = FVector(1);
-    FVector OutlineColor = FVector(1, 0, 0);
+
+    QFAColorF OutlineColor ; // need create set function for OutlineColor
     bool Outline = false;
 
     QFAText();
@@ -145,6 +147,36 @@ public:
     void SetText(std::u32string  text);
 
     void SetTextSize(unsigned int height);
+    
+    void SetTextColor(QFAColor color)
+    { 
+        glm::vec3 linear = Math::srgb_to_linear(glm::vec3((float)color.R / 255.0f, (float)color.G / 255.0f, (float)color.B / 255.0f));
+        Color = QFAColorF(linear.r, linear.g, linear.b);
+    }
+
+    void SetTextColor(QFAColorB color)
+    {
+        glm::vec3 linear = Math::srgb_to_linear(glm::vec3((float)color.R / 255.0f, (float)color.G / 255.0f, (float)color.B / 255.0f));
+        Color = QFAColorF(linear.r, linear.g, linear.b);
+    }
+
+    void SetTextColor(QFAColorF color)
+    {
+        glm::vec3 linear = Math::srgb_to_linear(glm::vec3(color.R, color.G, color.B));
+        Color = QFAColorF(linear.r, linear.g, linear.b);
+    }
+
+    void SetTextColor(unsigned char r, unsigned char g, unsigned char b)
+    {        
+        glm::vec3 linear = Math::srgb_to_linear(glm::vec3((float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f));
+        Color = QFAColorF(linear.r, linear.g, linear.b);
+    }
+
+    inline QFAColorF GetTextColor()
+    {
+        return Color;
+    }
+
     /*----*/
 
     void Destroy();
@@ -246,7 +278,7 @@ public:
         LRFFontStyleNameNotFound = 4,// if ib font StyleName == null, not return if in styleName not void
         LRFPathWasNull = 5,
         LRFFreeTypeError = 6, //Could not init FreeType Library
-        LRFEngineNotInit = 7 // if LoadFont called before Engine was initialized
+        LRFEngineNotInit = 7 // if LoadFont called before Engine was initialized and first window be created
     };
     
     static ELoadFontResult LoadFont(const char* fontPath, SFont*& outFont, std::u32string* familyName = nullptr, std::u32string* styleName = nullptr);

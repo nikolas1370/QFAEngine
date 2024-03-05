@@ -23,7 +23,13 @@ public:
 
 	void AddUnit(QFAUIUnit* unit);
 	void removeUnit(QFAUIUnit* unit);
+	void removeAllUnit();
+	
 
+	inline size_t GetUnitCount()
+	{
+		return Children.Length();
+	}
 protected:
 	void RemoveUnitWithoutNotify(QFAUIUnit* unit) final;
 

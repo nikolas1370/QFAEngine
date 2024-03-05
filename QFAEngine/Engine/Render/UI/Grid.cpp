@@ -28,29 +28,19 @@ float QFAUIGrid::UpdateInnerWidth()
 	return (float)Width;
 }
 
-#define GetCountUnit(Width, MaxUnitSize) (unsigned int)ceill((float)(Width) / (MaxUnitSize))
-#define GetSizeUnit(Width, MaxUnitSize) ((Width) / GetCountUnit(Width, MaxUnitSize))
+#define GetCountUnit(Width, MinUnitSize) floor((float)(Width) / (float)(MinUnitSize))
+#define GetSizeUnit(Width, MinUnitSize) ((float)(Width) / GetCountUnit(Width, MinUnitSize))
 
 int QFAUIGrid::GetSizeUnitAuto(int& columnCount)
 {
 	if (UnitSize > 0)
 		return UnitSize;
-	else if (MaxUnitSize == 0)
-		return 1;
 
-	int  offsetCount = (GetCountUnit(Width, MaxUnitSize + ColumnOffset) - 1);
+	int offsetCount = (int)GetCountUnit(Width, MinUnitSize) - 1;
 	int widthWithoutOffset = Width - ColumnOffset * offsetCount;
-	unsigned int unitWidth = GetSizeUnit(widthWithoutOffset, MaxUnitSize);
-	if (unitWidth >= MinUnitSize)
-	{
-		columnCount = GetCountUnit(widthWithoutOffset, MaxUnitSize);
-		return unitWidth + 1;
-	}
-	else
-	{
-		columnCount = GetCountUnit(Width, MaxUnitSize);
-		return GetSizeUnit(Width, MaxUnitSize) + 1;
-	}
+	unsigned int unitWidth = GetSizeUnit(widthWithoutOffset, MinUnitSize);
+	columnCount = offsetCount + 1;
+	return widthWithoutOffset / columnCount;
 }
 
 int QFAUIGrid::GetSizeUnitCount()
@@ -125,10 +115,9 @@ void QFAUIGrid::SetUnitWidth(unsigned int unitWidth)
 	ProcessChildPosition();
 }
 
-void QFAUIGrid::SetMinMax(unsigned int min, unsigned int max)
+void QFAUIGrid::SetMin(unsigned int min)
 {
 	MinUnitSize = min;
-	MaxUnitSize = max;
 	ProcessChildPosition();
 }
 

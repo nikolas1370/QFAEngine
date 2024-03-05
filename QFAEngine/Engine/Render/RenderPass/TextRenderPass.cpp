@@ -2,7 +2,7 @@
 #include <Tools/VulkanSuff.h>
 #include <Render/vk/LogicalDevice.h>
 #include <Render/Window/Window.h>
-QFAVKTextRenderPass::QFAVKTextRenderPass(VkFormat swapChainImageFormat)
+QFAVKTextRenderPass::QFAVKTextRenderPass(VkFormat swapChainImageFormat, bool clear)
 {
 
 
@@ -10,7 +10,7 @@ QFAVKTextRenderPass::QFAVKTextRenderPass(VkFormat swapChainImageFormat)
     
     colorAttachment.format = swapChainImageFormat;
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+    colorAttachment.loadOp = clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -66,6 +66,8 @@ QFAVKTextRenderPass::QFAVKTextRenderPass(VkFormat swapChainImageFormat)
     if (vkCreateRenderPass(QFAVKLogicalDevice::GetDevice(), &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS)
         stopExecute("failed to create render pass!");
 }
+
+
 
 QFAVKTextRenderPass::~QFAVKTextRenderPass()
 {

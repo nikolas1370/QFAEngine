@@ -51,3 +51,21 @@ glm::mat3  Math::ScaleMatrix3(glm::mat3 const& m, glm::vec3 const& v)
 	Result[2] = m[2] * v[2];
 	return Result;
 }
+
+/* if need Linear To SRGB
+vec3 LinearToSRGB(vec3 rgb)
+{
+  // See https://gamedev.stackexchange.com/questions/92015/optimized-linear-to-srgb-glsl
+  return mix(1.055 * pow(rgb, vec3(1.0 / 2.4)) - 0.055,
+			 rgb * 12.92,
+			 lessThanEqual(rgb, vec3(0.0031308)));
+}
+*/
+
+// from https://gist.github.com/Reedbeta/e8d3817e3f64bba7104b8fafd62906df
+glm::vec3 Math::srgb_to_linear(glm::vec3 rgb)
+{
+	return glm::mix(glm::pow((rgb + 0.055f) * (1.0f / 1.055f), glm::vec3(2.4f)),
+		rgb * (1.0f / 12.92f),
+		glm::lessThanEqual(rgb, glm::vec3(0.04045f)));
+}

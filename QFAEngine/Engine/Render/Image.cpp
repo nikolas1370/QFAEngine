@@ -17,6 +17,8 @@ QFAImage::QFAImage(SImageCreateInfo& ici)
     createImage(ici.Width, ici.Height, ici.format, VK_IMAGE_TILING_OPTIMAL, ici.usage);
     QFAVKBuffer::transitionImageLayout(TextureImage, ici.format, VK_IMAGE_LAYOUT_UNDEFINED, ici.layout, QFAWindow::QFAWindow::commandPool, ici.aspect);
     ImageView.CreateView(this, ici.aspect);
+    Width = ici.Width;
+    Height = ici.Height;
 }
 
 QFAImage::QFAImage( int Width, int Height, unsigned int channelCount,  VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspect , VkImageCreateFlags flags)
@@ -27,6 +29,8 @@ QFAImage::QFAImage( int Width, int Height, unsigned int channelCount,  VkFormat 
     createImage(Width, Height, format, VK_IMAGE_TILING_OPTIMAL, usage, flags);
     QFAVKBuffer::transitionImageLayout(TextureImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, QFAWindow::QFAWindow::commandPool, aspect);
     ImageView.CreateView(this, aspect);
+    Width = Width;
+    Height = Height;
 }
 
 QFAImage::QFAImage( const std::string src)
@@ -46,6 +50,8 @@ QFAImage::QFAImage( const std::string src)
     buffer->copyInImage(this, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), QFAWindow::commandPool);
 
     ImageView.CreateView(this, VK_IMAGE_ASPECT_COLOR_BIT);
+    Width = texWidth;
+    Height = texHeight;
 }
 
 QFAImage::QFAImage(const std::u32string src)
@@ -68,6 +74,8 @@ QFAImage::QFAImage(const std::u32string src)
     buffer->copyInImage(this, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), QFAWindow::commandPool);
 
     ImageView.CreateView(this, VK_IMAGE_ASPECT_COLOR_BIT);
+    Width = texWidth;
+    Height = texHeight;
 }
 
 QFAImage::~QFAImage()

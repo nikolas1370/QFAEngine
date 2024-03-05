@@ -22,7 +22,7 @@
 #include <Render/RenderPass/TextRenderPass.h>
 #include <Render/vk/PresentImage.h>
 #include <Render/UI/UIUnit.h>
-
+#include <Render/Window/Viewport.h>
 #include <Render/Window/UIEvent.h>
 struct UniformBufferObject
 {// more detail https://fvcaputo.github.io/2019/02/06/memory-alignment.html
@@ -35,7 +35,6 @@ struct UniformBufferObject
 };
 
 struct GLFWwindow;
-class QFAViewport;
 class QFAOverlord;
 class QFAFrameBufferMain;
 class QFAFrameBuffer;
@@ -85,7 +84,7 @@ class QFAWindow
 	static QFAVKRenderPass* RenderPass;
 	static QFAVKRenderPassDepth* RenderPassOffScreen;
 	static QFAVKTextRenderPass* TextRenderPass;
-
+	static QFAVKTextRenderPass* TextRenderPassClear;
 
 
 
@@ -218,7 +217,7 @@ private:
 	unsigned int ProcessMeshComponent(QSceneComponent* component, bool shadow);
 
 
-	void DrawUI(QFAViewport* viewport, int viewportIndex);
+	void DrawUI(QFAViewport* viewport, int viewportIndex, bool clear);
 
 
 	void DrawOffscreenBuffer();

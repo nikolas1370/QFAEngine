@@ -47,14 +47,13 @@ void QFAViewport::Settup(int windowWidth, int windowHeight)
 		Height = 1;
 
 	UIProjection = glm::orthoLH_ZO(0.0f, (float)Width, 0.0f, (float)Height, QFAViewport::MinMaxZIndexUI * -1, QFAViewport::MinMaxZIndexUI);
-
+	Root.SetSizeParent(Width, Height);
 	if (CurentCamera)
 		MatrixPerspective = glm::perspectiveLH_ZO(glm::radians(CurentCamera->Fov), (float)Width / (float)Height, 0.1f, CurentCamera->ViewDistance); // (near) not Less than 0.1f	
-	else
-		std::cout << "QFAViewport::Settup Camera not set\n";
 
 
-	Root.SetSizeParent(Width, Height);
+
+	
 }
 
 
@@ -75,10 +74,6 @@ inline void QFAViewport::ActivateCamera()
 	{
 		CurentCamera->IsActive = true;
 		CurentCamera->Viewport = this;
-		
-		
-		if (Window)
-			Root.ParentEnable();
 	}
 }
 
@@ -97,6 +92,7 @@ void QFAViewport::ChangeCamera(QCameraComponent* camera)
 	CurentCamera = camera;
 	if (CurentCamera->IsValid())
 	{
+
 		CurentCamera->Viewport = this;
 		MatrixPerspective = glm::perspectiveLH_ZO(glm::radians(CurentCamera->Fov),
 			(float)Width / (float)Height, 0.1f, CurentCamera->ViewDistance);

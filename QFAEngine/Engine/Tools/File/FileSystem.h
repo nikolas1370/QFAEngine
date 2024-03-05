@@ -85,6 +85,13 @@ private:
 class QFAFileSystem
 {
 public:
+	struct FolderUnit
+	{
+		std::u32string path;
+		std::u32string name;
+		bool IsFolder;
+	};
+
 	static QFAFile::Result LoadFile(std::u32string path, QFAFile* file);
 	/*
 		remove all from file before write
@@ -121,6 +128,8 @@ public:
 	static bool exists(std::u32string filePath);
 
 	static void CreateFolders(std::u32string folderPath);
+
+	static bool GetFolder—ontents(std::u32string path, std::vector<FolderUnit>& folder—ontents);
 	
 private:
 

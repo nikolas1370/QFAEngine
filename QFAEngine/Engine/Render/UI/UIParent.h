@@ -65,14 +65,16 @@ protected:
 	*/
 	virtual void ChangePosition(int x, int y) = 0;
 
-	EOverflow Overflow = EOverflow::Visible;
-
-	/*	
+	/*
 		parent call if need heve new InnerHeight
 		write new valude in this->InnerHeight and return it
 	*/
 	virtual float UpdateInnerHeight() = 0;
 	virtual float UpdateInnerWidth() = 0;
+
+	EOverflow Overflow = EOverflow::Visible;
+
+	
 
 
 	EParentType ParentType = EParentType::NONEChild;
@@ -101,17 +103,36 @@ public:
 	}
 
 	void SetBackgroundImage(QFAImage* image);
-	void SetBackgroundColor(FVector4D color);
+
+	void SetBackgroundColor(QFAColor color)
+	{
+		BackgroundColor = color.GetColorF();
+		BackgroundImage.SetBackgroundColor(BackgroundColor);
+	}
+
+	void SetBackgroundColor(QFAColorB color)
+	{
+		BackgroundColor = QFAColor(color).GetColorF();
+		BackgroundImage.SetBackgroundColor(BackgroundColor);
+	}
+
+	void SetBackgroundColor(QFAColorF color)
+	{
+		BackgroundColor = color;
+		BackgroundImage.SetBackgroundColor(BackgroundColor);
+	}
 
 	inline EParentType GetParentType()
 	{
 		return ParentType;
 	}
+
+
 protected:
 	EBackgroundType BackgroundType = EBackgroundType::BTNONE;
-	QFAUIImage BackgroundImage = QFAUIImage(nullptr);
+	QFAUIImage BackgroundImage = QFAUIImage(nullptr, true);
 	QFAImage* Image = nullptr;;
-	FVector4D BackgroundColor = FVector4D(0);
+	QFAColorF BackgroundColor;
 
 	void RenderBackground(VkCommandBuffer comandebuffer);
 
@@ -119,4 +140,9 @@ protected:
 	{
 		return BackgroundImage.GetPipeline();
 	}
+
+	// use only in child class with unit type QFAUIType::CustomUnit
+	void SetChildPosition(QFAUIUnit* childUnit, int x, int y);
+	// use only in child class with unit type QFAUIType::CustomUnit
+	void SetChildSize(QFAUIUnit* childUnit, int w, int h);
 };

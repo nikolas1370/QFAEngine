@@ -7,7 +7,7 @@ public:
 	/*
 		UPTAuto 
 			if UnitSize == 0	
-				UIUnit size be between MinUnitSize and MaxUnitSize
+				UIUnit size be not less MinUnitSize
 			else
 				UIUnit size = UnitSize
 			
@@ -28,7 +28,7 @@ public:
 	void SetColumnCount(unsigned int columnCount);
 	void SetOffsets(unsigned int columnOffset, unsigned int rowOffset);
 	void SetUnitWidth(unsigned int unitWidth);
-	void SetMinMax(unsigned int min, unsigned int max);
+	void SetMin(unsigned int min);
 	/*
 	*  UnitWidth * Ratio == UnitHeight
 	*  Height / Width
@@ -43,8 +43,7 @@ private:
 	unsigned int ColumnOffset = 0;
 	unsigned int RowOffset = 0;
 	unsigned int UnitSize = 0;
-	unsigned int MinUnitSize = 0;
-	unsigned int MaxUnitSize = 1;	
+	unsigned int MinUnitSize = 100;
 	float Ratio = 1; 
 
 	// not for setup grid

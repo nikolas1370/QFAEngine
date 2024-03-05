@@ -36,6 +36,9 @@ private:
 	bool RightMouseDown = false;
 	bool RightMouseUp = false;	
 
+	bool ForwardMouseDown = false;
+	bool BackwardMouseDown = false;
+
 	bool LeftShiftDown = false;
 	bool RightShiftDown = false;
 

@@ -24,12 +24,30 @@
     <ClCompile Include="Editor\EditorOverlord.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Editor\EditorWindows\MainEditorWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorUI\ExplorerFolderUnit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorUI\FileExplorer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor\ShaderCompiler\ShaderCompiler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Editor\EditorOverlord.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorWindows\MainEditorWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorUI\ExplorerFolderUnit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorUI\FileExplorer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

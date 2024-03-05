@@ -37,6 +37,7 @@ QFAVKRenderPassSwapChain* QFAWindow::RenderPassSwapChain;
 QFAVKRenderPass* QFAWindow::RenderPass;
 QFAVKRenderPassDepth* QFAWindow::RenderPassOffScreen;
 QFAVKTextRenderPass* QFAWindow::TextRenderPass;
+QFAVKTextRenderPass* QFAWindow::TextRenderPassClear;
 
 
 VkFormat QFAWindow::depthFormat =  VK_FORMAT_D32_SFLOAT;
@@ -57,11 +58,11 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 
 	QFAWindow::CurentProcessWindow = this;
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+	
 	glfWindow = glfwCreateWindow(width, height, name.c_str(), NULL, NULL);
 	QFAInput::WindowCreated(this);
 	UIEvent = new QFAUIEvent(this, glfWindow);
-	glfwSetWindowUserPointer(glfWindow, this);
-	//glfwSetFramebufferSizeCallback(glfWindow, framebufferResizeCallback);
+	glfwSetWindowUserPointer(glfWindow, this);	
 
 	if (!glfWindow)
 	{
@@ -124,7 +125,8 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 	{
 		RenderPassOffScreen = new QFAVKRenderPassDepth();
 		RenderPass = new QFAVKRenderPass(SwapChain->swapChainImageFormat, true);
-		TextRenderPass = new QFAVKTextRenderPass(SwapChain->swapChainImageFormat);
+		TextRenderPass = new QFAVKTextRenderPass(SwapChain->swapChainImageFormat, false);
+		TextRenderPassClear = new QFAVKTextRenderPass(SwapChain->swapChainImageFormat, true);
 		RenderPassSwapChain = new QFAVKRenderPassSwapChain(SwapChain->swapChainImageFormat, true);
 	
 		QFAText::Init(TextRenderPass->renderPass, commandPool);
@@ -181,12 +183,12 @@ void QFAWindow::createCommandBuffer()
 	FinisCommandBuffer = comb[comb.size() - 1];	
 }
 
-void QFAWindow::DrawUI(QFAViewport* viewport, int viewportIndex)
+void QFAWindow::DrawUI(QFAViewport* viewport, int viewportIndex, bool clear)
 {
 	CurentComandBuffer = ViewportStuff[ViewportProcess].comandBuffer;
 	VkRenderPassBeginInfo renderPassInfo{};
-	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	renderPassInfo.renderPass = TextRenderPass->renderPass;
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO; // if in first viewport not render mesh, text should clear buffer
+	renderPassInfo.renderPass = clear ? TextRenderPassClear->renderPass : TextRenderPass->renderPass;
 	renderPassInfo.framebuffer = frameBuffer->Framebuffer;
 	renderPassInfo.renderArea.offset = { 0, 0 };
 	renderPassInfo.renderArea.extent = SwapChain->swapChainExtent;
@@ -235,24 +237,9 @@ void QFAWindow::DrawUI(QFAViewport* viewport, int viewportIndex)
 		}
 		else if (SortUIUnits[i]->CanBeParent)
 		{
-			if (pipeline != ((QFAUIParent*)SortUIUnits[i])->GetBackgroundPipeline())
-			{
-				pipeline = ((QFAUIParent*)SortUIUnits[i])->GetBackgroundPipeline();
-				vkCmdBindPipeline(CurentComandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetPipeline());
-			}
-
+			pipeline = ((QFAUIParent*)SortUIUnits[i])->GetBackgroundPipeline();
+			vkCmdBindPipeline(CurentComandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetPipeline());
 			((QFAUIParent*)SortUIUnits[i])->RenderBackground(CurentComandBuffer);
-
-			if (((QFAUIParent*)SortUIUnits[i])->GetParentType() == QFAUIParent::HiddenChild)
-			{
-				if (pipeline != ((QFAParentHiddenChild*)SortUIUnits[i])->GetChildPipeline())
-				{
-					pipeline = ((QFAParentHiddenChild*)SortUIUnits[i])->GetChildPipeline();
-					vkCmdBindPipeline(CurentComandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetPipeline());
-				}
-
-				((QFAParentHiddenChild*)SortUIUnits[i])->RenderChild(CurentComandBuffer);
-			}
 		}
 	}
 	
@@ -294,8 +281,12 @@ void QFAWindow::AddUnit(QFAUIUnit* unit)
 		QFAUIParent* parent = (QFAUIParent*)unit;
 		if (parent->GetParentType() == QFAUIParent::EParentType::OneChild)
 			AddUnit(((QFAUIParentOneUnit*)unit)->Child);
-		else if (parent->GetParentType() == QFAUIParent::EParentType::OneChild)
-			AddUnit(((QFAParentHiddenChild*)parent)->GetChild());
+		else if (parent->GetParentType() == QFAUIParent::EParentType::HiddenChild)
+		{
+			QFAParentHiddenChild* parentHiden = (QFAParentHiddenChild*)unit;
+			for (size_t i = 0; i < parentHiden->Children.size(); i++)
+				AddUnit(parentHiden->Children[i]);
+		}
 		else  if (parent->GetParentType() == QFAUIParent::EParentType::MultipleChild)
 		{
 			QFAUIParentMultipleUnit* parentMultiple = (QFAUIParentMultipleUnit*)unit;
@@ -625,17 +616,19 @@ void QFAWindow::RenderWindows()
 
 void QFAWindow::RenderWindow(bool lastWindow)
 {
+	bool clear = true;
 	StartFrame();	
 	for (size_t i = 0; i < Viewports.Length(); i++)
 	{	
 		BeginCommandBuffer();
 		if (Viewports[i]->GetWorld())
 		{
+			clear = false;
 			ShadowRender(Viewports[i]);
 			DrawActors(Viewports[i], i == 0, i);
 		}
 
-		DrawUI(Viewports[i], i);
+		DrawUI(Viewports[i], i, clear);
 		EndCommandBufferAndQueueSubmit();
 		ViewportProcess++;
 	}

@@ -20,10 +20,11 @@ QFAImage* QFAUIImage::VoidImage = nullptr;
 
 VkDescriptorSet QFAUIImage::CurentDescriptorSetProject;
 
-QFAUIImage::QFAUIImage(QFAImage* image)
+QFAUIImage::QFAUIImage(QFAImage* image, bool iBackground)
 {
     CanRender = true;
     Type = QFAUIType::Image;
+    IBackground = iBackground;
 
     vertexBufer = new QFAVKVertexBuffer(sizeof(SImageShaderVertex) * 6, nullptr, commandPool);
     ChangeQuad();
@@ -113,12 +114,11 @@ void QFAUIImage::SetImage(QFAImage* image)
     PrepareSet();
 }
 
-void QFAUIImage::SetBackgroundColor(FVector4D color)
+void QFAUIImage::SetCanStretch(bool can)
 {
-    BackgroundColor = color;
+    CanStretch = can;
+    ChangeQuad();
 }
-
-
 
 void QFAUIImage::EndLife()
 {    
@@ -137,7 +137,7 @@ void QFAUIImage::CreateProjectionSet(VkBuffer buffer)
     descriptorSetInfo[0].dstBinding = 0;
     descriptorSetInfo[0].DescriptorBufferInfos = &bufferInfo;
 
-    Pipeline->CreateSet(0, descriptorSetInfo.data());
+    Pipeline->CreateSet(0, descriptorSetInfo.data());    
 }
 
 
@@ -145,34 +145,101 @@ void QFAUIImage::CreateProjectionSet(VkBuffer buffer)
 
 
 void QFAUIImage::ChangeQuad()
-{
+{//     
+
+    float offsetX = 0.0f;
+    float offsetY = 0.0f;
+
+    float newGpuW = 0.0f;
+    float newGpuH = 0.0f;
+    if (Image && !CanStretch && !IBackground)
+    {
+        float ratio = (float)Image->GetHeight() / (float)Image->GetWidth();        
+        if (Width > Height)
+        {
+            if (ratio > 1) // Image->Height > Image->Width
+            {                
+                newGpuH = (float)Height;
+                newGpuW = (float)Height * ((float)Image->GetWidth() / (float)Image->GetHeight());
+                offsetX = ((float)Width - newGpuW) / 2.0f;
+            }
+            else
+            {
+                float SelfRatio = (float)Height / (float)Width;
+                if (SelfRatio > ratio)
+                {
+                    newGpuH = (float)Width * ratio;
+                    newGpuW = (float)Width;
+                    offsetY = ((float)Height - newGpuH) / 2.0f;
+                }
+                else
+                {
+                    newGpuH = (float)Height;
+                    newGpuW = (float)Height * ((float)Image->GetWidth() / (float)Image->GetHeight());
+                    offsetX = ((float)Width - newGpuW) / 2.0f;
+                }
+            }           
+        }
+        else
+        {
+            if (ratio > 1)// Image->Height > Image->Width
+            {
+                float SelfRatio = (float)Height / (float)Width;
+                if (SelfRatio > ratio)
+                {
+                    newGpuW = Width;
+                    newGpuH = Width * ratio;
+                    offsetY = ((float)Height - newGpuH) / 2.0f;
+                } 
+                else
+                {
+                    newGpuW = (float)Height * ((float)Image->GetWidth() / (float)Image->GetHeight());
+                    newGpuH = (float)Height;
+                    offsetX = ((float)Width - newGpuW) / 2.0f;
+                }
+            }
+            else
+            {
+                newGpuH = (float)Width * ratio;
+                newGpuW = (float)Width;
+                offsetY = ((float)Height - newGpuH) / 2.0f;
+            }
+            
+        }        
+    }
+    else
+    {
+        newGpuH = Height;
+        newGpuW = Width;
+    }
+
     // left top
     quad[0].textureX = 0.0f;
     quad[0].textureY = 0.0f;
-    quad[0].x = (float)Position_x;
-    quad[0].y = (float)Position_y;
+    quad[0].x = (float)Position_x + offsetX;
+    quad[0].y = (float)Position_y + offsetY;
     quad[0].z = (float)ZIndex;
 
     // left bottom
     quad[1].textureX = 0.0f;
     quad[1].textureY = 1.0f;
-    quad[1].x = (float)Position_x;
-    quad[1].y = (float)Position_y + Height;
+    quad[1].x = (float)Position_x + offsetX;
+    quad[1].y = (float)Position_y + newGpuH + offsetY;
     quad[1].z = (float)ZIndex;
 
 
     // right top
     quad[2].textureX = 1.0f;
     quad[2].textureY = 0.0f;
-    quad[2].x = (float)(Position_x + Width);
-    quad[2].y = (float)Position_y;
+    quad[2].x = (float)(Position_x + newGpuW + offsetX);
+    quad[2].y = (float)Position_y + offsetY;
     quad[2].z = (float)ZIndex;
 
     // right bottom
     quad[3].textureX = 1.0f;
     quad[3].textureY = 1.0f;
-    quad[3].x = (float)(Position_x + Width);
-    quad[3].y = (float)(Position_y + Height);
+    quad[3].x = (float)(Position_x + newGpuW + offsetX);
+    quad[3].y = (float)(Position_y + newGpuH + offsetY);
     quad[3].z = (float)ZIndex;
 
     quad[4] = quad[2];

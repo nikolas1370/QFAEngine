@@ -16,7 +16,18 @@ namespace QFAUIType
 		Grid = 5,
 		Scroll = 6,
 		TextInput = 7,
-		List = 8
+		List = 8,
+		CustomUnit = 9
+	};
+}
+
+namespace QFAEditorUIType
+{
+	enum Type : unsigned char
+	{
+		NONE = 0,
+		FileExplorer = 1,
+		ExplorerFolderUnit = 2
 	};
 }
 
@@ -41,10 +52,10 @@ namespace QFAUISlot
 	struct SCanvasSlot
 	{
 		SSlotBaseInfo BaseInfo{ QFAUIType::Canvas, sizeof(QFAUISlot::SCanvasSlot) };
-		float Width;
-		float Height;
-		float x;
-		float y;
+		float Width = 0.0f;
+		float Height = 0.0f;
+		float x = 0.0f;
+		float y = 0.0f;
 	};
 
 	struct SViewportRootSlot
@@ -65,8 +76,8 @@ namespace QFAUISlot
 	struct SListSlot
 	{
 		SSlotBaseInfo BaseInfo{ QFAUIType::List, sizeof(QFAUISlot::SListSlot) };
-		int marginLeft;
-		int marginTop;
+		int marginLeft = 0;
+		int marginTop = 0;
 	};
 
 	
@@ -84,6 +95,7 @@ class QFAUIParent;
 class QFAUIScroll;
 class QFAViewportRoot;
 class QFAUIList;
+class QFAParentHiddenChild;
 class QFAUIUnit
 {
 	friend QFAViewport;
@@ -96,6 +108,8 @@ class QFAUIUnit
 	friend QFAUIParentOneUnit;
 	friend QFAUIScroll;
 	friend QFAUIList;
+	friend QFAParentHiddenChild;
+	friend QFAUIParent;
 
 protected:
 	struct UniformOverflow
@@ -125,6 +139,8 @@ protected:
 
 	bool CanBeParent = false;
 	QFAUIType::Type Type = QFAUIType::NONE;
+	QFAEditorUIType::Type EditorType = QFAEditorUIType::Type::NONE;
+
 	bool CanRender = false;
 
 	/*
@@ -171,40 +187,46 @@ public:
 
 		CallbackWithUnit LeftMouseDownUp;
 		CallbackWithUnit RightMouseDownUp;
+
+		CallbackWithUnit ForwardMouseDown;
+		CallbackWithUnit BackwardMouseDown;
+
 		EventFunctions() {};		
 	public:
 		/*
 			if child have focus parents also have focus
 			QFAUIUnit* unit in focus
 		*/
-		void SetInFocus(void (*fun)(QFAUIUnit*, void*), void* userData = nullptr);
+		void SetInFocus(void (*fun)(QFAUIUnit*, void*), void* userData);
 		/*		
 			if child have outfocus parents 
 			also have outfocus only if parent
-			not have other child in focus.
+			not have new child in focus.
 			if parents have new child focus
 			parents get event InFocus with new focus unit
 		*/
-		void SetOutFocus(void (*fun)(void*), void* userData = nullptr);
+		void SetOutFocus(void (*fun)(void*), void* userData);
 
 		/*
 			parents also notified
 		*/
-		void SetLeftMouseDown(void (*fun)(QFAUIUnit*, void*), void* userData = nullptr);
-		void SetLeftMouseUp(void (*fun)(QFAUIUnit*, void*), void* userData = nullptr);
-		void SetRightMouseDown(void (*fun)(QFAUIUnit*, void*), void* userData = nullptr);
-		void SetRightMouseUp(void (*fun)(QFAUIUnit*, void*), void* userData = nullptr);
+		void SetLeftMouseDown(void (*fun)(QFAUIUnit*, void*), void* userData );
+		void SetLeftMouseUp(void (*fun)(QFAUIUnit*, void*), void* userData );
+		void SetRightMouseDown(void (*fun)(QFAUIUnit*, void*), void* userData);
+		void SetRightMouseUp(void (*fun)(QFAUIUnit*, void*), void* userData );
+		void SetForwardMouseDown(void (*fun)(QFAUIUnit*, void*), void* userData);
+		void SetBackwardMouseDown(void (*fun)(QFAUIUnit*, void*), void* userData);
 
 		/*
 			call if Left Mouse button press and release at same unit
 			parents also notified
 		*/
-		void SetLeftMouseDownUp(void (*fun)(QFAUIUnit*, void*), void* userData = nullptr);
+		void SetLeftMouseDownUp(void (*fun)(QFAUIUnit*, void*), void* userData);
 		/*
 			call if Right Mouse button press and release at same unit
 			parents also notified
 		*/
-		void SetRightMouseDownUp(void (*fun)(QFAUIUnit*, void*), void* userData = nullptr);
+		void SetRightMouseDownUp(void (*fun)(QFAUIUnit*, void*), void* userData);
 	};
 
 	
@@ -310,6 +332,11 @@ public:
 	{
 		return Type;
 	}
+	// rename GetEditoUnitType to GetEditorUnitType
+	inline QFAEditorUIType::Type GetEditoUnitType()
+	{
+		return EditorType;
+	}
 protected:
 	QFAUISlot::SParentSlot Slot;
 
@@ -365,6 +392,9 @@ protected:
 	void NotifyLeftMouseUp();
 	void NotifyRightMouseDown();
 	void NotifyRightMouseUp();
+
+	void NotifyForwardMouseDown();
+	void NotifyBackwardMouseDown();
 
 	void NotifyLeftMouseDownUp();
 	void NotifyRightMouseDownUp();

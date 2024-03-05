@@ -71,10 +71,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Users\Juni\Desktop\QFAEngine Root\glfw-3.3.9.bin.WIN64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Assimp\include;C:\VulkanSDK\1.3.275.0\Include;C:\Users\Juni\Desktop\QFAEngine Root\QFAEngine\QFAEngine\Engine;C:\Users\Juni\Desktop\QFAEngine Root\glfw-3.3.9\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)QFAEditor\Editor;C:\Users\Juni\Desktop\QFAEngine Root\glfw-3.4.bin.WIN64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Assimp\include;C:\VulkanSDK\1.3.275.0\Include;C:\Users\Juni\Desktop\QFAEngine Root\QFAEngine\QFAEngine\Engine;C:\Users\Juni\Desktop\QFAEngine Root\glfw-3.3.9\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)..\glfw-3.3.9.bin.WIN64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Assimp\include;C:\VulkanSDK\1.3.275.0\Include;C:\Users\Juni\Desktop\QFAEngine Root\QFAEngine\QFAEngine\Engine;C:\Users\Juni\Desktop\QFAEngine Root\glfw-3.3.9\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)QFAEditor\Editor;$(SolutionDir)..\glfw-3.4.bin.WIN64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Assimp\include;C:\VulkanSDK\1.3.275.0\Include;C:\Users\Juni\Desktop\QFAEngine Root\QFAEngine\QFAEngine\Engine;C:\Users\Juni\Desktop\QFAEngine Root\glfw-3.4\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -115,7 +115,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\Juni\Desktop\QFAEngine Root\Shaderc\lib;$(SolutionDir)..\QFAEngine\x64\Debug;C:\VulkanSDK\1.3.275.0\Lib;$(SolutionDir)..\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\Assimp\lib\x64;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\Juni\Desktop\QFAEngine Root\Shaderc\lib;$(SolutionDir)..\QFAEngine\x64\Debug;C:\VulkanSDK\1.3.275.0\Lib;C:\Assimp\lib\x64;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);shaderc_sharedd.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -135,7 +135,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\Juni\Desktop\QFAEngine Root\Shaderc\lib;$(SolutionDir)..\QFAEngine\x64\Debug;C:\VulkanSDK\1.3.275.0\Lib;$(SolutionDir)..\glfw-3.3.8\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\Assimp\lib\x64;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\Juni\Desktop\QFAEngine Root\Shaderc\lib;$(SolutionDir)..\QFAEngine\x64\Debug;C:\VulkanSDK\1.3.275.0\Lib;C:\Assimp\lib\x64;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -145,12 +145,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Editor\EditorOverlord.cpp" />
+    <ClCompile Include="Editor\EditorUI\ExplorerFolderUnit.cpp" />
+    <ClCompile Include="Editor\EditorUI\FileExplorer.cpp" />
     <ClCompile Include="Editor\ShaderCompiler\ShaderCompiler.cpp" />
+    <ClCompile Include="Editor\EditorWindows\MainEditorWindow.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor\EditorOverlord.h" />
+    <ClInclude Include="Editor\EditorUI\ExplorerFolderUnit.h" />
+    <ClInclude Include="Editor\EditorUI\FileExplorer.h" />
     <ClInclude Include="Editor\ShaderCompiler\ShaderCompiler.h" />
+    <ClInclude Include="Editor\EditorWindows\MainEditorWindow.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

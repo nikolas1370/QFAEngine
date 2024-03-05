@@ -9,7 +9,7 @@ class QFAUITextInput : public QFAParentHiddenChild
 	friend QFAUIEvent;
 	friend QFAUIScroll;
 	static const int MaxTextCount = 256;
-	QFAText Text;
+	QFAText *Text;
 	char32_t Texts[MaxTextCount];
 	QFAText::PrepareData pd[MaxTextCount];
 public:
@@ -18,23 +18,9 @@ public:
 
 	inline bool SetFont(QFAText::SFont* font)
 	{
-		return Text.SetFont(font);
+		return Text->SetFont(font);
 	}
 protected:
-	inline QFAVKPipeline* GetChildPipeline() override
-	{
-		return QFAText::Pipeline;
-	}
-
-	inline void RenderChild(VkCommandBuffer comandebuffer) override
-	{
-		Text.Render(comandebuffer);
-	}
-	
-	inline QFAUIUnit* GetChild() override
-	{
-		return &Text;
-	}
 
 	void MySlotChange(QFAUIUnit* unit) override {};
 

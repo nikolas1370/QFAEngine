@@ -13,7 +13,7 @@ ACameraActor::~ACameraActor()
 
 void ACameraActor::ActivateCamera(QFAViewport* viewport)
 {
-	Camera.Activate();
+	Camera.Activate();	
 	if (viewport)
 		viewport->ChangeCamera(&Camera);	
 }

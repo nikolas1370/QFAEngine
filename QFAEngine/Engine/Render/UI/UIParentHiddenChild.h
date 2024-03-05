@@ -2,21 +2,27 @@
 #include <Render/UI/UIParent.h>
 
 /*
-	child of this class have only one UI child
 	QFAParentHiddenChild does not have slot because child Hidden
+
+	only child class can add child unit in Children
 */
 class QFAWindow;
+class QFAUIEvent;
 class QFAParentHiddenChild : public QFAUIParent
 {
 	friend QFAWindow;
+	friend QFAUIEvent;
 public:
 	QFAParentHiddenChild();
 	~QFAParentHiddenChild();
 
 protected:
-	virtual QFAVKPipeline* GetChildPipeline() = 0;
-	virtual void RenderChild(VkCommandBuffer comandebuffer) = 0;	
-	virtual QFAUIUnit* GetChild() = 0;
+	std::vector<QFAUIUnit*> Children;
+
+	void GetChildren(std::vector<QFAUIUnit*>& children);
+
+	// only child class can use it
+	void AddHiddenChild(QFAUIUnit* unit);
 private:
 	void RemoveUnitWithoutNotify(QFAUIUnit* unit) final {};
 

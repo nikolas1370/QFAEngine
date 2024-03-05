@@ -14,6 +14,8 @@ protected:
 	float UpdateInnerHeight() override;
 	float UpdateInnerWidth() override;
 	
+	// if true last unit be have height or width like free space in list
+	bool StretchLastUnit = false;
 public:
 	enum EListType
 	{
@@ -36,6 +38,10 @@ public:
 	void SetUnitWidth(unsigned int w);
 
 	inline void SetOverflow(EOverflow over) override {};
+	inline void SetStretchLastUnit(bool enable)
+	{
+		StretchLastUnit = enable;
+	}
 private:
 	/*
 		if true

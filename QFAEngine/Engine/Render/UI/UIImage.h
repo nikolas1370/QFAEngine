@@ -4,7 +4,8 @@
 #include <Math/Vector.h>
 #include <Render/UI/RenderUnit.h>
 #include <Render/Buffer/VKBuffer.h>
-#include <Math/Vector4D.h>
+#include <Tools/Color.h>
+
 
 
 /* ttf type */
@@ -44,7 +45,7 @@ class QFAUIImage : public QFAUIRenderUnit
         if Image == nullptr
         image be hawe this color
     */
-    FVector4D BackgroundColor = FVector4D();
+    QFAColorF BackgroundColor = QFAColorF(0.0f,0.0f,0.0f,0.0f);
 
 
     static QFAVKPipeline* Pipeline;
@@ -56,10 +57,13 @@ class QFAUIImage : public QFAUIRenderUnit
 
     // if this image use for Background image
     bool IBackground = false;
+
+    // if false ratio be same like in image
+    bool CanStretch = false;
 public:
   
 
-    QFAUIImage(QFAImage* image);
+    QFAUIImage(QFAImage* image, bool iBackground = false);
     ~QFAUIImage();
 
     /*
@@ -67,7 +71,29 @@ public:
         image area be have color of BackgroundColor
     */
     void SetImage(QFAImage* image);
-    void SetBackgroundColor(FVector4D color);
+   
+
+    void SetBackgroundColor(QFAColor color)
+    {
+
+        glm::vec3 linear = Math::srgb_to_linear(glm::vec3((float)color.R / 255.0f, (float)color.G / 255.0f, (float)color.B / 255.0f));
+        BackgroundColor = QFAColorF(linear.r, linear.g, linear.b, (float)color.A / 255.0f);
+    }
+
+    void SetBackgroundColor(QFAColorB color)
+    {
+        glm::vec3 linear = Math::srgb_to_linear(glm::vec3((float)color.R / 255.0f, (float)color.G / 255.0f, (float)color.B / 255.0f));
+        BackgroundColor = QFAColorF(linear.r, linear.g, linear.b, (float)color.A / 255.0f);
+    }
+
+    void SetBackgroundColor(QFAColorF color)
+    {
+        glm::vec3 linear = Math::srgb_to_linear(glm::vec3(color.R, color.G, color.B));
+        BackgroundColor = QFAColorF(linear.r, linear.g, linear.b, color.A);
+    }
+
+
+    void SetCanStretch(bool can);
 
 private: 
     static void Init(VkRenderPass renderPass, VkCommandPool commandPool);
@@ -114,7 +140,7 @@ private:
         float opacity;
         UniformOverflow overflow;
         int BackgroundEnable = 0;
-        alignas(16)FVector4D BackgroundColor;
+        alignas(16)QFAColorF BackgroundColor;
     };
 
     struct SImageVertexParam

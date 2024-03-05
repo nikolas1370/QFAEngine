@@ -20,6 +20,8 @@ class QFAImage
 	
 	VkFormat ImageFormat;
 
+	unsigned int Width;
+	unsigned int Height;
 
 public:
 	VkImage TextureImage;
@@ -48,6 +50,15 @@ public:
 	
 	void DeleteImageInCpuSide();
 
+	inline unsigned int GetWidth()
+	{
+		return Width;
+	}
+
+	inline unsigned int GetHeight()
+	{
+		return Height;
+	}
 
 private:
 	

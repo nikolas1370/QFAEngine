@@ -178,3 +178,30 @@ void QFAFileSystem::CreateFolders(std::u32string folderPath)
 	std::filesystem::create_directories(folderPath);
 }
 
+bool QFAFileSystem::GetFolder—ontents(std::u32string path, std::vector<FolderUnit>& folder—ontents)
+{
+	if (!std::filesystem::exists(path))
+		return false;
+
+	for (const auto& unit : std::filesystem::directory_iterator(path))
+		folder—ontents.push_back({ unit.path().u32string() , unit.path().filename().u32string() , unit.is_directory()});
+
+	if (folder—ontents.size() <= 1)
+		return true;
+
+	for (size_t i = 0; i < folder—ontents.size() - 1; i++)
+	{
+		for (size_t j = 0; j < folder—ontents.size() - 1; j++)
+		{
+			if (!folder—ontents[j].IsFolder && folder—ontents[j + 1].IsFolder)
+			{
+				FolderUnit fu = folder—ontents[j];
+				folder—ontents[j] = folder—ontents[j + 1];
+				folder—ontents[j + 1] = fu;
+			}
+		}
+	}
+
+	return true;
+}
+

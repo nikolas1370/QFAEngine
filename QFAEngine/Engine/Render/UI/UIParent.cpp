@@ -17,7 +17,6 @@ QFAUIParent::QFAUIParent()
 {
 	CanBeParent = true;
 	BackgroundImage.Parent = this;
-	BackgroundImage.IBackground = true;
 }
 
 QFAUIParent::~QFAUIParent()
@@ -30,6 +29,8 @@ void QFAUIParent::SetBackgroundImage(QFAImage* image)
 	Image = image;
 	BackgroundImage.SetImage(image);
 }
+
+
 
 void QFAUIParent::RenderBackground(VkCommandBuffer comandebuffer)
 {
@@ -62,9 +63,14 @@ void QFAUIParent::SetBackgroundType(EBackgroundType type)
 	}
 }
 
-
-void QFAUIParent::SetBackgroundColor(FVector4D color)
+void QFAUIParent::SetChildPosition(QFAUIUnit* childUnit, int x, int y)
 {
-	BackgroundColor = color;
-	BackgroundImage.SetBackgroundColor(color);
+	if(childUnit->IsValid() && childUnit->Parent == this)
+		childUnit->SetPositionParent(x, y);
+}
+
+void QFAUIParent::SetChildSize(QFAUIUnit* childUnit, int w, int h)
+{
+	if (childUnit->IsValid() && childUnit->Parent == this)
+		childUnit->SetSizeParent(w, h);
 }

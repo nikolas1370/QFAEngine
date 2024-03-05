@@ -5,6 +5,7 @@
 #include <functional>
 #include <Render/Time.h>
 #include <Render/UI/TextInput.h>
+#include <Render/UI/UIParentHiddenChild.h>
 
 std::vector<QFAUIEvent*> QFAUIEvent::Events;
 
@@ -29,6 +30,16 @@ QFAUIEvent::QFAUIEvent(QFAWindow* window, GLFWwindow* _glfWindow)
 			RightMouseDown = true;
 		});
 
+	Input->AddKeyPress(EKey::MOUSE_5, "FMD", [this](EKey::Key key)
+		{
+			ForwardMouseDown = true;
+		});
+
+	Input->AddKeyPress(EKey::MOUSE_4, "BMD", [this](EKey::Key key)
+		{
+			BackwardMouseDown = true;
+		});
+
 	Input->AddKeyRelease(EKey::MOUSE_LEFT, "LMU", [this](EKey::Key key)
 		{
 			LeftMouseUp = true;
@@ -38,6 +49,8 @@ QFAUIEvent::QFAUIEvent(QFAWindow* window, GLFWwindow* _glfWindow)
 		{
 			RightMouseUp = true;
 		});
+
+	
 
 	glfwSetCharCallback(glfWindow, QFAUIEvent::CharCallback);
 	Input->AddKeyPress(EKey::LEFT, "left", [this](EKey::Key key)
@@ -104,11 +117,20 @@ void QFAUIEvent::AddUnitToSortList(QFAUIUnit* unit)
 			AddUnitToSortList(((QFAUIParentOneUnit*)unit)->Child);	
 		else if (parent->GetParentType() == QFAUIParent::EParentType::MultipleChild)
 		{
-			QFAUIParentMultipleUnit* parent = (QFAUIParentMultipleUnit*)unit;
-			for (size_t i = 0; i < parent->Children.Length(); i++)
-				AddUnitToSortList(parent->Children[i]);
+			QFAUIParentMultipleUnit* multipleParent = (QFAUIParentMultipleUnit*)unit;
+			for (size_t i = 0; i < multipleParent->Children.Length(); i++)
+				AddUnitToSortList(multipleParent->Children[i]);
 		}// if parent type HiddenChild do nothing
-		else if (parent->GetParentType() != QFAUIParent::EParentType::HiddenChild)
+		else if (parent->GetParentType() == QFAUIParent::EParentType::HiddenChild)
+		{
+			if (parent->Type != QFAUIType::TextInput) // TextInput not give own child
+			{
+				QFAParentHiddenChild* hidenPArent = (QFAParentHiddenChild*)parent;
+				for (size_t i = 0; i < hidenPArent->Children.size(); i++)
+					AddUnitToSortList(hidenPArent->Children[i]);
+			}			
+		}
+		else 
 			stopExecute("QFAUIEvent::AddUnitToSortList undefined parent type");
 	}	
 }
@@ -224,8 +246,7 @@ void QFAUIEvent::FocusEvent(QFAUIUnit* newUnitUnderFocus)
 					if (lastFocusParentCount == curentFocusParentCount)
 					{
 						if (last == curent)
-						{
-							newUnitUnderFocus->NotifyInFocus();
+						{							
 							last = FocusUnit;
 							while (true)
 							{
@@ -236,6 +257,7 @@ void QFAUIEvent::FocusEvent(QFAUIUnit* newUnitUnderFocus)
 								last = last->Parent;
 							}
 
+							newUnitUnderFocus->NotifyInFocus();
 							break;
 						}
 						else
@@ -317,6 +339,22 @@ void QFAUIEvent::MouseButtonEvent(QFAUIUnit* unitUnderFocus)
 		}
 
 		RightMouseUnit = nullptr;
+	}
+
+	if (ForwardMouseDown)
+	{
+		if(unitUnderFocus)
+			unitUnderFocus->NotifyForwardMouseDown();
+
+		ForwardMouseDown = false;
+	}
+	
+	if (BackwardMouseDown)
+	{
+		if(unitUnderFocus)
+			unitUnderFocus->NotifyBackwardMouseDown();
+
+		BackwardMouseDown = false;
 	}
 }
 

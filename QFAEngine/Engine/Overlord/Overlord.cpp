@@ -17,11 +17,15 @@
 
 bool QFAOverlord::Life = false;
 bool QFAOverlord::isInit = false; 
-
+bool QFAOverlord::ShdowFpsInConsole = true;
 
 
 int QFAOverlord::DefaultWidth = 1000;
 int QFAOverlord::DefaultHeight = 600;
+
+float QFAOverlord::FrameCount = 60.0f;
+float QFAOverlord::FrameTime = 1000 / FrameCount;
+bool QFAOverlord::FpsLock = true;
 
 bool QFAOverlord::StartLife()
 {
@@ -30,20 +34,21 @@ bool QFAOverlord::StartLife()
     
     if (QFAText::Fonts.size() == 0)
         stopExecute("before call StartLife need add font, for it call ELoadFontResult LoadFont");
-
-    std::cout << "Engine load time " << (QTime::GetTime() / 10000) << '\n';
+    
 	Life = true;
+    std::cout << "Engine load time " << (QTime::GetTime() / 10000) << '\n';
 	QFAOverlord::MainLoop();
 	return true;
 }
 
 
-bool QFAOverlord::Init(std::vector<QFAVKPipeline::SShaderData> shaderData)
+bool QFAOverlord::Init(std::vector<QFAVKPipeline::SShaderData> shaderData, bool createWindow)
 {
     QTime::Init();    
     QFAVKPipeline::SetShaderData(shaderData);
 
-    new QFAWindow(DefaultWidth, DefaultHeight, "QFA");      
+    if(createWindow)
+        new QFAWindow(DefaultWidth, DefaultHeight, "QFA");
 
     timecaps_tag ptc{};
     timeGetDevCaps(
@@ -56,15 +61,15 @@ bool QFAOverlord::Init(std::vector<QFAVKPipeline::SShaderData> shaderData)
     return true;
 }
 
-static int count = 0;
-static double deltaAcum = 0;
+
 
 
 void QFAOverlord::MainLoop()
 {
-    const float frameCount = 60.0f;
-    const float frameTime = 1000 / frameCount;
-    bool limit = true;
+    static int count = 0;
+    static double deltaAcum = 0;
+
+
     float timePassedAcum = 0;
 
     while ( Life)
@@ -100,7 +105,7 @@ void QFAOverlord::MainLoop()
         float timePassed = (float)(QTime::GetSystemTime() - t) / 10000.0f;
         timePassedAcum += timePassed;
 
-        if (deltaAcum >= 1.0)
+        if (ShdowFpsInConsole && deltaAcum >= 1.0)
         {            
             std::cout << "fps " << count <<" deltatime " << 1.0 / (double)count << " " << timePassedAcum / count << "\n";
             timePassedAcum = 0;
@@ -109,8 +114,8 @@ void QFAOverlord::MainLoop()
         }
 
        
-        if (limit && timePassed < frameTime)
-            QFASleep(frameTime - timePassed);
+        if (FpsLock && timePassed < FrameTime)
+            QFASleep(FrameTime - timePassed);
     }
 }
 

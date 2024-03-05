@@ -43,6 +43,17 @@ void QFAUIParentMultipleUnit::removeUnit(QFAUIUnit* unit)
 	unit->ParentDisconect();
 }
 
+void QFAUIParentMultipleUnit::removeAllUnit()
+{
+	for (size_t i = 0; i < Children.Length(); i++)
+	{
+		Children[i]->Parent = nullptr;
+		Children[i]->ParentDisconect();
+	}
+
+	Children.Clear();
+}
+
 void QFAUIParentMultipleUnit::RemoveUnitWithoutNotify(QFAUIUnit* unit)
 {
 	Children.Remove(unit);

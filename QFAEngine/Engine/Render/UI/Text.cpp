@@ -46,6 +46,7 @@ QFAText::QFAText()
     Type = QFAUIType::Text;
     vertexBufer = new QFAVKVertexBuffer(sizeof(GlyphShader) * CountGlyphInGUP, nullptr, commandPool);
     CurentFontIndex = 0;
+    CurentFontIndex = 0;
 }
 
 void QFAText::Init(VkRenderPass renderPass, VkCommandPool commandPool_)
@@ -92,7 +93,7 @@ void QFAText::AddGlyph(FT_ULong symbol, SFont* font)
 
     float before = face->glyph->bitmap.width;
     if (FT_Render_Glyph(face->glyph, FT_RENDER_MODE_SDF))
-        std::cout << "ERORRRRRRR" << std::endl;
+        stopExecute("ERORRRRRRR")
 
     if (face->glyph->bitmap.width == 0) //space(' ')
         gi.differenceWidth = 1;
@@ -147,12 +148,12 @@ void QFAText::AddGlyph(FT_ULong symbol, SFont* font)
     gi.y = (float)row->y / (float)GlyphAtlasHeight;
     gi.xEnd = gi.x + ((float)gi.width / (float)GlyphAtlasWidth);
     gi.yEnd = gi.y + ((float)gi.height / (float)GlyphAtlasHeight);
-    gi.advance_x = face->glyph->advance.x / 64;    
+    gi.advance_x = face->glyph->advance.x / 64;
     gi.bitmap_left = face->glyph->bitmap_left;
     gi.bitmap_top = face->glyph->bitmap_top;
     gi.bitmap_bottom = gi.height - gi.bitmap_top;
     gi.atlasIndex = atlas->atlasIndex;
-    
+
     gi.HeightMultiplier = (float)(face->ascender - face->descender) / (float)face->units_per_EM;
     float maxH = (float)(face->ascender - face->descender);// descender < 0
     gi.MaxAscender = (int)round(((float)FontLoadCharHeight * ((float)face->ascender / maxH)));
@@ -166,8 +167,6 @@ void QFAText::AddGlyph(FT_ULong symbol, SFont* font)
 
     row->x += face->glyph->bitmap.width + OffsetBetweenGlyph;
     font->Symbols.Add(Symbol{ symbol, gi });
-
-
 }
 
 void QFAText::ProcessText()
@@ -226,14 +225,14 @@ void QFAText::ProcessText()
                 x += (int)((float)Fonts[CurentFontIndex]->Symbols[symI].Glyph.advance_x * tem);
             }
         }
-        else if (OverflowWrap == EOverflowWrap::OWWord)
+        else if (OverflowWrap == EOverflowWrap::OWWord || OverflowWrap == EOverflowWrap::OWWordBreak)
         {
             wordW += (int)((float)Fonts[CurentFontIndex]->Symbols[symI].Glyph.advance_x * tem);
             if (wordLen++ == 0)
                 wordStart = (unsigned int)i;
 
             TextMetadata.Add(PrepareData{ (unsigned int)symI });
-            if (Text[i] == U' ' || i == Text.size() - 1)
+            if (Text[i] == U' ' || i == Text.size() - 1 || (Width < (int)wordW && OverflowWrap == EOverflowWrap::OWWordBreak))
             {
                 int spaceS = 0;
                 if (Text[i] == U' ')
@@ -247,11 +246,27 @@ void QFAText::ProcessText()
                     if (x != 0)
                         countTextRow++;
 
-                    for (size_t j = wordStart; j < wordStart + wordLen; j++)
-                        TextMetadata[j].row = countTextRow;
+                    if (OverflowWrap == EOverflowWrap::OWWordBreak)
+                    {
+                        for (size_t j = wordStart; j < wordStart + wordLen - 1; j++)
+                            TextMetadata[j].row = countTextRow;
 
-                    countTextRow++;
-                    x = 0;
+                        countTextRow++;
+                        TextMetadata[wordStart + wordLen - 1].row = countTextRow;
+                        x = 0;
+                        wordW = (int)((float)Fonts[CurentFontIndex]->Symbols[symI].Glyph.advance_x * tem);;
+                        wordLen = 1;
+                        wordStart = i;
+                        continue;
+                    }
+                    else
+                    {
+                        for (size_t j = wordStart; j < wordStart + wordLen; j++)
+                            TextMetadata[j].row = countTextRow;
+
+                        countTextRow++;
+                        x = 0;
+                    }    
                 }
                 else if (x + (int)wordW <= Width)
                 {
@@ -674,8 +689,8 @@ void QFAText::SetPositionParent(int x, int y)
 void QFAText::updateUniformBuffer()
 {
     
-    TextUniformParam.textColor = Color;
-    TextUniformParam.outlineColor = OutlineColor;
+    TextUniformParam.textColor = FVector(Color.R, Color.G, Color.B);
+    TextUniformParam.outlineColor = FVector(OutlineColor.R, OutlineColor.G, OutlineColor.B);
     TextUniformParam.outline = (int)Outline;
     TextUniformParam.opacity = ProcessParentOpacity(Opacity, Parent);
 

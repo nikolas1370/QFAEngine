@@ -67,7 +67,8 @@ public:
 	}
 
 
-	
+	// from https://gist.github.com/Reedbeta/e8d3817e3f64bba7104b8fafd62906df
+	static glm::vec3 srgb_to_linear(glm::vec3 rgb);	
 };
 
 

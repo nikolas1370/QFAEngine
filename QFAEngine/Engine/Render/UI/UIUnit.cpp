@@ -209,6 +209,36 @@ void QFAUIUnit::NotifyRightMouseUp()
     }
 }
 
+void QFAUIUnit::NotifyForwardMouseDown()
+{
+    QFAUIUnit* parent = this;
+    while (true)
+    {
+        if (!parent)
+            return;
+
+        if (parent->Events.ForwardMouseDown.fun)
+            parent->Events.ForwardMouseDown.fun(this, parent->Events.ForwardMouseDown.userData);
+
+        parent = parent->Parent;
+    }
+}
+
+void QFAUIUnit::NotifyBackwardMouseDown()
+{
+    QFAUIUnit* parent = this;
+    while (true)
+    {
+        if (!parent)
+            return;
+
+        if (parent->Events.BackwardMouseDown.fun)
+            parent->Events.BackwardMouseDown.fun(this, parent->Events.BackwardMouseDown.userData);
+
+        parent = parent->Parent;
+    }
+}
+
 void QFAUIUnit::NotifyLeftMouseDownUp()
 {
     QFAUIUnit* parent = this;
@@ -276,6 +306,18 @@ void QFAUIUnit::EventFunctions::SetRightMouseUp(void (*fun)(QFAUIUnit*, void*), 
 {
     RightMouseUp.fun = fun;
     RightMouseUp.userData = userData;
+}
+
+void QFAUIUnit::EventFunctions::SetForwardMouseDown(void(*fun)(QFAUIUnit*, void*), void* userData)
+{
+    ForwardMouseDown.fun = fun;
+    ForwardMouseDown.userData = userData;
+}
+
+void QFAUIUnit::EventFunctions::SetBackwardMouseDown(void(*fun)(QFAUIUnit*, void*), void* userData)
+{
+    BackwardMouseDown.fun = fun;
+    BackwardMouseDown.userData = userData;
 }
 
 void QFAUIUnit::EventFunctions::SetLeftMouseDownUp(void (*fun)(QFAUIUnit*, void*), void* userData)
