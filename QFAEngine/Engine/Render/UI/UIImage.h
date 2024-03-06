@@ -132,7 +132,7 @@ private:
     static std::vector<SImageIndex> ImageIndexs;
     unsigned int Index = 0;
 
-    static const unsigned int AmountSetsInImageParamPool = 100;
+    static const unsigned int AmountSetsInImageParamPool = 20;
 
 
     struct SImageParam
@@ -145,7 +145,8 @@ private:
 
     struct SImageVertexParam
     {
-        float offset;        
+        float offset;
+        float offsetX;
     };
 
     void ChangeQuad();

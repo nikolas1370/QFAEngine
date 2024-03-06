@@ -82,7 +82,9 @@ void QFAUIImage::UpdateUniforms()
     ip.BackgroundColor = BackgroundColor;
 
     memcpy(ImageIndexs[Index].buffer->MapData, &ip, sizeof(SImageParam));
-    memcpy(ImageIndexs[Index].bufferVertex->MapData, &UnitScroll, sizeof(SImageVertexParam));
+
+    SImageVertexParam IVP = { UnitScroll + Position_y, Position_x};
+    memcpy(ImageIndexs[Index].bufferVertex->MapData, &IVP, sizeof(SImageVertexParam));
 }
 
 
@@ -216,30 +218,30 @@ void QFAUIImage::ChangeQuad()
     // left top
     quad[0].textureX = 0.0f;
     quad[0].textureY = 0.0f;
-    quad[0].x = (float)Position_x + offsetX;
-    quad[0].y = (float)Position_y + offsetY;
+    quad[0].x = offsetX;
+    quad[0].y = offsetY;
     quad[0].z = (float)ZIndex;
 
     // left bottom
     quad[1].textureX = 0.0f;
     quad[1].textureY = 1.0f;
-    quad[1].x = (float)Position_x + offsetX;
-    quad[1].y = (float)Position_y + newGpuH + offsetY;
+    quad[1].x = offsetX;
+    quad[1].y = newGpuH + offsetY;
     quad[1].z = (float)ZIndex;
 
 
     // right top
     quad[2].textureX = 1.0f;
     quad[2].textureY = 0.0f;
-    quad[2].x = (float)(Position_x + newGpuW + offsetX);
-    quad[2].y = (float)Position_y + offsetY;
+    quad[2].x = (float)(newGpuW + offsetX);
+    quad[2].y = offsetY;
     quad[2].z = (float)ZIndex;
 
     // right bottom
     quad[3].textureX = 1.0f;
     quad[3].textureY = 1.0f;
-    quad[3].x = (float)(Position_x + newGpuW + offsetX);
-    quad[3].y = (float)(Position_y + newGpuH + offsetY);
+    quad[3].x = (float)(newGpuW + offsetX);
+    quad[3].y = (float)(newGpuH + offsetY);
     quad[3].z = (float)ZIndex;
 
     quad[4] = quad[2];
@@ -247,21 +249,25 @@ void QFAUIImage::ChangeQuad()
     quad[5] = quad[1];
     vertexBufer->UpdateData(sizeof(quad), &quad);
     UpdateUniforms();
-}
+} 
 
 void QFAUIImage::SetSizeParent(unsigned int w, unsigned int h)
 {
+    bool changeQuad = false;
+    if (w != Width || h != Height)
+        changeQuad = true;
+
     Width = w;
     Height = h;
 
-    ChangeQuad();
+    if(changeQuad)
+        ChangeQuad();
 }
 
 void QFAUIImage::SetPositionParent(int x, int y)
 {
     Position_x = x;
     Position_y = y;
-    ChangeQuad();
 }
 
 void QFAUIImage::ParentEnable()
@@ -288,10 +294,7 @@ void QFAUIImage::ParentDisconect()
 }
 
 void QFAUIImage::PrepareSet()
-{
-    
-        
-
+{    
     std::array< QFAVKPipeline::QFADescriptorSetInfo, 3> setInfo;
     VkDescriptorImageInfo imageInfo;
 

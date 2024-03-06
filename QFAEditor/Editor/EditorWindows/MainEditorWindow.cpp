@@ -18,7 +18,7 @@ QFAEditorMainWindow::QFAEditorMainWindow()
 		MainWindow = this;
 
 	QFAOverlord::SetShdowFpsInConsole(true);
-	QFAOverlord::EnableFpsLock(true);
+	QFAOverlord::EnableFpsLock(false);
 	QFAOverlord::SetLimitFpsCount(60);
 	Window = new QFAWindow(800, 800, "QFAEditor");
 

@@ -280,7 +280,7 @@ void QFAVKPipeline::CreatePool(uint32_t groupIndex)
 
 void QFAVKPipeline::CreateSet(uint32_t groupIndex, QFADescriptorSetInfo* descriptorInfo)
 {
-    if (Pools[groupIndex].ListPool.size() == 0 || GroupDescriptorPools[groupIndex].DescriptorPoolSizeCount == GroupDescriptorPools[groupIndex].MaxSets)
+    if (Pools[groupIndex].ListPool.size() == 0 || GroupDescriptorPools[groupIndex].CountSetInLastPool == GroupDescriptorPools[groupIndex].MaxSets)
     {        
         CreatePool(groupIndex);
         GroupDescriptorPools[groupIndex].CountSetInLastPool = 0;
@@ -293,8 +293,8 @@ void QFAVKPipeline::CreateSet(uint32_t groupIndex, QFADescriptorSetInfo* descrip
     allocInfo.pSetLayouts = (const VkDescriptorSetLayout*)&DescriptorSetLayouts[groupIndex];
 
     VkDescriptorSet set;
-    if (vkAllocateDescriptorSets(QFAVKLogicalDevice::GetDevice(), &allocInfo, &set) != VK_SUCCESS)
-        stopExecute("failed to allocate descriptor sets!");
+    if (VkResult res = vkAllocateDescriptorSets(QFAVKLogicalDevice::GetDevice(), &allocInfo, &set))
+        stopExecute(res); // "failed to allocate descriptor sets! " 
 
     Pools[groupIndex].ListSet.push_back(set);
     UpdateSet(groupIndex, (uint32_t)Pools[groupIndex].ListSet.size() - 1, descriptorInfo);
