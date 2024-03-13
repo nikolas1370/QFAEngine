@@ -203,7 +203,17 @@ public:
 	{
 		ProcessTickIfWindowsMinimized = processTickIfWindowsMinimized;
 	}
+
+	
+
+	inline void SetDropFun(std::function<void (int path_count, const char* paths[])> fun)
+	{
+		DropFunction = fun;
+	}
+
 private:
+	std::function<void(int path_count, const char* paths[])> DropFunction;
+
 	uint32_t imageIndex; // next image in sqp shain
 	bool minimized = false;
 	bool ProcessTickIfWindowsMinimized = false;

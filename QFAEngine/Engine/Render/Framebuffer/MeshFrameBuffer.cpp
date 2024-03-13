@@ -1,9 +1,9 @@
 #include "MeshFrameBuffer.h"
 
-QFAVKMeshFrameBuffer::QFAVKMeshFrameBuffer(VkCommandPool commandPool, int w, int h)
+QFAVKMeshFrameBuffer::QFAVKMeshFrameBuffer(VkCommandPool commandPool, int w, int h, VkFormat imageFormat)
 {
-	Clear.CreateRenderPass(true);
-	After.CreateRenderPass(false);
+	Clear.CreateRenderPass(true, imageFormat);
+	After.CreateRenderPass(false, imageFormat);
 	
 	CreateBuffer(commandPool, w, h);
 

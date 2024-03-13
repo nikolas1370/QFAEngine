@@ -9,7 +9,7 @@ class QFAVKMeshFrameBuffer
 	void CreateBuffer(VkCommandPool commandPool, int w, int h);
 
 public:
-	QFAVKMeshFrameBuffer(VkCommandPool commandPool, int w, int h);
+	QFAVKMeshFrameBuffer(VkCommandPool commandPool, int w, int h, VkFormat imageFormat);
 	~QFAVKMeshFrameBuffer();
 	QFAImage* ColorImage;
 

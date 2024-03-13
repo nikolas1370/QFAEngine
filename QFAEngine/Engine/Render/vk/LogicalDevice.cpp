@@ -40,7 +40,6 @@ void QFAVKLogicalDevice::Init( VkSurfaceKHR surface)
     features.pNext = nullptr;
     features.runtimeDescriptorArray = VK_TRUE; // enable GL_EXT_nonuniform_qualifier
     features.descriptorIndexing = VK_TRUE;
-    //features.descriptorBindingPartiallyBound = VK_TRUE;
     
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;

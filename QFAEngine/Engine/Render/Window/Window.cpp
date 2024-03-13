@@ -1,4 +1,4 @@
-#include "Window.h"
+﻿#include "Window.h"
 
 #include <Object/ActorComponent/SceneComponent/Camera/Camera.h>
 
@@ -20,6 +20,7 @@
 #include <Render/Pipline/Pipline.h>
 #include <Render/UI/UIParentOneUnit.h>
 #include <Render/UI/UIParentHiddenChild.h>
+
 
 VkCommandPool QFAWindow::commandPool;
 
@@ -105,6 +106,20 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 		}			
 	});	
 
+	glfwSetDropCallback(glfWindow, [](GLFWwindow* window, int path_count, const char* paths[])
+		{
+			for (size_t i = 0; i < QFAWindow::Windows.size(); i++)
+			{
+				if (QFAWindow::Windows[i]->glfWindow == window)
+				{
+					if (QFAWindow::Windows[i]->DropFunction)
+						QFAWindow::Windows[i]->DropFunction(path_count, paths);
+
+					return;
+				}
+			}
+		});
+
 	if(!Instance)
 		Instance = new QFAVKInstance;
 
@@ -121,12 +136,16 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 	
 	SwapChain = new QFAVKSwapChain(glfWindow, surface, commandPool);
 
+	VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB;
+	
+		
+
 	if (Windows.size() == 1)
 	{
 		RenderPassOffScreen = new QFAVKRenderPassDepth();
 		RenderPass = new QFAVKRenderPass(SwapChain->swapChainImageFormat, true);
-		TextRenderPass = new QFAVKTextRenderPass(SwapChain->swapChainImageFormat, false);
-		TextRenderPassClear = new QFAVKTextRenderPass(SwapChain->swapChainImageFormat, true);
+		TextRenderPass = new QFAVKTextRenderPass(imageFormat, false);
+		TextRenderPassClear = new QFAVKTextRenderPass(imageFormat, true);
 		RenderPassSwapChain = new QFAVKRenderPassSwapChain(SwapChain->swapChainImageFormat, true);
 	
 		QFAText::Init(TextRenderPass->renderPass, commandPool);
@@ -143,7 +162,7 @@ QFAWindow::QFAWindow(int width, int height, std::string name)
 
 
 	SwapChain->createFramebuffers(RenderPassSwapChain->renderPass);	
-	frameBuffer = new QFAVKMeshFrameBuffer(commandPool, width, height);
+	frameBuffer = new QFAVKMeshFrameBuffer(commandPool, width, height, imageFormat);
 	PresentImage = new QFAPresentImage(commandPool, RenderPassSwapChain->renderPass, frameBuffer->ColorImage);
 
 	
@@ -264,7 +283,7 @@ void QFAWindow::SortUIs(QFAViewportRoot* root)
 				SortUIUnits[j + 1] = pTem;
 			}
 		}
-	}	
+	}
 }
 
 void QFAWindow::AddUnit(QFAUIUnit* unit)
@@ -629,6 +648,7 @@ void QFAWindow::RenderWindow(bool lastWindow)
 		}
 
 		DrawUI(Viewports[i], i, clear);
+		clear = false;
 		EndCommandBufferAndQueueSubmit();
 		ViewportProcess++;
 	}

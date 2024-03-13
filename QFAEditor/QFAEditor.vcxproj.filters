@@ -50,5 +50,8 @@
     <ClInclude Include="Editor\EditorUI\FileExplorer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Editor\EditorFileTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

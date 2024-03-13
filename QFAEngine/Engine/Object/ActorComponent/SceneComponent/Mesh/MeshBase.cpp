@@ -29,31 +29,42 @@ std::vector<VkDescriptorSet> QMeshBaseComponent::ShadowDescriptorSets;
 MeshData::MeshData(int uniqueIndexCount, int indexCount, int materialCount)
 {
 	
-	UniqueIndexCount = uniqueIndexCount;
-	IndexCount = indexCount;
-	MaterialCount = materialCount;
+	Mi.UniqueIndexCount = uniqueIndexCount;
+	Mi.IndexCount = indexCount;
+	Mi.MaterialCount = materialCount;
 	
-	VertexCount = uniqueIndexCount * 3;// index have 3 vertex
-	VerticesSize = sizeof(VertexMaterial) * VertexCount;
+	Mi.VertexCount = uniqueIndexCount * 3;// index have 3 vertex
+	Mi.VerticesSize = sizeof(VertexMaterial) * Mi.VertexCount;
 
-	FrameSize = sizeof(SSVertexMaterial) * uniqueIndexCount;
-	FramesData = (char*)malloc(FrameSize + sizeof(unsigned int) * IndexCount + sizeof(Material) * materialCount);
+	Mi.FrameSize = sizeof(SSVertexMaterial) * uniqueIndexCount;
+	Mi.AmountData = Mi.FrameSize + sizeof(unsigned int) * Mi.IndexCount + sizeof(Material) * materialCount;
+	FramesData = (char*)malloc(Mi.AmountData);
 }
 
 MeshData::MeshData(int vertexCount, int indexCount, int materialCount, int notNed)
 {	
-	MaterialCount = materialCount;
-	IndexCount = indexCount;
-	VertexCount = vertexCount;
-	VerticesSize = sizeof(VertexMaterial) * vertexCount;
+	Mi.MaterialCount = materialCount;
+	Mi.IndexCount = indexCount;
+	Mi.VertexCount = vertexCount;
+	Mi.VerticesSize = sizeof(VertexMaterial) * vertexCount;
 
-	FrameSize = sizeof(SSVertexMaterial) * vertexCount;
-	FramesData = (char*)malloc(FrameSize + ( sizeof(unsigned int) * IndexCount) + ( sizeof(Material) * materialCount));
+	Mi.FrameSize = sizeof(SSVertexMaterial) * vertexCount;
+	Mi.AmountData = Mi.FrameSize + (sizeof(unsigned int) * Mi.IndexCount) + (sizeof(Material) * materialCount);
+	FramesData = (char*)malloc(Mi.AmountData);
 }
 
-SSVertexMaterial* MeshData::GetFrameData(int frame) const
+SSVertexMaterial* MeshData::GetFrameData() const
 {
 	return (SSVertexMaterial*)&FramesData[0];
+}
+/*
+
+	SMeshInfo GetMeshInfo() const;
+
+*/
+MeshData::SMeshInfo MeshData::GetMeshInfo() const
+{
+	return Mi;
 }
 
 /*--------------*/

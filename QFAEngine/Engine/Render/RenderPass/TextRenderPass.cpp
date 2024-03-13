@@ -2,13 +2,13 @@
 #include <Tools/VulkanSuff.h>
 #include <Render/vk/LogicalDevice.h>
 #include <Render/Window/Window.h>
-QFAVKTextRenderPass::QFAVKTextRenderPass(VkFormat swapChainImageFormat, bool clear)
+QFAVKTextRenderPass::QFAVKTextRenderPass(VkFormat imageFormat, bool clear)
 {
 
 
     VkAttachmentDescription colorAttachment{};
     
-    colorAttachment.format = swapChainImageFormat;
+    colorAttachment.format = imageFormat;
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
     colorAttachment.loadOp = clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;

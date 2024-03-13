@@ -22,6 +22,9 @@ public:
 	}
 private:
 	void CreateUI();
+	void DropFun(int path_count, const char* paths[]);
+
+
 
 };
 

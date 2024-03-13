@@ -161,7 +161,7 @@ protected:
     void ParentAttach() override;
     void ParentDisconect() override;
 
-
+    bool CallPrepareSet = false;
     void PrepareSet();
     void DisableImage();
 

@@ -38,10 +38,10 @@ public:
 
         minimal fbx support - fbx 7.1 (FBX 2011)
     */
-    static QStaticMesh* LoadModel(const std::string& pFile);
-    static std::vector<QStaticMesh*> LoadModelSeparate(const std::string& pFile);
+    static MeshData* LoadModel(const std::string& pFile);
+    static std::vector<MeshData*> LoadModelSeparate(const std::string& pFile);
 private:
-    static void GetMesh(const aiScene* scene, const aiNode* node, EFileFormat fileFormat, std::vector<QStaticMesh*>& vector);
+    static void GetMesh(const aiScene* scene, const aiNode* node, EFileFormat fileFormat, std::vector<MeshData*>& vector);
 };
 inline QFAModelLoader::EFileFormat QFAModelLoader::GetFileFormat(const aiScene* scene)
 {
@@ -190,7 +190,7 @@ QFAModelLoader::~QFAModelLoader()
 {
 }
 
-QStaticMesh* QFAModelLoader::LoadModel(const std::string& pFile)
+MeshData* QFAModelLoader::LoadModel(const std::string& pFile)
 {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(pFile,
@@ -219,7 +219,7 @@ QStaticMesh* QFAModelLoader::LoadModel(const std::string& pFile)
         CalculateIndex(scene, scene->mRootNode->mChildren[i], allIndexCound, verticeCound, true);
 
     MeshData* mesDataReal = new MeshData(verticeCound, allIndexCound, scene->mNumMaterials, 0);
-    SSVertexMaterial* meshVertex = mesDataReal->GetFrameData(0);
+    SSVertexMaterial* meshVertex = mesDataReal->GetFrameData();
     unsigned int* meshIndexes = mesDataReal->GetIndexData();
     allIndexCound = 0;
     verticeCound = 0;
@@ -234,12 +234,12 @@ QStaticMesh* QFAModelLoader::LoadModel(const std::string& pFile)
         WriteMaterial(scene, scene->mRootNode->mChildren[i], mesDataReal, true);
     
     importer.FreeScene();
-    return new QStaticMesh(mesDataReal);
+    return mesDataReal;
 }
 
-std::vector<QStaticMesh*> QFAModelLoader::LoadModelSeparate(const std::string& pFile)
+std::vector<MeshData*> QFAModelLoader::LoadModelSeparate(const std::string& pFile)
 {
-    std::vector<QStaticMesh*> meshes;
+    std::vector<MeshData*> meshes;
     Assimp::Importer importer;
 
     const aiScene* scene = importer.ReadFile(pFile,
@@ -264,7 +264,7 @@ std::vector<QStaticMesh*> QFAModelLoader::LoadModelSeparate(const std::string& p
     return meshes;
 }
 
-void QFAModelLoader::GetMesh(const aiScene* scene, const aiNode* node, EFileFormat fileFormat, std::vector<QStaticMesh*>& vector)
+void QFAModelLoader::GetMesh(const aiScene* scene, const aiNode* node, EFileFormat fileFormat, std::vector<MeshData*>& vector)
 {
     for (size_t i = 0; i < node->mNumChildren; i++)
     {   
@@ -275,7 +275,7 @@ void QFAModelLoader::GetMesh(const aiScene* scene, const aiNode* node, EFileForm
         CalculateIndex(scene, node->mChildren[i], allIndexCound, verticeCound, false);
 
         MeshData* mesDataReal = new MeshData(verticeCound, allIndexCound, scene->mNumMaterials, 0);
-        SSVertexMaterial* meshVertex = mesDataReal->GetFrameData(0);
+        SSVertexMaterial* meshVertex = mesDataReal->GetFrameData();
         unsigned int* meshIndexes = mesDataReal->GetIndexData();        
         allIndexCound = 0;
         verticeCound = 0;
@@ -283,7 +283,7 @@ void QFAModelLoader::GetMesh(const aiScene* scene, const aiNode* node, EFileForm
         WriteIndex(scene, node->mChildren[i], meshIndexes, unicueIndex, allIndexCound, false);
         WriteVertex(scene, node->mChildren[i], verticeCound, meshVertex, fileFormat, false);
         WriteMaterial(scene, node->mChildren[i], mesDataReal, false);
-        vector.push_back(new QStaticMesh(mesDataReal));
+        vector.push_back(mesDataReal);
 
         for (size_t j = 0; j < node->mChildren[i]->mNumChildren; j++)
             GetMesh(scene, node->mChildren[i]->mChildren[j], fileFormat, vector);

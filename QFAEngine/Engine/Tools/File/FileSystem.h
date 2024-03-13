@@ -129,7 +129,7 @@ public:
 
 	static void CreateFolders(std::u32string folderPath);
 
-	static bool GetFolderÑontents(std::u32string path, std::vector<FolderUnit>& folderÑontents);
+	static bool GetFolderContents(std::u32string path, std::vector<FolderUnit>& folderÑontents);
 	
 private:
 

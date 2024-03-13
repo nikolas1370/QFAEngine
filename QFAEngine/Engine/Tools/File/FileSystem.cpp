@@ -178,7 +178,7 @@ void QFAFileSystem::CreateFolders(std::u32string folderPath)
 	std::filesystem::create_directories(folderPath);
 }
 
-bool QFAFileSystem::GetFolder—ontents(std::u32string path, std::vector<FolderUnit>& folder—ontents)
+bool QFAFileSystem::GetFolderContents(std::u32string path, std::vector<FolderUnit>& folder—ontents)
 {
 	if (!std::filesystem::exists(path))
 		return false;

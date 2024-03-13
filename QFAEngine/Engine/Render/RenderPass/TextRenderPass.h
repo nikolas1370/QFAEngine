@@ -8,7 +8,7 @@ class QFAVKTextRenderPass
 	friend QFAWindow;
 	VkRenderPass renderPass;	
 public:
-	QFAVKTextRenderPass(VkFormat swapChainImageFormat, bool clear);
+	QFAVKTextRenderPass(VkFormat imageFormat, bool clear);
 	~QFAVKTextRenderPass();
 
 private:

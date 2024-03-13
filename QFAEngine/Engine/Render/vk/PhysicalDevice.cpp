@@ -33,13 +33,15 @@ void QFAVKPhysicalDevice::Init(QFAVKInstance* instance, VkSurfaceKHR surface)
     vkGetPhysicalDeviceFeatures2()
     */
     //VkPhysicalDeviceFeatures::independentBlend
- 
+
+
 
     for (const auto& device : devices)
     {
         if (isDeviceSuitable(device, surface))
         {
             PhysicalDevice = device;
+
             break;
         }
     }

@@ -42,12 +42,21 @@ class MeshData
 	*/	
 	char* FramesData; 
 
-	size_t FrameSize; 
-	size_t VertexCount;
-	size_t VerticesSize;
-	int UniqueIndexCount;
-	int IndexCount;
-	unsigned char MaterialCount;
+public:
+	struct SMeshInfo
+	{
+		size_t FrameSize;
+		size_t VertexCount;
+		size_t VerticesSize;
+		size_t UniqueIndexCount;
+		size_t IndexCount;
+		size_t MaterialCount;
+		size_t AmountData;
+	};
+private:
+
+	SMeshInfo Mi;
+
 
 public:
 
@@ -66,43 +75,44 @@ public:
 		
 	}
 
-	SSVertexMaterial* GetFrameData(int frame) const;
+	SSVertexMaterial* GetFrameData() const;
+	SMeshInfo GetMeshInfo() const;
 	inline unsigned int* GetIndexData() const
 	{
-		return (unsigned int*)&FramesData[FrameSize ];
+		return (unsigned int*)&FramesData[Mi.FrameSize ];
 	}
 
 	inline Material* GetMaterialData() const
 	{
-		return (Material*)&FramesData[FrameSize + sizeof(unsigned int) * IndexCount];
+		return (Material*)&FramesData[Mi.FrameSize + sizeof(unsigned int) * Mi.IndexCount];
 	}
 
 	inline void SetMaterial(Material material, int index)
 	{
-		((Material*)&FramesData[FrameSize  + sizeof(unsigned int) * IndexCount])[index] = material;
+		((Material*)&FramesData[Mi.FrameSize  + sizeof(unsigned int) * Mi.IndexCount])[index] = material;
 	}
 
 
 	inline unsigned char GetMaterialCount() const
 	{
-		return MaterialCount;
+		return Mi.MaterialCount;
 	}
 	
 
 	inline int GetIndexCount() const
 	{
-		return IndexCount;
+		return Mi.IndexCount;
 	}
 
 	inline size_t GetVertexCount() const
 	{
-		return VertexCount;
+		return Mi.VertexCount;
 	}
 
 	// size of entire vertex in bytes 
 	inline size_t GetVerticesSize() const
 	{
-		return VerticesSize;
+		return Mi.VerticesSize;
 	}
 
 	// може прийдец€ удалить const

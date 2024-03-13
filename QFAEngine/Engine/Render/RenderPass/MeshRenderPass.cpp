@@ -15,15 +15,14 @@ QFAVKMeshRenderPass::~QFAVKMeshRenderPass()
         vkDestroyRenderPass(QFAVKLogicalDevice::GetDevice(), renderPass, nullptr);
 }
 
-void QFAVKMeshRenderPass::CreateRenderPass(bool Clear)
+void QFAVKMeshRenderPass::CreateRenderPass(bool Clear, VkFormat imageFormat)
 {
     if (renderPass)
         return;
 
 
     std::array< VkAttachmentDescription, 1> colorAttachments{};
-    //colorAttachment.format = VK_FORMAT_B8G8R8A8_SRGB;
-    colorAttachments[0].format = VK_FORMAT_R8G8B8A8_SRGB;
+    colorAttachments[0].format = imageFormat;
     colorAttachments[0].samples = VK_SAMPLE_COUNT_1_BIT;
 
     colorAttachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;

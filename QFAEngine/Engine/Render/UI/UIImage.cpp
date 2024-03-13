@@ -33,6 +33,9 @@ QFAUIImage::QFAUIImage(QFAImage* image, bool iBackground)
 
 void QFAUIImage::Render(VkCommandBuffer comandebuffer)
 {
+    if (CallPrepareSet)
+        PrepareSet();
+
     if (Index < 0 || Index >= ImageIndexs.size())
         return;
 
@@ -40,6 +43,8 @@ void QFAUIImage::Render(VkCommandBuffer comandebuffer)
     {
         return;
     } 
+
+
 
     UpdateUniforms();
 
@@ -107,14 +112,6 @@ QFAUIImage::~QFAUIImage()
     delete vertexBufer;
 }
 
-void QFAUIImage::SetImage(QFAImage* image)
-{  
-    if (!image && Image)
-        return DisableImage();
-
-    Image = image;
-    PrepareSet();
-}
 
 void QFAUIImage::SetCanStretch(bool can)
 {
@@ -270,9 +267,19 @@ void QFAUIImage::SetPositionParent(int x, int y)
     Position_y = y;
 }
 
+
+void QFAUIImage::SetImage(QFAImage* image)
+{
+    if (!image && Image)
+        return DisableImage();
+
+    Image = image;
+    CallPrepareSet = true;
+}
+
 void QFAUIImage::ParentEnable()
 {
-    PrepareSet();
+    CallPrepareSet = true;
 }
 
 
@@ -281,12 +288,10 @@ void QFAUIImage::ParentDisable()
     DisableImage();
 }
 
-
 void QFAUIImage::ParentAttach()
 {
-    PrepareSet();
+    CallPrepareSet = true;
 }
-
 
 void QFAUIImage::ParentDisconect()
 {
@@ -295,6 +300,7 @@ void QFAUIImage::ParentDisconect()
 
 void QFAUIImage::PrepareSet()
 {    
+    CallPrepareSet = false;
     std::array< QFAVKPipeline::QFADescriptorSetInfo, 3> setInfo;
     VkDescriptorImageInfo imageInfo;
 
@@ -307,7 +313,6 @@ void QFAUIImage::PrepareSet()
     
     setInfo[0].dstBinding = 0;
     setInfo[0].DescriptorImageInfos = &imageInfo;
-
 
     if (Index < ImageIndexs.size() && ImageIndexs[Index].image == this)
     {
@@ -450,6 +455,7 @@ void QFAUIImage::CreatePipeline()
     firsLayout[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
     std::array<VkDescriptorSetLayoutBinding, 3> secondLayout;
+
     secondLayout[0].binding = 0;
     secondLayout[0].descriptorCount = 1;
     secondLayout[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -465,7 +471,6 @@ void QFAUIImage::CreatePipeline()
     secondLayout[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     secondLayout[2].pImmutableSamplers = nullptr;
     secondLayout[2].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-
 
     DescriptorSetLayouts[0].BindingCount = (uint32_t)firsLayout.size();
     DescriptorSetLayouts[1].BindingCount = (uint32_t)secondLayout.size();

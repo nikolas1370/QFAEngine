@@ -72,10 +72,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Assimp\include;$(SolutionDir)..\freetype-master 2.13.2\include;$(SolutionDir)..\glfw-3.4.bin.WIN64\include;$(SolutionDir)..\glm;$(SolutionDir)QFAEngine/Engine;$(SolutionDir)..\stb;C:\VulkanSDK\1.3.275.0\Include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Assimp\include;$(SolutionDir)..\freetype2.13.2\include;$(SolutionDir)..\glfw-3.4.bin.WIN64\include;$(SolutionDir)QFAEngine/Engine;$(SolutionDir)..\stb;C:\VulkanSDK\1.3.275.0\Include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Assimp\include;$(SolutionDir)..\freetype-master 2.13.2\include;$(SolutionDir)..\glfw-3.4.bin.WIN64\include;$(SolutionDir)..\glm;$(SolutionDir)QFAEngine/Engine;$(SolutionDir)..\stb;C:\VulkanSDK\1.3.275.0\Include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Assimp\include;$(SolutionDir)..\freetype2.13.2\include;$(SolutionDir)..\glfw-3.4.bin.WIN64\include;$(SolutionDir)QFAEngine/Engine;$(SolutionDir)..\stb;C:\VulkanSDK\1.3.275.0\Include;$(IncludePath)</IncludePath>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -126,7 +126,7 @@
     </Link>
     <Lib>
       <AdditionalDependencies>vulkan-1.lib;glfw3.lib;assimp-vc143-mt.lib;freetype.lib;</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.275.0\Lib;$(SolutionDir)..\glfw-3.4.bin.WIN64\lib-vc2022;C:\Assimp\lib\x64;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.275.0\Lib;$(SolutionDir)..\glfw-3.4.bin.WIN64\lib-vc2022;C:\Assimp\lib\x64;$(SolutionDir)..\freetype2.13.2\objs\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
@@ -158,7 +158,7 @@
     </Link>
     <Lib>
       <AdditionalDependencies>vulkan-1.lib;glfw3.lib;assimp-vc143-mt.lib;freetype.lib;shaderc_shared.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.275.0\Lib;$(SolutionDir)..\glfw-3.4.bin.WIN64\lib-vc2022;C:\Assimp\lib\x64;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.275.0\Lib;$(SolutionDir)..\glfw-3.4.bin.WIN64\lib-vc2022;C:\Assimp\lib\x64;$(SolutionDir)..\freetype2.13.2\objs\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>

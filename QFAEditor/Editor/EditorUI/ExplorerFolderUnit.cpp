@@ -17,8 +17,8 @@ QFAEditorExplorerFolderUnit::QFAEditorExplorerFolderUnit()
 
 	if (!FolderImage)
 	{
-		FolderImage = new QFAImage(U"SomeImage/folder-png-folder-png-image-1367.png");
-		FileImage = new QFAImage(U"SomeImage/file-icon.png");
+		FolderImage = new QFAImage(U"SomeImage/folder-png-download-png-1024px-1024.png");
+		FileImage = new QFAImage(U"SomeImage/file-text-icon-1360881626.png");
 	}
 
 

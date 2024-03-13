@@ -248,35 +248,7 @@ QFAVKPipeline::QFAVKPipeline(QFAPipelineCreateInfo& PipInfo)
 }
 
 
-void QFAVKPipeline::SetPoolsParameter(QFAPipelineCreateInfo& PipInfo)
-{    
-    for (size_t i = 0; i < PipInfo.DescriptorSetLayoutCount/*groupCount*/; i++)
-    {        
-        GroupDescriptorPools[i].DescriptorPoolSizeCount = PipInfo.DescriptorSetLayouts[i].BindingCount; // groups[i].DescriptorPoolSizeCount;        
-        GroupDescriptorPools[i].MaxSets = PipInfo.MaxSets[i];
 
-        for (size_t j = 0; j < GroupDescriptorPools[i].DescriptorPoolSizeCount; j++)
-        {
-            GroupDescriptorPools[i].DescriptorPoolSizes[j].descriptorCount = PipInfo.DescriptorSetLayouts[i].Bindings[j].descriptorCount;
-            GroupDescriptorPools[i].DescriptorPoolSizes[j].type = PipInfo.DescriptorSetLayouts[i].Bindings[j].descriptorType;
-        }
-    }
-}
-
-void QFAVKPipeline::CreatePool(uint32_t groupIndex)
-{
-    VkDescriptorPoolCreateInfo poolInfo{};
-    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = GroupDescriptorPools[groupIndex].DescriptorPoolSizeCount;
-    poolInfo.pPoolSizes = GroupDescriptorPools[groupIndex].DescriptorPoolSizes;
-    poolInfo.maxSets = GroupDescriptorPools[groupIndex].MaxSets;    
-
-    VkDescriptorPool pool;
-    if (vkCreateDescriptorPool(QFAVKLogicalDevice::GetDevice(), &poolInfo, nullptr, &pool) != VK_SUCCESS)
-        stopExecute("failed to create descriptor pool!");
-
-    Pools[groupIndex].ListPool.push_back(pool);
-}
 
 void QFAVKPipeline::CreateSet(uint32_t groupIndex, QFADescriptorSetInfo* descriptorInfo)
 {
@@ -351,14 +323,59 @@ VkShaderModule QFAVKPipeline::createShaderModule(const uint32_t* code, size_t si
     return shaderModule;
 }
 
+void QFAVKPipeline::SetPoolsParameter(QFAPipelineCreateInfo& PipInfo)
+{
+    for (size_t i = 0; i < PipInfo.DescriptorSetLayoutCount/*groupCount*/; i++)
+    {
+        GroupDescriptorPools[i].DescriptorPoolSizeCount = PipInfo.DescriptorSetLayouts[i].BindingCount; // groups[i].DescriptorPoolSizeCount;        
+        GroupDescriptorPools[i].MaxSets = PipInfo.MaxSets[i];
+        GroupDescriptorPools[i].descriptorPoolFlags = PipInfo.DescriptorSetLayouts[i].descriptorPoolFlags;
+
+        for (size_t j = 0; j < GroupDescriptorPools[i].DescriptorPoolSizeCount; j++)
+        {
+            GroupDescriptorPools[i].DescriptorPoolSizes[j].descriptorCount = PipInfo.DescriptorSetLayouts[i].Bindings[j].descriptorCount;
+            GroupDescriptorPools[i].DescriptorPoolSizes[j].type = PipInfo.DescriptorSetLayouts[i].Bindings[j].descriptorType;            
+        }
+    }
+}
+
+void QFAVKPipeline::CreatePool(uint32_t groupIndex)
+{
+    VkDescriptorPoolCreateInfo poolInfo{};
+    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    poolInfo.poolSizeCount = GroupDescriptorPools[groupIndex].DescriptorPoolSizeCount;
+    poolInfo.pPoolSizes = GroupDescriptorPools[groupIndex].DescriptorPoolSizes;
+    poolInfo.maxSets = GroupDescriptorPools[groupIndex].MaxSets;
+    poolInfo.flags = GroupDescriptorPools[groupIndex].descriptorPoolFlags;
+
+        VkDescriptorPool pool;
+    if (vkCreateDescriptorPool(QFAVKLogicalDevice::GetDevice(), &poolInfo, nullptr, &pool) != VK_SUCCESS)
+        stopExecute("failed to create descriptor pool!");
+
+    Pools[groupIndex].ListPool.push_back(pool);
+}
+
 void QFAVKPipeline::CreateDescriptorSetLayouts(QFAPipelineCreateInfo& PipInfo)
 {
     for (size_t i = 0; i < PipInfo.DescriptorSetLayoutCount; i++)
-    {        
+    {   
         VkDescriptorSetLayoutCreateInfo layoutInfo{};
         layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
         layoutInfo.bindingCount = PipInfo.DescriptorSetLayouts[i].BindingCount;
         layoutInfo.pBindings = PipInfo.DescriptorSetLayouts[i].Bindings;
+        layoutInfo.flags = PipInfo.DescriptorSetLayouts[i].descriptorSetLayoutFlags;
+
+        if (PipInfo.DescriptorSetLayouts[i].pBindingFlags)
+        {
+            VkDescriptorSetLayoutBindingFlagsCreateInfo dslbfci;
+            dslbfci.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
+            dslbfci.bindingCount = PipInfo.DescriptorSetLayouts[i].BindingCount;
+            dslbfci.pBindingFlags = PipInfo.DescriptorSetLayouts[i].pBindingFlags;
+            dslbfci.pNext = nullptr;
+            layoutInfo.pNext = &dslbfci;
+        }
+        else
+            layoutInfo.pNext = nullptr;
 
         if (vkCreateDescriptorSetLayout(QFAVKLogicalDevice::GetDevice(), &layoutInfo, nullptr, &DescriptorSetLayouts[i]) != VK_SUCCESS)
             stopExecute("failed to create descriptor set layout!");

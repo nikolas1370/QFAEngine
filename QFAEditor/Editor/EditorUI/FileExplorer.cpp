@@ -1,4 +1,4 @@
-#include "FileExplorer.h"
+Ôªø#include "FileExplorer.h"
 #include <Tools/VulkanSuff.h>
 #include <Render/UI/UIList.h>
 #include <Render/UI/Canvas.h>
@@ -9,6 +9,20 @@
 #include "ExplorerFolderUnit.h"
 #include <EditorWindows/MainEditorWindow.h>
 #include <Render/Time.h>
+
+#include <filesystem>
+#include <stb_image.h>
+
+#include <unicode/unistr.h>
+#include <EditorFileTypes.h>
+#include <Tools/File/FileSystem.h>
+#include <Tools/File/ModelLoader.h>
+
+const std::array<std::string, 4> QFAUIEditorFileExplorer::SupportFileExtension =
+{
+	".obj", ".fbx", ".jpg", ".png"
+};
+
 
 QFAUIEditorFileExplorer::QFAUIEditorFileExplorer(QFAWindow *window)
 {
@@ -107,18 +121,21 @@ void QFAUIEditorFileExplorer::CreateBottom()
 
 void QFAUIEditorFileExplorer::UpdateFolderItemList()
 {	
-	folder—ontents.clear();
+	folderContents.clear();
 	FolderItemList->removeAllUnit();
-	QFAFileSystem::GetFolder—ontents(CurentPath, folder—ontents);
+	QFAFileSystem::GetFolderContents(CurentPath, folderContents);
 	folderUnitInUse = 0;
-	for (size_t i = 0; i < folder—ontents.size(); i++)
+	for (size_t i = 0; i < folderContents.size(); i++)
 	{
+		if (!folderContents[i].IsFolder && std::filesystem::path(folderContents[i].name).extension() != ".qfa")
+			continue;
+
 		if (folderUnitInUse == FolderUnitList.size())
 			FolderUnitList.push_back(new QFAEditorExplorerFolderUnit);
 
-		FolderItemList->AddUnit(FolderUnitList[i]);
-		FolderUnitList[i]->ChangeImage(folder—ontents[i].IsFolder);
-		FolderUnitList[i]->ChangeText(folder—ontents[i].name);
+		FolderItemList->AddUnit(FolderUnitList[folderUnitInUse]);
+		FolderUnitList[folderUnitInUse]->ChangeImage(folderContents[i].IsFolder);
+		FolderUnitList[folderUnitInUse]->ChangeText(folderContents[i].name);
 		folderUnitInUse++;		
 	}
 }
@@ -151,12 +168,12 @@ void QFAUIEditorFileExplorer::FolderItemListLeftMouseDown(QFAUIUnit* unit, void*
 				{
 					if (thisUnit->FolderUnitList[i] == parent)
 					{					
-						if (thisUnit->folder—ontents[i].IsFolder)
+						if (thisUnit->folderContents[i].IsFolder)
 						{							
 							thisUnit->LastLeftMouseDownTime = 0;
 							thisUnit->FolderItemListSelectUnit->SetBackgroundColor(thisUnit->InFocusUnitColor);
 							thisUnit->FolderItemListSelectUnit = nullptr;
-							thisUnit->NextFolder(thisUnit->folder—ontents[i].path);
+							thisUnit->NextFolder(thisUnit->folderContents[i].path);
 						}
 
 						return;
@@ -281,6 +298,108 @@ void QFAUIEditorFileExplorer::PreviousFolderButton(QFAUIUnit* unit, void* _this)
 		thisUnit->BackButton->SetTextColor(thisUnit->ButoonOnColor);
 
 	thisUnit->PathChanged();
+}
+
+void QFAUIEditorFileExplorer::DropFiles(int path_count, const char* paths[])
+{
+	std::filesystem::path curentPath(CurentPath);
+	curentPath.append("");// add "\\" in path
+	for (size_t i = 0; i < path_count; i++)
+	{
+		icu::UnicodeString ucs = icu::UnicodeString::fromUTF8(paths[i]);
+		UErrorCode kkl = U_ZERO_ERROR;
+		DropPath.resize(ucs.length());
+
+		int32_t strLen = ucs.toUTF32(DropPath.data(), DropPath.size(), kkl);
+		std::u32string str;
+		str.resize(strLen);
+		for (size_t j = 0; j < ucs.length(); j++)
+			str[j] = static_cast<char32_t>(DropPath[j]);
+
+		QFAFile file;
+		//QFAFileSystem::LoadFile(str, &file);
+		std::filesystem::path path(str);
+		std::filesystem::path ext = path.extension();
+		if (std::filesystem::is_directory(path))
+		{
+			std::cout << "DropFile not file\n";
+			continue;
+		}
+
+		SQFAEditorFile ef;
+		ef.version = EditorFileVersion;
+		if (ext == ".obj" || ext == ".fbx")
+		{
+			/*
+				SQFAEditorFile
+				MeshData::SMeshInfo
+				MeshData::FramesData
+			*/
+
+			/*
+				create fun when load model and get aiScene check if valid
+				and after use aiScene like SeparateModel or solid
+			*/
+			MeshData* md = QFAModelLoader::LoadModel(paths[i]);
+			if (!md)
+			{
+				std::cout << "DropFile not load\n";
+				continue;
+			}
+
+			ef.type = QFAEditorFileTypes::EFTMesh;
+			path.replace_extension(".qfa");
+			curentPath.replace_filename(path.filename());
+
+			QFAFileSystem::WriteFile(curentPath.u32string(), &ef, sizeof(ef));
+			
+			MeshData::SMeshInfo mi = md->GetMeshInfo();
+			QFAFile writeFile;
+			QFAFileSystem::OpenFile(curentPath.u32string(), &writeFile, false);
+			QFAFileSystem::AppendFile(&writeFile, &mi, sizeof(mi));
+
+			QFAFileSystem::AppendFile(&writeFile, md->GetFrameData(), mi.AmountData);
+			QFAFileSystem::CloseFile(&writeFile);
+		}
+		else if (ext == ".jpg" || ext == ".png")
+		{
+			/*
+				SQFAEditorFile
+				raw Image			
+			*/
+			int texWidth, texHeight, texChannels;
+			QFAFile rawImageFile;
+			if (QFAFileSystem::LoadFile(str, &rawImageFile))
+			{
+				std::cout << "DropFile not load\n";
+				continue;
+			}
+
+			stbi_uc* pixels = stbi_load_from_memory((stbi_uc*)rawImageFile.GetData(), rawImageFile.GetFileSize(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);				
+			if (!pixels) // check if rawImageFile is image
+			{
+				std::cout << "DropFile not load\n";
+				continue;
+			}
+			
+			stbi_image_free(pixels);
+			path.replace_extension(".qfa");
+			curentPath.replace_filename(path.filename());
+
+			ef.type = QFAEditorFileTypes::EFTImage;
+			QFAFileSystem::WriteFile(curentPath.u32string(), &ef, sizeof(ef));
+
+			QFAFile writeFile;			
+			QFAFileSystem::OpenFile(curentPath.u32string(), &writeFile, false);
+			QFAFileSystem::AppendFile(&writeFile, rawImageFile.GetData(), rawImageFile.GetFileSize());
+			QFAFileSystem::CloseFile(&writeFile);			
+		}
+		else
+			std::cout << "DropFile not support extension\n";
+
+	}
+
+	UpdateFolderItemList();
 }
 
 void QFAUIEditorFileExplorer::PathChanged()

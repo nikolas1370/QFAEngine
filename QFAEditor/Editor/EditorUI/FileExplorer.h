@@ -9,8 +9,11 @@ class QFAUIGrid;
 class QFAText;
 class QFAEditorExplorerFolderUnit;
 class QFAUIScroll;
+class QFAEditorMainWindow;
 class QFAUIEditorFileExplorer : public QFAParentHiddenChild
 {
+	friend QFAEditorMainWindow;
+
 	QFAUIList* FileExplorerTop;
 	QFAText* BackButton;
 	QFAText* ForwardButton;
@@ -51,7 +54,7 @@ private:
 	static void FolderItemListLeftMouseDown(QFAUIUnit* unit, void* _this);
 	
 
-	std::vector<QFAFileSystem::FolderUnit> folder—ontents;
+	std::vector<QFAFileSystem::FolderUnit> folderContents;
 	void UpdateFolderItemList();
 
 	const uint64_t MouseDownMaxTimeInMS = 400;
@@ -73,4 +76,13 @@ private:
 	const QFAColorF InFocusUnitColor = QFAColorF(1.0f, 1.0f, 1.0f, 0.05f);
 	const QFAColorF OutFocusUnitColor = QFAColorF(0.0f, 0.0f, 0.0f, 0.0f);
 	const QFAColorF SelectUnit = QFAColor(14, 134, 255, 255).GetColorF();
+
+	void DropFiles(int path_count, const char* paths[]);
+
+	// <icu::UChar32>
+	std::vector<int> DropPath;
+
+	static const std::array<std::string, 4> SupportFileExtension;
+
+	static const unsigned short EditorFileVersion = 1;
 };

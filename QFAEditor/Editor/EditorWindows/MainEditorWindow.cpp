@@ -1,4 +1,4 @@
-#include "MainEditorWindow.h"
+﻿#include "MainEditorWindow.h"
 #include <Render/Window/Window.h>
 #include <EditorUI/FileExplorer.h>
 #include <Tools/VulkanSuff.h>
@@ -7,6 +7,9 @@
 
 #include <Overlord/Overlord.h>
 #include <EditorUI/ExplorerFolderUnit.h>
+
+
+
 
 QFAEditorMainWindow* QFAEditorMainWindow::MainWindow = nullptr;
 QFAText::SFont* QFAEditorMainWindow::Icomonfont;
@@ -29,6 +32,12 @@ QFAEditorMainWindow::QFAEditorMainWindow()
 
 	QFAText::LoadFont("SomeFont/icomoon.ttf", QFAEditorMainWindow::Icomonfont);
 	CreateUI();
+
+	Window->SetDropFun([this](int path_count, const char* paths[])
+		{
+			FileExplorer->DropFiles(path_count, paths);
+		});
+	
 }
 
 QFAEditorMainWindow::~QFAEditorMainWindow()
@@ -50,5 +59,10 @@ void QFAEditorMainWindow::CreateUI()
 	FileExplorer = new QFAUIEditorFileExplorer(Window);
 	FileExplorer->SetSlot(&slot);
 	WindowCanvas->AddUnit(FileExplorer);
+}
+
+void QFAEditorMainWindow::DropFun(int path_count, const char* paths[])
+{
+
 }
 

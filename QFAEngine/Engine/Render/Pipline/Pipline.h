@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <Tools/VulkanSuff.h>
 #include <string>
 #include <array>
@@ -92,6 +92,18 @@ public:
     {
         uint32_t BindingCount = 0;
         VkDescriptorSetLayoutBinding* Bindings = nullptr;
+        VkDescriptorBindingFlags* pBindingFlags = nullptr; // optional
+        VkDescriptorSetLayoutCreateFlags descriptorSetLayoutFlags = 0; // optional
+        /*
+            if in pBindingFlags any binding has the VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT
+                in descriptorSetLayoutFlags should be VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT
+        */
+        VkDescriptorPoolCreateFlags descriptorPoolFlags = 0;
+        /*
+            if descriptorSetLayoutFlags ==
+                VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT
+                DescriptorPoolFlags should be VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT
+        */
     };
 
     struct QFAPipelineCreateInfo
@@ -107,7 +119,9 @@ public:
         uint32_t DescriptorSetLayoutCount = 0;
         QFADescriptorSetLayout* DescriptorSetLayouts = nullptr;
         uint32_t* MaxSets = nullptr; // MaxSets[0] == GroupDescriptorPools[0].MaxSets
+
     };
+
     
     struct QFADescriptorSetInfo
     {
@@ -123,6 +137,7 @@ private:
         uint32_t DescriptorPoolSizeCount = 0;
         uint32_t MaxSets = 0;
         uint32_t CountSetInLastPool = 0;
+        VkDescriptorPoolCreateFlags descriptorPoolFlags = 0;
     };
 
     struct SDescriptorPool
