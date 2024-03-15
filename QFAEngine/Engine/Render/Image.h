@@ -27,7 +27,7 @@ public:
 	VkImage TextureImage;
 	QFAVKImageView ImageView;
 	VmaAllocation ImageAllocation;
-	QFAVKBuffer* buffer;
+	QFAVKBuffer* buffer = nullptr;
 
 	struct SImageCreateInfo
 	{
@@ -39,6 +39,10 @@ public:
 		int Width;
 		int Height;
 		unsigned int channelCount = 4;		
+		/*
+			if false buffer be create in SetImage(void* pixels)
+		*/
+		bool createBuffer = true; 
 	};
 
 	QFAImage(SImageCreateInfo &ici);
@@ -59,6 +63,9 @@ public:
 	{
 		return Height;
 	}
+
+	void SetImage(void* pixels);
+
 
 private:
 	

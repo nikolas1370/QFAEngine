@@ -54,10 +54,7 @@ public:
 		size_t AmountData;
 	};
 private:
-
 	SMeshInfo Mi;
-
-
 public:
 
 
@@ -67,6 +64,8 @@ public:
 	*/
 	MeshData( int uniqueIndexCount, int indexCount, int materialCount);// false to true
 	MeshData(int VertexCount, int indexCount, int materialCount, int notNed);
+	MeshData(SMeshInfo* mi, void* framesData);
+
 
 	~MeshData()
 	{

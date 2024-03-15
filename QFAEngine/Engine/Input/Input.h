@@ -315,6 +315,8 @@ public:
 	QFAInput(QFAWindow* window);
 	~QFAInput();
 
+	void ChangeWindow(QFAWindow* window);
+
 	void ActiveInput(bool activate)
 	{
 		BlockInput = !activate;

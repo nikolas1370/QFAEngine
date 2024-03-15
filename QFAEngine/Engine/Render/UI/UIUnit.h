@@ -27,7 +27,8 @@ namespace QFAEditorUIType
 	{
 		NONE = 0,
 		FileExplorer = 1,
-		ExplorerFolderUnit = 2
+		ExplorerFolderUnit = 2,
+		FileViewUnit = 3
 	};
 }
 
@@ -43,12 +44,9 @@ namespace QFAUISlot
 	struct SParentSlot
 	{
 		SSlotBaseInfo BaseInfo{ QFAUIType::NONE, sizeof(QFAUISlot::SParentSlot) };
-		char ParentSloot[16];
+		char ParentSloot[20];
 	};
 
-	/* 
-		all parameter 0 - 1 == 0% - 100%
-	*/
 	struct SCanvasSlot
 	{
 		SSlotBaseInfo BaseInfo{ QFAUIType::Canvas, sizeof(QFAUISlot::SCanvasSlot) };
@@ -56,6 +54,10 @@ namespace QFAUISlot
 		float Height = 0.0f;
 		float x = 0.0f;
 		float y = 0.0f;
+		bool HeightInPixel = false; // if true Height be in pixel
+		bool WidthInPixel = false;
+		bool xInPixel = false;
+		bool yInPixel = false;
 	};
 
 	struct SViewportRootSlot
@@ -157,7 +159,7 @@ protected:
 	QFAUIParent* Parent = nullptr;
 
 	float Opacity = 1;
-	int ZIndex = 0; // ZIndex store forward == 1, set forvard -1
+	int ZIndex = 0;
 
 	bool UnitValid = true;
 public:
@@ -307,12 +309,12 @@ public:
 	// min max valude is QFAViewport::MinMaxZIndexUI
 	inline void SetZIndex(int zIndex)
 	{
-		ZIndex = zIndex * -1;
+		ZIndex = zIndex;
 	}
 
 	inline int GetZIndex()
 	{
-		return ZIndex * -1;
+		return ZIndex ;
 	}
 	
 	std::string UnitName;

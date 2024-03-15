@@ -143,6 +143,6 @@ protected:
 
 	// use only in child class with unit type QFAUIType::CustomUnit
 	void SetChildPosition(QFAUIUnit* childUnit, int x, int y);
-	// use only in child class with unit type QFAUIType::CustomUnit
+	// use only at child class with unit type QFAUIType::CustomUnit
 	void SetChildSize(QFAUIUnit* childUnit, int w, int h);
 };

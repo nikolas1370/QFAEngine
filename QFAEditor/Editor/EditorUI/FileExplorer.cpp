@@ -17,12 +17,7 @@
 #include <EditorFileTypes.h>
 #include <Tools/File/FileSystem.h>
 #include <Tools/File/ModelLoader.h>
-
-const std::array<std::string, 4> QFAUIEditorFileExplorer::SupportFileExtension =
-{
-	".obj", ".fbx", ".jpg", ".png"
-};
-
+#include <EditorWindows/FileViewWindow.h>
 
 QFAUIEditorFileExplorer::QFAUIEditorFileExplorer(QFAWindow *window)
 {
@@ -131,7 +126,9 @@ void QFAUIEditorFileExplorer::UpdateFolderItemList()
 			continue;
 
 		if (folderUnitInUse == FolderUnitList.size())
+		{
 			FolderUnitList.push_back(new QFAEditorExplorerFolderUnit);
+		}
 
 		FolderItemList->AddUnit(FolderUnitList[folderUnitInUse]);
 		FolderUnitList[folderUnitInUse]->ChangeImage(folderContents[i].IsFolder);
@@ -174,6 +171,25 @@ void QFAUIEditorFileExplorer::FolderItemListLeftMouseDown(QFAUIUnit* unit, void*
 							thisUnit->FolderItemListSelectUnit->SetBackgroundColor(thisUnit->InFocusUnitColor);
 							thisUnit->FolderItemListSelectUnit = nullptr;
 							thisUnit->NextFolder(thisUnit->folderContents[i].path);
+						}
+						else
+						{
+							QFAUIEditorFileExplorer* fe = (QFAUIEditorFileExplorer*)_this;
+							if (fe->FileViewWindow)
+							{
+								if (fe->FileViewWindow->IsClosed())
+								{
+									delete fe->FileViewWindow;
+									fe->FileViewWindow = new QFAEditorFileViewWindow();
+								}
+
+								fe->FileViewWindow->AddFile(thisUnit->folderContents[i].path);
+							}
+							else
+							{
+								fe->FileViewWindow = new QFAEditorFileViewWindow();
+								fe->FileViewWindow->AddFile(thisUnit->folderContents[i].path);
+							}
 						}
 
 						return;
@@ -326,12 +342,12 @@ void QFAUIEditorFileExplorer::DropFiles(int path_count, const char* paths[])
 			continue;
 		}
 
-		SQFAEditorFile ef;
+		QFAEditorFile ef;
 		ef.version = EditorFileVersion;
 		if (ext == ".obj" || ext == ".fbx")
 		{
 			/*
-				SQFAEditorFile
+				QFAEditorFile
 				MeshData::SMeshInfo
 				MeshData::FramesData
 			*/
@@ -364,7 +380,7 @@ void QFAUIEditorFileExplorer::DropFiles(int path_count, const char* paths[])
 		else if (ext == ".jpg" || ext == ".png")
 		{
 			/*
-				SQFAEditorFile
+				QFAEditorFile
 				raw Image			
 			*/
 			int texWidth, texHeight, texChannels;

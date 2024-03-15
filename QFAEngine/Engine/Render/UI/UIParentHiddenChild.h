@@ -17,6 +17,7 @@ public:
 	~QFAParentHiddenChild();
 
 protected:
+	// not add child directly use AddHiddenChild
 	std::vector<QFAUIUnit*> Children;
 
 	void GetChildren(std::vector<QFAUIUnit*>& children);

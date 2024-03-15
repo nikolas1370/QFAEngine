@@ -18,6 +18,7 @@ void QWorld::ForgetActor(QActor* actor)
 
 void QWorld::ProcessTicks()
 {	
+	//std::cout << Worlds.Length() << "\n";
 	float delta = (float)QTime::GetDeltaTime();
 	for (size_t i = 0; i < Worlds.Length(); i++) // search active world		
 	{// world active if at least one viewport connect
@@ -74,9 +75,6 @@ QWorld::QWorld()
 
 QWorld::~QWorld()
 {
-	for (int i = 0; i < Actors.Length(); i++)
-		Actors[i]->Destroy();
-
 	Worlds.Remove(this);
 }
 

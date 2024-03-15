@@ -2,8 +2,7 @@
 
 QFAUIList::QFAUIList()
 {
-	Type = QFAUIType::List;
-	Overflow = QFAUIParent::Hidden;
+	Type = QFAUIType::List;	
 }
 
 QFAUIList::~QFAUIList()

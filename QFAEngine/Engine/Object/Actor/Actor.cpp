@@ -10,7 +10,7 @@ QActor::~QActor()
 {
 	RootComponent->Destroy();
 
-	if (ActorWorld)
+	if (ActorWorld->IsValid())
 		ActorWorld->ForgetActor(this);
 }
 
@@ -71,7 +71,19 @@ FVector QActor::GetActorUpVector() const
 QSceneComponent* QActor::SetRootComponent(QSceneComponent* component, bool inseparable)
 {	
 	bool componentValide = component->IsValid();
-	if (componentValide && component->Inseparable)
+	if (!componentValide)
+	{
+		if (RootComponent->IsValid())
+		{
+			RootComponent->IRootComponent = false;
+			RootComponent->ParentActor = nullptr;
+		}
+
+		RootComponent = nullptr;
+		return nullptr;
+	}
+
+	if (component->Inseparable)
 		return nullptr;
 
 

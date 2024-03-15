@@ -53,6 +53,12 @@ MeshData::MeshData(int vertexCount, int indexCount, int materialCount, int notNe
 	FramesData = (char*)malloc(Mi.AmountData);
 }
 
+MeshData::MeshData(SMeshInfo* mi, void* framesData)
+{
+	FramesData = (char*)framesData;
+	Mi = *mi;
+}
+
 SSVertexMaterial* MeshData::GetFrameData() const
 {
 	return (SSVertexMaterial*)&FramesData[0];

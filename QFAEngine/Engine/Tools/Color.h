@@ -15,7 +15,7 @@ public:
 		R = r;
 		G = g;
 		B = b;
-		A = 1;
+		A = 1.0f;
 	}
 
 	QFAColorF(float r, float g, float b, float a)
@@ -42,7 +42,7 @@ public:
 		R = r;
 		G = g;
 		B = b;
-		A = 1;
+		A = 255;
 	}
 
 	QFAColorB(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
@@ -75,7 +75,7 @@ public:
 		R = all;
 		G = all;
 		B = all;
-		A = 1;
+		A = 255;
 	}
 
 	QFAColor(int r, int g, int b) 
@@ -83,7 +83,7 @@ public:
 		R= r;
 		G= g;
 		B= b;
-		A= 1;
+		A= 255;
 	}
 
 	QFAColor(int r, int g, int b, int a)

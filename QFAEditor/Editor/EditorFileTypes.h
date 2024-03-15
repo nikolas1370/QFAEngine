@@ -6,13 +6,13 @@ enum QFAEditorFileTypes : short
 	EFTImage = 2
 };
 
-struct SQFAEditorFile
+struct QFAEditorFile
 {
 	const char signature[10] = "QFAEditor";
 	QFAEditorFileTypes type;
 	unsigned short version;
-	SQFAEditorFile() {}
-	SQFAEditorFile(QFAEditorFileTypes fileType, unsigned int fileVersion)
+	QFAEditorFile() {}
+	QFAEditorFile(QFAEditorFileTypes fileType, unsigned int fileVersion)
 	{
 		type = fileType;
 		version = fileVersion;

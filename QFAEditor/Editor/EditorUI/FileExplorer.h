@@ -10,6 +10,7 @@ class QFAText;
 class QFAEditorExplorerFolderUnit;
 class QFAUIScroll;
 class QFAEditorMainWindow;
+class QFAEditorFileViewWindow;
 class QFAUIEditorFileExplorer : public QFAParentHiddenChild
 {
 	friend QFAEditorMainWindow;
@@ -82,7 +83,9 @@ private:
 	// <icu::UChar32>
 	std::vector<int> DropPath;
 
-	static const std::array<std::string, 4> SupportFileExtension;
+
 
 	static const unsigned short EditorFileVersion = 1;
+
+	QFAEditorFileViewWindow* FileViewWindow = nullptr;
 };

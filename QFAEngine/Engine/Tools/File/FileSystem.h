@@ -28,7 +28,6 @@ public:
 		FileNotOpen
 	};
 
-	QFAFile() {}
 	~QFAFile()
 	{
 		openFileOUT.close();
@@ -36,6 +35,22 @@ public:
 			delete[] file;
 
 		file = nullptr;
+	}
+
+	void DeleteFile()
+	{
+		if(file)
+			delete[] file;
+
+		for (size_t i = 0; i < Datas.size(); i++)
+		{
+			if (Datas[i] == file)
+			{
+				Datas.erase(Datas.begin() + i);
+				file = nullptr;
+				return;
+			}
+		}		
 	}
 
 	/*

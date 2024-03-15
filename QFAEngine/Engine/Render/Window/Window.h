@@ -155,8 +155,10 @@ private:
 	void CreateViewPortStuff();
 
 	bool NeedClose = false;
+	// call if window closed and delete
+	std::function<void()> ClosedFun;
 public:
-	QFAWindow(int width, int height, std::string name);
+	QFAWindow(int width, int height, std::string name, std::function<void ()> closedFun = nullptr);
 	~QFAWindow();
 
 
@@ -209,6 +211,11 @@ public:
 	inline void SetDropFun(std::function<void (int path_count, const char* paths[])> fun)
 	{
 		DropFunction = fun;
+	}
+
+	void GetFocus()
+	{
+		glfwFocusWindow(glfWindow);
 	}
 
 private:

@@ -11,10 +11,6 @@ QFAUICanvas::~QFAUICanvas()
 {
 }
 
-
-
-
-
 void QFAUICanvas::NewUnit(QFAUIUnit* unit)
 {
 	QFAUISlot::SCanvasSlot* slot = (QFAUISlot::SCanvasSlot*)&unit->Slot;
@@ -26,10 +22,10 @@ void QFAUICanvas::NewUnit(QFAUIUnit* unit)
 		slot->y = 0.0f;		
 	}	
 
-	unit->SetPositionParent((int)(slot->x * (float)Width + (float)Position_x),
-							(int)(slot->y * (float)Height + (float)Position_y));
-	unit->SetSizeParent((int)(slot->Width * (float)Width),
-					    (int)(slot->Height * (float)Height));
+	unit->SetPositionParent((int)(slot->xInPixel ? slot->x + (float)Position_x : slot->x * (float)Width + (float)Position_x),
+							(int)(slot->yInPixel ? slot->y + (float)Position_y : slot->y * (float)Height + (float)Position_y));
+	unit->SetSizeParent((int)(slot->WidthInPixel ? slot->Width : slot->Width * (float)Width),
+					    (int)(slot->HeightInPixel ? slot->Height : slot->Height * (float)Height));
 }
 
 void QFAUICanvas::MySlotChange(QFAUIUnit* unit)
@@ -58,10 +54,10 @@ void QFAUICanvas::UpdatePositionSizeChildren()
 	for (size_t i = 0; i < Children.Length(); i++)
 	{
 		slot = (QFAUISlot::SCanvasSlot*)&Children[i]->Slot;
-		Children[i]->SetPositionParent((int)(slot->x * (float)Width + (float)Position_x),
-									   (int)(slot->y * (float)Height + (float)Position_y));
-		Children[i]->SetSizeParent((int)(slot->Width * (float)Width), 
-								   (int)(slot->Height * (float)Height));
+		Children[i]->SetPositionParent((int)(slot->xInPixel ? slot->x + (float)Position_x : slot->x * (float)Width + (float)Position_x),
+									   (int)(slot->yInPixel ? slot->y + (float)Position_y : slot->y * (float)Height + (float)Position_y));
+		Children[i]->SetSizeParent((int)(slot->WidthInPixel ? slot->Width : slot->Width * (float)Width),
+								   (int)(slot->HeightInPixel ? slot->Height : slot->Height * (float)Height));
 	}
 }
 

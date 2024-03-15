@@ -147,6 +147,8 @@
     <ClCompile Include="Editor\EditorOverlord.cpp" />
     <ClCompile Include="Editor\EditorUI\ExplorerFolderUnit.cpp" />
     <ClCompile Include="Editor\EditorUI\FileExplorer.cpp" />
+    <ClCompile Include="Editor\EditorUI\FileViewUnit.cpp" />
+    <ClCompile Include="Editor\EditorWindows\FileViewWindow.cpp" />
     <ClCompile Include="Editor\ShaderCompiler\ShaderCompiler.cpp" />
     <ClCompile Include="Editor\EditorWindows\MainEditorWindow.cpp" />
     <ClCompile Include="main.cpp" />
@@ -156,6 +158,8 @@
     <ClInclude Include="Editor\EditorOverlord.h" />
     <ClInclude Include="Editor\EditorUI\ExplorerFolderUnit.h" />
     <ClInclude Include="Editor\EditorUI\FileExplorer.h" />
+    <ClInclude Include="Editor\EditorUI\FileViewUnit.h" />
+    <ClInclude Include="Editor\EditorWindows\FileViewWindow.h" />
     <ClInclude Include="Editor\ShaderCompiler\ShaderCompiler.h" />
     <ClInclude Include="Editor\EditorWindows\MainEditorWindow.h" />
   </ItemGroup>

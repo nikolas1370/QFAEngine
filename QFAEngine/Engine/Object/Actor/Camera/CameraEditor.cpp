@@ -35,15 +35,17 @@ ACameraEditor::~ACameraEditor()
 {
 }
 
+void ACameraEditor::SetWindowForInput(QFAWindow* window)
+{
+	Input.ChangeWindow(window);
+}
+
 
 void ACameraEditor::Tick(float delta)
-{
+{	
 	if (!Camera.GetStatus())
 		return;
-
-
-
-
+	
 	if (mosePress)
 	{
 		FVector rot = GetActorRotation();

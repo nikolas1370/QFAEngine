@@ -13,7 +13,9 @@ QFAImage::QFAImage(SImageCreateInfo& ici)
 {
     ImageFormat = ici.format;
     VkDeviceSize imageSize = ici.Width * ici.Height * ici.channelCount;
-    buffer = new QFAVKBuffer(imageSize, nullptr, true);
+    if(ici.createBuffer)
+        buffer = new QFAVKBuffer(imageSize, nullptr, true);
+
     createImage(ici.Width, ici.Height, ici.format, VK_IMAGE_TILING_OPTIMAL, ici.usage);
     QFAVKBuffer::transitionImageLayout(TextureImage, ici.format, VK_IMAGE_LAYOUT_UNDEFINED, ici.layout, QFAWindow::QFAWindow::commandPool, ici.aspect);
     ImageView.CreateView(this, ici.aspect);
@@ -78,6 +80,17 @@ QFAImage::QFAImage(const std::u32string src)
     Height = texHeight;
 }
 
+
+void QFAImage::SetImage(void* pixels)
+{
+    if (buffer)
+        return;
+
+    buffer = new QFAVKBuffer(Width * Height * 4, pixels, true);
+    buffer->copyInImage(this, static_cast<uint32_t>(Width), static_cast<uint32_t>(Height), QFAWindow::commandPool);
+}
+
+
 QFAImage::~QFAImage()
 {
     vmaDestroyImage(QFAVKBuffer::allocator, TextureImage, ImageAllocation);
@@ -93,6 +106,7 @@ void QFAImage::DeleteImageInCpuSide()
         buffer = nullptr;
     }
 }
+
 
 
 void QFAImage::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkImageCreateFlags       flags)

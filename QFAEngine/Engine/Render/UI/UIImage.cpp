@@ -29,22 +29,22 @@ QFAUIImage::QFAUIImage(QFAImage* image, bool iBackground)
     vertexBufer = new QFAVKVertexBuffer(sizeof(SImageShaderVertex) * 6, nullptr, commandPool);
     ChangeQuad();
     SetImage(image);    
+    if (iBackground)
+        PrepareSet();
 }
 
 void QFAUIImage::Render(VkCommandBuffer comandebuffer)
-{
+{    
     if (CallPrepareSet)
         PrepareSet();
 
     if (Index < 0 || Index >= ImageIndexs.size())
         return;
 
-    if ( ImageIndexs[Index].image != this)
+    if (ImageIndexs[Index].image != this )
     {
         return;
     } 
-
-
 
     UpdateUniforms();
 
@@ -65,7 +65,7 @@ void QFAUIImage::Render(VkCommandBuffer comandebuffer)
 
 void QFAUIImage::UpdateUniforms()
 {
-    if (Index < 0 || Index >= ImageIndexs.size() || ImageIndexs[Index].image != this)
+    if (Index < 0 || Index >= ImageIndexs.size() || ImageIndexs[Index].image != this || !Parent)
         return;
 
     SImageParam ip;
@@ -83,7 +83,7 @@ void QFAUIImage::UpdateUniforms()
 
     ProcessParentOverflow(ip.overflow, parent);
 
-    ip.BackgroundEnable = !Image;// ;
+    ip.BackgroundEnable = !Image;
     ip.BackgroundColor = BackgroundColor;
 
     memcpy(ImageIndexs[Index].buffer->MapData, &ip, sizeof(SImageParam));
@@ -270,16 +270,39 @@ void QFAUIImage::SetPositionParent(int x, int y)
 
 void QFAUIImage::SetImage(QFAImage* image)
 {
-    if (!image && Image)
+    if (!image)
+    {
+        Image = nullptr;
         return DisableImage();
+    }
 
     Image = image;
     CallPrepareSet = true;
+    ChangeQuad();
+}
+
+void QFAUIImage::SetBackgroundColor(QFAColor color)
+{
+    glm::vec3 linear = Math::srgb_to_linear(glm::vec3((float)color.R / 255.0f, (float)color.G / 255.0f, (float)color.B / 255.0f));
+    BackgroundColor = QFAColorF(linear.r, linear.g, linear.b, (float)color.A / 255.0f);
+}
+
+void QFAUIImage::SetBackgroundColor(QFAColorB color)
+{
+    glm::vec3 linear = Math::srgb_to_linear(glm::vec3((float)color.R / 255.0f, (float)color.G / 255.0f, (float)color.B / 255.0f));
+    BackgroundColor = QFAColorF(linear.r, linear.g, linear.b, (float)color.A / 255.0f);    
+}
+
+void QFAUIImage::SetBackgroundColor(QFAColorF color)
+{
+    glm::vec3 linear = Math::srgb_to_linear(glm::vec3(color.R, color.G, color.B));
+    BackgroundColor = QFAColorF(linear.r, linear.g, linear.b, color.A);
 }
 
 void QFAUIImage::ParentEnable()
 {
     CallPrepareSet = true;
+    ChangeQuad();
 }
 
 
@@ -291,6 +314,7 @@ void QFAUIImage::ParentDisable()
 void QFAUIImage::ParentAttach()
 {
     CallPrepareSet = true;
+    ChangeQuad();
 }
 
 void QFAUIImage::ParentDisconect()

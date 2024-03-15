@@ -51,8 +51,9 @@ VkCommandBuffer QFAWindow::FinisCommandBuffer;
 /*-----*/
 
 
-QFAWindow::QFAWindow(int width, int height, std::string name)
+QFAWindow::QFAWindow(int width, int height, std::string name, std::function<void()> closedFun)
 {
+	ClosedFun = closedFun;
 	Windows.push_back(this);
 	Width = width;
 	Height = height;
@@ -184,6 +185,9 @@ QFAWindow::~QFAWindow()
 	delete UIEvent;
 	QFAInput::WindowClosed(this);
 	glfwDestroyWindow(glfWindow);
+
+	if (ClosedFun)
+		ClosedFun();
 }
 
 void QFAWindow::createCommandBuffer()

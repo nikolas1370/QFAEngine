@@ -92,7 +92,6 @@ void QFAViewport::ChangeCamera(QCameraComponent* camera)
 	CurentCamera = camera;
 	if (CurentCamera->IsValid())
 	{
-
 		CurentCamera->Viewport = this;
 		MatrixPerspective = glm::perspectiveLH_ZO(glm::radians(CurentCamera->Fov),
 			(float)Width / (float)Height, 0.1f, CurentCamera->ViewDistance);

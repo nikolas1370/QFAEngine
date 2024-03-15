@@ -73,25 +73,9 @@ public:
     void SetImage(QFAImage* image);
    
 
-    void SetBackgroundColor(QFAColor color)
-    {
-
-        glm::vec3 linear = Math::srgb_to_linear(glm::vec3((float)color.R / 255.0f, (float)color.G / 255.0f, (float)color.B / 255.0f));
-        BackgroundColor = QFAColorF(linear.r, linear.g, linear.b, (float)color.A / 255.0f);
-    }
-
-    void SetBackgroundColor(QFAColorB color)
-    {
-        glm::vec3 linear = Math::srgb_to_linear(glm::vec3((float)color.R / 255.0f, (float)color.G / 255.0f, (float)color.B / 255.0f));
-        BackgroundColor = QFAColorF(linear.r, linear.g, linear.b, (float)color.A / 255.0f);
-    }
-
-    void SetBackgroundColor(QFAColorF color)
-    {
-        glm::vec3 linear = Math::srgb_to_linear(glm::vec3(color.R, color.G, color.B));
-        BackgroundColor = QFAColorF(linear.r, linear.g, linear.b, color.A);
-    }
-
+    void SetBackgroundColor(QFAColor color);
+    void SetBackgroundColor(QFAColorB color);
+    void SetBackgroundColor(QFAColorF color);
 
     void SetCanStretch(bool can);
 

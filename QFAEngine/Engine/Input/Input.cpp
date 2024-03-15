@@ -22,7 +22,7 @@ QFAInput::QFAInput(QFAWindow* window)
 	{
 		if (WindowList[i] == window)
 		{
-			this->Window = WindowList[0]->glfWindow;
+			this->Window = WindowList[i]->glfWindow;
 			QFAInput::Inputs.Add({ window, this });
 			return;
 		}
@@ -42,6 +42,14 @@ QFAInput::~QFAInput()
 			return;
 		}
 	}
+}
+
+void QFAInput::ChangeWindow(QFAWindow* window)
+{
+	Window = window->glfWindow;
+	for (size_t i = 0; i < QFAInput::Inputs.Length(); i++)
+		if (QFAInput::Inputs[i].input == this)
+			QFAInput::Inputs[i].window = window;
 }
 
 void QFAInput::NewFrame(float delta)
