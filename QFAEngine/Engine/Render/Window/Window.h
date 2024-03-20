@@ -51,6 +51,7 @@ class QFAUIUnit;
 class QFAUIImage;
 class QFAVKRenderPassSwapChain;
 class QFAInput;
+class MeshData;
 class QFAWindow
 {
 
@@ -62,6 +63,7 @@ class QFAWindow
 	friend QFAVKSwapChain;
 	friend QFAImage;
 	friend QWorld;
+	friend MeshData;
 
 	static std::vector<QFAWindow*> Windows;
 	//static QFAWindow* MainWindow;
@@ -158,7 +160,7 @@ private:
 	// call if window closed and delete
 	std::function<void()> ClosedFun;
 public:
-	QFAWindow(int width, int height, std::string name, std::function<void ()> closedFun = nullptr);
+	QFAWindow(int width, int height, std::string name, bool inCenter = false, bool decorated = true, std::function<void ()> closedFun = nullptr);
 	~QFAWindow();
 
 
@@ -217,6 +219,29 @@ public:
 	{
 		glfwFocusWindow(glfWindow);
 	}
+
+	void EnabelDecorated(bool enabel)
+	{
+		glfwSetWindowAttrib(glfWindow, GLFW_DECORATED, enabel);
+	}
+
+	void SetSize(int w, int h)
+	{
+		glfwSetWindowSize(glfWindow, w, h);
+		Width = w;
+		Height = h;
+	}
+
+	void MoveToCenter()
+	{
+		GLFWmonitor* pm = glfwGetPrimaryMonitor();
+		int x, y, w, h;
+
+		glfwGetMonitorWorkarea(pm, &x, &y, &w, &h);
+		std::cout << x << " " << y << "\n";
+		glfwSetWindowPos(glfWindow, w / 2 - Width / 2  + x, h / 2 - Height / 2 + y);
+	}
+
 
 private:
 	std::function<void(int path_count, const char* paths[])> DropFunction;

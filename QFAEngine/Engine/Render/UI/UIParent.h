@@ -16,6 +16,8 @@ class QFAWindow;
 class QFAUIEvent;
 class QFAUIScroll;
 class QFAVKPipeline;
+class QFAUIList;
+class QFAText;
 class QFAUIParent : public QFAUIUnit
 {
 	friend QFAUIParentMultipleUnit;
@@ -24,7 +26,8 @@ class QFAUIParent : public QFAUIUnit
 	friend QFAWindow;
 	friend QFAUIEvent;
 	friend QFAUIScroll;
-
+	friend QFAUIList;
+	friend QFAText;
 
 public:
 	enum EOverflow : unsigned char
@@ -71,6 +74,11 @@ protected:
 	*/
 	virtual float UpdateInnerHeight() = 0;
 	virtual float UpdateInnerWidth() = 0;
+
+	/*	
+		child call if inner Height/Width change	
+	*/
+	virtual void ChildInnerChange(QFAUIUnit* child) {};
 
 	EOverflow Overflow = EOverflow::Visible;
 

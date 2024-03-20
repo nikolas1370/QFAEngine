@@ -15,9 +15,9 @@
 
 #include <unicode/unistr.h>
 #include <EditorFileTypes.h>
-#include <Tools/File/FileSystem.h>
 #include <Tools/File/ModelLoader.h>
 #include <EditorWindows/FileViewWindow.h>
+#include <EditorFileStorage.h>
 
 QFAUIEditorFileExplorer::QFAUIEditorFileExplorer(QFAWindow *window)
 {
@@ -33,10 +33,13 @@ QFAUIEditorFileExplorer::QFAUIEditorFileExplorer(QFAWindow *window)
 	CreateBottom();
 	AddHiddenChild(FileExplorerTop);
 	AddHiddenChild(FileExplorerBottom);	
-	CurentPath = MainFolder;
-	PathHistory.push_back(CurentPath);
+	QFAFileSystem::FolderUnit fu;
+	fu.id = 1;// 1 is defauld id for flder Content
+	fu.IsFolder = true;
+	fu.path = MainFolder;
+	CurentFolder = fu;
+	PathHistory.push_back(fu);
 	PathChanged();
-	UpdateFolderItemList();
 }
 
 QFAUIEditorFileExplorer::~QFAUIEditorFileExplorer()
@@ -116,15 +119,16 @@ void QFAUIEditorFileExplorer::CreateBottom()
 
 void QFAUIEditorFileExplorer::UpdateFolderItemList()
 {	
+	
+	
+
+
 	folderContents.clear();
 	FolderItemList->removeAllUnit();
-	QFAFileSystem::GetFolderContents(CurentPath, folderContents);
+	QFAEditorFileStorage::GetFolderContents(CurentFolder.id, folderContents);
 	folderUnitInUse = 0;
 	for (size_t i = 0; i < folderContents.size(); i++)
 	{
-		if (!folderContents[i].IsFolder && std::filesystem::path(folderContents[i].name).extension() != ".qfa")
-			continue;
-
 		if (folderUnitInUse == FolderUnitList.size())
 		{
 			FolderUnitList.push_back(new QFAEditorExplorerFolderUnit);
@@ -134,7 +138,7 @@ void QFAUIEditorFileExplorer::UpdateFolderItemList()
 		FolderUnitList[folderUnitInUse]->ChangeImage(folderContents[i].IsFolder);
 		FolderUnitList[folderUnitInUse]->ChangeText(folderContents[i].name);
 		folderUnitInUse++;		
-	}
+	}	
 }
 
 void QFAUIEditorFileExplorer::FolderItemListLeftMouseDown(QFAUIUnit* unit, void* _this)
@@ -170,7 +174,7 @@ void QFAUIEditorFileExplorer::FolderItemListLeftMouseDown(QFAUIUnit* unit, void*
 							thisUnit->LastLeftMouseDownTime = 0;
 							thisUnit->FolderItemListSelectUnit->SetBackgroundColor(thisUnit->InFocusUnitColor);
 							thisUnit->FolderItemListSelectUnit = nullptr;
-							thisUnit->NextFolder(thisUnit->folderContents[i].path);
+							thisUnit->NextFolder(thisUnit->folderContents[i]);
 						}
 						else
 						{
@@ -183,12 +187,12 @@ void QFAUIEditorFileExplorer::FolderItemListLeftMouseDown(QFAUIUnit* unit, void*
 									fe->FileViewWindow = new QFAEditorFileViewWindow();
 								}
 
-								fe->FileViewWindow->AddFile(thisUnit->folderContents[i].path);
+								fe->FileViewWindow->AddFile(thisUnit->folderContents[i].id);
 							}
 							else
 							{
 								fe->FileViewWindow = new QFAEditorFileViewWindow();
-								fe->FileViewWindow->AddFile(thisUnit->folderContents[i].path);
+								fe->FileViewWindow->AddFile(thisUnit->folderContents[i].id);
 							}
 						}
 
@@ -252,16 +256,18 @@ void QFAUIEditorFileExplorer::FolderItemListOutFocus(void* _this)
 	thisUnit->FolderItemListInFocusUnit = nullptr;
 }
 
-void QFAUIEditorFileExplorer::NextFolder(std::u32string nextPath)
+void QFAUIEditorFileExplorer::NextFolder(QFAFileSystem::FolderUnit nextFolder)
 {
-	if (!QFAFileSystem::exists(nextPath))
+	if (!QFAFileSystem::exists(nextFolder.path))
 		return;
 	
+	
+
 	if (PathHistory.size() > CurentPathHistoryIndex + 1 &&
-		PathHistory[CurentPathHistoryIndex + 1] == nextPath)
+		PathHistory[CurentPathHistoryIndex + 1].id == nextFolder.id)
 	{
 		CurentPathHistoryIndex++;
-		CurentPath = nextPath;
+		CurentFolder = nextFolder;
 		BackButton->SetTextColor(ButoonOnColor);
 		if(PathHistory.size() > CurentPathHistoryIndex + 1)
 			ForwardButton->SetTextColor(ButoonOnColor);
@@ -272,8 +278,8 @@ void QFAUIEditorFileExplorer::NextFolder(std::u32string nextPath)
 	{
 		CurentPathHistoryIndex++;
 		PathHistory.resize(CurentPathHistoryIndex);
-		PathHistory.push_back(nextPath);
-		CurentPath = nextPath;
+		PathHistory.push_back(nextFolder);
+		CurentFolder = nextFolder;
 		ForwardButton->SetTextColor(ButoonOffColor);
 		BackButton->SetTextColor(ButoonOnColor);
 	}
@@ -289,7 +295,7 @@ void QFAUIEditorFileExplorer::NextFolderButton(QFAUIUnit* unit, void* _this)
 		return;
 
 	thisUnit->CurentPathHistoryIndex++;
-	thisUnit->CurentPath = thisUnit->PathHistory[thisUnit->CurentPathHistoryIndex];
+	thisUnit->CurentFolder = thisUnit->PathHistory[thisUnit->CurentPathHistoryIndex];
 	thisUnit->BackButton->SetTextColor(thisUnit->ButoonOnColor);
 	if (thisUnit->CurentPathHistoryIndex + 1 >= thisUnit->PathHistory.size())
 		thisUnit->ForwardButton->SetTextColor(thisUnit->ButoonOffColor);
@@ -306,7 +312,7 @@ void QFAUIEditorFileExplorer::PreviousFolderButton(QFAUIUnit* unit, void* _this)
 		return;
 
 	thisUnit->CurentPathHistoryIndex--;
-	thisUnit->CurentPath = thisUnit->PathHistory[thisUnit->CurentPathHistoryIndex];
+	thisUnit->CurentFolder = thisUnit->PathHistory[thisUnit->CurentPathHistoryIndex];
 	thisUnit->ForwardButton->SetTextColor(thisUnit->ButoonOnColor);
 	if(thisUnit->CurentPathHistoryIndex == 0)
 		thisUnit->BackButton->SetTextColor(thisUnit->ButoonOffColor);
@@ -318,7 +324,21 @@ void QFAUIEditorFileExplorer::PreviousFolderButton(QFAUIUnit* unit, void* _this)
 
 void QFAUIEditorFileExplorer::DropFiles(int path_count, const char* paths[])
 {
-	std::filesystem::path curentPath(CurentPath);
+	/*
+	
+	
+	
+	
+	
+	rewrite
+	
+	
+	
+	
+	*/
+
+
+	std::filesystem::path curentPath(CurentFolder.path);
 	curentPath.append("");// add "\\" in path
 	for (size_t i = 0; i < path_count; i++)
 	{
@@ -420,7 +440,7 @@ void QFAUIEditorFileExplorer::DropFiles(int path_count, const char* paths[])
 
 void QFAUIEditorFileExplorer::PathChanged()
 {
-	PathText->SetText(CurentPath);
+	PathText->SetText(CurentFolder.path);
 	UpdateFolderItemList();
 }
 

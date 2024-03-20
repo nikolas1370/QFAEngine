@@ -29,7 +29,7 @@ class QFAUIEditorFileExplorer : public QFAParentHiddenChild
 	QFAUIScroll* FolderItemListScroll;
 
 	unsigned int FileExplorerTopHeight = 20;
-	std::u32string CurentPath;
+	QFAFileSystem::FolderUnit CurentFolder;
 protected:
 	void MySlotChange(QFAUIUnit* unit) override;
 	void ChangeSize(unsigned int w, unsigned int h) override;
@@ -63,11 +63,11 @@ private:
 	uint64_t LastLeftMouseDownTime;
 
 	void PathChanged();
-	void NextFolder(std::u32string nextPath);
+	void NextFolder(QFAFileSystem::FolderUnit nextFolder);
 	static void NextFolderButton(QFAUIUnit* unit , void* _this);
 	static void PreviousFolderButton(QFAUIUnit* unit, void* _this);
 
-	std::vector<std::u32string> PathHistory;
+	std::vector<QFAFileSystem::FolderUnit> PathHistory;
 	int CurentPathHistoryIndex = 0;
 	const std::u32string MainFolder = U"Content";
 

@@ -22,6 +22,7 @@ public:
 	{
 		return GraphicsQueue;
 	}
+
 	static inline VkQueue  GetPresentQueue()
 	{
 		return PresentQueue;

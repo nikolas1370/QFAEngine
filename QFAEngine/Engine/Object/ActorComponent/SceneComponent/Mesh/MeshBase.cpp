@@ -26,6 +26,7 @@ std::vector<QMeshBaseComponent::SSet1Buffers> QMeshBaseComponent::Set1Buffers;
 unsigned int QMeshBaseComponent::SetsInUse = 0;
 std::vector<VkDescriptorSet> QMeshBaseComponent::ShadowDescriptorSets;
 
+
 MeshData::MeshData(int uniqueIndexCount, int indexCount, int materialCount)
 {
 	
@@ -59,6 +60,16 @@ MeshData::MeshData(SMeshInfo* mi, void* framesData)
 	Mi = *mi;
 }
 
+void MeshData::CreateVertextIndexBuffer()
+{
+	if (VertexBufer)
+		return;
+	
+	
+	VertexBufer = new QFAVKVertexBuffer(GetVerticesSize(), GetVerticesDate(), QFAWindow::commandPool);
+	IndexBuffer = new QFAVKIndexBuffer(GetIndexCount() * sizeof(int), GetIndexData(), QFAWindow::commandPool);
+}
+
 SSVertexMaterial* MeshData::GetFrameData() const
 {
 	return (SSVertexMaterial*)&FramesData[0];
@@ -82,7 +93,8 @@ QMeshBaseComponent::QMeshBaseComponent()
 
 QMeshBaseComponent::~QMeshBaseComponent()
 {
-	/*
+
+		/*	
 		delete all
 	*/
 }
@@ -117,8 +129,9 @@ void QMeshBaseComponent::Render(VkCommandBuffer commandBuffer, bool shadow, FVec
 	VkDeviceSize offsets[] = { 0 };
 	if (shadow)
 	{
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &VertexBufer->GpuSideBuffer->Buffer, offsets);
-		vkCmdBindIndexBuffer(commandBuffer, IndexBuffer->GpuSideBuffer->Buffer, 0, VK_INDEX_TYPE_UINT32);
+		
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &Mf->VertexBufer->GpuSideBuffer->Buffer, offsets);
+		vkCmdBindIndexBuffer(commandBuffer, Mf->IndexBuffer->GpuSideBuffer->Buffer, 0, VK_INDEX_TYPE_UINT32);
 		auto nextSet = GetShadowNextSet();
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
 			ShadowPipline->GetPipelineLayout(), 0, 1, &nextSet, 0, nullptr);
@@ -127,8 +140,8 @@ void QMeshBaseComponent::Render(VkCommandBuffer commandBuffer, bool shadow, FVec
 	}
 	else
 	{
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &VertexBufer->GpuSideBuffer->Buffer, offsets);
-		vkCmdBindIndexBuffer(commandBuffer, IndexBuffer->GpuSideBuffer->Buffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &Mf->VertexBufer->GpuSideBuffer->Buffer, offsets);
+		vkCmdBindIndexBuffer(commandBuffer, Mf->IndexBuffer->GpuSideBuffer->Buffer, 0, VK_INDEX_TYPE_UINT32);
 
 		auto nextSets = GetNextSets();
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -138,11 +151,6 @@ void QMeshBaseComponent::Render(VkCommandBuffer commandBuffer, bool shadow, FVec
 	}
 }
 
-void QMeshBaseComponent::CreateVertexIndexBuffers()
-{
-	VertexBufer = new QFAVKVertexBuffer(Mf->GetVerticesSize(), Mf->GetVerticesDate(), commandPool);
-	IndexBuffer = new QFAVKIndexBuffer(Mf->GetIndexCount() * sizeof(int), Mf->GetIndexData(), commandPool);
-}
 
 
 void QMeshBaseComponent::StartFrameViewpoet(glm::mat4& viewPortProjection, glm::mat3& cameraRotationMatrix, glm::mat4& directionLightMatrix, int viewportIndex)

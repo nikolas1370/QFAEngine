@@ -18,6 +18,7 @@ class QFAEditorUIFileViewUnit;
 #include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
 #include <Object/Actor/Actor.h>
 #include <Object/Actor/Camera/CameraEditor.h>
+#include <EditorFileStorage.h>
 class QFAEditorFileViewWindow
 {
 	bool Closed = false;
@@ -25,13 +26,14 @@ class QFAEditorFileViewWindow
 	ACameraEditor Camera;
 	QWorld World;
 	QActor Actor;
+	QStaticMesh Mesh;
 public:
 	QFAEditorFileViewWindow();
 	~QFAEditorFileViewWindow();
 	
 	bool IsClosed();
 
-	void AddFile(std::u32string qfaFilePAth);
+	void AddFile(size_t fileId);
 private:
 	
 
@@ -43,14 +45,20 @@ private:
 	QFAUIList* TopList;
 	QFAUIScroll* TopListScroll;
 
+	
 	struct SFile
 	{
+		SEditorFile ef;
+		/*
 		std::u32string path;
 		QStaticMesh* mesh = nullptr;
 		QFAImage* image = nullptr;
-		QFAEditorUIFileViewUnit* viewUnit;
-		QFAFile* file;
+		*/
+		/* все зверху удалить знизу розкоментірувать  */
+		//SEditorFile ef;
+		QFAEditorUIFileViewUnit* viewUnit;	
 	};
+	
 
 	enum ECurentType
 	{
@@ -60,13 +68,12 @@ private:
 	};
 
 	int CurentEnableFolderCount = 0;
-	std::vector<SFile> Folders;
+	std::vector<SFile> Files;
 	QFAEditorUIFileViewUnit* CurentViewUnit = nullptr;
 
 	ECurentType CurentActiveType = ECurentType::CTNone;
 
 	void InFocus(SFile* file);
-	bool LoadFile(std::u32string qfaFilePAth, SFile & sfile);
 	void UpdateList();
 
 	static void LeftMouse(QFAUIUnit* unit, void* _this);

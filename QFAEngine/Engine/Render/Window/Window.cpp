@@ -51,7 +51,7 @@ VkCommandBuffer QFAWindow::FinisCommandBuffer;
 /*-----*/
 
 
-QFAWindow::QFAWindow(int width, int height, std::string name, std::function<void()> closedFun)
+QFAWindow::QFAWindow(int width, int height, std::string name, bool inCenter, bool decorated, std::function<void()> closedFun)
 {
 	ClosedFun = closedFun;
 	Windows.push_back(this);
@@ -61,6 +61,20 @@ QFAWindow::QFAWindow(int width, int height, std::string name, std::function<void
 	QFAWindow::CurentProcessWindow = this;
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	
+	if(inCenter)
+	{
+		GLFWmonitor* pm = glfwGetPrimaryMonitor();
+		int x, y, w, h;
+		glfwGetMonitorWorkarea(pm, &x, &y, &w, &h);
+		glfwWindowHint(GLFW_POSITION_X, w / 2 - Width / 2 + x);
+		glfwWindowHint(GLFW_POSITION_Y, h / 2 - Height / 2 + y);
+	}
+
+	if (decorated)
+		glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
+	else
+		glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+
 	glfWindow = glfwCreateWindow(width, height, name.c_str(), NULL, NULL);
 	QFAInput::WindowCreated(this);
 	UIEvent = new QFAUIEvent(this, glfWindow);
@@ -174,7 +188,8 @@ QFAWindow::QFAWindow(int width, int height, std::string name, std::function<void
 	AddViewport(vp);
 	vp->Settup(width, height);
 
-
+	
+	
 }
 
 QFAWindow::~QFAWindow()
@@ -605,10 +620,9 @@ void QFAWindow::ShadowRender(QFAViewport* _viewport)
 
 }
 
-
 void QFAWindow::RenderWindows()
 { 
-	vkQueueWaitIdle(QFAVKLogicalDevice::GetGraphicsQueue()); // Wait before render
+	vkQueueWaitIdle(QFAVKLogicalDevice::GetGraphicsQueue());
 	ViewportProcess = 0;
 	QMeshBaseComponent::StartFrame();
 	QFAText::StartFrame();
@@ -836,8 +850,11 @@ unsigned int QFAWindow::ProcessMeshComponent(QSceneComponent* component, bool sh
 	unsigned int countComponentForRender = 0;
 	if (QMeshBaseComponent* mesh = dynamic_cast<QMeshBaseComponent*>(component))
 	{		
-		mesh->Render(CurentComandBuffer, shadow, CurentCameraPosition);
-		countComponentForRender++;
+		if (mesh->Mf)
+		{
+			mesh->Render(CurentComandBuffer, shadow, CurentCameraPosition);
+			countComponentForRender++;
+		}
 	}
 
 	for (size_t i = 0; i < component->ListComponents.Length(); i++)

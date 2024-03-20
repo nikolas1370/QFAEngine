@@ -30,6 +30,8 @@ struct Material // struct in fragment shader
 	float Specular = 0;
 };
 
+class QStaticMesh;
+class QMeshBaseComponent;
 class MeshData
 {
 	/*
@@ -41,7 +43,8 @@ class MeshData
 	}
 	*/	
 	char* FramesData; 
-
+	friend QStaticMesh;
+	friend QMeshBaseComponent;
 public:
 	struct SMeshInfo
 	{
@@ -55,23 +58,28 @@ public:
 	};
 private:
 	SMeshInfo Mi;
+	QFAVKVertexBuffer* VertexBufer = nullptr;
+	QFAVKIndexBuffer* IndexBuffer = nullptr;
+	// call when set MeshData in staticMesh
+	void CreateVertextIndexBuffer();
 public:
 
 
 	/*
 		uniqueIndexCount = count SSVertex in memory
 		indexCount = count of indices in list who represent all of mesh
-	*/
+	*/	
 	MeshData( int uniqueIndexCount, int indexCount, int materialCount);// false to true
-	MeshData(int VertexCount, int indexCount, int materialCount, int notNed);
+	MeshData(int VertexCount, int indexCount, int materialCount, int notNed);	
 	MeshData(SMeshInfo* mi, void* framesData);
+
 
 
 	~MeshData()
 	{
-	
-		free((void*)FramesData);
-		
+		delete VertexBufer;
+		delete IndexBuffer;
+		free((void*)FramesData);		
 	}
 
 	SSVertexMaterial* GetFrameData() const;
@@ -267,8 +275,6 @@ private:
 
 	static  VkDescriptorSet descriptorSetShadow; 
 
-	QFAVKVertexBuffer* VertexBufer;
-	QFAVKIndexBuffer* IndexBuffer;
 
 	struct SSet1Buffers
 	{
@@ -285,6 +291,7 @@ private:
 
 	static std::vector<VkDescriptorSet> ShadowDescriptorSets;
 
+	// call only if Mf != nullptr
 	void Render(VkCommandBuffer commandBuffer, bool shadow, FVector cameraPosition);
 protected:
 
@@ -306,7 +313,7 @@ protected:
 		alignas(64) glm::mat4 depthMVP;
 	};
 
-	void CreateVertexIndexBuffers();
+
 
 	static void StartFrameViewpoet(glm::mat4& viewPortProjection, glm::mat3& cameraRotationMatrix,  glm::mat4& directionLightMatrix, int viewportIndex);
 

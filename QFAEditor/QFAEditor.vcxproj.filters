@@ -39,6 +39,9 @@
     <ClCompile Include="Editor\EditorUI\FileViewUnit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Editor\EditorFileStorage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor\ShaderCompiler\ShaderCompiler.h">
@@ -63,6 +66,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Editor\EditorUI\FileViewUnit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorFileStorage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -144,6 +144,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Editor\EditorFileStorage.cpp" />
     <ClCompile Include="Editor\EditorOverlord.cpp" />
     <ClCompile Include="Editor\EditorUI\ExplorerFolderUnit.cpp" />
     <ClCompile Include="Editor\EditorUI\FileExplorer.cpp" />
@@ -154,6 +155,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Editor\EditorFileStorage.h" />
     <ClInclude Include="Editor\EditorFileTypes.h" />
     <ClInclude Include="Editor\EditorOverlord.h" />
     <ClInclude Include="Editor\EditorUI\ExplorerFolderUnit.h" />

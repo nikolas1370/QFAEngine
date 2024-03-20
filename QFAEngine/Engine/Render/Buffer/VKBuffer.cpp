@@ -3,8 +3,12 @@
 #include <Render/vk/LogicalDevice.h>
 #include <Render/vk/PhysicalDevice.h>
 #include <Render/Image.h>
+#include <Overlord/Overlord.h>
 
 VmaAllocator QFAVKBuffer::allocator = nullptr;
+
+
+std::vector<QFAVKBuffer::BufferTaskOtherThread> QFAVKBuffer::Tasks;
 
 
 void QFAVKBuffer::Init(VkInstance instance)
@@ -36,15 +40,6 @@ QFAVKBuffer::QFAVKBuffer(VkDeviceSize size, const void* data, bool inHost, VkBuf
     if (data == nullptr || !inHost)
         return;
     
-    /*
-    * some time can be
-        Exception thrown at 0x00007FF94A7AF9D1 (vcruntime140d.dll) in QFAEngine.exe: 0xC0000005: Access violation reading location 0x000001FB2EE54000.
-        QMeshBaseComponent::CreateVertexIndexBuffers()
-        QStaticMesh::SetMesh(MeshData* meshData)
-        QStaticMesh::QStaticMesh(MeshData* meshData)
-         QFAModelLoader::LoadModel(const std::string& pFile)
-         only if load model
-    */
     memcpy(MapData, data, static_cast<size_t>(size));
 }
 
@@ -74,11 +69,19 @@ QFAVKBuffer::~QFAVKBuffer()
         vmaUnmapMemory(allocator, allocation);
         
     vmaDestroyBuffer(allocator, Buffer, allocation);
+
+    for (size_t i = 0; i < Tasks.size(); i++)
+    {
+        if (Tasks[i].buffer == this)
+        {
+            Tasks.erase(Tasks.begin() + i);
+            return;
+        }
+    }
 }
 
 uint32_t QFAVKBuffer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
-{
-    
+{    
     VkPhysicalDeviceMemoryProperties memProperties;
     vkGetPhysicalDeviceMemoryProperties(QFAVKPhysicalDevice::GetDevice(), &memProperties);
 
@@ -89,14 +92,6 @@ uint32_t QFAVKBuffer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags 
     stopExecute("QFAVKBuffer::findMemoryType failed to find suitable memory type!");
 }
 
-void QFAVKBuffer::copyInImage(QFAImage* image, uint32_t width, uint32_t height, VkCommandPool commandPool, int32_t imageOffsetX, int32_t imageOffsetY, VkImageAspectFlags aspect, VkImageLayout endLayout)
-{   
-    transitionImageLayout(image->TextureImage, image->ImageFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, commandPool, aspect);
-    copyBufferToImage(image->TextureImage, width, height, commandPool, imageOffsetX, imageOffsetY, aspect);
-    if(endLayout != VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
-        transitionImageLayout(image->TextureImage, image->ImageFormat, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, endLayout, commandPool, aspect);
-}  
-
 void QFAVKBuffer::UpdateData(unsigned int size, void* data)
 {
     memcpy(MapData, data, static_cast<size_t>(size));   
@@ -104,6 +99,20 @@ void QFAVKBuffer::UpdateData(unsigned int size, void* data)
 
 void QFAVKBuffer::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandPool commandPool, VkImageAspectFlags aspect)
 {
+    if (QFAOverlord::GetMainThreadId() != std::this_thread::get_id())
+    {
+        BufferTaskOtherThread btot;
+        btot.type = ETaskType::TTtransition;
+        btot.vKImage = image;
+        btot.format = format;
+        btot.oldLayout = oldLayout;
+        btot.newLayout = newLayout;
+        btot.commandPool = commandPool;
+        btot.aspect = aspect;
+        Tasks.push_back(btot);
+        return;
+    }
+
     VkCommandBuffer commandBuffer = beginSingleTimeCommands(commandPool);
 
     VkImageMemoryBarrier barrier{};
@@ -247,6 +256,104 @@ void QFAVKBuffer::EndLife()
 }
 
 
+void QFAVKBuffer::ProcessTaskFromOtherThread()
+{
+    for (size_t i = 0; i < Tasks.size(); i++)
+    {
+        if (Tasks[i].type == ETaskType::TTBuffer)
+            Tasks[i].buffer->copyBuffer(Tasks[i].dstBuffer, Tasks[i].size, Tasks[i].commandPool, Tasks[i].srcOffset, Tasks[i].dstOffset);
+        else if (Tasks[i].type == ETaskType::TTImage)
+            Tasks[i].buffer->copyInImage(Tasks[i].image, Tasks[i].width, Tasks[i].height, Tasks[i].commandPool, Tasks[i].imageOffsetX, Tasks[i].imageOffsetY, Tasks[i].aspect, Tasks[i].endLayout);
+        else if (Tasks[i].type == ETaskType::TTtransition)
+            transitionImageLayout(Tasks[i].vKImage, Tasks[i].format, Tasks[i].oldLayout, Tasks[i].newLayout, Tasks[i].commandPool, Tasks[i].aspect);
+    }
+
+    Tasks.clear();
+}
+
+void QFAVKBuffer::copyInImage(QFAImage* image, uint32_t width, uint32_t height, VkCommandPool commandPool, int32_t imageOffsetX, int32_t imageOffsetY, VkImageAspectFlags aspect, VkImageLayout endLayout)
+{
+    if (QFAOverlord::GetMainThreadId() != std::this_thread::get_id())
+    {
+        BufferTaskOtherThread btot;
+        btot.type = ETaskType::TTImage;
+        btot.buffer = this;
+        btot.image = image;
+        btot.width = width;
+        btot.height = height;
+        btot.commandPool = commandPool;
+        btot.imageOffsetX = imageOffsetX;
+        btot.imageOffsetY = imageOffsetY;
+        btot.aspect = aspect;
+        btot.endLayout = endLayout;
+        Tasks.push_back(btot);
+        return;
+    }
+
+    transitionImageLayout(image->TextureImage, image->ImageFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, commandPool, aspect);
+    copyBufferToImage(image->TextureImage, width, height, commandPool, imageOffsetX, imageOffsetY, aspect);
+    if (endLayout != VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+        transitionImageLayout(image->TextureImage, image->ImageFormat, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, endLayout, commandPool, aspect);
+}
+
+void QFAVKBuffer::copyBuffer(VkBuffer dstBuffer, VkDeviceSize size, VkCommandPool commandPool, VkDeviceSize srcOffset, VkDeviceSize dstOffset)
+{
+    if (QFAOverlord::GetMainThreadId() != std::this_thread::get_id())
+    {
+        BufferTaskOtherThread btot;
+        btot.type = ETaskType::TTBuffer;
+        btot.buffer = this;
+        btot.dstBuffer = dstBuffer;
+        btot.size = size;
+        btot.commandPool = commandPool;
+        btot.srcOffset = srcOffset;
+        btot.dstOffset = dstOffset;
+        Tasks.push_back(btot);
+        return;
+    }
+
+    VkCommandBuffer commandBuffer = beginSingleTimeCommands(commandPool);
+
+    VkBufferCopy copyRegion{};
+    copyRegion.size = size;
+    copyRegion.srcOffset = srcOffset;
+    copyRegion.dstOffset = dstOffset;
+    vkCmdCopyBuffer(commandBuffer, Buffer, dstBuffer, 1, &copyRegion);//does not copy more than allocated memory in dstBuffer
+
+
+    endSingleTimeCommands(commandPool, commandBuffer);
+}
+
+
+
+void QFAVKBuffer::copyBufferToImage(VkImage image, uint32_t width, uint32_t height, VkCommandPool commandPool, int32_t imageOffsetX, int32_t imageOffsetY, VkImageAspectFlags aspect )
+{
+    //  imageOffsetX, int32_t imageOffsetY,
+    VkCommandBuffer commandBuffer = beginSingleTimeCommands(commandPool);
+
+    VkBufferImageCopy region{};
+    region.bufferOffset = 0;
+    region.bufferRowLength = 0;
+    region.bufferImageHeight = 0;
+    region.imageSubresource.aspectMask = aspect;
+    region.imageSubresource.mipLevel = 0;
+    region.imageSubresource.baseArrayLayer = 0;
+    region.imageSubresource.layerCount = 1;
+    region.imageOffset = { imageOffsetX, imageOffsetY, 0 };
+    region.imageExtent = {
+        width,
+        height,
+        1
+    };
+
+    vkCmdCopyBufferToImage(commandBuffer, Buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+
+    endSingleTimeCommands(commandPool, commandBuffer);
+    
+}
+
+
+
 
 VkCommandBuffer QFAVKBuffer::beginSingleTimeCommands(VkCommandPool commandPool)
 {
@@ -278,50 +385,9 @@ void QFAVKBuffer::endSingleTimeCommands(VkCommandPool commandPool, VkCommandBuff
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
     submitInfo.pNext = nullptr;
-    
+
     vkQueueSubmit(QFAVKLogicalDevice::GetGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
     vkQueueWaitIdle(QFAVKLogicalDevice::GetGraphicsQueue());
 
     vkFreeCommandBuffers(QFAVKLogicalDevice::GetDevice(), commandPool, 1, &commandBuffer);
 }
-
-void QFAVKBuffer::copyBufferToImage(VkImage image, uint32_t width, uint32_t height, VkCommandPool commandPool, int32_t imageOffsetX, int32_t imageOffsetY, VkImageAspectFlags aspect )
-{
-    //  imageOffsetX, int32_t imageOffsetY,
-    VkCommandBuffer commandBuffer = beginSingleTimeCommands(commandPool);
-
-    VkBufferImageCopy region{};
-    region.bufferOffset = 0;
-    region.bufferRowLength = 0;
-    region.bufferImageHeight = 0;
-    region.imageSubresource.aspectMask = aspect;
-    region.imageSubresource.mipLevel = 0;
-    region.imageSubresource.baseArrayLayer = 0;
-    region.imageSubresource.layerCount = 1;
-    region.imageOffset = { imageOffsetX, imageOffsetY, 0 };
-    region.imageExtent = {
-        width,
-        height,
-        1
-    };
-
-    vkCmdCopyBufferToImage(commandBuffer, Buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
-
-    endSingleTimeCommands(commandPool, commandBuffer);
-    
-}
-
-void QFAVKBuffer::copyBuffer( VkBuffer dstBuffer, VkDeviceSize size, VkCommandPool commandPool, VkDeviceSize srcOffset, VkDeviceSize dstOffset)
-{
-    VkCommandBuffer commandBuffer = beginSingleTimeCommands(commandPool);
-
-    VkBufferCopy copyRegion{};
-    copyRegion.size = size;    
-    copyRegion.srcOffset = srcOffset;
-    copyRegion.dstOffset = dstOffset;    
-    vkCmdCopyBuffer(commandBuffer, Buffer, dstBuffer, 1, &copyRegion);//does not copy more than allocated memory in dstBuffer
-    
-
-    endSingleTimeCommands(commandPool, commandBuffer);
-}
-

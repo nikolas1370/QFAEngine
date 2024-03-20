@@ -59,13 +59,22 @@ void QFAUIList::SetUnitWidth(unsigned int w)
 
 void QFAUIList::CalculateChildren()
 {	
-	if (ListType == LTVertical)
+	if (ListType == LTVertical || ListType == LTVerticalInner)
 	{
 		int y = 0;
 		for (size_t i = 0; i < Children.Length(); i++)
 		{
 			if (Children[i]->IsValid())
 			{
+				unsigned int unitHeight;
+				if (Children[i]->CanBeParent)
+				{
+					QFAUIParent* child = (QFAUIParent*)Children[i];
+					unitHeight = ListType == LTVertical ? UnitHeight : child->UpdateInnerHeight();
+				}
+				else
+					unitHeight = ListType == LTVertical ? UnitHeight : Children[i]->InnerHeight;
+
 				if (marginMinus)
 				{
 					QFAUISlot::SListSlot* listSlot = (QFAUISlot::SListSlot*)&Children[i]->Slot;
@@ -83,8 +92,8 @@ void QFAUIList::CalculateChildren()
 					}
 					else
 					{
-						Children[i]->SetSizeParent(Width - listSlot->marginLeft, UnitHeight - listSlot->marginTop);
-						y += UnitHeight;
+						Children[i]->SetSizeParent(Width - listSlot->marginLeft, unitHeight - listSlot->marginTop);
+						y += unitHeight;
 					}
 					
 				}
@@ -105,8 +114,8 @@ void QFAUIList::CalculateChildren()
 					}
 					else
 					{
-						Children[i]->SetSizeParent(Width, UnitHeight);
-						y += UnitHeight + listSlot->marginTop;
+						Children[i]->SetSizeParent(Width, unitHeight);
+						y += unitHeight + listSlot->marginTop;
 					}
 
 
@@ -124,6 +133,15 @@ void QFAUIList::CalculateChildren()
 		{
 			if (Children[i]->IsValid())
 			{
+				unsigned int unitWidth;
+				if (Children[i]->CanBeParent)
+				{
+					QFAUIParent* child = (QFAUIParent*)Children[i];
+					unitWidth = ListType == LTHorizon ? UnitWidth : child->UpdateInnerWidth();
+				}
+				else
+					unitWidth = ListType == LTHorizon ? UnitWidth : Children[i]->InnerWidth;
+
 				if (marginMinus)
 				{
 					QFAUISlot::SListSlot* listSlot = (QFAUISlot::SListSlot*)&Children[i]->Slot;
@@ -141,8 +159,8 @@ void QFAUIList::CalculateChildren()
 					}
 					else
 					{
-						Children[i]->SetSizeParent(UnitWidth - listSlot->marginLeft, Height - listSlot->marginTop);
-						x += UnitWidth;
+						Children[i]->SetSizeParent(unitWidth - listSlot->marginLeft, Height - listSlot->marginTop);
+						x += unitWidth;
 					}
 				}
 				else
@@ -162,8 +180,8 @@ void QFAUIList::CalculateChildren()
 					}
 					else
 					{
-						Children[i]->SetSizeParent(UnitWidth, Height);
-						x += UnitWidth + listSlot->marginLeft;
+						Children[i]->SetSizeParent(unitWidth, Height);
+						x += unitWidth + listSlot->marginLeft;
 					}
 				}				
 			}
@@ -172,6 +190,13 @@ void QFAUIList::CalculateChildren()
 		InnerHeight = Height;
 		InnerWidth = x;
 	}
+}
+
+void QFAUIList::ChildInnerChange(QFAUIUnit* child)
+{
+	if (ListType == LTHorizonInner || ListType == LTVerticalInner)
+		if (child->Type == QFAUIType::Text)
+			CalculateChildren();
 }
 
 

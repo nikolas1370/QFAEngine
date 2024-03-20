@@ -8,7 +8,6 @@
 #include <Tools/File/FileSystem.h>
 #include <Render/Window/Window.h>
 
-
 QFAImage::QFAImage(SImageCreateInfo& ici)
 {
     ImageFormat = ici.format;

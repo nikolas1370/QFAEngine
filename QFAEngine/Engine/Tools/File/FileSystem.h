@@ -104,6 +104,7 @@ public:
 	{
 		std::u32string path;
 		std::u32string name;
+		size_t id; // not for QFAFileSystem
 		bool IsFolder;
 	};
 
@@ -144,7 +145,7 @@ public:
 
 	static void CreateFolders(std::u32string folderPath);
 
-	static bool GetFolderContents(std::u32string path, std::vector<FolderUnit>& folder—ontents);
+	static bool GetFolderContents(std::u32string path, std::vector<FolderUnit>& folderContents);
 	
 private:
 

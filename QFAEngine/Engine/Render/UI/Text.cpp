@@ -4,6 +4,7 @@
 #include <Render/Buffer/VertexBuffer.h>
 #include <Render/UI/UIParentMultipleUnit.h>
 #include <Render/Pipline/Pipline.h>
+#include "UIParent.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H  
@@ -305,6 +306,8 @@ void QFAText::ProcessText()
         vertexBufer->UpdateData(sizeof(GlyphShader)* CountSymbolForRender, GlyphInfoData);
 
     TextChange = false;
+    if (Parent->IsValid())
+        Parent->ChildInnerChange(this);
 }
 
 void QFAText::PrepareSymbolsToGpu()

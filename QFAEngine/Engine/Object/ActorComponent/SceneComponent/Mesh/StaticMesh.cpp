@@ -8,8 +8,14 @@ QStaticMesh::QStaticMesh(MeshData* meshData)
 
 void QStaticMesh::SetMesh(MeshData* meshData)
 {
+	if (!meshData)
+	{
+		Mf = nullptr;
+		return;
+	}
+
 	Mf = meshData;
-	CreateVertexIndexBuffers();
+	Mf->CreateVertextIndexBuffer();
 }
 
 void QStaticMesh::UpdateBuffers( uint64_t startFrameTime, bool isShadow, const FVector &cameraPos)

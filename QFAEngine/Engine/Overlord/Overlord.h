@@ -2,6 +2,8 @@
 #include <Object/World/World.h>
 #include <Object/ActorComponent/SceneComponent/Camera/Camera.h>
 #include <Render/Pipline/Pipline.h>
+#include <functional>
+#include <thread>
 class QSceneComponent;
 class QFAWindow;
 
@@ -19,6 +21,11 @@ class QFAOverlord
 	static float FrameTime; // 1000 / frameCount
 	static bool FpsLock;
 	static bool ShdowFpsInConsole;
+
+	static std::function<void()> FrameStarted;
+	static std::function<void()> FrameEnded;
+
+	static std::thread::id MainThreadId;
 public:
 	/*
 		start processing world 
@@ -33,7 +40,7 @@ public:
 		if createWindow == false
 			need create new window before QFAText::LoadFont
 	*/
-	static bool Init(std::vector<QFAVKPipeline::SShaderData> shaderData, bool createWindow);
+	static bool Init(std::vector<QFAVKPipeline::SShaderData> shaderData, bool createWindow, std::function<void()> frameStarted, std::function<void()> frameEnded);
 
 
 	static void SetLimitFpsCount(float framesCount)
@@ -65,6 +72,10 @@ public:
 		ShdowFpsInConsole = enable;
 	}
 
+	static std::thread::id GetMainThreadId()
+	{
+		return MainThreadId;
+	}
 private:
 
 	static void MainLoop();

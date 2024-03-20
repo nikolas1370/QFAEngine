@@ -20,7 +20,9 @@ public:
 	enum EListType
 	{
 		LTVertical, 
-		LTHorizon   
+		LTHorizon,
+		LTHorizonInner, // instead UnitWidth use childUnit.innerWidth
+		LTVerticalInner // instead UnitHeight use childUnit.innerHeight
 	};
 
 	QFAUIList();
@@ -57,5 +59,5 @@ private:
 
 	void CalculateChildren();
 
-
+	void ChildInnerChange(QFAUIUnit* child) override;
 };

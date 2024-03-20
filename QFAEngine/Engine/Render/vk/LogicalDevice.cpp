@@ -67,8 +67,6 @@ void QFAVKLogicalDevice::Init( VkSurfaceKHR surface)
     if (vkCreateDevice(QFAVKPhysicalDevice::GetDevice(), &createInfo, nullptr, &Device) != VK_SUCCESS)
         stopExecute("failed to create logical device!");
 
-
-
     vkGetDeviceQueue(Device, indices.graphicsFamily.value(), 0, &GraphicsQueue);
     vkGetDeviceQueue(Device, indices.presentFamily.value(), 0, &PresentQueue);
 

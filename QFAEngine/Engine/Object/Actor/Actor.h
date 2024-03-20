@@ -75,7 +75,7 @@ public:
 
 		if component Inseparable return nullptr
 	*/
-	QSceneComponent* SetRootComponent(QSceneComponent* component, bool inseparable = false);
+	bool SetRootComponent(QSceneComponent* component, bool inseparable = false);
 
 
 	//will return null if the actor is not actually spawned in world

@@ -68,7 +68,7 @@ FVector QActor::GetActorUpVector() const
 	return fv;
 }
 
-QSceneComponent* QActor::SetRootComponent(QSceneComponent* component, bool inseparable)
+bool QActor::SetRootComponent(QSceneComponent* component, bool inseparable)
 {	
 	bool componentValide = component->IsValid();
 	if (!componentValide)
@@ -78,13 +78,13 @@ QSceneComponent* QActor::SetRootComponent(QSceneComponent* component, bool insep
 			RootComponent->IRootComponent = false;
 			RootComponent->ParentActor = nullptr;
 		}
-
+		
 		RootComponent = nullptr;
-		return nullptr;
+		return false;
 	}
 
 	if (component->Inseparable)
-		return nullptr;
+		return false;
 
 
 	QSceneComponent* oldRootComponent = RootComponent;
@@ -92,12 +92,6 @@ QSceneComponent* QActor::SetRootComponent(QSceneComponent* component, bool insep
 	{
 		RootComponent->IRootComponent = false;
 		RootComponent->ParentActor = nullptr;			
-	}
-
-	if (!componentValide )
-	{		
-		RootComponent = nullptr;
-		return oldRootComponent;
 	}
 
 	if (component->ParentActor->IsValid())
@@ -117,5 +111,5 @@ QSceneComponent* QActor::SetRootComponent(QSceneComponent* component, bool insep
 	RootComponent->SetWorldPosition(Position);
 	RootComponent->SetRotation(Rotation);
 	RootComponent->SetScale(Scale);
-	return oldRootComponent;
+	return true;
 }

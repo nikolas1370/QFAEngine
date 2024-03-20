@@ -7,6 +7,7 @@ class QFAVKIndexBuffer
 {
 	friend QFAWindow;
 	friend QMeshBaseComponent;
+	QFAVKBuffer* CpuSideBuffer;
 	QFAVKBuffer* GpuSideBuffer;
 public:
 	//VkBuffer IndexBuffer;

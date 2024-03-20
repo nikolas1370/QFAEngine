@@ -178,26 +178,27 @@ void QFAFileSystem::CreateFolders(std::u32string folderPath)
 	std::filesystem::create_directories(folderPath);
 }
 
-bool QFAFileSystem::GetFolderContents(std::u32string path, std::vector<FolderUnit>& folder—ontents)
+bool QFAFileSystem::GetFolderContents(std::u32string path, std::vector<FolderUnit>& folderContents)
 {
 	if (!std::filesystem::exists(path))
 		return false;
 
 	for (const auto& unit : std::filesystem::directory_iterator(path))
-		folder—ontents.push_back({ unit.path().u32string() , unit.path().filename().u32string() , unit.is_directory()});
+		folderContents.push_back(FolderUnit{ unit.path().u32string() , unit.path().filename().u32string() , 0, unit.is_directory() });
 
-	if (folder—ontents.size() <= 1)
+	if (folderContents.size() <= 1)
 		return true;
 
-	for (size_t i = 0; i < folder—ontents.size() - 1; i++)
+
+	for (size_t i = 0; i < folderContents.size() - 1; i++)
 	{
-		for (size_t j = 0; j < folder—ontents.size() - 1; j++)
+		for (size_t j = 0; j < folderContents.size() - 1; j++)
 		{
-			if (!folder—ontents[j].IsFolder && folder—ontents[j + 1].IsFolder)
+			if (!folderContents[j].IsFolder && folderContents[j + 1].IsFolder)
 			{
-				FolderUnit fu = folder—ontents[j];
-				folder—ontents[j] = folder—ontents[j + 1];
-				folder—ontents[j + 1] = fu;
+				FolderUnit fu = folderContents[j];
+				folderContents[j] = folderContents[j + 1];
+				folderContents[j + 1] = fu;
 			}
 		}
 	}

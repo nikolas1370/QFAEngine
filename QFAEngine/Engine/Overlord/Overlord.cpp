@@ -27,11 +27,17 @@ float QFAOverlord::FrameCount = 60.0f;
 float QFAOverlord::FrameTime = 1000 / FrameCount;
 bool QFAOverlord::FpsLock = true;
 
+std::function<void()> QFAOverlord::FrameStarted;
+std::function<void()> QFAOverlord::FrameEnded;
+
+std::thread::id QFAOverlord::MainThreadId;
+
 bool QFAOverlord::StartLife()
 {
 	if (Life || !isInit)
 		return false;	
-    
+
+    MainThreadId = std::this_thread::get_id();    
     if (QFAText::Fonts.size() == 0)
         stopExecute("before call StartLife need add font, for it call ELoadFontResult LoadFont");
     
@@ -42,8 +48,14 @@ bool QFAOverlord::StartLife()
 }
 
 
-bool QFAOverlord::Init(std::vector<QFAVKPipeline::SShaderData> shaderData, bool createWindow)
+bool QFAOverlord::Init(std::vector<QFAVKPipeline::SShaderData> shaderData, bool createWindow, std::function<void()> frameStarted, std::function<void()> frameEnded)
 {
+    if (isInit)
+        return false;
+
+    FrameStarted = frameStarted;
+    FrameEnded = frameEnded;
+
     QTime::Init();    
     QFAVKPipeline::SetShaderData(shaderData);
 
@@ -74,6 +86,9 @@ void QFAOverlord::MainLoop()
 
     while ( Life)
     {
+        if (FrameStarted)
+            FrameStarted();
+
         for (int i = QFAWindow::Windows.size() - 1; i >= 0; i--)
         {
             if (QFAWindow::Windows[i]->ShouldClose())
@@ -95,6 +110,7 @@ void QFAOverlord::MainLoop()
         QFAInput::NewFrame((float)QTime::GetDeltaTime());
         QFAWindow::ProcessUIEvent();
         QWorld::ProcessTicks();
+        QFAVKBuffer::ProcessTaskFromOtherThread();
         QFAWindow::RenderWindows();
         
 
@@ -113,7 +129,9 @@ void QFAOverlord::MainLoop()
             deltaAcum = 0.0;
         }
 
-       
+        if (FrameEnded)
+            FrameEnded();
+
         if (FpsLock && timePassed < FrameTime)
             QFASleep(FrameTime - timePassed);
     }

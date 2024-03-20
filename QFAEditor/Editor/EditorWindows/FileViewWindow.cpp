@@ -9,13 +9,13 @@
 #include <Tools/File/FileSystem.h>
 #include <EditorFileTypes.h>
 #include <Render/Image.h>
-#include <stb_image.h>
+
 #include <filesystem>
 
 
 QFAEditorFileViewWindow::QFAEditorFileViewWindow()
 {
-	Window = new QFAWindow(600, 600, "File View", [this]()
+	Window = new QFAWindow(600, 600, "File View", true , true, [this]()
 		{
 			Closed = true;
 		});
@@ -60,7 +60,7 @@ QFAEditorFileViewWindow::QFAEditorFileViewWindow()
 	World.AddActor(&Actor);
 	Camera.ActivateCamera(Window->GetViewport(0));
 	Camera.SetWindowForInput(Window);
-
+	Actor.SetRootComponent(&Mesh);
 
 	TopList->Events.SetLeftMouseDown(&QFAEditorFileViewWindow::LeftMouse, this);
 	TopList->Events.SetRightMouseDown(&QFAEditorFileViewWindow::RightMouse, this);
@@ -76,7 +76,7 @@ QFAEditorFileViewWindow::~QFAEditorFileViewWindow()
 	QFAUIList* TopList;
 	QFAUIScroll* TopListScroll;
 	* 
-		delete all Folders
+		delete all Files
 	
 	*/
 }
@@ -90,7 +90,7 @@ bool QFAEditorFileViewWindow::IsClosed()
 	return Closed; 
 }
 
-void QFAEditorFileViewWindow::AddFile(std::u32string qfaFilePAth)
+void QFAEditorFileViewWindow::AddFile(size_t fileId)
 {
 	if (CurentViewUnit)
 		CurentViewUnit->Enable(false);
@@ -98,38 +98,39 @@ void QFAEditorFileViewWindow::AddFile(std::u32string qfaFilePAth)
 	Window->GetFocus();
 	for (size_t i = 0; i < CurentEnableFolderCount; i++)
 	{
-		if (Folders[i].path == qfaFilePAth)
-		{		
-			CurentViewUnit = Folders[i].viewUnit;
-			CurentViewUnit->Enable(true);			
-			InFocus(&Folders[i]);
+		if (Files[i].ef.id == fileId)
+		{
+			CurentViewUnit = Files[i].viewUnit;
+			CurentViewUnit->Enable(true);
+			InFocus(&Files[i]);
 			return;
 		}
 	}
-	
-	SFile sfile;
-	if (!LoadFile(qfaFilePAth, sfile))
-		stopExecute("not load");
 
-	if (Folders.size() == CurentEnableFolderCount)
+	SFile sfile;
+	sfile.ef = QFAEditorFileStorage::GetFile(fileId);
+	if (!sfile.ef.id)
+		return;
+
+	if (Files.size() == CurentEnableFolderCount)
 	{
 		sfile.viewUnit = new QFAEditorUIFileViewUnit;
 		sfile.viewUnit->SetZIndex(10);
-		Folders.push_back(sfile);
+		Files.push_back(sfile);
 	}
 	else
-		Folders[CurentEnableFolderCount] = sfile;
+		Files[CurentEnableFolderCount] = sfile;
 
-	CurentViewUnit = Folders[CurentEnableFolderCount].viewUnit;
+	CurentViewUnit = Files[CurentEnableFolderCount].viewUnit;
 	CurentEnableFolderCount++;
 	UpdateList();
-	InFocus(&Folders[CurentEnableFolderCount - 1]);
+	InFocus(&Files[CurentEnableFolderCount - 1]);
 	CurentViewUnit->Enable(true);
 }
 
 void QFAEditorFileViewWindow::InFocus(SFile* file)
 {
-	if (file->mesh)
+	if (file->ef.fileType == QFAEditorFileTypes::EFTMesh)
 	{
 		if (CurentActiveType == ECurentType::CTImage)
 			DisplayImage->SetImage(nullptr);
@@ -138,67 +139,24 @@ void QFAEditorFileViewWindow::InFocus(SFile* file)
 		Camera.SetActorPosition(FVector(-1000, 0, 0));
 		Camera.SetActorRotation(0);
 		Actor.SetActorPosition(0);
-		Actor.SetRootComponent(file->mesh);
+
+		Mesh.SetMesh((MeshData*)file->ef.file);
 	}
 	else
 	{
 		if (CurentActiveType == ECurentType::CTMesh)
-			Actor.SetRootComponent(nullptr);
+			Mesh.SetMesh(nullptr);
 
 		CurentActiveType = ECurentType::CTImage;
 		for (size_t i = 0; i < CurentEnableFolderCount; i++)
 		{
-			if (Folders[i].viewUnit == CurentViewUnit)
+			if (Files[i].viewUnit == CurentViewUnit)
 			{
-				DisplayImage->SetImage(Folders[i].image);
+				DisplayImage->SetImage((QFAImage*)Files[i].ef.file);
 				return;
 			}
 		}
 	}
-}
-
-bool QFAEditorFileViewWindow::LoadFile(std::u32string qfaFilePAth, SFile& sfile)
-{
-	sfile.path = qfaFilePAth;
-	QFAFile* file = new QFAFile;
-	sfile.file = file;
-	if (QFAFileSystem::LoadFile(qfaFilePAth, file))
-		stopExecute("not load");
-
-	QFAEditorFile* eFile = (QFAEditorFile*)file->GetData();
-	if (eFile->type == QFAEditorFileTypes::EFTImage)
-	{
-		int texWidth, texHeight, texChannels;
-		stbi_uc* pixels = stbi_load_from_memory(((const unsigned char*)eFile + sizeof(QFAEditorFile)), (int)file->GetDataSize() - sizeof(QFAEditorFile), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-		if (!pixels)
-			stopExecute("");
-
-		QFAImage::SImageCreateInfo ici;
-		ici.Width = texWidth;
-		ici.Height = texHeight;
-		ici.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		ici.createBuffer = false;
-		QFAImage* image = new QFAImage(ici);
-
-		image->SetImage(pixels);		
-		stbi_image_free(pixels);
-
-		sfile.image = image;
-	}
-	else if (eFile->type == QFAEditorFileTypes::EFTMesh)
-	{// sizeof(QFAEditorFile)
-		MeshData* meshData = new MeshData(
-			(MeshData::SMeshInfo*)((char*)eFile + sizeof(QFAEditorFile)),
-			((char*)eFile + sizeof(QFAEditorFile) + sizeof(MeshData::SMeshInfo))
-		);
-		
-		QStaticMesh* mesh = new QStaticMesh(meshData);
-		sfile.mesh = mesh;
-	} 
-	else
-		stopExecute("not support");
-
-	return true;
 }
 
 void QFAEditorFileViewWindow::UpdateList()
@@ -208,9 +166,9 @@ void QFAEditorFileViewWindow::UpdateList()
 	listSlot.marginLeft = 10;
 	for (size_t i = 0; i < CurentEnableFolderCount; i++)
 	{
-		Folders[i].viewUnit->SetText(std::filesystem::path(Folders[i].path).filename().u32string());
-		TopList->AddUnit(Folders[i].viewUnit);
-		Folders[i].viewUnit->SetSlot(&listSlot);
+		Files[i].viewUnit->SetText(std::filesystem::path(Files[i].ef.path).filename().u32string());
+		TopList->AddUnit(Files[i].viewUnit);
+		Files[i].viewUnit->SetSlot(&listSlot);
 	}
 }
 
@@ -236,9 +194,9 @@ void QFAEditorFileViewWindow::LeftMouse(QFAUIUnit* unit, void* _this)
 
 			for (size_t i = 0; i < efvw->CurentEnableFolderCount; i++)
 			{
-				if (efvw->Folders[i].viewUnit == parent)
+				if (efvw->Files[i].viewUnit == parent)
 				{
-					efvw->InFocus(&efvw->Folders[i]);
+					efvw->InFocus(&efvw->Files[i]);
 					return;
 				}
 			}
@@ -261,30 +219,20 @@ void QFAEditorFileViewWindow::RightMouse(QFAUIUnit* unit, void* _this)
 
 		if (parent->GetEditoUnitType() == QFAEditorUIType::FileViewUnit)
 		{
-		
-			//efvw->CurentViewUnit;
-
 			for (size_t i = 0; i < efvw->CurentEnableFolderCount; i++)
 			{
-				if (efvw->Folders[i].viewUnit == parent)
-				{					
-					SFile sfile = efvw->Folders[i];
-					efvw->Folders.erase(efvw->Folders.begin() + i);
-					efvw->Folders.push_back(sfile);
+				if (efvw->Files[i].viewUnit == parent)
+				{
+					efvw->Files.erase(efvw->Files.begin() + i);
 					efvw->CurentEnableFolderCount--;
 					if (efvw->CurentEnableFolderCount == 0)
 						efvw->Window->Close();
 					else
 					{
-						/*
-						
-							удалить теперішній і подив я перейде на перед
-						
-						*/
 						if (efvw->CurentViewUnit == parent)
 						{
-							efvw->CurentViewUnit = efvw->Folders[0].viewUnit;
-							efvw->InFocus(&efvw->Folders[0]);
+							efvw->CurentViewUnit = efvw->Files[0].viewUnit;
+							efvw->InFocus(&efvw->Files[0]);
 							efvw->CurentViewUnit->Enable(true);
 						}
 						

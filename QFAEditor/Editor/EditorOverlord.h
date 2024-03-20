@@ -1,17 +1,25 @@
 #pragma once
 
 #include "ShaderCompiler/ShaderCompiler.h"
+#include <thread>
 class QFAEditorMainWindow;
 class QFAEditorOverlord
 {
 	static QFAShaderCompiler compiler;
-	QFAEditorMainWindow* mainWindow;
+	static QFAEditorMainWindow* MainWindow;
 public:
-	
-
 	static void StartLife();
-	static void Init();
 private:
-	
-};
+	static bool AllFilesLoad;
+	static bool NewLoadText;
+	static std::u32string LoadText;
+	static std::u32string LoadText_2;
 
+	static void Init();
+	// call from not main thread
+	static void PrepareToWork();
+	static void StartFrame();
+	static void EndFrame();
+
+	static std::thread* LoadThread;
+};
