@@ -1,6 +1,6 @@
 #pragma once
 #include <Render/UI/Text.h>
-#include <thread>
+
 
 class QFAWindow;
 class QFAUIEditorFileExplorer;

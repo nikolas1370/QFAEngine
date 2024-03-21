@@ -80,12 +80,11 @@ private:
 
 	void DropFiles(int path_count, const char* paths[]);
 
-	// <icu::UChar32>
-	std::vector<int> DropPath;
 
 
 
-	static const unsigned short EditorFileVersion = 1;
+
+
 
 	QFAEditorFileViewWindow* FileViewWindow = nullptr;
 };

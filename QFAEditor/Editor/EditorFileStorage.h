@@ -37,10 +37,17 @@ class QFAEditorFileStorage
     {
         std::u32string path;
         void* fileData = nullptr;
-        QFAFile* file;
+        /*
+             if file was drop in editor file be null.
+        */
+        QFAFile* file = nullptr;
         size_t id;
         QFAEditorFileTypes type;
+        
     };
+
+    // use stbi_image_free
+    static std::vector<stbi_uc*> Stbi_image;
 
     // store all folders
     static std::vector<SFolder> Folders;
@@ -55,7 +62,9 @@ class QFAEditorFileStorage
     static std::vector<std::u32string> FoldersForWork;
 
 
-
+    static const unsigned short EditorFileVersion = 1;
+    // <icu::UChar32>
+    static std::vector<int> DropPath;
 public:
     static SEditorFile GetFile(size_t fileIndex);
 
@@ -70,10 +79,11 @@ private:
 
 	static void EndLife()
 	{
-
+        for (size_t i = 0; i < Stbi_image.size(); i++)
+            stbi_image_free(Stbi_image[i]);
 	}
 
-    
+    static void DropFiles(size_t folderId, int path_count, const char* paths[]);
 
 /*--next function only for inside usage--*/
 

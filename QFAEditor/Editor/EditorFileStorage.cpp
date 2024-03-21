@@ -1,5 +1,8 @@
 ﻿#include "EditorFileStorage.h"
 #include <filesystem>
+#include <unicode/unistr.h>
+#include <stb_image.h>
+#include <Tools/File/ModelLoader.h>
 
 size_t QFAEditorFileStorage::Id = 0;
 size_t QFAEditorFileStorage::folderId = 0;
@@ -8,6 +11,8 @@ std::vector<QFAFileSystem::FolderUnit> QFAEditorFileStorage::FolderContents;
 std::vector<QFAEditorFileStorage::SEditorFileInside> QFAEditorFileStorage::EditorFile;
 std::vector<SFolder> QFAEditorFileStorage::Folders;
 
+std::vector<int> QFAEditorFileStorage::DropPath;
+std::vector<stbi_uc*> QFAEditorFileStorage::Stbi_image;
 
 void QFAEditorFileStorage::LoadEditorFiles(std::u32string& textForDisplay, bool& ifTextChange)
 {
@@ -26,6 +31,161 @@ void QFAEditorFileStorage::LoadEditorFiles(std::u32string& textForDisplay, bool&
 	{
 		FolderContents.clear();
 		LoadFilesInfolder(i, textForDisplay, ifTextChange);
+	}
+}
+
+void QFAEditorFileStorage::DropFiles(size_t folderId, int path_count, const char* paths[])
+{
+	/*
+	
+		
+
+	
+
+		check if paths is folder
+
+	*/
+	bool find = false;
+	size_t folderIndex;
+	for (size_t i = 0; i < Folders.size(); i++)
+	{
+		if (Folders[i].id == folderId)
+		{
+			find = true;
+			folderIndex = i;
+			break;
+		}
+	}
+
+	if (!find)
+		return;
+
+	std::filesystem::path curentPath(Folders[folderIndex].path);
+	curentPath.append("");// add "\\" in path
+
+	for (size_t i = 0; i < path_count; i++)
+	{
+		icu::UnicodeString ucs = icu::UnicodeString::fromUTF8(paths[i]);
+		UErrorCode kkl = U_ZERO_ERROR;
+		DropPath.resize(ucs.length());
+
+		int32_t strLen = ucs.toUTF32(DropPath.data(), DropPath.size(), kkl);
+		std::u32string str;
+		str.resize(strLen);
+		for (size_t j = 0; j < ucs.length(); j++)
+			str[j] = static_cast<char32_t>(DropPath[j]);
+
+
+		std::filesystem::path path(str);
+		std::filesystem::path ext = path.extension();
+		if (std::filesystem::is_directory(path))
+		{
+			std::cout << "DropFile not file\n";
+			continue;
+		}
+
+		QFAEditorFileOnDisk ef;
+		SEditorFileInside efi;
+		QFAFileSystem::FolderUnit fu;
+		ef.version = EditorFileVersion;
+		if (ext == ".obj" || ext == ".fbx")
+		{
+			/*
+				QFAEditorFileOnDisk
+				MeshData::SMeshInfo
+				MeshData::FramesData
+			*/
+
+			/*
+				create fun when load model and get aiScene check if valid
+				and after use aiScene like SeparateModel or solid
+			*/
+			MeshData* md = QFAModelLoader::LoadModel(paths[i]);
+			if (!md)
+			{
+				std::cout << "DropFile not load\n";
+				continue;
+			}
+
+			ef.type = QFAEditorFileTypes::EFTMesh;
+			path.replace_extension(".qfa");
+			curentPath.replace_filename(path.filename());
+
+			QFAFileSystem::WriteFile(curentPath.u32string(), &ef, sizeof(ef));
+
+			MeshData::SMeshInfo mi = md->GetMeshInfo();
+			QFAFile writeFile;
+			QFAFileSystem::OpenFile(curentPath.u32string(), &writeFile, false);
+			QFAFileSystem::AppendFile(&writeFile, &mi, sizeof(mi));
+
+			QFAFileSystem::AppendFile(&writeFile, md->GetFrameData(), mi.AmountData);
+			QFAFileSystem::CloseFile(&writeFile);
+
+			efi.type = QFAEditorFileTypes::EFTMesh;
+			efi.fileData = md;
+		}
+		else if (ext == ".jpg" || ext == ".png")
+		{
+			/*
+				QFAEditorFileOnDisk
+				raw Image
+			*/
+			int texWidth, texHeight, texChannels;
+			QFAFile rawImageFile;
+			if (QFAFileSystem::LoadFile(str, &rawImageFile))
+			{
+				std::cout << "DropFile not load\n";
+				continue;
+			}
+
+			stbi_uc* pixels = stbi_load_from_memory((stbi_uc*)rawImageFile.GetData(), rawImageFile.GetFileSize(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+			if (!pixels) // check if rawImageFile is image
+			{
+				std::cout << "DropFile not load\n";
+				continue;
+			}
+
+			/*
+			
+
+
+			*/
+
+			path.replace_extension(".qfa");
+			curentPath.replace_filename(path.filename());
+
+			ef.type = QFAEditorFileTypes::EFTImage;
+			QFAFileSystem::WriteFile(curentPath.u32string(), &ef, sizeof(ef));
+
+			QFAFile writeFile;
+			QFAFileSystem::OpenFile(curentPath.u32string(), &writeFile, false);
+			QFAFileSystem::AppendFile(&writeFile, rawImageFile.GetData(), rawImageFile.GetFileSize());
+			QFAFileSystem::CloseFile(&writeFile);
+			
+			QFAImage::SImageCreateInfo ici;
+			ici.Width = texWidth;
+			ici.Height = texHeight;
+			ici.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			ici.createBuffer = false;
+			QFAImage* image = new QFAImage(ici);
+
+			image->SetImage(pixels);
+			Stbi_image.push_back(pixels);
+			efi.type = QFAEditorFileTypes::EFTImage;
+			efi.fileData = image;
+		}
+		else
+			std::cout << "DropFile not support extension\n";
+
+		efi.path = curentPath.u32string();
+		efi.id = ++Id;
+		EditorFile.push_back(efi);
+
+		fu.id = efi.id;
+		fu.IsFolder = false;
+		fu.name = std::filesystem::path(efi.path).filename().u32string();
+		fu.path = efi.path;
+		Folders[folderIndex].folderUnits.push_back(fu);
 	}
 }
 
@@ -144,12 +304,12 @@ void QFAEditorFileStorage::LoadFile(std::u32string qfaFilePAth, SEditorFileInsid
 		return;
 	}
 
-	QFAEditorFile* eFile = (QFAEditorFile*)file->GetData();
+	QFAEditorFileOnDisk* eFile = (QFAEditorFileOnDisk*)file->GetData();
 	sfile.id = ++Id;
 	if (eFile->type == QFAEditorFileTypes::EFTImage)
 	{
 		int texWidth, texHeight, texChannels;
-		stbi_uc* pixels = stbi_load_from_memory(((const unsigned char*)eFile + sizeof(QFAEditorFile)), (int)file->GetDataSize() - sizeof(QFAEditorFile), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+		stbi_uc* pixels = stbi_load_from_memory(((const unsigned char*)eFile + sizeof(*eFile)), (int)file->GetDataSize() - sizeof(*eFile), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 		if (!pixels)
 		{
 			--Id;
@@ -165,7 +325,7 @@ void QFAEditorFileStorage::LoadFile(std::u32string qfaFilePAth, SEditorFileInsid
 		QFAImage* image = new QFAImage(ici);
 
 		image->SetImage(pixels);
-		stbi_image_free(pixels);
+		Stbi_image.push_back(pixels);
 
 		sfile.type = QFAEditorFileTypes::EFTImage;
 		sfile.fileData = image;
@@ -173,8 +333,8 @@ void QFAEditorFileStorage::LoadFile(std::u32string qfaFilePAth, SEditorFileInsid
 	else if (eFile->type == QFAEditorFileTypes::EFTMesh)
 	{
 		MeshData* meshData = new MeshData(
-			(MeshData::SMeshInfo*)((char*)eFile + sizeof(QFAEditorFile)),
-			((char*)eFile + sizeof(QFAEditorFile) + sizeof(MeshData::SMeshInfo))
+			(MeshData::SMeshInfo*)((char*)eFile + sizeof(*eFile)),
+			((char*)eFile + sizeof(*eFile) + sizeof(MeshData::SMeshInfo))
 		);
 
 		sfile.type = QFAEditorFileTypes::EFTMesh;

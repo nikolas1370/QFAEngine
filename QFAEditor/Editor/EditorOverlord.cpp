@@ -24,6 +24,7 @@ void QFAEditorOverlord::StartLife()
 
     delete MainWindow;
     compiler.EndLife();
+    QFAEditorFileStorage::EndLife();
 }
 
 void QFAEditorOverlord::Init()
@@ -64,6 +65,8 @@ void QFAEditorOverlord::StartFrame()
 
 void QFAEditorOverlord::EndFrame()
 {
+
+
 }
 
 

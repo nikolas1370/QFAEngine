@@ -104,6 +104,7 @@ StyleCopReport.xml
 *.spvc
 *.ttf
 *.qfa
+*.zip
 SomeImage/
 SomeModel/
 SomeFont/
