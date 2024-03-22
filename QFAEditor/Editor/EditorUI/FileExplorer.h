@@ -38,11 +38,14 @@ protected:
 	float UpdateInnerWidth() override;
 	QFAWindow* Window;
 public:
-	QFAUIEditorFileExplorer(QFAWindow* window);
+	QFAUIEditorFileExplorer(QFAWindow* window, std::function <void (size_t fileId)> dragFun);
 	~QFAUIEditorFileExplorer();
 
 private:
-	std::vector<QFAEditorExplorerFolderUnit*> FolderUnitList;
+	std::function <void(size_t fileId)> DragFun;
+	/* FolderUnitList and folderContents[0] have same order */
+	std::vector<QFAEditorExplorerFolderUnit*> FolderUnitList; 
+	std::vector<QFAFileSystem::FolderUnit> folderContents;
 	int folderUnitInUse = 0;
 
 	QFAEditorExplorerFolderUnit* FolderItemListInFocusUnit = nullptr;
@@ -55,7 +58,7 @@ private:
 	static void FolderItemListLeftMouseDown(QFAUIUnit* unit, void* _this);
 	
 
-	std::vector<QFAFileSystem::FolderUnit> folderContents;
+
 	void UpdateFolderItemList();
 
 	const uint64_t MouseDownMaxTimeInMS = 400;
@@ -87,4 +90,6 @@ private:
 
 
 	QFAEditorFileViewWindow* FileViewWindow = nullptr;
+
+	void NotifyMainEditorWindowDrag(QFAEditorExplorerFolderUnit* unit);
 };

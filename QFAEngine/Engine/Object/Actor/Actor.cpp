@@ -70,6 +70,9 @@ FVector QActor::GetActorUpVector() const
 
 bool QActor::SetRootComponent(QSceneComponent* component, bool inseparable)
 {	
+	if (RootComponent->IsValid() && RootComponent->Inseparable)
+		return false;
+
 	bool componentValide = component->IsValid();
 	if (!componentValide)
 	{

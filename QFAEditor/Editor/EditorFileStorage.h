@@ -66,6 +66,7 @@ class QFAEditorFileStorage
     // <icu::UChar32>
     static std::vector<int> DropPath;
 public:
+    // if SEditorFile.id == 0 file not found
     static SEditorFile GetFile(size_t fileIndex);
 
 private:	

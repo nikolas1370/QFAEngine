@@ -2,7 +2,7 @@
 #include <filesystem>
 #include <unicode/unistr.h>
 #include <stb_image.h>
-#include <Tools/File/ModelLoader.h>
+#include <ModelLoader.h>
 
 size_t QFAEditorFileStorage::Id = 0;
 size_t QFAEditorFileStorage::folderId = 0;
@@ -84,6 +84,7 @@ void QFAEditorFileStorage::DropFiles(size_t folderId, int path_count, const char
 			continue;
 		}
 
+		bool fileExist = false;
 		QFAEditorFileOnDisk ef;
 		SEditorFileInside efi;
 		QFAFileSystem::FolderUnit fu;
@@ -110,6 +111,9 @@ void QFAEditorFileStorage::DropFiles(size_t folderId, int path_count, const char
 			ef.type = QFAEditorFileTypes::EFTMesh;
 			path.replace_extension(".qfa");
 			curentPath.replace_filename(path.filename());
+
+			if (std::filesystem::exists(curentPath))
+				fileExist = true;
 
 			QFAFileSystem::WriteFile(curentPath.u32string(), &ef, sizeof(ef));
 
@@ -145,14 +149,11 @@ void QFAEditorFileStorage::DropFiles(size_t folderId, int path_count, const char
 				continue;
 			}
 
-			/*
-			
-
-
-			*/
-
 			path.replace_extension(".qfa");
 			curentPath.replace_filename(path.filename());
+
+			if (std::filesystem::exists(curentPath))
+				fileExist = true;
 
 			ef.type = QFAEditorFileTypes::EFTImage;
 			QFAFileSystem::WriteFile(curentPath.u32string(), &ef, sizeof(ef));
@@ -177,15 +178,27 @@ void QFAEditorFileStorage::DropFiles(size_t folderId, int path_count, const char
 		else
 			std::cout << "DropFile not support extension\n";
 
-		efi.path = curentPath.u32string();
-		efi.id = ++Id;
-		EditorFile.push_back(efi);
+		if (fileExist)
+		{
+			/*
+			
+				if file exist need delete old file replase to new file in Folders[folderIndex].folderUnits
+				and apply change in staticMesh/QFAImage
+			
+			*/
+		}
+		else
+		{
+			efi.path = curentPath.u32string();
+			efi.id = ++Id;
+			EditorFile.push_back(efi);
 
-		fu.id = efi.id;
-		fu.IsFolder = false;
-		fu.name = std::filesystem::path(efi.path).filename().u32string();
-		fu.path = efi.path;
-		Folders[folderIndex].folderUnits.push_back(fu);
+			fu.id = efi.id;
+			fu.IsFolder = false;
+			fu.name = std::filesystem::path(efi.path).filename().u32string();
+			fu.path = efi.path;
+			Folders[folderIndex].folderUnits.push_back(fu);
+		}		
 	}
 }
 
@@ -230,7 +243,6 @@ void QFAEditorFileStorage::LoadFilesInfolder(size_t folderIndex, std::u32string&
 
 void QFAEditorFileStorage::GetFolderContents(size_t folderId, std::vector<QFAFileSystem::FolderUnit>& folderContents)
 {
-	std::cout << "QFAEditorFileStorage::GetFolderContents " << Folders.size() << "\n";
 	// write binary search
 	for (size_t i = 0; i < Folders.size(); i++)
 	{
@@ -248,7 +260,7 @@ void QFAEditorFileStorage::GetFolderContents(size_t folderId, std::vector<QFAFil
 							break;
 						}
 					}
-				}				
+				}
 			}
 
 			for (size_t j = 0; j < Folders[i].folderUnits.size(); j++)

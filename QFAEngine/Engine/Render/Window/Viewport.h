@@ -12,7 +12,7 @@ class QMeshBaseComponent;
 
 class QFAUIUnit;
 class QFAUIParentMultipleUnit;
-
+class QFAEditorMainWindow;
 class QFAViewport
 {
 
@@ -20,6 +20,7 @@ class QFAViewport
 	friend QFAWindow;
 	friend QFAUIParentMultipleUnit;
 	friend QFAUIUnit;
+	friend QFAEditorMainWindow;
 
 	QFAWindow* Window;
 

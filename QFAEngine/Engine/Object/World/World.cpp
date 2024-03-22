@@ -18,10 +18,20 @@ void QWorld::ForgetActor(QActor* actor)
 
 void QWorld::ProcessTicks()
 {	
-	//std::cout << Worlds.Length() << "\n";
 	float delta = (float)QTime::GetDeltaTime();
 	for (size_t i = 0; i < Worlds.Length(); i++) // search active world		
 	{// world active if at least one viewport connect
+		if (!Worlds[i]->GetEnable())
+		{
+			if (Worlds[i]->EditorActor->IsValid())
+			{
+				Worlds[i]->EditorActor->Tick(delta);
+				ProcessSceneComponentTick(Worlds[i]->EditorActor->RootComponent);
+			}
+
+			continue;
+		}
+
 		bool worldProcess = false; // viewport connect to world by camera
 		for (size_t j = 0; j < QFAWindow::Windows.size(); j++)
 		{
@@ -90,4 +100,22 @@ void QWorld::AddActor(QActor* actor)
 
 
 	Actors.Add(actor);
+}
+
+void QWorld::SetEditorActor(QActor* actor)
+{
+	if (!actor->IsValid())
+	{
+		if (EditorActor->IsValid())
+			EditorActor->ActorWorld = nullptr;
+
+		EditorActor = nullptr;
+		return;
+	}
+
+	if (EditorActor->IsValid())
+		EditorActor->ActorWorld = nullptr;
+
+	actor->ActorWorld = this;
+	EditorActor = actor;
 }

@@ -17,7 +17,7 @@ class QFAEditorUIFileViewUnit;
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
 #include <Object/Actor/Actor.h>
-#include <Object/Actor/Camera/CameraEditor.h>
+#include <Camera/CameraEditor.h>
 #include <EditorFileStorage.h>
 class QFAEditorFileViewWindow
 {

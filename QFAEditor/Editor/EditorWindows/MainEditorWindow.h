@@ -7,12 +7,14 @@ class QFAUIEditorFileExplorer;
 class QFAUICanvas;
 class QFAEditorOverlord;
 class QFAUIList;
+class ACameraEditor;
 class QFAEditorMainWindow
 {
 	friend QFAEditorOverlord;
 
 	static QFAEditorMainWindow* MainWindow;
 	QFAWindow* Window;
+	QFAViewport* GameViewport;
 
 	QFAUICanvas* LoadCanvas;
 	QFAUIList* TextList;
@@ -29,6 +31,15 @@ class QFAEditorMainWindow
 	static const int LoaderHeight = 200;
 	static const int WorkWidth = 1000;
 	static const int WorkHeight = 600;
+
+	QFAInput* Input;
+
+	/*
+		Worlds[0] == EditorWorld
+		Worlds[1] == GameWorld
+	*/
+	QWorld* Worlds = nullptr; // allocated with new[]
+	ACameraEditor* EditorCamera = nullptr;
 public:
 	QFAEditorMainWindow();
 	~QFAEditorMainWindow();
@@ -43,9 +54,12 @@ private:
 	void ChangeLoadInfo(std::u32string text, std::u32string text_2);
 	// call in QFAEditorOverlord 
 	void CreateUI();
-	void DropFun(int path_count, const char* paths[]);
 
+	size_t CurentDragFileId = 0;
+	static void StartDragAndDrop(size_t fileId);
+	static void EndDragAndDrop(EKey::Key key);
+	void PrepareGameViewport();
 
-
+	void AddActorToWorlds(QActor* actor);
 };
 

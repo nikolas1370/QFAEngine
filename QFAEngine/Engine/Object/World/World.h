@@ -6,12 +6,12 @@ class QActor;
 class QFAOverlord;
 class QFAViewport;
 class QSceneComponent;
-
+class QFAEditorMainWindow;
 
 class QWorld : public QObject
 {
 	friend QFAOverlord;
-
+	friend QFAEditorMainWindow;
 	
 public:
 
@@ -34,7 +34,12 @@ private:
 	static void ProcessTicks();
 	static void ProcessSceneComponentTick(QSceneComponent* component);
 
-	QFAViewport* Viewport = nullptr;
+	/*
+		if Enable == false tick provces in EditorActor
+	
+	*/
+	QActor* EditorActor = nullptr;
+	bool Enable = true;
 public:
 	
 
@@ -52,6 +57,17 @@ public:
 	{
 		return &DirectionLight;
 	}
-private:
 
+	
+	inline bool GetEnable()
+	{
+		return Enable;
+	}
+
+	inline void SetEnable(bool enable)
+	{
+		Enable = enable;
+	}
+private:
+	void SetEditorActor(QActor* actor);
 };

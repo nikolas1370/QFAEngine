@@ -71,10 +71,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)QFAEditor\Editor;$(SolutionDir)..\glfw-3.4.bin.WIN64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Assimp\include;C:\VulkanSDK\1.3.275.0\Include;$(SolutionDir)QFAEngine\Engine;$(SolutionDir)..\glfw-3.4\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Assimp\include;$(SolutionDir)QFAEditor\Editor;$(SolutionDir)..\glfw-3.4.bin.WIN64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\VulkanSDK\1.3.275.0\Include;$(SolutionDir)QFAEngine\Engine;$(SolutionDir)..\glfw-3.4\include;$(SolutionDir)..\icu4c-74_2\include;$(SolutionDir)..\stb;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)QFAEditor\Editor;$(SolutionDir)..\glfw-3.4.bin.WIN64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Assimp\include;C:\VulkanSDK\1.3.275.0\Include;$(SolutionDir)QFAEngine\Engine;$(SolutionDir)..\glfw-3.4\include;$(SolutionDir)..\icu4c-74_2\include;$(SolutionDir)..\stb;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Assimp\include;$(SolutionDir)QFAEditor\Editor;$(SolutionDir)..\glfw-3.4.bin.WIN64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\VulkanSDK\1.3.275.0\Include;$(SolutionDir)QFAEngine\Engine;$(SolutionDir)..\glfw-3.4\include;$(SolutionDir)..\icu4c-74_2\include;$(SolutionDir)..\stb;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -116,7 +116,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\Juni\Desktop\QFAEngine Root\Shaderc\lib;$(SolutionDir)..\QFAEngine\x64\Debug;C:\VulkanSDK\1.3.275.0\Lib;C:\Assimp\lib\x64;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug;C:\Users\Jahi\Desktop\QFAEngine Root\icu4c-74_2\lib64</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);shaderc_sharedd.lib;icuuc.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);shaderc_sharedd.lib;icuuc.lib;assimp-vc143-mt.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -135,7 +135,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\Juni\Desktop\QFAEngine Root\Shaderc\lib;$(SolutionDir)..\QFAEngine\x64\Debug;C:\VulkanSDK\1.3.275.0\Lib;C:\Assimp\lib\x64;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\Juni\Desktop\QFAEngine Root\Shaderc\lib;$(SolutionDir)..\QFAEngine\x64\Debug;C:\VulkanSDK\1.3.275.0\Lib;C:\Assimp\lib\x64;$(SolutionDir)..\freetype-master 2.13.2\objs\x64\Debug;C:\Users\Jahi\Desktop\QFAEngine Root\icu4c-74_2\lib64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);shaderc_sharedd.lib;icuuc.lib;assimp-vc143-mt.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -144,6 +145,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Editor\Camera\CameraEditor.cpp" />
     <ClCompile Include="Editor\EditorFileStorage.cpp" />
     <ClCompile Include="Editor\EditorOverlord.cpp" />
     <ClCompile Include="Editor\EditorUI\ExplorerFolderUnit.cpp" />
@@ -155,6 +157,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Editor\Camera\CameraEditor.h" />
     <ClInclude Include="Editor\EditorFileStorage.h" />
     <ClInclude Include="Editor\EditorFileTypes.h" />
     <ClInclude Include="Editor\EditorOverlord.h" />
@@ -162,6 +165,7 @@
     <ClInclude Include="Editor\EditorUI\FileExplorer.h" />
     <ClInclude Include="Editor\EditorUI\FileViewUnit.h" />
     <ClInclude Include="Editor\EditorWindows\FileViewWindow.h" />
+    <ClInclude Include="Editor\ModelLoader.h" />
     <ClInclude Include="Editor\ShaderCompiler\ShaderCompiler.h" />
     <ClInclude Include="Editor\EditorWindows\MainEditorWindow.h" />
   </ItemGroup>

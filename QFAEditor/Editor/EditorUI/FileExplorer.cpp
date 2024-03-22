@@ -16,8 +16,9 @@
 #include <EditorWindows/FileViewWindow.h>
 #include <EditorFileStorage.h>
 
-QFAUIEditorFileExplorer::QFAUIEditorFileExplorer(QFAWindow *window)
+QFAUIEditorFileExplorer::QFAUIEditorFileExplorer(QFAWindow *window, std::function <void(size_t fileId)> dragFun)
 {
+	DragFun = dragFun;
 	Window = window;
 	Type = QFAUIType::CustomUnit;
 	EditorType = QFAEditorUIType::FileExplorer;
@@ -116,10 +117,6 @@ void QFAUIEditorFileExplorer::CreateBottom()
 
 void QFAUIEditorFileExplorer::UpdateFolderItemList()
 {	
-	
-	
-
-
 	folderContents.clear();
 	FolderItemList->removeAllUnit();
 	QFAEditorFileStorage::GetFolderContents(CurentFolder.id, folderContents);
@@ -143,7 +140,7 @@ void QFAUIEditorFileExplorer::FolderItemListLeftMouseDown(QFAUIUnit* unit, void*
 	QFAUIEditorFileExplorer* thisUnit = (QFAUIEditorFileExplorer*)(_this);
 
 	if (unit == thisUnit->FolderItemListSelectUnit)
-		return;
+		return thisUnit->NotifyMainEditorWindowDrag((QFAEditorExplorerFolderUnit*)unit);
 
 	if (thisUnit == unit)
 	{
@@ -159,6 +156,7 @@ void QFAUIEditorFileExplorer::FolderItemListLeftMouseDown(QFAUIUnit* unit, void*
 		
 		if (parent->GetEditoUnitType() == QFAEditorUIType::ExplorerFolderUnit)
 		{
+			thisUnit->NotifyMainEditorWindowDrag((QFAEditorExplorerFolderUnit*)parent);
 			if (parent == thisUnit->FolderItemListSelectUnit &&
 				QTime::GetSystemTime() - thisUnit->LastLeftMouseDownTime < thisUnit->MouseDownMaxTime)
 			{				
@@ -323,6 +321,16 @@ void QFAUIEditorFileExplorer::DropFiles(int path_count, const char* paths[])
 {	
 	QFAEditorFileStorage::DropFiles(CurentFolder.id, path_count, paths);
 	UpdateFolderItemList();
+}
+
+void QFAUIEditorFileExplorer::NotifyMainEditorWindowDrag(QFAEditorExplorerFolderUnit* unit)
+{
+	if (!unit)
+		return;
+
+	for (size_t i = 0; i < folderUnitInUse; i++)
+		if (FolderUnitList[i] == unit)
+			return DragFun(folderContents[i].id);
 }
 
 void QFAUIEditorFileExplorer::PathChanged()

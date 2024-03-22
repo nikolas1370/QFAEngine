@@ -8,8 +8,9 @@
 #include <Overlord/Overlord.h>
 #include <EditorUI/ExplorerFolderUnit.h>
 #include <Render/UI/UIList.h>
-
-
+#include <Camera/CameraEditor.h>
+#include <EditorFileStorage.h>
+#include <Object/Actor/StaticMeshActor.h>
 
 QFAEditorMainWindow* QFAEditorMainWindow::MainWindow = nullptr;
 QFAText::SFont* QFAEditorMainWindow::Icomonfont;
@@ -39,15 +40,24 @@ QFAEditorMainWindow::QFAEditorMainWindow()
 		});	
 
 	MainWindow->CreateLoadUI();
+
+	Input = new QFAInput(Window);
+	Input->AddKeyRelease(EKey::MOUSE_LEFT, "lmbU", QFAEditorMainWindow::EndDragAndDrop);
 }
 
 QFAEditorMainWindow::~QFAEditorMainWindow()
 {
-	delete WindowCanvas;
-	delete FileExplorer;
+
 	delete LoadCanvas;
 	delete Text;
 	delete LoadText;
+
+	if (WindowCanvas)
+	{
+		delete WindowCanvas;
+		delete FileExplorer;
+		delete[]Worlds;
+	}
 }
 
 void QFAEditorMainWindow::CreateUI()
@@ -61,16 +71,76 @@ void QFAEditorMainWindow::CreateUI()
 	slot.Height = 0.3f;
 	slot.x = 0.0f;
 	slot.y = 0.7f;
-	FileExplorer = new QFAUIEditorFileExplorer(Window);
+	FileExplorer = new QFAUIEditorFileExplorer(Window, QFAEditorMainWindow::StartDragAndDrop);
 	FileExplorer->SetSlot(&slot);
 	WindowCanvas->AddUnit(FileExplorer);
 	mainViewPort->AddUnit(WindowCanvas);
-
+	
 
 	Window->SetSize(WorkWidth, WorkHeight);
 	Window->MoveToCenter();
-	Window->EnabelDecorated(true);
+	Window->EnabelDecorated(true);	
+	PrepareGameViewport();
 }
+
+void QFAEditorMainWindow::PrepareGameViewport()
+{
+	GameViewport = new QFAViewport();
+	Window->AddViewport(GameViewport);
+	GameViewport->SetParameters(0.0f, 0.0f, 1.0f, 0.7f);
+
+	Worlds = new QWorld[2];
+	Worlds[0].SetEnable(false);
+	EditorCamera = new ACameraEditor;
+	EditorCamera->SetActorPosition(FVector(-200, 0, 0));
+	EditorCamera->SetActorRotation(0);
+	EditorCamera->ActivateCamera(GameViewport);
+
+	Worlds[0].SetEditorActor(EditorCamera);
+}
+
+void QFAEditorMainWindow::AddActorToWorlds(QActor* actor)
+{
+	Worlds[0].AddActor(actor);	
+}
+
+
+void QFAEditorMainWindow::StartDragAndDrop(size_t fileId)
+{
+	MainWindow->CurentDragFileId = fileId;
+}
+
+void QFAEditorMainWindow::EndDragAndDrop(EKey::Key key)
+{
+	if (MainWindow->CurentDragFileId)
+	{
+		double viewportX = MainWindow->GameViewport->X;
+		double viewportY = MainWindow->GameViewport->Y;
+		double viewportWidth = MainWindow->GameViewport->Width;
+		double viewportHeight = MainWindow->GameViewport->Height;
+		
+		size_t id = MainWindow->CurentDragFileId;
+		MainWindow->CurentDragFileId = 0;
+
+		double x, y;
+		MainWindow->Window->GetMousePosition(x, y);
+		if (x >= viewportX && y >= viewportY &&
+			x <= viewportWidth && y <= viewportHeight)
+		{
+			SEditorFile ef = QFAEditorFileStorage::GetFile(id);
+			if (ef.id == 0)
+				return;
+			else if(ef.fileType == QFAEditorFileTypes::EFTMesh)
+			{
+				AStaticMeshActor* staticActor = new AStaticMeshActor;
+				staticActor->SetActorPosition(0);
+				staticActor->SetMesh((MeshData*)ef.file);
+				MainWindow->AddActorToWorlds(staticActor);
+			}			
+		}		
+	}
+}
+
 
 void QFAEditorMainWindow::CreateLoadUI()
 {
@@ -115,7 +185,3 @@ void QFAEditorMainWindow::ChangeLoadInfo(std::u32string text, std::u32string tex
 	}
 }
 
-void QFAEditorMainWindow::DropFun(int path_count, const char* paths[])
-{
-
-}
