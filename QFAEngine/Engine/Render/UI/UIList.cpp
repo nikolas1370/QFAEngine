@@ -1,4 +1,4 @@
-#include "UIList.h"
+﻿#include "UIList.h"
 
 QFAUIList::QFAUIList()
 {
@@ -199,6 +199,10 @@ void QFAUIList::ChildInnerChange(QFAUIUnit* child)
 			CalculateChildren();
 }
 
+void QFAUIList::UnitWasRemoved()
+{
+	CalculateChildren();
+}
 
 float QFAUIList::UpdateInnerHeight()
 {

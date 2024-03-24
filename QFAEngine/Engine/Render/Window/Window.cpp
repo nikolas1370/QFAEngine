@@ -622,7 +622,6 @@ void QFAWindow::ShadowRender(QFAViewport* _viewport)
 
 void QFAWindow::RenderWindows()
 { 
-	vkQueueWaitIdle(QFAVKLogicalDevice::GetGraphicsQueue());
 	ViewportProcess = 0;
 	QMeshBaseComponent::StartFrame();
 	QFAText::StartFrame();
@@ -709,9 +708,21 @@ void QFAWindow::ProcessUIEvent()
 	for (size_t i = 0; i < Windows.size(); i++)
 	{
 		double x;
-		double y;		
-		if (!Windows[i]->GetMousePosition(x, y) || Windows[i]->minimized)
+		double y;
+		if (!Windows[i]->GetMousePosition(x, y))
+		{
+			if (Windows[i]->UIEvent->FocusUnit)
+			{
+				Windows[i]->UIEvent->FocusUnit->NotifyOutFocus(false);
+				Windows[i]->UIEvent->FocusUnit = nullptr;
+			}
+
 			continue;
+		}
+	
+		if (Windows[i]->minimized)
+			continue;
+
 		// don't replase int because in "i" can be minus value 
 		for (int j = (int)Windows[i]->Viewports.Length() - 1; j >= 0; j--)
 		{

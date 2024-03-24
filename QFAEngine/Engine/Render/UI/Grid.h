@@ -59,10 +59,13 @@ private:
 	void ChangePosition(int x, int y) override;
 
 	void NewUnit(QFAUIUnit* unit) override;
+	void UnitWasRemoved() override;
 	// child call if his slot change
 	void MySlotChange(QFAUIUnit* unit) override {};
 
 	float UpdateInnerHeight() override;
 	// grid always return own Width
 	float UpdateInnerWidth() override;
+
+
 };

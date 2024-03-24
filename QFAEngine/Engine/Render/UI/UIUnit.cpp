@@ -271,7 +271,7 @@ void QFAUIUnit::NotifyRightMouseDownUp()
 
 
 /*-------- EventFunctions --------*/
-void QFAUIUnit::EventFunctions::SetInFocus(void (*fun)(QFAUIUnit*, void*), void* userData)
+void QFAUIUnit::EventFunctions::SetInFocus(void (*fun)(QFAUIUnit*, void* ), void* userData)
 {
     InFocus.fun = fun;
     InFocus.userData = userData;

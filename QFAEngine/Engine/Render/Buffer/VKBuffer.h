@@ -89,9 +89,17 @@ private:
 
 
 	static std::vector<BufferTaskOtherThread> Tasks;
-	
-
 	static void ProcessTaskFromOtherThread();
+
+	struct SNotNeedBuffer
+	{
+		VkBuffer buffer;
+		VmaAllocation allocation;
+		bool isHost;
+	};
+
+	static std::vector<SNotNeedBuffer> NotNeedBuffers;
+	static void DeleteNotNeedBuffer();
 
 	void copyBufferToImage(VkImage image, uint32_t width, uint32_t height, VkCommandPool commandPool, int32_t imageOffsetX = 0, int32_t imageOffsetY = 0, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT);
 	static VkCommandBuffer beginSingleTimeCommands(VkCommandPool commandPool);

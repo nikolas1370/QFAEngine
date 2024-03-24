@@ -111,11 +111,11 @@ void QFAOverlord::MainLoop()
         QFAWindow::ProcessUIEvent();
         QWorld::ProcessTicks();
         QFAVKBuffer::ProcessTaskFromOtherThread();
+
+        vkQueueWaitIdle(QFAVKLogicalDevice::GetGraphicsQueue());// delete NotNeedBuffers after render done;
+        QFAVKBuffer::DeleteNotNeedBuffer(); 
         QFAWindow::RenderWindows();
         
-
-
-
         count++;
         deltaAcum += QTime::GetDeltaTime();
         float timePassed = (float)(QTime::GetSystemTime() - t) / 10000.0f;

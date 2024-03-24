@@ -34,7 +34,7 @@ public:
 	~QFAModelLoader();
 
     /*
-        import up Y and forwart -Z because blender defauld setings
+        import forwart Z, up -Y
 
         minimal fbx support - fbx 7.1 (FBX 2011)
     */
@@ -114,6 +114,14 @@ inline void QFAModelLoader::WriteVertex(const aiScene* scene, const aiNode* node
             rotations = FVector(Math::RadiansToDegrees(rotation.x), Math::RadiansToDegrees(rotation.y), Math::RadiansToDegrees(rotation.z));            
         }
 
+        //aiMatrix4x4::ro
+        /*
+        aiVector3D vector(0,0,1);
+        aiMatrix4x4 finiteMatrix_2;
+        finiteMatrix.Rotation(90, vector, finiteMatrix_2);
+        finiteMatrix = finiteMatrix_2;
+        */
+
         for (size_t i = 0; i < node->mNumMeshes; i++)
         {
             unsigned int meshIndex = node->mMeshes[i];
@@ -128,7 +136,7 @@ inline void QFAModelLoader::WriteVertex(const aiScene* scene, const aiNode* node
                     meshVertex[verticeCound].Normal.Z = scene->mMeshes[meshIndex]->mNormals[j].z;
                 }
                 else// fbx
-                {                     
+                {
                     aiVector3D vert = finiteMatrix * scene->mMeshes[meshIndex]->mVertices[j];
                     meshVertex[verticeCound].Position = FVector(vert.x, vert.y, vert.z) * 0.01f;// scale in fbx by default 100
                     meshVertex[verticeCound].Normal = FVector(scene->mMeshes[meshIndex]->mNormals[j].x, scene->mMeshes[meshIndex]->mNormals[j].y, scene->mMeshes[meshIndex]->mNormals[j].z)
@@ -199,12 +207,13 @@ MeshData* QFAModelLoader::LoadModel(const std::string& pFile)
         aiProcess_JoinIdenticalVertices |
         aiProcess_SortByPType |
         aiProcess_FlipWindingOrder |
-        aiProcess_GenSmoothNormals 
+        aiProcess_GenSmoothNormals //|
+        //aiProcess_MakeLeftHanded
     ); 
 
     if (nullptr == scene)
     {
-        const char* errorNA =  importer.GetErrorString();        
+        const char* errorNA =  importer.GetErrorString();
         std::cout << errorNA << "\n";
         ASSERT(false);
         return nullptr;

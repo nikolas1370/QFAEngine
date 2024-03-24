@@ -9,7 +9,7 @@ VmaAllocator QFAVKBuffer::allocator = nullptr;
 
 
 std::vector<QFAVKBuffer::BufferTaskOtherThread> QFAVKBuffer::Tasks;
-
+std::vector<QFAVKBuffer::SNotNeedBuffer> QFAVKBuffer::NotNeedBuffers;
 
 void QFAVKBuffer::Init(VkInstance instance)
 {
@@ -65,19 +65,11 @@ void QFAVKBuffer::CreateBufferInside(VkDeviceSize size, VkBufferUsageFlags usage
 
 QFAVKBuffer::~QFAVKBuffer()
 {
-    if (InHost)
-        vmaUnmapMemory(allocator, allocation);
-        
-    vmaDestroyBuffer(allocator, Buffer, allocation);
-
-    for (size_t i = 0; i < Tasks.size(); i++)
-    {
-        if (Tasks[i].buffer == this)
-        {
-            Tasks.erase(Tasks.begin() + i);
-            return;
-        }
-    }
+    SNotNeedBuffer nnb;
+    nnb.isHost = InHost;
+    nnb.buffer = Buffer;
+    nnb.allocation = allocation;
+    NotNeedBuffers.push_back(nnb);
 }
 
 uint32_t QFAVKBuffer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
@@ -269,6 +261,19 @@ void QFAVKBuffer::ProcessTaskFromOtherThread()
     }
 
     Tasks.clear();
+}
+
+void QFAVKBuffer::DeleteNotNeedBuffer()
+{
+    for (size_t i = 0; i < NotNeedBuffers.size(); i++)
+    {
+        if (NotNeedBuffers[i].isHost)
+            vmaUnmapMemory(allocator, NotNeedBuffers[i].allocation);
+
+        vmaDestroyBuffer(allocator, NotNeedBuffers[i].buffer, NotNeedBuffers[i].allocation);
+    }
+
+    NotNeedBuffers.clear();
 }
 
 void QFAVKBuffer::copyInImage(QFAImage* image, uint32_t width, uint32_t height, VkCommandPool commandPool, int32_t imageOffsetX, int32_t imageOffsetY, VkImageAspectFlags aspect, VkImageLayout endLayout)

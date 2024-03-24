@@ -11,6 +11,11 @@ void QFAUIGrid::NewUnit(QFAUIUnit* unit)
 	ProcessChildPosition();
 }
 
+void QFAUIGrid::UnitWasRemoved()
+{
+	ProcessChildPosition();
+}
+
 float QFAUIGrid::UpdateInnerHeight()
 {
 	if (roowCount <= 0)
@@ -27,6 +32,8 @@ float QFAUIGrid::UpdateInnerWidth()
 {
 	return (float)Width;
 }
+
+
 
 #define GetCountUnit(Width, MinUnitSize) floor((float)(Width) / (float)(MinUnitSize))
 #define GetSizeUnit(Width, MinUnitSize) ((float)(Width) / GetCountUnit(Width, MinUnitSize))

@@ -21,6 +21,7 @@ public:
 	{
 		LTVertical, 
 		LTHorizon,
+		/* right now work only for text */
 		LTHorizonInner, // instead UnitWidth use childUnit.innerWidth
 		LTVerticalInner // instead UnitHeight use childUnit.innerHeight
 	};
@@ -60,4 +61,6 @@ private:
 	void CalculateChildren();
 
 	void ChildInnerChange(QFAUIUnit* child) override;
+
+	void UnitWasRemoved() override;
 };

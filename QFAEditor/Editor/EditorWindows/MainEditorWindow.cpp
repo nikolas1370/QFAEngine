@@ -11,6 +11,8 @@
 #include <Camera/CameraEditor.h>
 #include <EditorFileStorage.h>
 #include <Object/Actor/StaticMeshActor.h>
+#include <EditorUI/GameViewportInfo.h>
+#include <EditorUI/UIActorList.h>
 
 QFAEditorMainWindow* QFAEditorMainWindow::MainWindow = nullptr;
 QFAText::SFont* QFAEditorMainWindow::Icomonfont;
@@ -76,18 +78,28 @@ void QFAEditorMainWindow::CreateUI()
 	WindowCanvas->AddUnit(FileExplorer);
 	mainViewPort->AddUnit(WindowCanvas);
 	
-
+	
+	slot.Width = 0.3f;
+	slot.Height = 0.7f;
+	slot.x = 0.7f;
+	slot.y = 0.0f;
+	GameViewportInfo = new QFAEditorGameViewportInfo;	
+	GameViewportInfo->SetSlot(&slot);
+	WindowCanvas->AddUnit(GameViewportInfo);
+	GameViewportInfo->SetBackgroundColor(QFAColor(36, 36, 36));
+	
 	Window->SetSize(WorkWidth, WorkHeight);
 	Window->MoveToCenter();
 	Window->EnabelDecorated(true);	
 	PrepareGameViewport();
+	PrepareCallback();	
 }
 
 void QFAEditorMainWindow::PrepareGameViewport()
 {
 	GameViewport = new QFAViewport();
 	Window->AddViewport(GameViewport);
-	GameViewport->SetParameters(0.0f, 0.0f, 1.0f, 0.7f);
+	GameViewport->SetParameters(0.0f, 0.0f, 0.7f, 0.7f);
 
 	Worlds = new QWorld[2];
 	Worlds[0].SetEnable(false);
@@ -99,11 +111,34 @@ void QFAEditorMainWindow::PrepareGameViewport()
 	Worlds[0].SetEditorActor(EditorCamera);
 }
 
-void QFAEditorMainWindow::AddActorToWorlds(QActor* actor)
+void QFAEditorMainWindow::PrepareCallback()
 {
-	Worlds[0].AddActor(actor);	
+	
+	Input = new QFAInput(Window);
+	Input->AddKeyPress(EKey::DELETE, "pressDelete", [this](EKey::Key key)
+		{
+			switch (Focus)
+			{
+				case QFAEditorMainWindow::FActorList:
+					GameViewportInfo->ActorList->PressDelete(); break;
+				case QFAEditorMainWindow::FFileExplorer:
+					break;
+				default:
+					break;
+			}
+		});
+
+	GameViewportInfo->ActorList->SelectFun = [this]()
+		{
+			Focus = EFocus::FActorList;
+		};
 }
 
+void QFAEditorMainWindow::AddActorToWorlds(QActor* actor, SEditorFile& ef)
+{
+	Worlds[0].AddActor(actor);	
+	GameViewportInfo->ActorList->AddActor(actor, ef);
+}
 
 void QFAEditorMainWindow::StartDragAndDrop(size_t fileId)
 {
@@ -135,7 +170,7 @@ void QFAEditorMainWindow::EndDragAndDrop(EKey::Key key)
 				AStaticMeshActor* staticActor = new AStaticMeshActor;
 				staticActor->SetActorPosition(0);
 				staticActor->SetMesh((MeshData*)ef.file);
-				MainWindow->AddActorToWorlds(staticActor);
+				MainWindow->AddActorToWorlds(staticActor, ef);
 			}			
 		}		
 	}

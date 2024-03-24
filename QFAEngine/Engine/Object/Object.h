@@ -14,7 +14,7 @@ protected:
 public:
 	QObject();
 
-	std::string Name;
+	std::u32string Name;
 
 	/*
 	* about virtual destructor

@@ -17,7 +17,8 @@ namespace QFAUIType
 		Scroll = 6,
 		TextInput = 7,
 		List = 8,
-		CustomUnit = 9
+		CustomUnit = 9,
+		Background = 10
 	};
 }
 
@@ -28,7 +29,7 @@ namespace QFAEditorUIType
 		NONE = 0,
 		FileExplorer = 1,
 		ExplorerFolderUnit = 2,
-		FileViewUnit = 3
+		FileViewUnit = 3,
 	};
 }
 
@@ -82,6 +83,8 @@ namespace QFAUISlot
 		int marginTop = 0;
 	};
 
+
+	
 	
 }
 
@@ -98,6 +101,7 @@ class QFAUIScroll;
 class QFAViewportRoot;
 class QFAUIList;
 class QFAParentHiddenChild;
+class QFAUIBackground;
 class QFAUIUnit
 {
 	friend QFAViewport;
@@ -112,6 +116,7 @@ class QFAUIUnit
 	friend QFAUIList;
 	friend QFAParentHiddenChild;
 	friend QFAUIParent;
+	friend QFAUIBackground;
 
 protected:
 	struct UniformOverflow
@@ -196,16 +201,21 @@ public:
 		EventFunctions() {};		
 	public:
 		/*
+			QFAUIUnit* unit,
+			void* userData
+		*/
+
+		/*
 			if child have focus parents also have focus
 			QFAUIUnit* unit in focus
 		*/
-		void SetInFocus(void (*fun)(QFAUIUnit*, void*), void* userData);
+		void SetInFocus(void (*fun)(QFAUIUnit*, void* ), void* userData);
 		/*		
 			if child have outfocus parents 
 			also have outfocus only if parent
-			not have new child in focus.
+			not have new child in focus or self in focus.
 			if parents have new child focus
-			parents get event InFocus with new focus unit
+			parents get event InFocus with new focus unit.
 		*/
 		void SetOutFocus(void (*fun)(void*), void* userData);
 

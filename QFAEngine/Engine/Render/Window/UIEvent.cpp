@@ -93,7 +93,7 @@ QFAUIEvent::QFAUIEvent(QFAWindow* window, GLFWwindow* _glfWindow)
 		});
 
 
-	// 
+	
 }
 
 QFAUIEvent::~QFAUIEvent()
@@ -156,7 +156,7 @@ void QFAUIEvent::SortUIs(QFAViewportRoot* root)
 }
 
 void QFAUIEvent::NewFrame(QFAViewportRoot* root, float mousePosX, float mousePosY, double delta)
-{		
+{			
 	QFAUIUnit* unitUnderFocus = nullptr;
 	QFAUIScroll* scrollUnit = nullptr;
 	FindUnitUnderFocus(root, unitUnderFocus, scrollUnit, mousePosX, mousePosY);

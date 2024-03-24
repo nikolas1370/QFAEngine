@@ -67,7 +67,7 @@ class QFAEditorFileStorage
     static std::vector<int> DropPath;
 public:
     // if SEditorFile.id == 0 file not found
-    static SEditorFile GetFile(size_t fileIndex);
+    static SEditorFile GetFile(size_t fileId);
 
 private:	
     // textForDisplay display in load screen

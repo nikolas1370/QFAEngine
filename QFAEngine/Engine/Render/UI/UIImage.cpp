@@ -256,6 +256,8 @@ void QFAUIImage::SetSizeParent(unsigned int w, unsigned int h)
 
     Width = w;
     Height = h;
+    InnerHeight = Height;
+    InnerWidth = Width;
 
     if(changeQuad)
         ChangeQuad();

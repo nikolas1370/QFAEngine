@@ -284,12 +284,12 @@ void QFAEditorFileStorage::GetFolderContents(size_t folderId, std::vector<QFAFil
 	}	
 }
 
-SEditorFile QFAEditorFileStorage::GetFile(size_t fileIndex)
+SEditorFile QFAEditorFileStorage::GetFile(size_t fileId)
 {
 	// write binary search
 	for (size_t i = 0; i < EditorFile.size(); i++)
 	{
-		if (EditorFile[i].id == fileIndex)
+		if (EditorFile[i].id == fileId)
 		{
 			SEditorFile ef;
 			ef.id = EditorFile[i].id;

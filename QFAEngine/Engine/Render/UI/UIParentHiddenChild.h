@@ -22,7 +22,13 @@ protected:
 
 	void GetChildren(std::vector<QFAUIUnit*>& children);
 
-	// only child class can use it
+
+	/*
+		 only child class can use it
+
+		 this function not set child position/size
+
+	*/
 	void AddHiddenChild(QFAUIUnit* unit);
 private:
 	void RemoveUnitWithoutNotify(QFAUIUnit* unit) final {};

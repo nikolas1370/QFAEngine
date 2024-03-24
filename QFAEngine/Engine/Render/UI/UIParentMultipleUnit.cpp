@@ -41,6 +41,7 @@ void QFAUIParentMultipleUnit::removeUnit(QFAUIUnit* unit)
 
 	RemoveUnitWithoutNotify(unit);
 	unit->ParentDisconect();
+	UnitWasRemoved();
 }
 
 void QFAUIParentMultipleUnit::removeAllUnit()
@@ -52,6 +53,7 @@ void QFAUIParentMultipleUnit::removeAllUnit()
 	}
 
 	Children.Clear();
+	UnitWasRemoved();
 }
 
 void QFAUIParentMultipleUnit::RemoveUnitWithoutNotify(QFAUIUnit* unit)

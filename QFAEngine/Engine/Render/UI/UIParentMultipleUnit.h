@@ -17,6 +17,8 @@ protected:
 	QFAArray<QFAUIUnit*> Children;
 	// call if AddUnit success
 	virtual void NewUnit(QFAUIUnit* unit) = 0;
+	// call if removeUnit or removeAllUnit success
+	virtual void UnitWasRemoved() {};
 public:
 	QFAUIParentMultipleUnit();
 	~QFAUIParentMultipleUnit();
