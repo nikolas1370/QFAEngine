@@ -457,10 +457,11 @@ void QFAUIImage::CreatePipeline()
 
     PipelineInfo.Rasterization.CullMode = VK_CULL_MODE_NONE;
 
-    QFAVKPipeline::QFAPipelineColorBlendAttachment blendAttachment;
-    blendAttachment.BlendEnable = VK_TRUE;
-    PipelineInfo.ColorBlendState.attachmentCount = 1;
-    PipelineInfo.ColorBlendState.pAttachments = &blendAttachment;
+    std::array<QFAVKPipeline::QFAPipelineColorBlendAttachment, 2> blendAttachments;
+    blendAttachments[0].BlendEnable = VK_TRUE;
+    blendAttachments[1].BlendEnable = VK_FALSE;
+    PipelineInfo.ColorBlendState.attachmentCount = blendAttachments.size();
+    PipelineInfo.ColorBlendState.pAttachments = blendAttachments.data();
 
 
     std::array<VkDynamicState, 2> dynamicStates =

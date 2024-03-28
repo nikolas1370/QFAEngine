@@ -199,7 +199,6 @@
     <ClCompile Include="Engine\Render\vk\PhysicalDevice.cpp" />
     <ClCompile Include="Engine\Render\RenderPass\RenderPassDepth.cpp" />
     <ClCompile Include="Engine\Render\RenderPass\MeshRenderPass.cpp" />
-    <ClCompile Include="Engine\Render\RenderPass\RenderPass.cpp" />
     <ClCompile Include="Engine\Render\vk\PresentImage.cpp" />
     <ClCompile Include="Engine\Render\vk\SwapChain.cpp" />
     <ClCompile Include="Engine\Render\RenderPass\TextRenderPass.cpp" />
@@ -256,7 +255,6 @@
     <ClInclude Include="Engine\Render\RenderPass\MeshRenderPass.h" />
     <ClInclude Include="Engine\Render\vk\PresentImage.h" />
     <ClInclude Include="Engine\Render\vk\QueueFamilies.h" />
-    <ClInclude Include="Engine\Render\RenderPass\RenderPass.h" />
     <ClInclude Include="Engine\Render\vk\SwapChain.h" />
     <ClInclude Include="Engine\Render\RenderPass\TextRenderPass.h" />
     <ClInclude Include="Engine\Render\Image.h" />

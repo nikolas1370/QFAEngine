@@ -10,7 +10,7 @@ class QFAVKPipeline
     friend QFAOverlord;
 public:
     static const uint32_t MaxDescriptorSetLayoutCount = 2;// if need more SetLayout
-    static const uint32_t MaxDescriptorSetLayoutBinding = 3; // if need more VkDescriptorSetLayoutBinding in SetLayout
+    static const uint32_t MaxDescriptorSetLayoutBinding = 4; // if need more VkDescriptorSetLayoutBinding in SetLayout
     static const uint32_t MaxColorBlendAttachment = 2;
 
     /*
@@ -105,6 +105,11 @@ public:
                 DescriptorPoolFlags should be VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT
         */
     };
+    struct QFAPushConstant
+    {
+        uint32_t pushConstantRangeCount = 0;
+        VkPushConstantRange* PushConstantRanges = nullptr;
+    };
 
     struct QFAPipelineCreateInfo
     {
@@ -119,7 +124,7 @@ public:
         uint32_t DescriptorSetLayoutCount = 0;
         QFADescriptorSetLayout* DescriptorSetLayouts = nullptr;
         uint32_t* MaxSets = nullptr; // MaxSets[0] == GroupDescriptorPools[0].MaxSets
-
+        QFAPushConstant PushConstant;
     };
 
     

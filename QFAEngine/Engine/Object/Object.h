@@ -3,18 +3,20 @@
 #include <string>
 
 
-
+class QFAEditorUIActorList;
 class QObject
 {
+	friend QFAEditorUIActorList;
+
 	static const unsigned int ValidNumber = 167031;
 	unsigned int Valid = ValidNumber;
 protected:
 
-	
+	std::u32string Name;
 public:
 	QObject();
 
-	std::u32string Name;
+	
 
 	/*
 	* about virtual destructor
@@ -36,7 +38,10 @@ public:
 	*/
 	virtual void Destroy() final;
 	
-
+	inline std::u32string GetName()
+	{
+		return Name;
+	}
 };
 
 

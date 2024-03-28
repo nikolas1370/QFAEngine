@@ -23,8 +23,8 @@ QFAEditorMainWindow::QFAEditorMainWindow()
 	else
 		MainWindow = this;
 
-	QFAOverlord::SetShdowFpsInConsole(true);
-	QFAOverlord::EnableFpsLock(false);
+	QFAOverlord::SetShdowFpsInConsole(false);
+	QFAOverlord::EnableFpsLock(true);
 	QFAOverlord::SetLimitFpsCount(60);
 	Window = new QFAWindow(LoaderWidth, LoaderHeight, "QFAEditor", true, false);
 
@@ -45,6 +45,7 @@ QFAEditorMainWindow::QFAEditorMainWindow()
 
 	Input = new QFAInput(Window);
 	Input->AddKeyRelease(EKey::MOUSE_LEFT, "lmbU", QFAEditorMainWindow::EndDragAndDrop);
+	Input->AddKeyPress(EKey::MOUSE_LEFT, "lmbD", QFAEditorMainWindow::PickMesh);
 }
 
 QFAEditorMainWindow::~QFAEditorMainWindow()
@@ -136,8 +137,22 @@ void QFAEditorMainWindow::PrepareCallback()
 
 void QFAEditorMainWindow::AddActorToWorlds(QActor* actor, SEditorFile& ef)
 {
-	Worlds[0].AddActor(actor);	
+	Worlds[0].AddActor(actor);
 	GameViewportInfo->ActorList->AddActor(actor, ef);
+
+
+	/*  
+	
+		remove
+		
+	*/
+	static int lop = 0;
+	actor->SetActorPosition(FVector(300 * lop, 0, 0));
+	lop++;
+	
+
+
+
 }
 
 void QFAEditorMainWindow::StartDragAndDrop(size_t fileId)
@@ -174,6 +189,16 @@ void QFAEditorMainWindow::EndDragAndDrop(EKey::Key key)
 			}			
 		}		
 	}
+}
+
+
+
+void QFAEditorMainWindow::PickMesh(EKey::Key key)
+{
+	MainWindow->Window->GetMeshUnderCursore([](QMeshBaseComponent* mesh)
+		{
+			MainWindow->GameViewportInfo->ActorList->SelectActor(mesh->GetActor());
+		});
 }
 
 

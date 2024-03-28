@@ -25,6 +25,7 @@ std::vector<VkDescriptorImageInfo> QFAText::DII;
 std::vector<QFAVKBuffer*> QFAText::textParamBuffers;
 std::vector<QFAVKBuffer*> QFAText::textVertexParamBuffers;
 
+
 VkRenderPass QFAText::RenderPass;
 QFAVKTextureSampler* QFAText::AtlassSampler;
 
@@ -778,7 +779,7 @@ void QFAText::CreateTextParameterSet()
     BufferInfo_Vertex.buffer = textVertexParamBuffers.back()->Buffer;
     BufferInfo_Vertex.offset = 0;
     BufferInfo_Vertex.range = sizeof(QFAText::UniformBufferTextParamVertex);
-
+    
     std::array< QFAVKPipeline::QFADescriptorSetInfo, 3> descriptorSetInfo;
     descriptorSetInfo[0].dstBinding = 0;
     descriptorSetInfo[0].DescriptorImageInfos = QFAText::DII.data();
@@ -786,7 +787,7 @@ void QFAText::CreateTextParameterSet()
     descriptorSetInfo[1].DescriptorBufferInfos= &BufferInfo;
     descriptorSetInfo[2].dstBinding = 2;
     descriptorSetInfo[2].DescriptorBufferInfos = &BufferInfo_Vertex;
-
+    
     Pipeline->CreateSet(1, descriptorSetInfo.data());
     maxTextInframe++;  
 }
@@ -801,16 +802,15 @@ void QFAText::RecreateTextParameterSet(VkBuffer buffer, VkBuffer VertexBuffer)
     VkDescriptorBufferInfo BufferInfo_Vertex;
     BufferInfo_Vertex.buffer = VertexBuffer;
     BufferInfo_Vertex.offset = 0;
-    BufferInfo_Vertex.range = sizeof(QFAText::UniformBufferTextParamVertex);
-
-    std::array< QFAVKPipeline::QFADescriptorSetInfo, 2> descriptorSetInfo;
+    BufferInfo_Vertex.range = sizeof(QFAText::UniformBufferTextParamVertex);   
+    
+    std::array< QFAVKPipeline::QFADescriptorSetInfo, 3> descriptorSetInfo;
     descriptorSetInfo[0].dstBinding = 0;
     descriptorSetInfo[0].DescriptorImageInfos = QFAText::DII.data();
     descriptorSetInfo[1].dstBinding = 1;
     descriptorSetInfo[1].DescriptorBufferInfos = &BufferInfo;
     descriptorSetInfo[2].dstBinding = 2;
-    descriptorSetInfo[2].DescriptorBufferInfos = &BufferInfo_Vertex;
-
+    descriptorSetInfo[2].DescriptorBufferInfos = &BufferInfo_Vertex;   
 
     Pipeline->CreateSet(1, descriptorSetInfo.data());    
 }
@@ -918,8 +918,9 @@ void QFAText::CreatePipeline()
     
 
     PipelineInfo.Rasterization.CullMode = VK_CULL_MODE_NONE;
-    std::array< QFAVKPipeline::QFAPipelineColorBlendAttachment, 1> blendAttachments;
+    std::array< QFAVKPipeline::QFAPipelineColorBlendAttachment, 2> blendAttachments;
     blendAttachments[0].BlendEnable = VK_TRUE;
+    blendAttachments[1].BlendEnable = VK_FALSE;
 
     PipelineInfo.ColorBlendState.attachmentCount = (uint32_t)blendAttachments.size();
     PipelineInfo.ColorBlendState.pAttachments = blendAttachments.data();
@@ -958,6 +959,8 @@ void QFAText::CreatePipeline()
     secondLayout[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     secondLayout[2].pImmutableSamplers = nullptr;
     secondLayout[2].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+
 
     DescriptorSetLayouts[0].BindingCount = (uint32_t)firsLayout.size();
     DescriptorSetLayouts[1].BindingCount = (uint32_t)secondLayout.size();

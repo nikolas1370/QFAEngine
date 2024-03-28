@@ -3,7 +3,7 @@
 #include <set>
 #include <Render/vk/QueueFamilies.h>
 
-const std::vector<const char*> QFAVKPhysicalDevice::deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME };
+const std::vector<const char*> QFAVKPhysicalDevice::deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME};
 VkPhysicalDevice QFAVKPhysicalDevice::PhysicalDevice = VK_NULL_HANDLE;
 bool QFAVKPhysicalDevice::IsInit = false;
 

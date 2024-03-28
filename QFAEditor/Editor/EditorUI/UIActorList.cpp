@@ -31,7 +31,6 @@ void QFAEditorUIActorList::AddActor(QActor* actor, SEditorFile& ef)
 	QFAUIBackground* color = new QFAUIBackground;
 	UIActorList->AddUnit(color);
 	QFAText* text = new QFAText;
-	UIActorList->AddUnit(text);
 	color->SetUnit(text);
 	text->SetTextSize(20);
 
@@ -55,6 +54,7 @@ void QFAEditorUIActorList::AddActor(QActor* actor, SEditorFile& ef)
 	else
 		name.append(U"_").append(NumToU32string(count));
 
+	actor->Name = name;
 	text->SetText(name);
 	SActor sActor;
 	sActor.actor = actor;
@@ -168,4 +168,23 @@ std::u32string QFAEditorUIActorList::NumToU32string(size_t num)
 		bigString[i] = (char32_t)str[i];
 
 	return bigString;
+}
+
+void QFAEditorUIActorList::SelectActor(QActor* actor)
+{
+	for (size_t i = 0; i < ActorList.size(); i++)
+	{
+		if (ActorList[i].actor == actor) 
+		{
+			if (CurentActorSelect)
+				CurentActorSelect->SetBackgroundColor(OutFocusUnitColor);
+
+			CurentActorSelect = ActorList[i].textBackgroundColor;
+			CurentActorSelect->SetBackgroundColor(SelectUnit);
+			if (SelectFun)
+				SelectFun();
+
+			return;
+		}
+	}
 }

@@ -75,17 +75,16 @@ bool QFAOverlord::Init(std::vector<QFAVKPipeline::SShaderData> shaderData, bool 
 
 
 
+#include <filesystem>
 
 void QFAOverlord::MainLoop()
 {
     static int count = 0;
     static double deltaAcum = 0;
-
-
     float timePassedAcum = 0;
 
     while ( Life)
-    {
+    {   
         if (FrameStarted)
             FrameStarted();
 
@@ -109,11 +108,15 @@ void QFAOverlord::MainLoop()
         glfwPollEvents();
         QFAInput::NewFrame((float)QTime::GetDeltaTime());
         QFAWindow::ProcessUIEvent();
-        QWorld::ProcessTicks();
-        QFAVKBuffer::ProcessTaskFromOtherThread();
+        QWorld::ProcessTicks();        
 
-        vkQueueWaitIdle(QFAVKLogicalDevice::GetGraphicsQueue());// delete NotNeedBuffers after render done;
+        vkQueueWaitIdle(QFAVKLogicalDevice::GetGraphicsQueue());
+        QFAVKBuffer::ProcessTaskFromOtherThread();
         QFAVKBuffer::DeleteNotNeedBuffer(); 
+
+        QFAWindow::CheckIfNeedResizeWindows();
+        QFAWindow::ProcessGetMeshId();
+
         QFAWindow::RenderWindows();
         
         count++;

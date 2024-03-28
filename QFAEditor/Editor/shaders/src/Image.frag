@@ -2,7 +2,7 @@
 layout(location = 0) in vec2 TexCoords;
 
 layout(location = 0) out vec4 color;
-
+layout(location = 1) out uvec4 FragMeshId; // not use in image
 
 layout(set = 1,binding = 0) uniform sampler2D imageTexture;
 

@@ -35,7 +35,6 @@ QFAWindow* QFAWindow::CurentProcessWindow;
 
 
 QFAVKRenderPassSwapChain* QFAWindow::RenderPassSwapChain;
-QFAVKRenderPass* QFAWindow::RenderPass;
 QFAVKRenderPassDepth* QFAWindow::RenderPassOffScreen;
 QFAVKTextRenderPass* QFAWindow::TextRenderPass;
 QFAVKTextRenderPass* QFAWindow::TextRenderPassClear;
@@ -158,7 +157,6 @@ QFAWindow::QFAWindow(int width, int height, std::string name, bool inCenter, boo
 	if (Windows.size() == 1)
 	{
 		RenderPassOffScreen = new QFAVKRenderPassDepth();
-		RenderPass = new QFAVKRenderPass(SwapChain->swapChainImageFormat, true);
 		TextRenderPass = new QFAVKTextRenderPass(imageFormat, false);
 		TextRenderPassClear = new QFAVKTextRenderPass(imageFormat, true);
 		RenderPassSwapChain = new QFAVKRenderPassSwapChain(SwapChain->swapChainImageFormat, true);
@@ -169,8 +167,6 @@ QFAWindow::QFAWindow(int width, int height, std::string name, bool inCenter, boo
 		ShadowFrameBuffer = new QFAVKShadowFrameBuffer(commandPool, RenderPassOffScreen->renderPass);
 		CreateShadow();
 
-		QMeshBaseComponent::Init(RenderPass->renderPass, RenderPassOffScreen->renderPass, commandPool);
-
 		createCommandBuffer();
 	}
 	
@@ -180,6 +176,8 @@ QFAWindow::QFAWindow(int width, int height, std::string name, bool inCenter, boo
 	frameBuffer = new QFAVKMeshFrameBuffer(commandPool, width, height, imageFormat);
 	PresentImage = new QFAPresentImage(commandPool, RenderPassSwapChain->renderPass, frameBuffer->ColorImage);
 
+	if (Windows.size() == 1)
+		QMeshBaseComponent::Init(frameBuffer->Clear.renderPass, RenderPassOffScreen->renderPass, commandPool);
 	
 
 	createSyncObject();
@@ -189,7 +187,7 @@ QFAWindow::QFAWindow(int width, int height, std::string name, bool inCenter, boo
 	vp->Settup(width, height);
 
 	
-	
+	PickBuffer = new QFAVKBuffer(4, nullptr, true, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 }
 
 QFAWindow::~QFAWindow()
@@ -233,7 +231,8 @@ void QFAWindow::DrawUI(QFAViewport* viewport, int viewportIndex, bool clear)
 
 	std::array<VkClearValue, 3> clearValues{};
 	clearValues[0].color = { {0, 0, 0, 0} };
-	clearValues[1].depthStencil = { 1.0f, 0 };
+	clearValues[1].color = { {0.0, 0.0, 0.0, 0.0} };
+	clearValues[2].depthStencil = { 1.0f, 0 };
 
 	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
 	renderPassInfo.pClearValues = clearValues.data();
@@ -332,6 +331,31 @@ void QFAWindow::AddUnit(QFAUIUnit* unit)
 				AddUnit(parentMultiple->Children[i]);
 		}
 	}	
+}
+
+void QFAWindow::ProcessGetMeshId()
+{
+	double x, y;
+	for (size_t i = 0; i < Windows.size(); i++)
+	{		
+		if (Windows[i]->GetMeshCallback && Windows[i]->GetMousePosition(x, y))
+		{
+			if (x > 0 && y > 0)
+			{
+				Windows[i]->PickBuffer->copyInBuffer(Windows[i]->frameBuffer->IdImage, 1, 1, commandPool, x - 1, y - 1, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_GENERAL);
+				unsigned int rawChar = *(unsigned int*)Windows[i]->PickBuffer->MapData;
+				if (rawChar)
+					Windows[i]->GetMeshCallback(QMeshBaseComponent::MeshIdList[rawChar - 1]);
+			}
+		}
+
+		Windows[i]->GetMeshCallback = nullptr;
+	}	
+}
+
+void QFAWindow::GetMeshUnderCursore(std::function<void(QMeshBaseComponent*)> callback)
+{
+	GetMeshCallback = callback;
 }
 
 
@@ -444,8 +468,8 @@ void QFAWindow::createSyncObject()
 void QFAWindow::recreateSwapChain()
 {
 	delete SwapChain;
-	SwapChain = new QFAVKSwapChain(glfWindow, surface, commandPool);
-	SwapChain->createFramebuffers(RenderPass->renderPass);
+	SwapChain = new QFAVKSwapChain(glfWindow, surface, commandPool);	
+	SwapChain->createFramebuffers(RenderPassSwapChain->renderPass);
 	
 	frameBuffer->ResizeBuffer(commandPool, NewWidth, NewHeight);
 	delete PresentImage;
@@ -485,6 +509,17 @@ bool QFAWindow::GetMousePosition(double& x, double& y)
 	if (CursorOnWindow)
 	{
 		glfwGetCursorPos(glfWindow, &x, &y);
+		if (x < 0 || y < 0)
+		{
+			x = 0; 
+			y = 0;
+		}
+		else if(x >= Width  || y >= Height)
+		{
+			x = Width - 1;
+			y = Height - 1;
+		}
+
 		return true;
 	}
 	else
@@ -622,6 +657,8 @@ void QFAWindow::ShadowRender(QFAViewport* _viewport)
 
 void QFAWindow::RenderWindows()
 { 
+
+
 	ViewportProcess = 0;
 	QMeshBaseComponent::StartFrame();
 	QFAText::StartFrame();
@@ -740,20 +777,26 @@ void QFAWindow::ProcessUIEvent()
 	}
 }
 
+void QFAWindow::CheckIfNeedResizeWindows()
+{
+	for (size_t i = 0; i < Windows.size(); i++)
+	{
+		if (Windows[i]->WindowSizeChanched)
+		{
+			Windows[i]->recreateSwapChain();
+			Windows[i]->Width = Windows[i]->NewWidth;
+			Windows[i]->Height = Windows[i]->NewHeight;
+			Windows[i]->WindowSizeChanched = false;
+			for (int j = 0; j < Windows[i]->Viewports.Length(); j++)
+				Windows[i]->Viewports[j]->Settup(Windows[i]->Width, Windows[i]->Height);
+		}
+	}
+	
+}
+
 
 void QFAWindow::StartFrame()
 {
-	if (WindowSizeChanched)
-	{
-		recreateSwapChain();
-
-		Width = NewWidth;
-		Height = NewHeight;
-		WindowSizeChanched = false;
-		for (int j = 0; j < Viewports.Length(); j++)
-			Viewports[j]->Settup(Width, Height);
-	}
-
 	VkResult result = vkAcquireNextImageKHR(QFAVKLogicalDevice::GetDevice(), SwapChain->SwapChain, UINT64_MAX, GetImageSemaphore, nullptr, &imageIndex);
 	if (result == VK_ERROR_OUT_OF_DATE_KHR)
 	{
@@ -813,9 +856,10 @@ void QFAWindow::DrawActors(QFAViewport* _viewport, bool clear, int viewportIndex
 	renderPassInfo.renderArea.extent = SwapChain->swapChainExtent;
 
 
-	std::array<VkClearValue, 2> clearValues{};
+	std::array<VkClearValue, 3> clearValues{};
 	clearValues[0].color = { {0.0f, 0.0f, 0.0f, 0.0f} };
-	clearValues[1].depthStencil = { 1.0f, 0 };
+	clearValues[1].color = { {0.0f, 0.0f, 0.0f, 0.0f} };
+	clearValues[2].depthStencil = { 1.0f, 0 };
 
 	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
 	renderPassInfo.pClearValues = clearValues.data();

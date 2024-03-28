@@ -202,6 +202,8 @@ QFAVKPipeline::QFAVKPipeline(QFAPipelineCreateInfo& PipInfo)
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = PipInfo.DescriptorSetLayoutCount;
     pipelineLayoutInfo.pSetLayouts = DescriptorSetLayouts.data();
+    pipelineLayoutInfo.pushConstantRangeCount = PipInfo.PushConstant.pushConstantRangeCount;
+    pipelineLayoutInfo.pPushConstantRanges = PipInfo.PushConstant.PushConstantRanges;
 
 
     if (vkCreatePipelineLayout(QFAVKLogicalDevice::GetDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) 

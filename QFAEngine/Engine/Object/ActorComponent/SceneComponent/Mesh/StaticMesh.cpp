@@ -1,4 +1,4 @@
-#include "StaticMesh.h"
+﻿#include "StaticMesh.h"
 #include <Tools/VulkanSuff.h>
 
 QStaticMesh::QStaticMesh(MeshData* meshData)
@@ -18,7 +18,7 @@ void QStaticMesh::SetMesh(MeshData* meshData)
 	Mf->CreateVertextIndexBuffer();
 }
 
-void QStaticMesh::UpdateBuffers( uint64_t startFrameTime, bool isShadow, const FVector &cameraPos)
+void QStaticMesh::UpdateBuffers(VkCommandBuffer commandBuffer, uint64_t startFrameTime, bool isShadow, const FVector &cameraPos)
 {	
 	// convertation from 1 unit 1 centimeter to 1 unit 1 meter.
 	ModelMatrix[3][0] = (WorldPosition.X - cameraPos.X) * 0.01f;

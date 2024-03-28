@@ -6,7 +6,6 @@
 #include <Render/vk/PhysicalDevice.h>
 #include <Render/vk/LogicalDevice.h>
 #include <Render/vk/SwapChain.h>
-#include <Render/RenderPass/RenderPass.h>
 #include <string>
 #include <Math/Vector.h>
 #include <Render/vk/QueueFamilies.h>
@@ -24,6 +23,7 @@
 #include <Render/UI/UIUnit.h>
 #include <Render/Window/Viewport.h>
 #include <Render/Window/UIEvent.h>
+
 struct UniformBufferObject
 {// more detail https://fvcaputo.github.io/2019/02/06/memory-alignment.html
 	/*
@@ -76,14 +76,12 @@ class QFAWindow
 	int NewHeight;
 	int NewWidth;
 	bool WindowSizeChanched = false;
-	//static QFAVKInstance*Instance;
 	static QFAVKInstance* Instance;
 	VkSurfaceKHR surface;	
 	QFAVKSwapChain *SwapChain;
 
 
 	static QFAVKRenderPassSwapChain* RenderPassSwapChain;
-	static QFAVKRenderPass* RenderPass;
 	static QFAVKRenderPassDepth* RenderPassOffScreen;
 	static QFAVKTextRenderPass* TextRenderPass;
 	static QFAVKTextRenderPass* TextRenderPassClear;
@@ -94,6 +92,8 @@ class QFAWindow
 
 	// call Overloed
 	static void ProcessUIEvent();
+	// use after all render and present done
+	static void CheckIfNeedResizeWindows();
 	void StartFrame();
 	
 
@@ -103,6 +103,7 @@ class QFAWindow
 	static void PresentWindows();
 public:
 
+	 
 	
 private:
 	static int ViewportProcess;
@@ -289,6 +290,7 @@ private:
 	void StartUIRenderViewPort(int viewportIndex);
 public:
 
+	void GetMeshUnderCursore(std::function<void(QMeshBaseComponent*)> callback);
 private:
 	const float shadowResolution = 2000;
 	// VkFormat
@@ -327,4 +329,10 @@ private:
 	static VkSemaphore* NextWaitSemi;
 
 
+	QFAVKBuffer* PickBuffer;
+
+	
+	std::function<void(QMeshBaseComponent*)> GetMeshCallback;
+	// call after QFAWindow::CheckIfNeedResizeWindows
+	static void ProcessGetMeshId();
 };

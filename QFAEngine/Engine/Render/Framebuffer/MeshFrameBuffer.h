@@ -12,9 +12,10 @@ public:
 	QFAVKMeshFrameBuffer(VkCommandPool commandPool, int w, int h, VkFormat imageFormat);
 	~QFAVKMeshFrameBuffer();
 	QFAImage* ColorImage;
+	QFAImage* IdImage;
 
 	VkImageView ColorImageView;
-
+	VkImageView IdImageView;
 
 
 	QFAImage* DepthImage;

@@ -52,4 +52,6 @@ private:
 	const QFAColorF SelectUnit = QFAColor(14, 134, 255, 255).GetColorF();
 
 	std::u32string NumToU32string(size_t num);
+
+	void SelectActor(QActor* actor);
 };

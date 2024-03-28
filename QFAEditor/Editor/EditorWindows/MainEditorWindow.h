@@ -69,6 +69,7 @@ private:
 	size_t CurentDragFileId = 0;
 	static void StartDragAndDrop(size_t fileId);
 	static void EndDragAndDrop(EKey::Key key);
+	static void PickMesh(EKey::Key key);
 	void PrepareGameViewport();
 	void PrepareCallback();
 

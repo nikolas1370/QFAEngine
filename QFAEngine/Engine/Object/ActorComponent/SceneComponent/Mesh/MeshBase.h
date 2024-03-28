@@ -137,7 +137,7 @@ class QFAViewport;
 class QFAWindow;
 class QFAVKPipeline;
 class QStaticMesh;
-
+class QFAOverlord;
 #include <Render/Buffer/IndexBuffer.h>
 #include <Render/Buffer/VertexBuffer.h>
 
@@ -147,7 +147,8 @@ class QMeshBaseComponent : public QSceneComponent
 	friend QStaticMesh;
 	friend QFAWindow;
 	friend QFAViewport;
-	
+	friend QFAOverlord;
+
 protected:
 	
 
@@ -156,7 +157,10 @@ protected:
 	glm::mat4 ModelMatrix = Math::DefauldMatrix4;
 	void UpdateModelMatrix() override;
 
-
+	struct SPushConstantPickId
+	{
+		unsigned int meshId;
+	};
 
 public:	
 
@@ -177,7 +181,7 @@ public:
 	virtual int GetIndexCount() = 0;
 
 
-	virtual void UpdateBuffers( uint64_t startFrameTime, bool isShadow, const FVector& cameraPos) = 0;
+	virtual void UpdateBuffers(VkCommandBuffer commandBuffer, uint64_t startFrameTime, bool isShadow, const FVector& cameraPos) = 0;
 	
 
 	inline void* GetModelBuffer()
@@ -291,6 +295,10 @@ private:
 
 	static std::vector<VkDescriptorSet> ShadowDescriptorSets;
 
+
+	static unsigned int MaxMeshId;
+	static std::vector<QMeshBaseComponent*> MeshIdList;
+	SPushConstantPickId PickId;
 	// call only if Mf != nullptr
 	void Render(VkCommandBuffer commandBuffer, bool shadow, FVector cameraPosition);
 protected:

@@ -428,9 +428,9 @@ private:
     struct UniformBufferTextParam
     {
         alignas(16) FVector textColor;
-        alignas(4) int outline;
-        alignas(16) FVector outlineColor;
-        alignas(4) float opacity;
+        int outline;
+        FVector outlineColor;
+        float opacity;
         UniformOverflow overflow;
         int pen = 0;
     };
@@ -528,4 +528,8 @@ protected:
     static VkDescriptorSet PenDescriptorSet;
     // set pointer to input text
     void SetInputText(char32_t* pText, size_t pTextSize, size_t maxSize);
+
+
+
+    bool kio = false;
 };

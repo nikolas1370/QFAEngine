@@ -1,6 +1,7 @@
 #version 460 core
 
 layout(location = 0) out vec4 FragColor ;
+layout(location = 1) out uint FragMeshId;
 
 struct Material
 {
@@ -17,6 +18,7 @@ struct DirLight {
     vec3 specular;
 };
 
+layout(set = 0, binding = 1) uniform sampler2D shadowMap;
 
 layout(set = 1, binding = 1) uniform UniformBufferObject 
 {// https://vkguide.dev/docs/chapter-4/storage_buffers/  for Material materials[];
@@ -28,7 +30,6 @@ layout(set = 1, binding = 1) uniform UniformBufferObject
       
 } prog;
 
-layout(set = 0, binding = 1) uniform sampler2D shadowMap;
 
 
 layout(location = 0) in vec3 Normal;  
@@ -69,21 +70,10 @@ struct SpotLight
 
 
 
+layout( push_constant ) uniform MeshId {
+  uint id;
+} meshId;
 
-
-
-
-
-
-// array of offset direction for sampling
-vec3 gridSamplingDisk[20] = vec3[]
-(
-   vec3(1, 1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1, 1,  1), 
-   vec3(1, 1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
-   vec3(1, 1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1, 1,  0),
-   vec3(1, 0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1, 0, -1),
-   vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
-);
 
 
 
@@ -209,10 +199,13 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 }
 
 
-
-
 void main()
 {
+
+
+    FragMeshId = meshId.id;
+
+
     vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(-FragPos);
        
@@ -220,7 +213,3 @@ void main()
           
     FragColor = vec4(result, 1.0);
 }
-
-
-
-

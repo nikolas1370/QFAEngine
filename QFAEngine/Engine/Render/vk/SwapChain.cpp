@@ -202,7 +202,7 @@ void QFAVKSwapChain::createFramebuffers(VkRenderPass renderPass)
         framebufferInfo.layers = 1;
 
         if (vkCreateFramebuffer(QFAVKLogicalDevice::GetDevice(), &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS)
-            stopExecute("failed to create framebuffer!");        
+            stopExecute("failed to create framebuffer!");
     }
 }
 

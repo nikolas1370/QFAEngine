@@ -140,7 +140,7 @@ QFAPresentImage::QFAPresentImage(VkCommandPool _commandPool, VkRenderPass render
 
 QFAPresentImage::~QFAPresentImage()
 {
-    delete vertexBufer;
+    //delete vertexBufer;
     delete Pipeline;
 }
 

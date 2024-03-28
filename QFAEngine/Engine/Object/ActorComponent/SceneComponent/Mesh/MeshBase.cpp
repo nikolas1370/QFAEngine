@@ -27,6 +27,9 @@ unsigned int QMeshBaseComponent::SetsInUse = 0;
 std::vector<VkDescriptorSet> QMeshBaseComponent::ShadowDescriptorSets;
 
 
+std::vector<QMeshBaseComponent*> QMeshBaseComponent::MeshIdList;
+unsigned int QMeshBaseComponent::MaxMeshId;
+
 MeshData::MeshData(int uniqueIndexCount, int indexCount, int materialCount)
 {
 	
@@ -114,6 +117,8 @@ void QMeshBaseComponent::UpdateModelMatrix()
 void QMeshBaseComponent::StartFrame()
 {
 	SetsInUse = 0;
+	MaxMeshId = 0;
+	MeshIdList.clear();
 }
 
 void QMeshBaseComponent::StartShadowFrameViewport(glm::mat4& lmat)
@@ -123,13 +128,12 @@ void QMeshBaseComponent::StartShadowFrameViewport(glm::mat4& lmat)
 
 void QMeshBaseComponent::Render(VkCommandBuffer commandBuffer, bool shadow, FVector cameraPosition)
 {
-	UpdateBuffers(0, shadow, cameraPosition);
+	UpdateBuffers(commandBuffer, 0, shadow, cameraPosition);
 
 
 	VkDeviceSize offsets[] = { 0 };
 	if (shadow)
-	{
-		
+	{		
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &Mf->VertexBufer->GpuSideBuffer->Buffer, offsets);
 		vkCmdBindIndexBuffer(commandBuffer, Mf->IndexBuffer->GpuSideBuffer->Buffer, 0, VK_INDEX_TYPE_UINT32);
 		auto nextSet = GetShadowNextSet();
@@ -140,6 +144,10 @@ void QMeshBaseComponent::Render(VkCommandBuffer commandBuffer, bool shadow, FVec
 	}
 	else
 	{
+		MeshIdList.push_back(this);
+		PickId.meshId = ++MaxMeshId;
+		vkCmdPushConstants(commandBuffer, Pipeline->GetPipelineLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PickId), &PickId);
+
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &Mf->VertexBufer->GpuSideBuffer->Buffer, offsets);
 		vkCmdBindIndexBuffer(commandBuffer, Mf->IndexBuffer->GpuSideBuffer->Buffer, 0, VK_INDEX_TYPE_UINT32);
 
@@ -217,16 +225,19 @@ void QMeshBaseComponent::createDescriptorSet1()
 	bufferInfoFragment.buffer = Set1Buffers.back().fragmentBuffer->Buffer;
 	bufferInfoFragment.offset = 0;
 	bufferInfoFragment.range = sizeof(UBOFragment);
+
+
 	
-	std::array< QFAVKPipeline::QFADescriptorSetInfo, 2 > SetsInfo;
+	std::array< QFAVKPipeline::QFADescriptorSetInfo, 2> SetsInfo;
 	SetsInfo[0].dstBinding = 0;
 	SetsInfo[0].DescriptorBufferInfos = &bufferInfoVertexMatrix;
 	
 	SetsInfo[1].dstBinding = 1;
 	SetsInfo[1].DescriptorBufferInfos = &bufferInfoFragment;
 
+
+
 	Pipeline->CreateSet(1, SetsInfo.data());
-	
 }
 
 void QMeshBaseComponent::Init(VkRenderPass renderPass, VkRenderPass shadowRenderPass, VkCommandPool commandPool_)
@@ -238,6 +249,7 @@ void QMeshBaseComponent::Init(VkRenderPass renderPass, VkRenderPass shadowRender
 	CreatePipeline();
 	
 	CreateShadowPipline();
+	MeshIdList.reserve(1000);
 }
 
 void QMeshBaseComponent::CreatePipeline()
@@ -275,8 +287,9 @@ void QMeshBaseComponent::CreatePipeline()
 
 
 	PipelineInfo.Rasterization.CullMode = VK_CULL_MODE_BACK_BIT;
-	std::array< QFAVKPipeline::QFAPipelineColorBlendAttachment, 1> blendAttachments;
+	std::array< QFAVKPipeline::QFAPipelineColorBlendAttachment, 2> blendAttachments;
 	blendAttachments[0].BlendEnable = VK_FALSE;
+	blendAttachments[1].BlendEnable = VK_FALSE;
 
 
 	PipelineInfo.ColorBlendState.attachmentCount = (uint32_t)blendAttachments.size();
@@ -333,6 +346,15 @@ void QMeshBaseComponent::CreatePipeline()
 	MaxSets[0] = DescriptorSets0Amount;
 	MaxSets[1] = DescriptorSets0Amount;
 	PipelineInfo.MaxSets = MaxSets.data();
+
+
+	VkPushConstantRange range = {};
+	range.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	range.offset = 0;
+	range.size = sizeof(SPushConstantPickId); // use for pick mesh
+	PipelineInfo.PushConstant.pushConstantRangeCount = 1;
+	PipelineInfo.PushConstant.PushConstantRanges = &range;
+
 	Pipeline = new QFAVKPipeline(PipelineInfo);
 }
 
