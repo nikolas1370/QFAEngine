@@ -271,6 +271,7 @@
     <ClInclude Include="Engine\Tools\Array.h" />
     <ClInclude Include="Engine\Tools\Color.h" />
     <ClInclude Include="Engine\Tools\File\FileSystem.h" />
+    <ClInclude Include="Engine\Tools\String.h" />
     <ClInclude Include="Engine\Tools\VulkanSuff.h" />
     <ClInclude Include="Engine\Math\Math.h" />
     <ClInclude Include="Engine\Math\Vector.h" />

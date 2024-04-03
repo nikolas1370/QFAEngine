@@ -7,13 +7,19 @@ class QActor;
 class QFAUICanvas;
 class QFAEditorUIActorList;
 class QFAEditorMainWindow;
+class QFAUIActorTransform;
+class QFAUIGrid;
 
 class QFAEditorGameViewportInfo : public QFAParentHiddenChild
 {
 	friend QFAEditorMainWindow;
-
+	friend QFAEditorUIActorList;
+	QFAUICanvas* Canvas;
 	QFAEditorUIActorList* ActorList;
 
+	QFAUIScroll* ActorInfoSCroll;
+	QFAUIList* ActorInfoList;
+	QFAUIActorTransform* ActorTransform;
 
 
 	void MySlotChange(QFAUIUnit* unit) override;
@@ -31,7 +37,7 @@ public:
 
 	
 private:
-
+	void SelectActor(QActor* actor);
 
 
 };

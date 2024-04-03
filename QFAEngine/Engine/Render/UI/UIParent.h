@@ -19,6 +19,8 @@ class QFAVKPipeline;
 class QFAUIList;
 class QFAText;
 class QFAUIBackground;
+class QFAUITextInput;
+
 class QFAUIParent : public QFAUIUnit
 {
 	friend QFAUIParentMultipleUnit;
@@ -30,6 +32,7 @@ class QFAUIParent : public QFAUIUnit
 	friend QFAUIList;
 	friend QFAText;
 	friend QFAUIBackground;
+	friend QFAUITextInput;
 
 public:
 	enum EOverflow : unsigned char

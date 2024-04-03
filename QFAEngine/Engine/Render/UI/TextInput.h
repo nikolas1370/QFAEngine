@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <Render/UI/UIParentHiddenChild.h>
 #include <Render/UI/Text.h>
 
@@ -8,19 +8,59 @@ class QFAUITextInput : public QFAParentHiddenChild
 {
 	friend QFAUIEvent;
 	friend QFAUIScroll;
+	friend QFAText;
+
 	static const int MaxTextCount = 256;
 	QFAText *Text;
 	char32_t Texts[MaxTextCount];
 	QFAText::PrepareData pd[MaxTextCount];
+
+	static char convertStr[21];
+
+	float  ValidFLoat = 0.0f;
+	int  ValidInt = 0;
 public:
-	QFAUITextInput();
+	enum ENumberType
+	{
+		None,
+		Int,
+		Float
+	};
+private:
+	ENumberType NumberType;
+public:
+	
+
+	QFAUITextInput(ENumberType numberT = ENumberType::None);
 	~QFAUITextInput();
 
 	inline bool SetFont(QFAText::SFont* font)
 	{
 		return Text->SetFont(font);
 	}
+
+	inline void SetTextSize(size_t size)
+	{
+		Text->SetTextSize(size);
+	}
+	inline void SetTextColor(QFAColor color)
+	{
+		Text->SetTextColor(color);
+	}
+
+	inline void SetTextAlign(QFAText::ETextAlign aligh)
+	{
+		Text->SetTextAlign(aligh);
+	}
+
+	std::u32string GetValue();
+	void SetValue(float value);
+	void SetValue(int value);
+	void SetValue(std::u32string value);
+	
+	void SetOutFocusFun(std::function<void(QFAUITextInput*)> fun);
 protected:
+	std::function<void(QFAUITextInput*)> OutFocusFun;
 
 	void MySlotChange(QFAUIUnit* unit) override {};
 
@@ -39,7 +79,7 @@ protected:
 	void PenLeft();
 	void PenRight();
 
-	void UpdateUnitOffset();
+	void UpdateUnitOffset(bool removeChar = false);
 
 	void NewFrame(float delta);
 
@@ -47,5 +87,6 @@ protected:
 	const float MaxPenTime = 0.5f; // static
 	float PenTime = 0.0f;
 
-	//Create Getvalue
+	void ChildInnerChange(QFAUIUnit* child) override;
+
 };

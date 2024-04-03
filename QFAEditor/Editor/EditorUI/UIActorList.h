@@ -5,6 +5,9 @@ class QFAUIList;
 class QFAEditorGameViewportInfo;
 class QActor;
 class QFAEditorMainWindow;
+class QFAEditorGameViewportInfo;
+class QFAInput;
+
 class QFAEditorUIActorList : public QFAUIScroll
 {
 	friend QFAEditorGameViewportInfo;
@@ -24,8 +27,12 @@ class QFAEditorUIActorList : public QFAUIScroll
 	};
 
 	std::vector<SActorTypes> ActorTypes;
+	
+	// set in QFAEditorGameViewportInfo
+	std::function<void(QActor*)> SelectFunction;
+
 public:
-	QFAEditorUIActorList();
+	QFAEditorUIActorList(std::function<void(QActor*)> selectFunction);
 	~QFAEditorUIActorList();
 
 private:
@@ -40,18 +47,18 @@ private:
 	static void Outfocus(void* _this);
 	static void MouseDown(QFAUIUnit* unit, void* _this);
 	void PressDelete();
-	/*
-		set in QFAEditorMainWindow
-		call if some element was select
-	*/
-	std::function<void()> SelectFun;
-	
+
 
 	const QFAColorF InFocusUnitColor = QFAColorF(1.0f, 1.0f, 1.0f, 0.05f);	
 	const QFAColorF OutFocusUnitColor = QFAColorF(0.0f, 0.0f, 0.0f, 0.0f);
 	const QFAColorF SelectUnit = QFAColor(14, 134, 255, 255).GetColorF();
+	const QFAColorF SelectUnitNotFocus = QFAColor(64, 87, 111, 255).GetColorF();
 
 	std::u32string NumToU32string(size_t num);
 
 	void SelectActor(QActor* actor);
+
+	bool InputFocus = false;
+	void LostInputFocus();
+
 };

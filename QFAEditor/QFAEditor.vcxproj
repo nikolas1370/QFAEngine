@@ -148,6 +148,7 @@
     <ClCompile Include="Editor\Camera\CameraEditor.cpp" />
     <ClCompile Include="Editor\EditorFileStorage.cpp" />
     <ClCompile Include="Editor\EditorOverlord.cpp" />
+    <ClCompile Include="Editor\EditorUI\UIActorTransform.cpp" />
     <ClCompile Include="Editor\EditorUI\ExplorerFolderUnit.cpp" />
     <ClCompile Include="Editor\EditorUI\FileExplorer.cpp" />
     <ClCompile Include="Editor\EditorUI\FileViewUnit.cpp" />
@@ -163,6 +164,7 @@
     <ClInclude Include="Editor\EditorFileStorage.h" />
     <ClInclude Include="Editor\EditorFileTypes.h" />
     <ClInclude Include="Editor\EditorOverlord.h" />
+    <ClInclude Include="Editor\EditorUI\UIActorTransform.h" />
     <ClInclude Include="Editor\EditorUI\ExplorerFolderUnit.h" />
     <ClInclude Include="Editor\EditorUI\FileExplorer.h" />
     <ClInclude Include="Editor\EditorUI\FileViewUnit.h" />

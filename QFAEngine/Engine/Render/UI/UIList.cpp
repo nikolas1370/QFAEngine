@@ -195,7 +195,7 @@ void QFAUIList::CalculateChildren()
 void QFAUIList::ChildInnerChange(QFAUIUnit* child)
 {
 	if (ListType == LTHorizonInner || ListType == LTVerticalInner)
-		if (child->Type == QFAUIType::Text)
+		if (child->Type == QFAUIType::Text || child->Type == QFAUIType::TextInput)
 			CalculateChildren();
 }
 

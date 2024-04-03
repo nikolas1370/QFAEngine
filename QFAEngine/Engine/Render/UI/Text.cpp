@@ -48,7 +48,6 @@ QFAText::QFAText()
     Type = QFAUIType::Text;
     vertexBufer = new QFAVKVertexBuffer(sizeof(GlyphShader) * CountGlyphInGUP, nullptr, commandPool);
     CurentFontIndex = 0;
-    CurentFontIndex = 0;
 }
 
 void QFAText::Init(VkRenderPass renderPass, VkCommandPool commandPool_)
@@ -592,7 +591,7 @@ void QFAText::Render(VkCommandBuffer comandebuffer)
     if (NumberTextInFrame >= maxTextInframe)
         CreateTextParameterSet();
 
-    if (TextChange && Text.size() > 0)
+    if (TextChange && Text.size() > 0)    
         ProcessText();
 
     CurentDescriptorSet = Pipeline->GetSet(1, NumberTextInFrame);
@@ -619,7 +618,14 @@ void QFAText::RenderPen(VkCommandBuffer comandebuffer)
 {
     TextUniformParam.pen = 1;
     textParamBuffers[0]->UpdateData(sizeof(UniformBufferTextParam), &TextUniformParam);// Pen buffer
-    textVertexParamBuffers[0]->UpdateData(sizeof(UniformBufferTextParamVertex), &UnitScroll);
+    struct STem
+    {
+        float UnitScroll = 0.0f; // offset y
+        float UnitOffsetX = 0.0f;
+    };
+    STem tem{ Position_y + UnitScroll, Position_x + UnitOffsetX};
+
+    textVertexParamBuffers[0]->UpdateData(sizeof(UniformBufferTextParamVertex), &tem);
 
     WritePenInfo();
     VkBuffer vertexBuffers[] = { PenVertexBufer->GpuSideBuffer->Buffer };
@@ -703,11 +709,10 @@ void QFAText::updateUniformBuffer()
     TextUniformParam.overflow.rightBottomY = 1000000;
     
     ProcessParentOverflow(TextUniformParam.overflow, Parent);
-
     TextUniformParam.pen = 0;
     memcpy(textParamBuffers[NumberTextInFrame]->MapData, &TextUniformParam, sizeof(UniformBufferTextParam));
     
-    UniformBufferTextParamVertex ubtpv = { UnitScroll , UnitOffsetX };    
+    UniformBufferTextParamVertex ubtpv = { UnitScroll, UnitOffsetX };
     if (InnerWidth > Width && TextAlign == ETextAlign::TARight)
         ubtpv.offsetX *= -1;
     
@@ -823,11 +828,11 @@ void QFAText::GetPenPosition(QFAText::GlyphShader& gs)
     if (TextMetadata.size() == 0)
     {
         if (TextAlign == TALeft)
-            gs.leftTop_1 = { (float)Position_x, (float)Position_y };
+            gs.leftTop_1 = { 0.0f, 0.0f };
         else if (TextAlign == TACenter)
-            gs.leftTop_1 = { (float)(Position_x + Width / 2),(float)Position_y };
+            gs.leftTop_1 = { (float)(Width / 2), 0.0f};
         else if (TextAlign == TARight)
-            gs.leftTop_1 = { (float)(Position_x + Width - 1),(float)Position_y };
+            gs.leftTop_1 = { (float)(Width - 1), 0.0f};
 
         gs.leftBottom_1 = { gs.leftTop_1.x, gs.leftTop_1.y + (Fonts[CurentFontIndex]->Symbols[0].Glyph.HeightMultiplier * (float)FontHeight) };
         gs.rightBottom_1 = { gs.leftBottom_1.x + penH,  (float)gs.leftBottom_1.y };
@@ -840,16 +845,20 @@ void QFAText::GetPenPosition(QFAText::GlyphShader& gs)
     {
         if (Text.pen >= TextMetadata.size())
         {
+            /*
+            
+                пофіксь це
+
+            */
             if (TextAlign == ETextAlign::TARight)
             {
-                gs.leftTop_1 = { (float)(Position_x + Width - 1),
-                    (Fonts[CurentFontIndex]->Symbols[TextMetadata[Text.pen - 1].symbolIndex].Glyph.HeightMultiplier * (float)FontHeight) * TextMetadata[Text.pen - 1].row + Position_y };
+                gs.leftTop_1 = { (float)(Width - 1),
+                    (Fonts[CurentFontIndex]->Symbols[TextMetadata[Text.pen - 1].symbolIndex].Glyph.HeightMultiplier * (float)FontHeight) * TextMetadata[Text.pen - 1].row };            
             }
             else
             {
                 gs.leftTop_1 = { ownGlyphInfoData[Text.pen - 1].rightBottom_1.x + (Fonts[CurentFontIndex]->Symbols[TextMetadata[Text.pen - 1].symbolIndex].Glyph.bitmap_left * Fonts[CurentFontIndex]->Symbols[TextMetadata[Text.pen - 1].symbolIndex].Glyph.differenceWidth) ,
-                                    (Fonts[CurentFontIndex]->Symbols[TextMetadata[Text.pen - 1].symbolIndex].Glyph.HeightMultiplier * (float)FontHeight) * TextMetadata[Text.pen - 1].row + Position_y };
-                
+                                    (Fonts[CurentFontIndex]->Symbols[TextMetadata[Text.pen - 1].symbolIndex].Glyph.HeightMultiplier * (float)FontHeight) * TextMetadata[Text.pen - 1].row };                
             }
 
             gs.leftBottom_1 = { gs.leftTop_1.x, gs.leftTop_1.y + (Fonts[CurentFontIndex]->Symbols[TextMetadata[Text.pen - 1].symbolIndex].Glyph.HeightMultiplier * (float)FontHeight) };
@@ -863,7 +872,7 @@ void QFAText::GetPenPosition(QFAText::GlyphShader& gs)
         {
             float tem = (float)Fonts[CurentFontIndex]->Symbols[TextMetadata[Text.pen].symbolIndex].Glyph.bitmap_left * Fonts[CurentFontIndex]->Symbols[TextMetadata[Text.pen].symbolIndex].Glyph.differenceWidth;// differenceWidth
 
-            gs.leftTop_1 = { ownGlyphInfoData[Text.pen].leftTop_2.x - tem - yOffset, (Fonts[CurentFontIndex]->Symbols[TextMetadata[Text.pen].symbolIndex].Glyph.HeightMultiplier * (float)FontHeight) * TextMetadata[Text.pen].row + Position_y };
+            gs.leftTop_1 = { ownGlyphInfoData[Text.pen].leftTop_2.x - tem - yOffset, (Fonts[CurentFontIndex]->Symbols[TextMetadata[Text.pen].symbolIndex].Glyph.HeightMultiplier * (float)FontHeight) * TextMetadata[Text.pen].row };
             gs.leftBottom_1 = { gs.leftTop_1.x, gs.leftTop_1.y + (Fonts[CurentFontIndex]->Symbols[TextMetadata[Text.pen].symbolIndex].Glyph.HeightMultiplier * (float)FontHeight) };
             gs.rightBottom_1 = { gs.leftBottom_1.x + penH,  (float)gs.leftBottom_1.y };
 

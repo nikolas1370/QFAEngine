@@ -1,9 +1,12 @@
-#include "TextInput.h"
+﻿#include "TextInput.h"
 
-QFAUITextInput::QFAUITextInput()
+char QFAUITextInput::convertStr[21];
+
+QFAUITextInput::QFAUITextInput(ENumberType numberT)
 {
 	Type = QFAUIType::TextInput;
 	Text = new QFAText;
+
 	Text->Parent = this;
 	Text->Text.pen = 0;
 	Text->Text.penEnable = true;
@@ -12,12 +15,70 @@ QFAUITextInput::QFAUITextInput()
 	Text->TextMetadata.onlyText = false;
 	Text->TextMetadata.inputData = &pd[0];
 	Overflow = EOverflow::Hidden; 	
-	Children.push_back(Text);
+	AddHiddenChild(Text);	
+	NumberType = numberT;	
+	if (NumberType == ENumberType::Float)
+		SetValue(0.0f);
+	else if (NumberType == ENumberType::Int)
+		SetValue(0);
+	
 }
 
 QFAUITextInput::~QFAUITextInput()
 {
 	Text->Parent = nullptr;
+}
+
+std::u32string QFAUITextInput::GetValue()
+{
+	std::u32string val;
+	val.resize(Text->Text.size());
+	for (size_t i = 0; i < Text->Text.size(); i++)
+		val[i] = Text->Text.pText[i];
+
+	return val;
+}
+
+void QFAUITextInput::SetValue(float value)
+{
+	std::string str = std::to_string(value);
+	for (size_t i = 0; i < str.size(); i++)
+		Text->Text.pText[i] = (char32_t)str[i];
+
+	
+	Text->Text.pTextSize = str.size();
+	Text->Text.pen = 0;
+	UpdateUnitOffset();
+	Text->TextChange = true;
+}
+
+void QFAUITextInput::SetValue(int value)
+{
+	std::string str = std::to_string(value);
+	for (size_t i = 0; i < str.size(); i++)
+		Text->Text.pText[i] = (char32_t)str[i];
+
+	Text->Text.pTextSize = str.size();
+	Text->Text.pen = 0;
+	UpdateUnitOffset();
+	Text->TextChange = true;
+}
+
+void QFAUITextInput::SetValue(std::u32string value)
+{
+	int maxText = value.size() > MaxTextCount ? MaxTextCount : value.size();
+	for (size_t i = 0; i < maxText; i++)
+		Text->Text.pText[i] = value[i];
+
+	Text->Text.pTextSize = maxText;
+	Text->Text.pen = 0;
+	UpdateUnitOffset();
+	Text->TextChange = true;
+}
+
+void QFAUITextInput::SetOutFocusFun(std::function<void(QFAUITextInput*)> fun)
+{
+	OutFocusFun = fun;
 }
 
 void QFAUITextInput::ChangeSize(unsigned int w, unsigned int h)
@@ -30,7 +91,7 @@ void QFAUITextInput::ChangeSize(unsigned int w, unsigned int h)
 void QFAUITextInput::ChangePosition(int x, int y)
 {
 	Position_x = x;
-	Position_y = y;
+	Position_y = y;	
 	Text->SetPositionParent(x, y);
 }
 
@@ -54,6 +115,35 @@ void QFAUITextInput::InInputfocus(unsigned int cursorX, unsigned int cursorY)
 
 	Text->Text.inputFocus = true;
 
+	if (NumberType == ENumberType::Float)
+	{
+		memset(convertStr, 0, sizeof(convertStr));
+		for (size_t i = 0; i < sizeof(convertStr) - 1; i++)
+			convertStr[i] = (char)Text->Text.pText[i];
+		try
+		{
+			ValidFLoat = std::stoi(convertStr);
+		}
+		catch (const std::exception&)
+		{
+
+		}
+	}
+	else if (NumberType == ENumberType::Int)
+	{
+		memset(convertStr, 0, sizeof(convertStr));
+		for (size_t i = 0; i < sizeof(convertStr) - 1; i++)
+			convertStr[i] = (char)Text->Text.pText[i];
+		try
+		{
+			ValidInt = std::stoi(convertStr);
+		}
+		catch (const std::exception&)
+		{
+
+		}
+	}
+	
 
 	QFAText::GlyphShader *gs = (QFAText::GlyphShader*)Text->vertexBufer->CpuSideBuffer->MapData;
 	int index = 0;
@@ -88,6 +178,54 @@ void QFAUITextInput::OutInputfocus()
 {
 	Text->Text.inputFocus = false;
 	PenTime = 0.0f;
+
+	if (NumberType == ENumberType::Float)
+	{
+		memset(convertStr, 0, sizeof(convertStr));
+		for (size_t i = 0; i < sizeof(convertStr) - 1; i++)
+			convertStr[i] = (char)Text->Text.pText[i];
+
+		try
+		{
+			ValidFLoat = std::stof(convertStr);
+		}
+		catch (const std::exception&)
+		{
+				
+		}
+
+		Text->Text.pTextSize = 0;
+		Text->Text.pen = 0;
+		std::string str = std::to_string(ValidFLoat);
+		for (size_t i = 0; i < str.size(); i++)
+			AddChar((unsigned int)str[i]);
+
+		Text->Text.pen = 0;
+		UpdateUnitOffset();
+	}
+	else if (NumberType == ENumberType::Int)
+	{		
+		try
+		{
+			ValidInt = std::stoi(convertStr);
+		}
+		catch (const std::exception&)
+		{
+			
+		}
+
+		Text->Text.pTextSize = 0;
+		Text->Text.pen = 0;
+		std::string str = std::to_string(ValidInt);
+		for (size_t i = 0; i < str.size(); i++)
+			AddChar((unsigned int)str[i]);
+
+		Text->Text.pen = 0;
+		UpdateUnitOffset();
+	}
+
+	if (OutFocusFun)
+		OutFocusFun(this);
 }
 
 void QFAUITextInput::AddChar(unsigned int charCode)
@@ -96,13 +234,16 @@ void QFAUITextInput::AddChar(unsigned int charCode)
 		return;
 
 	for (size_t i = Text->Text.pTextSize; i > Text->Text.pen; i--)
-		Texts[i] = Texts[i - 1];
+		Texts[i] = Texts[i - 1];	
 
 	Texts[Text->Text.pen] = charCode;
 	Text->Text.pen++;
 	Text->Text.pTextSize++;	
 	Text->ProcessText(); // before UpdateUnitOffset need re proces text, otherwise GetPenPosition return error value
 	UpdateUnitOffset();
+		
+	
+
 
 	PenTime = MaxPenTime;
 	Text->Text.CanSeePen = true;
@@ -126,7 +267,8 @@ void QFAUITextInput::RemoveChar()
 		Text->TextMetadata.Clear();
 	}
 
-	UpdateUnitOffset();
+	
+	UpdateUnitOffset(true);
 	PenTime = MaxPenTime;
 	Text->Text.CanSeePen = true;
 }
@@ -154,19 +296,33 @@ void QFAUITextInput::PenRight()
 }
 
 
-void QFAUITextInput::UpdateUnitOffset()
+void QFAUITextInput::UpdateUnitOffset(bool removeChar)
 {	
 	QFAText::GlyphShader gs;
 	Text->GetPenPosition(gs);
-	if (gs.leftTop_1.x + Text->UnitOffsetX < Position_x) // left
-		Text->UnitOffsetX = Position_x - gs.leftTop_1.x; // + value
-	else if(gs.rightTop_2.x + Text->UnitOffsetX > Position_x + Width) // right
-		Text->UnitOffsetX = Position_x + Width - gs.rightTop_2.x; // - value
+	if (gs.leftTop_1.x <= 0) // left
+	{
+		/*
+			if type left set 0
+			in other some else
+			Text->UnitOffsetX = gs.leftTop_1.x;
+		*/
+		Text->UnitOffsetX = 1;
+	}	
+	else if (gs.rightTop_2.x > Width - Text->UnitOffsetX ||
+			(removeChar && Text->Text.pen == Text->Text.pTextSize && Text->UnitOffsetX < 0)) // right
+	{
+		Text->UnitOffsetX = Width - gs.rightTop_2.x;		
+	}
+	else if (gs.rightTop_2.x < -Text->UnitOffsetX)// left
+		Text->UnitOffsetX = -gs.leftTop_1.x;
 
-	if (gs.leftTop_1.y + Text->UnitScroll < Position_y) // up
-		Text->UnitScroll = Position_y - gs.leftTop_1.y; // + value
-	else if(gs.leftBottom_1.y + Text->UnitScroll > Position_y + Height) // down
-		Text->UnitScroll = Position_y + Height - gs.leftBottom_1.y; // - value
+	if (gs.leftTop_1.y  < 0) // up
+		Text->UnitScroll = gs.leftTop_1.y; 
+	else if (gs.leftBottom_1.y > Height - Text->UnitScroll) // down
+		Text->UnitScroll = Height - gs.leftBottom_1.y;
+	else if(gs.leftBottom_1.y < -Text->UnitScroll)// up
+		Text->UnitScroll = -Text->UnitScroll;
 }
 
 void QFAUITextInput::NewFrame(float delta)
@@ -177,6 +333,12 @@ void QFAUITextInput::NewFrame(float delta)
 		PenTime = MaxPenTime;
 		Text->Text.CanSeePen = !Text->Text.CanSeePen;
 	}
+}
+
+void QFAUITextInput::ChildInnerChange(QFAUIUnit* child)
+{
+	if (Parent->IsValid())
+		Parent->ChildInnerChange(this);
 }
 
 

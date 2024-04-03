@@ -1,10 +1,10 @@
 #pragma once
 
-#include <Tools/Array.h>
 #include <Math/Vector.h>
-#include <Render/UI/RenderUnit.h>
 #include <Render/Buffer/VKBuffer.h>
+#include <Render/UI/RenderUnit.h>
 #include <Render/Window/Window.h>
+#include <Tools/Array.h>
 #include <Tools/Color.h>
 
 /* ttf type */
@@ -521,6 +521,9 @@ protected:
     STextMetadata TextMetadata;
     unsigned int countTextRow = 0;
 
+    /*
+        in position not include position_x and position_y
+    */
     void GetPenPosition(QFAText::GlyphShader& gs);
     void WritePenInfo();
 

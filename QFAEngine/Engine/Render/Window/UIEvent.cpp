@@ -71,6 +71,14 @@ QFAUIEvent::QFAUIEvent(QFAWindow* window, GLFWwindow* _glfWindow)
 				this->TextInput->RemoveChar();
 		});
 
+	Input->AddKeyRelease(EKey::ENTER, "Enter", [this](EKey::Key key)
+		{
+			if (TextInput)
+			{
+				TextInput->OutInputfocus();
+				TextInput = nullptr;
+			}
+		});
 
 	Input->AddKeyPress(EKey::LEFT_SHIFT, "DLSH", [this](EKey::Key key)
 		{
@@ -93,6 +101,8 @@ QFAUIEvent::QFAUIEvent(QFAWindow* window, GLFWwindow* _glfWindow)
 		});
 
 
+
+	
 	
 }
 

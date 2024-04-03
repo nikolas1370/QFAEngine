@@ -6,9 +6,9 @@
 #include <Render/UI/Text.h>
 #include <filesystem>
 
-
-QFAEditorUIActorList::QFAEditorUIActorList()
+QFAEditorUIActorList::QFAEditorUIActorList(std::function<void(QActor*)> selectFunction)
 {
+	SelectFunction = selectFunction;
 	UIActorList = new QFAUIList;
 	UIActorList->SetListType(QFAUIList::LTVertical);
 	UIActorList->SetUnitHeight(25);
@@ -18,13 +18,24 @@ QFAEditorUIActorList::QFAEditorUIActorList()
 	UIActorList->Events.SetOutFocus(QFAEditorUIActorList::Outfocus, this);
 
 	UIActorList->Events.SetLeftMouseDown(QFAEditorUIActorList::MouseDown, this);
+
+
+
+	/*
+	
+	thisUnit->SelectFunction(nullptr);
+	if (unit == _this)
+	{
+		thisUnit->CurentActorSelect = nullptr;
+	*/
 }
-
-
 
 QFAEditorUIActorList::~QFAEditorUIActorList()
 {
 }
+
+
+
 
 void QFAEditorUIActorList::AddActor(QActor* actor, SEditorFile& ef)
 {
@@ -33,6 +44,7 @@ void QFAEditorUIActorList::AddActor(QActor* actor, SEditorFile& ef)
 	QFAText* text = new QFAText;
 	color->SetUnit(text);
 	text->SetTextSize(20);
+
 
 	size_t count = 0;
 	for (size_t i = 0; i < ActorTypes.size(); i++)
@@ -112,12 +124,20 @@ void QFAEditorUIActorList::Outfocus(void* _this)
 
 void QFAEditorUIActorList::MouseDown(QFAUIUnit* unit, void* _this)
 {
-	if (unit == _this)
-		return;
-
 	QFAEditorUIActorList* thisUnit = (QFAEditorUIActorList*)_this;
+	thisUnit->SelectFunction(nullptr);
+	if (unit == _this)
+	{
+		thisUnit->CurentActorSelect = nullptr;
+		return;
+	}
+
+	
 	if (thisUnit->CurentActorSelect)
+	{
 		thisUnit->CurentActorSelect->SetBackgroundColor(thisUnit->OutFocusUnitColor);
+		thisUnit->CurentActorSelect = nullptr;
+	}
 
 	QFAUIUnit* parent = unit;
 	while (true)
@@ -127,11 +147,18 @@ void QFAEditorUIActorList::MouseDown(QFAUIUnit* unit, void* _this)
 
 		if (parent->GetUnitType() == QFAUIType::Background)
 		{
+			for (size_t i = 0; i < thisUnit->ActorList.size(); i++)
+			{
+				if (thisUnit->ActorList[i].textBackgroundColor == parent)
+				{
+					thisUnit->SelectFunction(thisUnit->ActorList[i].actor);
+					break;
+				}
+			}
+			
+			thisUnit->InputFocus = true;
 			thisUnit->CurentActorSelect = (QFAUIBackground*)parent;
 			thisUnit->CurentActorSelect->SetBackgroundColor(thisUnit->SelectUnit);
-			if(thisUnit->SelectFun)
-				thisUnit->SelectFun();
-
 			return;
 		}
 
@@ -141,7 +168,7 @@ void QFAEditorUIActorList::MouseDown(QFAUIUnit* unit, void* _this)
 
 void QFAEditorUIActorList::PressDelete()
 {
-	if (!CurentActorSelect)
+	if (!CurentActorSelect || !InputFocus)
 		return;
 
 	for (size_t i = 0; i < ActorList.size(); i++)
@@ -172,6 +199,9 @@ std::u32string QFAEditorUIActorList::NumToU32string(size_t num)
 
 void QFAEditorUIActorList::SelectActor(QActor* actor)
 {
+	if (!actor->IsValid())
+		return;
+
 	for (size_t i = 0; i < ActorList.size(); i++)
 	{
 		if (ActorList[i].actor == actor) 
@@ -181,10 +211,15 @@ void QFAEditorUIActorList::SelectActor(QActor* actor)
 
 			CurentActorSelect = ActorList[i].textBackgroundColor;
 			CurentActorSelect->SetBackgroundColor(SelectUnit);
-			if (SelectFun)
-				SelectFun();
 
 			return;
 		}
 	}
+}
+
+void QFAEditorUIActorList::LostInputFocus()
+{
+	InputFocus = false;
+	if(CurentActorSelect->IsValid())
+		CurentActorSelect->SetBackgroundColor(SelectUnitNotFocus);
 }

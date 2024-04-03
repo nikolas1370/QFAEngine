@@ -96,6 +96,7 @@ void QFAEditorMainWindow::CreateUI()
 	PrepareCallback();	
 }
 
+#include <Render/UI/TextInput.h>
 void QFAEditorMainWindow::PrepareGameViewport()
 {
 	GameViewport = new QFAViewport();
@@ -109,7 +110,7 @@ void QFAEditorMainWindow::PrepareGameViewport()
 	EditorCamera->SetActorRotation(0);
 	EditorCamera->ActivateCamera(GameViewport);
 
-	Worlds[0].SetEditorActor(EditorCamera);
+	Worlds[0].SetEditorActor(EditorCamera);		
 }
 
 void QFAEditorMainWindow::PrepareCallback()
@@ -129,29 +130,23 @@ void QFAEditorMainWindow::PrepareCallback()
 			}
 		});
 
-	GameViewportInfo->ActorList->SelectFun = [this]()
-		{
-			Focus = EFocus::FActorList;
-		};
+	Input->AddKeyPress(EKey::MOUSE_LEFT, "select", [this](EKey::Key key)
+		{// QFAEditorUIActorList LostInputFocus
+			//GameViewportInfo->ActorInfoList
+			/*
+			
+				write LostInputFocus for QFAEditorUIActorList and fileExplorer
+
+			*/
+		});
+
+	
 }
 
 void QFAEditorMainWindow::AddActorToWorlds(QActor* actor, SEditorFile& ef)
 {
 	Worlds[0].AddActor(actor);
 	GameViewportInfo->ActorList->AddActor(actor, ef);
-
-
-	/*  
-	
-		remove
-		
-	*/
-	static int lop = 0;
-	actor->SetActorPosition(FVector(300 * lop, 0, 0));
-	lop++;
-	
-
-
 
 }
 
@@ -197,7 +192,7 @@ void QFAEditorMainWindow::PickMesh(EKey::Key key)
 {
 	MainWindow->Window->GetMeshUnderCursore([](QMeshBaseComponent* mesh)
 		{
-			MainWindow->GameViewportInfo->ActorList->SelectActor(mesh->GetActor());
+			MainWindow->GameViewportInfo->SelectActor(mesh->GetActor());
 		});
 }
 
