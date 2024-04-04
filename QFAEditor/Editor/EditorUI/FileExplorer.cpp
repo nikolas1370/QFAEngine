@@ -200,9 +200,10 @@ void QFAUIEditorFileExplorer::FolderItemListLeftMouseDown(QFAUIUnit* unit, void*
 				if (thisUnit->FolderItemListSelectUnit)
 					thisUnit->FolderItemListSelectUnit->SetBackgroundColor(QFAColor(0, 0, 0, 0));
 
+				thisUnit->InputFocus = true;
 				thisUnit->LastLeftMouseDownTime = QTime::GetSystemTime();
 				thisUnit->FolderItemListSelectUnit = (QFAEditorExplorerFolderUnit*)parent;
-				thisUnit->FolderItemListSelectUnit->SetBackgroundColor(thisUnit->SelectUnit);
+				thisUnit->FolderItemListSelectUnit->SetBackgroundColor(thisUnit->SelectUnit);				
 			}
 			
 			break;
@@ -298,6 +299,11 @@ void QFAUIEditorFileExplorer::NextFolderButton(QFAUIUnit* unit, void* _this)
 		thisUnit->ForwardButton->SetTextColor(thisUnit->ButoonOnColor);
 
 	thisUnit->PathChanged();
+	if(thisUnit->FolderItemListSelectUnit->IsValid())
+	{
+		thisUnit->FolderItemListSelectUnit->SetBackgroundColor(thisUnit->OutFocusUnitColor);
+		thisUnit->FolderItemListSelectUnit = nullptr;
+	}
 }
 
 void QFAUIEditorFileExplorer::PreviousFolderButton(QFAUIUnit* unit, void* _this)
@@ -315,6 +321,11 @@ void QFAUIEditorFileExplorer::PreviousFolderButton(QFAUIUnit* unit, void* _this)
 		thisUnit->BackButton->SetTextColor(thisUnit->ButoonOnColor);
 
 	thisUnit->PathChanged();
+	if (thisUnit->FolderItemListSelectUnit->IsValid())
+	{
+		thisUnit->FolderItemListSelectUnit->SetBackgroundColor(thisUnit->OutFocusUnitColor);
+		thisUnit->FolderItemListSelectUnit = nullptr;
+	}
 }
 
 void QFAUIEditorFileExplorer::DropFiles(int path_count, const char* paths[])
@@ -333,6 +344,14 @@ void QFAUIEditorFileExplorer::NotifyMainEditorWindowDrag(QFAEditorExplorerFolder
 			return DragFun(folderContents[i].id);
 }
 
+void QFAUIEditorFileExplorer::LostInputFocus()
+{	
+	if (FolderItemListSelectUnit->IsValid())
+		FolderItemListSelectUnit->SetBackgroundColor(SelectUnitNotFocus);
+	
+	InputFocus = false;
+}
+
 void QFAUIEditorFileExplorer::PathChanged()
 {
 	PathText->SetText(CurentFolder.path);
@@ -346,12 +365,16 @@ void QFAUIEditorFileExplorer::MySlotChange(QFAUIUnit* unit)
 
 void QFAUIEditorFileExplorer::ChangeSize(unsigned int w, unsigned int h)
 {	
+	Width = w;
+	Height = h;
 	SetChildSize(FileExplorerTop, w, h);
 	SetChildSize(FileExplorerBottom, w, h >= FileExplorerTopHeight ? h - FileExplorerTopHeight : 0);
 }
 
 void QFAUIEditorFileExplorer::ChangePosition(int x, int y)
 {
+	Position_x = x;
+	Position_y = y;
 	SetChildPosition(FileExplorerTop, x, y );
 	SetChildPosition(FileExplorerBottom, x, y + FileExplorerTopHeight);
 }

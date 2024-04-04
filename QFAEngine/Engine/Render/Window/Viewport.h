@@ -27,9 +27,7 @@ class QFAViewport
 	glm::mat4 MatrixPerspective;
 	QCameraComponent* CurentCamera = nullptr;
 
-	// rename
-
-	// offset from left bottom corner
+	
 	int X, Y;
 	int Width = 1;
 	int Height = 1;
@@ -101,6 +99,16 @@ public:
 	inline QFAViewportRoot* GetRoot()
 	{
 		return &Root;
+	}
+
+	inline FVector2D GetSize()
+	{
+		return FVector2D(Width, Height);
+	}
+
+	inline FVector2D GetPosition()
+	{
+		return FVector2D(X, Y);
 	}
 
 protected:

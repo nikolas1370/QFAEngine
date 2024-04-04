@@ -84,7 +84,10 @@ public:
 		return ActorWorld;
 	}
 
-
+	inline void SetTick(bool enable)
+	{
+		CanTick = enable;
+	}
 
 };
 

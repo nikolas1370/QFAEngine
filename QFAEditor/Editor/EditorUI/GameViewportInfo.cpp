@@ -51,7 +51,6 @@ QFAEditorGameViewportInfo::~QFAEditorGameViewportInfo()
 
 void QFAEditorGameViewportInfo::SelectActor(QActor* actor)
 {
-	std::cout << "Lopoid\n";
 	ActorInfoList->SetEnable(actor->IsValid());
 
 	ActorList->SelectActor(actor);

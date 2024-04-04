@@ -80,6 +80,7 @@ private:
 	const QFAColorF InFocusUnitColor = QFAColorF(1.0f, 1.0f, 1.0f, 0.05f);
 	const QFAColorF OutFocusUnitColor = QFAColorF(0.0f, 0.0f, 0.0f, 0.0f);
 	const QFAColorF SelectUnit = QFAColor(14, 134, 255, 255).GetColorF();
+	const QFAColorF SelectUnitNotFocus = QFAColor(64, 87, 111, 255).GetColorF();
 
 	void DropFiles(int path_count, const char* paths[]);
 
@@ -92,4 +93,7 @@ private:
 	QFAEditorFileViewWindow* FileViewWindow = nullptr;
 
 	void NotifyMainEditorWindowDrag(QFAEditorExplorerFolderUnit* unit);
+
+	bool InputFocus = false;
+	void LostInputFocus();
 };

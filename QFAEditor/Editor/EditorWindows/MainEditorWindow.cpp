@@ -44,8 +44,44 @@ QFAEditorMainWindow::QFAEditorMainWindow()
 	MainWindow->CreateLoadUI();
 
 	Input = new QFAInput(Window);
-	Input->AddKeyRelease(EKey::MOUSE_LEFT, "lmbU", QFAEditorMainWindow::EndDragAndDrop);
-	Input->AddKeyPress(EKey::MOUSE_LEFT, "lmbD", QFAEditorMainWindow::PickMesh);
+	Input->AddKeyRelease(EKey::MOUSE_LEFT, "lmbU", [this](EKey::Key key)
+		{
+			QFAEditorMainWindow::EndDragAndDrop(key);
+			
+
+
+			double x, y;
+			if (Window->GetMousePosition(x, y))
+			{
+				FVector2D tem = PickObjectLastCursorPos - FVector2D(x, y);
+				if(tem.Length() < 10.0f)
+					QFAEditorMainWindow::PickMesh(key);
+			}
+			
+			EditorCamera->SetTick(false);
+		});// EKey::Key key
+	Input->AddKeyPress(EKey::MOUSE_LEFT, "lmbD", [this](EKey::Key key)
+		{
+			double x, y;
+			if (Window->GetMousePosition(x, y))
+			{				
+				FVector2D pos = GameViewport->GetPosition();
+				FVector2D size = GameViewport->GetSize();
+				if (x >= pos.X && y >= pos.Y &&
+					x <= pos.X + size.X && y <= pos.Y + size.Y)
+				{
+					PickObjectLastCursorPos.X = x;
+					PickObjectLastCursorPos.Y = y;
+					EditorCamera->SetTick(true);
+				}
+				else
+				{
+					PickObjectLastCursorPos.X = -1.0f;
+					PickObjectLastCursorPos.Y = -1.0f;
+				}
+				
+			}
+		});
 }
 
 QFAEditorMainWindow::~QFAEditorMainWindow()
@@ -106,6 +142,7 @@ void QFAEditorMainWindow::PrepareGameViewport()
 	Worlds = new QWorld[2];
 	Worlds[0].SetEnable(false);
 	EditorCamera = new ACameraEditor;
+	EditorCamera->SetTick(false);
 	EditorCamera->SetActorPosition(FVector(-200, 0, 0));
 	EditorCamera->SetActorRotation(0);
 	EditorCamera->ActivateCamera(GameViewport);
@@ -131,15 +168,36 @@ void QFAEditorMainWindow::PrepareCallback()
 		});
 
 	Input->AddKeyPress(EKey::MOUSE_LEFT, "select", [this](EKey::Key key)
-		{// QFAEditorUIActorList LostInputFocus
-			//GameViewportInfo->ActorInfoList
-			/*
-			
-				write LostInputFocus for QFAEditorUIActorList and fileExplorer
+		{
+			double x, y;			
+			if (Window->GetMousePosition(x, y))
+			{
+				FVector2D pos = GameViewportInfo->ActorList->GetPosition();
+				FVector2D size = GameViewportInfo->ActorList->GetSize();
+				
+				if (!(x >= pos.X && y >= pos.Y &&
+					x <= pos.X + size.X && y <= pos.Y + size.Y))
+				{
+					GameViewportInfo->ActorList->LostInputFocus();
+				}
 
-			*/
+				pos = FileExplorer->GetPosition();
+				size = FileExplorer->GetSize();
+				if (!(x >= pos.X && y >= pos.Y &&
+					x <= pos.X + size.X && y <= pos.Y + size.Y))
+				{
+					FileExplorer->LostInputFocus();
+				}
+
+				return;
+			}
+
+			GameViewportInfo->ActorList->LostInputFocus();
+			FileExplorer->LostInputFocus();
 		});
 
+
+	
 	
 }
 
@@ -190,9 +248,9 @@ void QFAEditorMainWindow::EndDragAndDrop(EKey::Key key)
 
 void QFAEditorMainWindow::PickMesh(EKey::Key key)
 {
-	MainWindow->Window->GetMeshUnderCursore([](QMeshBaseComponent* mesh)
+	Window->GetMeshUnderCursore([this](QMeshBaseComponent* mesh)
 		{
-			MainWindow->GameViewportInfo->SelectActor(mesh->GetActor());
+			GameViewportInfo->SelectActor(mesh->GetActor());
 		});
 }
 

@@ -23,7 +23,7 @@ void QWorld::ProcessTicks()
 	{// world active if at least one viewport connect
 		if (!Worlds[i]->GetEnable())
 		{
-			if (Worlds[i]->EditorActor->IsValid())
+			if (Worlds[i]->EditorActor->IsValid() && Worlds[i]->EditorActor->CanTick)
 			{
 				Worlds[i]->EditorActor->Tick(delta);
 				ProcessSceneComponentTick(Worlds[i]->EditorActor->RootComponent);

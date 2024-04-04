@@ -69,12 +69,13 @@ private:
 	size_t CurentDragFileId = 0;
 	static void StartDragAndDrop(size_t fileId);
 	static void EndDragAndDrop(EKey::Key key);
-	static void PickMesh(EKey::Key key);
+	void PickMesh(EKey::Key key);
 	void PrepareGameViewport();
 	void PrepareCallback();
 
 	void AddActorToWorlds(QActor* actor, SEditorFile& ef);
 
 	QFAInput* input;
+	FVector2D PickObjectLastCursorPos;
 };
 
