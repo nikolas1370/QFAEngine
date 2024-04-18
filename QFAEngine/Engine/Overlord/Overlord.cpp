@@ -73,10 +73,6 @@ bool QFAOverlord::Init(std::vector<QFAVKPipeline::SShaderData> shaderData, bool 
     return true;
 }
 
-
-
-#include <filesystem>
-
 void QFAOverlord::MainLoop()
 {
     static int count = 0;
@@ -161,8 +157,3 @@ void QFAOverlord::EndLife()
     );
     timeEndPeriod(ptc.wPeriodMin); // need call after timeBeginPeriod
 }
-
-
-
-
-

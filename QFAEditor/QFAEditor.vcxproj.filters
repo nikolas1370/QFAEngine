@@ -54,6 +54,9 @@
     <ClCompile Include="Editor\EditorUI\UIActorTransform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Editor\GameCodeTool\GameCodeCompiler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor\ShaderCompiler\ShaderCompiler.h">
@@ -96,6 +99,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Editor\EditorUI\UIActorTransform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\GameCodeTool\GameCodeCompiler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

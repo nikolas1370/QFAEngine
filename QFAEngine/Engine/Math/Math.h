@@ -1,9 +1,6 @@
 #pragma once
-
 #define PI 					(3.1415926535897932f)	
 #define DOUBLE_PI		    (3.141592653589793238462643383279502884197169399)
-
-
 
 #define EqualFloats(value1, value2) (abs((value1) - (value2)) < 0.00001)
 #define EqualToZero(value) (abs(value) < 0.00001)
@@ -11,21 +8,15 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+
 
 class Math
 {
-
-
 public:
 	static const glm::mat4 DefauldMatrix4;
 	static const glm::mat3 DefauldMatrix3;
-
-
-
 	/*
-	*	angle in radians
-	*
+	* angle in radians
 	* copy glm::rotate but with glm::mat3
 	*/
 	static glm::mat3 rotateMatrix3(glm::mat3 const& m, float angle, glm::vec3 const& v);
@@ -66,12 +57,6 @@ public:
 		return dmm;
 	}
 
-
 	// from https://gist.github.com/Reedbeta/e8d3817e3f64bba7104b8fafd62906df
 	static glm::vec3 srgb_to_linear(glm::vec3 rgb);	
 };
-
-
-
-
-

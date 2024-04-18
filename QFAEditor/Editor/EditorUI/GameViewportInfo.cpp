@@ -9,6 +9,8 @@
 #include <EditorUI/UIActorTransform.h>
 
 
+
+
 QFAEditorGameViewportInfo::QFAEditorGameViewportInfo()
 {	
 	Canvas = new QFAUICanvas;

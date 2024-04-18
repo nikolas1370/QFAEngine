@@ -7,6 +7,10 @@
 
 QFAArray<QWorld*> QWorld::Worlds;
 
+#define lopoid(val) int val::lox;
+
+lopoid(QWorld)
+
 void QWorld::ForgetActor(QActor* actor)
 {
 	if (!actor->IsValid())

@@ -8,8 +8,13 @@ class QFAViewport;
 class QSceneComponent;
 class QFAEditorMainWindow;
 
+
+	QFAClass
 class QWorld : public QObject
 {
+
+	static int lox;
+
 	friend QFAOverlord;
 	friend QFAEditorMainWindow;
 	

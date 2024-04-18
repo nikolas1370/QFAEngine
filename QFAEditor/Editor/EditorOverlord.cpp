@@ -27,6 +27,8 @@ void QFAEditorOverlord::StartLife()
     QFAEditorFileStorage::EndLife();
 }
 
+
+
 void QFAEditorOverlord::Init()
 {
     /*

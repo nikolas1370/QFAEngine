@@ -231,7 +231,7 @@ void QFAUITextInput::OutInputfocus()
 void QFAUITextInput::AddChar(unsigned int charCode)
 {
 	if ((NumberType == ENumberType::Float || NumberType == ENumberType::Int) &&
-		!(charCode >= (unsigned int)'0' && charCode <= (unsigned int)'9' || charCode == (unsigned int)'.') )
+		!(charCode >= (unsigned int)'0' && charCode <= (unsigned int)'9' || charCode == (unsigned int)'.' || charCode == (unsigned int)'-') )
 		return;		
 
 	if (Text->Text.pTextSize >= MaxTextCount)

@@ -15,8 +15,6 @@ class QFAUIParentMultipleUnit;
 class QFAEditorMainWindow;
 class QFAViewport
 {
-
-
 	friend QFAWindow;
 	friend QFAUIParentMultipleUnit;
 	friend QFAUIUnit;

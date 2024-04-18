@@ -1,6 +1,7 @@
 #pragma once
 #include <Render/UI/Text.h>
 #include <EditorFileStorage.h>
+#include <GameCodeTool/GameCodeCompiler.h>
 
 class QFAWindow;
 class QFAUIEditorFileExplorer;
@@ -77,5 +78,9 @@ private:
 
 	QFAInput* input;
 	FVector2D PickObjectLastCursorPos;
+
+	bool LeftCTRLPress = false;
+	static void GameCompileCallback(GameCodeCompiler::CompileStatus status);
+	bool CompileStarted = false;
 };
 

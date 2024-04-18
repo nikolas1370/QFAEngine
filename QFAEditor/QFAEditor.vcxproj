@@ -71,10 +71,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Assimp\include;$(SolutionDir)QFAEditor\Editor;$(SolutionDir)..\glfw-3.4.bin.WIN64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\VulkanSDK\1.3.275.0\Include;$(SolutionDir)QFAEngine\Engine;$(SolutionDir)..\glfw-3.4\include;$(SolutionDir)..\icu4c-74_2\include;$(SolutionDir)..\stb;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Assimp\include;$(SolutionDir)QFAEditor\Editor;$(SolutionDir)..\glfw-3.4.bin.WIN64\include;$(VC_IncludePath);$(SolutionDir)QFAEngine;$(WindowsSDK_IncludePath);C:\VulkanSDK\1.3.275.0\Include;$(SolutionDir)QFAEngine\Engine;$(SolutionDir)..\glfw-3.4\include;$(SolutionDir)..\icu4c-74_2\include;$(SolutionDir)..\stb;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Assimp\include;$(SolutionDir)QFAEditor\Editor;$(SolutionDir)..\glfw-3.4.bin.WIN64\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\VulkanSDK\1.3.275.0\Include;$(SolutionDir)QFAEngine\Engine;$(SolutionDir)..\glfw-3.4\include;$(SolutionDir)..\icu4c-74_2\include;$(SolutionDir)..\stb;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Assimp\include;$(SolutionDir)QFAEditor\Editor;$(SolutionDir)..\glfw-3.4.bin.WIN64\include;$(VC_IncludePath);$(SolutionDir)QFAEngine;$(WindowsSDK_IncludePath);C:\VulkanSDK\1.3.275.0\Include;$(SolutionDir)QFAEngine\Engine;$(SolutionDir)..\glfw-3.4\include;$(SolutionDir)..\icu4c-74_2\include;$(SolutionDir)..\stb;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -108,7 +108,7 @@
     <ClCompile>
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>QFA_EDITOR_ONLY;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
@@ -125,7 +125,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>QFA_EDITOR_ONLY;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
@@ -155,6 +155,7 @@
     <ClCompile Include="Editor\EditorUI\GameViewportInfo.cpp" />
     <ClCompile Include="Editor\EditorUI\UIActorList.cpp" />
     <ClCompile Include="Editor\EditorWindows\FileViewWindow.cpp" />
+    <ClCompile Include="Editor\GameCodeTool\GameCodeCompiler.cpp" />
     <ClCompile Include="Editor\ShaderCompiler\ShaderCompiler.cpp" />
     <ClCompile Include="Editor\EditorWindows\MainEditorWindow.cpp" />
     <ClCompile Include="main.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="Editor\EditorUI\GameViewportInfo.h" />
     <ClInclude Include="Editor\EditorUI\UIActorList.h" />
     <ClInclude Include="Editor\EditorWindows\FileViewWindow.h" />
+    <ClInclude Include="Editor\GameCodeTool\GameCodeCompiler.h" />
     <ClInclude Include="Editor\ModelLoader.h" />
     <ClInclude Include="Editor\ShaderCompiler\ShaderCompiler.h" />
     <ClInclude Include="Editor\EditorWindows\MainEditorWindow.h" />
