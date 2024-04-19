@@ -1,43 +1,72 @@
 #include "GameCodeCompiler.h"
 
 #include <Tools/File/FileSystem.h>
-
 #include <Windows.h> 
 #include <iostream>
+#include <processthreadsapi.h>
 
-/*
+#if _DEBUG
+const char* GameCodeCompiler::CopyDllFrom = "Source/x64/debug/GameCode.dll";
+const char* GameCodeCompiler::CopyDllIn = "../x64/Debug/GameCode.dll";
+#else
+const char* GameCodeCompiler::CopyDllFrom = "Source/x64/release/GameCode.dll";
+const char* GameCodeCompiler::CopyDllIn = "../x64/Release/GameCode.dll";
+#endif
 
-    HMODULE mod = LoadLibraryW(L"lopoid.dll");
-    if (mod)
+bool GameCodeCompiler::Compile()
+{
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    ZeroMemory(&pi, sizeof(pi));
+    // /t:rebuild 
+    TCHAR lox2[] = L"\"C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe\" Source/GameCode.vcxproj /p:configuration=debug /p:platform=x64";
+
+    if (!CreateProcessW(0,   // No module name (use command line)
+        lox2,
+        NULL,           // Process handle not inheritable
+        NULL,           // Thread handle not inheritable
+        FALSE,          // Set handle inheritance to FALSE
+        0,              // No creation flags
+        NULL,           // Use parent's environment block
+        NULL,           // Use parent's starting directory 
+        &si,            // Pointer to STARTUPINFO structure
+        &pi)           // Pointer to PROCESS_INFORMATION structure
+        )
     {
-        FARPROC Add = (FARPROC)GetProcAddress(mod, "lox");
-        if(Add)
-        {
-
-            std::cout << Add() << "\n";
-        }
-
-        FreeLibrary(mod);
+        printf("CreateProcess failed (%d).\n", GetLastError());
+        return false;
     }
 
-
-
+    // Wait until child process exits.
+    WaitForSingleObject(pi.hProcess, INFINITE);
+    bool succeed = false;
     
-    /*
-    std::cout << typeid(QFAEditorMainWindow).name() << "\n";
-    std::cout << typeid(QFAEditorMainWindow).raw_name() << "\n";
-    * /
-
-
-
-*/
+    DWORD ExitCode;
+    GetExitCodeProcess(pi.hProcess, &ExitCode);
+    if (!ExitCode && std::filesystem::exists(CopyDllFrom))
+    {
+        std::filesystem::copy_options co = std::filesystem::copy_options::update_existing;
+        std::filesystem::copy_file(CopyDllFrom, CopyDllIn, co);
+        succeed = true;
+    }
+    
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+    return succeed;
+}
 
 
 #include <Object/Object.h>
 void (*GameCodeCompiler::CompileCallback)(GameCodeCompiler::CompileStatus);
 void GameCodeCompiler::CompileGameCode(void (*callback)(CompileStatus))
-{// SourceFolder
+{
 	CompileCallback = callback;
+    if (!Compile())
+        return;
+    
     HMODULE mod = LoadLibraryW(L"GameCode.dll");
     if (mod)
     {
@@ -62,20 +91,4 @@ void GameCodeCompiler::CompileGameCode(void (*callback)(CompileStatus))
 
         FreeLibrary(mod);
     } 
-}
-/*
-    only  class NameClass {}
-    or	  class NameClass : ParentNameClass {}
-*/
-void GameCodeCompiler::AnalyzeFile(std::filesystem::path filePath)
-{
-    QFAFile file;
-    
-    if (QFAFileSystem::LoadFile(filePath.u32string(), &file))
-        return;
-
-    char* text = (char*)file.GetData();
-    size_t textSize = file.GetFileSize();
-
-
 }

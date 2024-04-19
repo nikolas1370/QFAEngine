@@ -12,12 +12,15 @@ class GameCodeCompiler
 		Error
 	};
 
+	static const char* CopyDllFrom;
+	static const char* CopyDllIn;
+
 	static void CompileGameCode(void (*callback)(CompileStatus));
 	
-
-
-
 	static void (*CompileCallback)(GameCodeCompiler::CompileStatus);
-	static void AnalyzeFile(std::filesystem::path filePath);
+
+	/* inside usage */
+	// if return true Compile Succeed
+	static bool Compile();
 };
 
