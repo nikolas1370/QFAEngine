@@ -1,11 +1,6 @@
 #pragma once
 #include <iostream>
 
-
-
-#define QFAClass 
-
-
 #include <string>
 #include <vector>
 

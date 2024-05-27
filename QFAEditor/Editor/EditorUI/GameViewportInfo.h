@@ -38,6 +38,6 @@ public:
 	
 private:
 	void SelectActor(QActor* actor);
-
+	void PressedDelete();
 
 };

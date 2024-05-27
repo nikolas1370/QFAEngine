@@ -23,7 +23,7 @@ class QFAEditorMainWindow
 	QFAText* Text;
 	QFAText* LoadText;
 	QFAText* LoadText_2;
-	QFAText* LoadText_3;
+
 	/**/
 	QFAUICanvas* WindowCanvas = nullptr;
 	QFAUIEditorFileExplorer* FileExplorer;
@@ -64,8 +64,8 @@ private:
 
 	void CreateLoadUI();
 	void ChangeLoadInfo(std::u32string text, std::u32string text_2);
-	// call in QFAEditorOverlord 
-	void CreateUI();
+	// call in QFAEditorOverlord if initialization after start editor done
+	void CreateMainEdirorUI();
 
 	size_t CurentDragFileId = 0;
 	static void StartDragAndDrop(size_t fileId);
@@ -80,7 +80,9 @@ private:
 	FVector2D PickObjectLastCursorPos;
 
 	bool LeftCTRLPress = false;
-	static void GameCompileCallback(GameCodeCompiler::CompileStatus status);
+	static void GameCompileCallback(QFAGameCode::CompileStatus status);
 	bool CompileStarted = false;
+
+	void CreateInput();
 };
 

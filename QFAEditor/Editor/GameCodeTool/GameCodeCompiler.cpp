@@ -6,14 +6,16 @@
 #include <processthreadsapi.h>
 
 #if _DEBUG
-const char* GameCodeCompiler::CopyDllFrom = "Source/x64/debug/GameCode.dll";
-const char* GameCodeCompiler::CopyDllIn = "../x64/Debug/GameCode.dll";
+const char* QFAGameCode::CopyDllFrom = "Source/x64/debug/GameCode.dll";
+const char* QFAGameCode::CopyDllIn = "../x64/Debug/GameCode.dll";
 #else
-const char* GameCodeCompiler::CopyDllFrom = "Source/x64/release/GameCode.dll";
-const char* GameCodeCompiler::CopyDllIn = "../x64/Release/GameCode.dll";
+const char* QFAGameCode::CopyDllFrom = "Source/x64/release/GameCode.dll";
+const char* QFAGameCode::CopyDllIn = "../x64/Release/GameCode.dll";
 #endif
 
-bool GameCodeCompiler::Compile()
+void* QFAGameCode::GameCodeModule = NULL; // HMODULE
+
+bool QFAGameCode::Compile()
 {
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
@@ -60,13 +62,18 @@ bool GameCodeCompiler::Compile()
 
 
 #include <Object/Object.h>
-void (*GameCodeCompiler::CompileCallback)(GameCodeCompiler::CompileStatus);
-void GameCodeCompiler::CompileGameCode(void (*callback)(CompileStatus))
+void (*QFAGameCode::CompileCallback)(QFAGameCode::CompileStatus);
+void QFAGameCode::CompileGameCode(void (*callback)(CompileStatus))
 {
 	CompileCallback = callback;
     if (!Compile())
         return;
     
+    LoadCode();
+}
+
+void QFAGameCode::LoadCode()
+{
     HMODULE mod = LoadLibraryW(L"GameCode.dll");
     if (mod)
     {
@@ -74,10 +81,10 @@ void GameCodeCompiler::CompileGameCode(void (*callback)(CompileStatus))
         if (Functions)
         {
             QFAGameCodeFunctions* funs = (QFAGameCodeFunctions*)Functions();
-            
-            std::vector<QFAClassInfoBase*>* gameClassList = funs->GetGameClassList();            
+
+            std::vector<QFAClassInfoBase*>* gameClassList = funs->GetGameClassList();
             QFAClassInfoBase** classInfo = gameClassList->data();
-            
+
             for (size_t i = 0; i < gameClassList->size(); i++)
             {
                 QObject* obj = funs->CreateObject(classInfo[i]->GetClassId());
@@ -86,9 +93,21 @@ void GameCodeCompiler::CompileGameCode(void (*callback)(CompileStatus))
         }
         else
         {
-            std::cout <<"dead end\n";
+            FreeLibrary(mod);
+            std::cout << "dead end\n";
+            return;
         }
 
-        FreeLibrary(mod);
-    } 
+        if (GameCodeModule)
+        {
+            /*
+
+                do some stuff
+
+            */
+            FreeLibrary((HMODULE)GameCodeModule);
+        }
+      
+        GameCodeModule = (void*)mod;
+    }
 }

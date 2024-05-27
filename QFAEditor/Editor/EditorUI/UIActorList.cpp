@@ -18,24 +18,11 @@ QFAEditorUIActorList::QFAEditorUIActorList(std::function<void(QActor*)> selectFu
 	UIActorList->Events.SetOutFocus(QFAEditorUIActorList::Outfocus, this);
 
 	UIActorList->Events.SetLeftMouseDown(QFAEditorUIActorList::MouseDown, this);
-
-
-
-	/*
-	
-	thisUnit->SelectFunction(nullptr);
-	if (unit == _this)
-	{
-		thisUnit->CurentActorSelect = nullptr;
-	*/
 }
 
 QFAEditorUIActorList::~QFAEditorUIActorList()
 {
 }
-
-
-
 
 void QFAEditorUIActorList::AddActor(QActor* actor, SEditorFile& ef)
 {
@@ -169,7 +156,7 @@ void QFAEditorUIActorList::MouseDown(QFAUIUnit* unit, void* _this)
 void QFAEditorUIActorList::PressDelete()
 {
 	if (!CurentActorSelect || !InputFocus)
-		return;
+		return;	
 
 	for (size_t i = 0; i < ActorList.size(); i++)
 	{
@@ -209,9 +196,9 @@ void QFAEditorUIActorList::SelectActor(QActor* actor)
 			if (CurentActorSelect)
 				CurentActorSelect->SetBackgroundColor(OutFocusUnitColor);
 
+			InputFocus = true;
 			CurentActorSelect = ActorList[i].textBackgroundColor;
 			CurentActorSelect->SetBackgroundColor(SelectUnit);
-
 			return;
 		}
 	}

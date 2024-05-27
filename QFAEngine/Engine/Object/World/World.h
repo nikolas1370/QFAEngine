@@ -9,7 +9,7 @@ class QSceneComponent;
 class QFAEditorMainWindow;
 
 
-	QFAClass
+
 class QWorld : public QObject
 {
 

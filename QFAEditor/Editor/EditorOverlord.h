@@ -10,7 +10,7 @@ class QFAEditorOverlord
 public:
 	static void StartLife();
 private:
-	static bool AllFilesLoad;
+	static bool InitializationDon;
 	static bool NewLoadText;
 	static std::u32string LoadText;
 	static std::u32string LoadText_2;
@@ -18,6 +18,7 @@ private:
 	static void Init();
 	// call from not main thread
 	static void PrepareToWork();
+	// QFAOverlord call 
 	static void StartFrame();
 	static void EndFrame();
 

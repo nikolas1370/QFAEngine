@@ -5,11 +5,12 @@
 #include <Render/UI/Text.h>
 #include <EditorWindows/MainEditorWindow.h>
 #include <EditorFileStorage.h>
+#include <GameCodeTool/GameCodeCompiler.h>
 
 QFAShaderCompiler QFAEditorOverlord::compiler;
 std::thread* QFAEditorOverlord::LoadThread;
 
-bool QFAEditorOverlord::AllFilesLoad = false;
+bool QFAEditorOverlord::InitializationDon = false;
 bool QFAEditorOverlord::NewLoadText = false;
 std::u32string QFAEditorOverlord::LoadText;
 std::u32string QFAEditorOverlord::LoadText_2;
@@ -45,17 +46,19 @@ void QFAEditorOverlord::Init()
 void QFAEditorOverlord::PrepareToWork()
 {
     NewLoadText = true;
+    LoadText = U"Load Game code";
+    QFAGameCode::LoadCode();
     LoadText = U"Load file : ";
     QFAEditorFileStorage::LoadEditorFiles(LoadText_2, NewLoadText);
-    AllFilesLoad = true;
+    InitializationDon = true;
 }
 
 void QFAEditorOverlord::StartFrame()
 {
-    if (AllFilesLoad)
+    if (InitializationDon)
     {
-        AllFilesLoad = false;
-        MainWindow->CreateUI();
+        InitializationDon = false;
+        MainWindow->CreateMainEdirorUI();
     }
     else if(NewLoadText)
     {
@@ -63,6 +66,8 @@ void QFAEditorOverlord::StartFrame()
         NewLoadText = false;
         MainWindow->ChangeLoadInfo(LoadText, LoadText_2);        
     }
+
+    //std::cout << "lox\n";
 }
 
 void QFAEditorOverlord::EndFrame()

@@ -28,81 +28,13 @@ QFAEditorMainWindow::QFAEditorMainWindow()
 	QFAOverlord::SetLimitFpsCount(60);
 	Window = new QFAWindow(LoaderWidth, LoaderHeight, "QFAEditor", true, false);
 
-
 	QFAText::SFont* font;
 	if (QFAText::ELoadFontResult res = QFAText::LoadFont("SomeFont/Roboto-Regular.ttf", font))
 		stopExecute(res);	
 
 	QFAText::LoadFont("SomeFont/icomoon.ttf", QFAEditorMainWindow::Icomonfont);
 
-	Window->SetDropFun([this](int path_count, const char* paths[])
-		{
-			if(WindowCanvas)
-				FileExplorer->DropFiles(path_count, paths);
-		});	
-
 	MainWindow->CreateLoadUI();
-
-	Input = new QFAInput(Window);
-	Input->AddKeyRelease(EKey::MOUSE_LEFT, "lmbU", [this](EKey::Key key)
-		{
-			QFAEditorMainWindow::EndDragAndDrop(key);
-			
-
-
-			double x, y;
-			if (Window->GetMousePosition(x, y))
-			{
-				FVector2D tem = PickObjectLastCursorPos - FVector2D(x, y);
-				if(tem.Length() < 10.0f)
-					QFAEditorMainWindow::PickMesh(key);
-			}
-			
-			EditorCamera->SetTick(false);
-		});// EKey::Key key
-
-	Input->AddKeyPress(EKey::MOUSE_LEFT, "lmbD", [this](EKey::Key key)
-		{
-			
-			double x, y;
-			if (Window->GetMousePosition(x, y))
-			{				
-				FVector2D pos = GameViewport->GetPosition();
-				FVector2D size = GameViewport->GetSize();
-				if (x >= pos.X && y >= pos.Y &&
-					x <= pos.X + size.X && y <= pos.Y + size.Y)
-				{
-					PickObjectLastCursorPos.X = x;
-					PickObjectLastCursorPos.Y = y;
-					EditorCamera->SetTick(true);
-				}
-				else
-				{
-					PickObjectLastCursorPos.X = -1.0f;
-					PickObjectLastCursorPos.Y = -1.0f;
-				}
-				
-			}
-		});
-
-	Input->AddKeyPress(EKey::LEFT_CONTROL, "LEFT_CONTROL_down", [this](EKey::Key key)
-		{
-			LeftCTRLPress = true;
-		});
-
-	Input->AddKeyRelease(EKey::LEFT_CONTROL, "LEFT_CONTROL_up", [this](EKey::Key key)
-		{
-			LeftCTRLPress = false;
-		});
-
-	Input->AddKeyPress(EKey::B, "LEFT_CONTROL", [this](EKey::Key key)
-		{
-			if (LeftCTRLPress && !CompileStarted)
-			{
-				CompileStarted = true;
-				GameCodeCompiler::CompileGameCode(QFAEditorMainWindow::GameCompileCallback);
-			}
-		});
 }
 
 QFAEditorMainWindow::~QFAEditorMainWindow()
@@ -120,8 +52,9 @@ QFAEditorMainWindow::~QFAEditorMainWindow()
 	}
 }
 
-void QFAEditorMainWindow::CreateUI()
+void QFAEditorMainWindow::CreateMainEdirorUI()
 {	
+	CreateInput();
 	QFAViewport* mainViewPort = Window->GetViewport(0);
 	mainViewPort->GetRoot()->removeAllUnit();
 
@@ -150,7 +83,7 @@ void QFAEditorMainWindow::CreateUI()
 	Window->MoveToCenter();
 	Window->EnabelDecorated(true);	
 	PrepareGameViewport();
-	PrepareCallback();	
+	
 }
 
 #include <Render/UI/TextInput.h>
@@ -229,10 +162,88 @@ void QFAEditorMainWindow::AddActorToWorlds(QActor* actor, SEditorFile& ef)
 
 }
 
-void QFAEditorMainWindow::GameCompileCallback(GameCodeCompiler::CompileStatus status)
+void QFAEditorMainWindow::GameCompileCallback(QFAGameCode::CompileStatus status)
 {
 	std::cout << "QFAEditorMainWindow::GameCompileCallback\n";	
 	MainWindow->CompileStarted = false;
+}
+
+void QFAEditorMainWindow::CreateInput()
+{
+	Window->SetDropFun([this](int path_count, const char* paths[])
+		{
+			if (WindowCanvas)
+				FileExplorer->DropFiles(path_count, paths);
+		});
+
+	Input = new QFAInput(Window);
+	Input->AddKeyRelease(EKey::MOUSE_LEFT, "lmbU", [this](EKey::Key key)
+		{
+			QFAEditorMainWindow::EndDragAndDrop(key);
+
+
+
+			double x, y;
+			if (Window->GetMousePosition(x, y))
+			{
+				FVector2D tem = PickObjectLastCursorPos - FVector2D(x, y);
+				if (tem.Length() < 10.0f)
+					QFAEditorMainWindow::PickMesh(key);
+			}
+
+			EditorCamera->SetTick(false);
+		});// EKey::Key key
+
+	Input->AddKeyPress(EKey::MOUSE_LEFT, "lmbD", [this](EKey::Key key)
+		{
+
+			double x, y;
+			if (Window->GetMousePosition(x, y))
+			{
+				FVector2D pos = GameViewport->GetPosition();
+				FVector2D size = GameViewport->GetSize();
+				if (x >= pos.X && y >= pos.Y &&
+					x <= pos.X + size.X && y <= pos.Y + size.Y)
+				{
+					PickObjectLastCursorPos.X = x;
+					PickObjectLastCursorPos.Y = y;
+					EditorCamera->SetTick(true);
+				}
+				else
+				{
+					PickObjectLastCursorPos.X = -1.0f;
+					PickObjectLastCursorPos.Y = -1.0f;
+				}
+
+			}
+		});
+
+	Input->AddKeyPress(EKey::LEFT_CONTROL, "LEFT_CONTROL_down", [this](EKey::Key key)
+		{
+			LeftCTRLPress = true;
+		});
+
+	Input->AddKeyRelease(EKey::LEFT_CONTROL, "LEFT_CONTROL_up", [this](EKey::Key key)
+		{
+			LeftCTRLPress = false;
+		});
+
+	Input->AddKeyPress(EKey::B, "LEFT_CONTROL", [this](EKey::Key key)
+		{
+			if (LeftCTRLPress && !CompileStarted)
+			{
+				CompileStarted = true;
+				QFAGameCode::CompileGameCode(QFAEditorMainWindow::GameCompileCallback);
+			}
+		});
+
+
+	Input->AddKeyRelease(EKey::DELETE, "delete_release", [this](EKey::Key key)
+		{
+			GameViewportInfo->PressedDelete();
+		});
+
+	PrepareCallback();
 }
 
 void QFAEditorMainWindow::StartDragAndDrop(size_t fileId)

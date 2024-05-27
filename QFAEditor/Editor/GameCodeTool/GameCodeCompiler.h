@@ -1,10 +1,14 @@
 #pragma once
 #include <filesystem>
 
+
 class QFAEditorMainWindow;
-class GameCodeCompiler
+class QFAEditorOverlord;
+class QFAGameCode
 {
 	friend QFAEditorMainWindow;
+	friend QFAEditorOverlord;
+	static void* GameCodeModule;// GameCodeModule is HMODULE, don't wanna include windows.h
 	const char SourceFolder[7] = "Source";
 	enum CompileStatus
 	{
@@ -17,7 +21,9 @@ class GameCodeCompiler
 
 	static void CompileGameCode(void (*callback)(CompileStatus));
 	
-	static void (*CompileCallback)(GameCodeCompiler::CompileStatus);
+	static void (*CompileCallback)(QFAGameCode::CompileStatus);
+
+	static void LoadCode();
 
 	/* inside usage */
 	// if return true Compile Succeed

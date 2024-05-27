@@ -59,6 +59,11 @@ void QFAEditorGameViewportInfo::SelectActor(QActor* actor)
 	ActorTransform->SelectActor(actor);
 }
 
+void QFAEditorGameViewportInfo::PressedDelete()
+{
+	ActorList->PressDelete();
+}
+
 
 
 void QFAEditorGameViewportInfo::MySlotChange(QFAUIUnit* unit)
