@@ -74,52 +74,24 @@ void QFAUIList::CalculateChildren()
 				}
 				else
 					unitHeight = ListType == LTVertical ? UnitHeight : Children[i]->InnerHeight;
-
-				if (marginMinus)
+				
+				QFAUISlot::SListSlot* listSlot = (QFAUISlot::SListSlot*)&Children[i]->Slot;
+				Children[i]->SetPositionParent(Position_x + listSlot->marginLeft, Position_y + y + listSlot->marginTop);
+				if (i == Children.Length() - 1 && StretchLastUnit)
 				{
-					QFAUISlot::SListSlot* listSlot = (QFAUISlot::SListSlot*)&Children[i]->Slot;
-					Children[i]->SetPositionParent(Position_x + listSlot->marginLeft, Position_y + y + listSlot->marginTop);
-					
-					if (i == Children.Length() - 1 && StretchLastUnit)
+					if (Height > y + listSlot->marginTop)
 					{
-						if (Height - listSlot->marginTop > y)
-						{
-							Children[i]->SetSizeParent(Width - listSlot->marginLeft, Height  - listSlot->marginTop - y);
-							y += Height - listSlot->marginTop - y;
-						}
-						else
-							Children[i]->SetSizeParent(Width - listSlot->marginLeft, 0);
+						Children[i]->SetSizeParent(Width - listSlot->marginLeft, Height - (y + listSlot->marginTop));
+						y += Height - (y + listSlot->marginTop);
 					}
 					else
-					{
-						Children[i]->SetSizeParent(Width - listSlot->marginLeft, unitHeight - listSlot->marginTop);
-						y += unitHeight;
-					}
-					
+						Children[i]->SetSizeParent(Width - listSlot->marginLeft, 0);
 				}
 				else
 				{
-					QFAUISlot::SListSlot* listSlot = (QFAUISlot::SListSlot*)&Children[i]->Slot;
-					Children[i]->SetPositionParent(Position_x + listSlot->marginLeft, Position_y + y + listSlot->marginTop);
-
-					if (i == Children.Length() - 1 && StretchLastUnit)
-					{
-						if (Height   > y + listSlot->marginTop)
-						{
-							Children[i]->SetSizeParent(Width - listSlot->marginLeft, Height - (y + listSlot->marginTop));
-							y += Height - (y + listSlot->marginTop);
-						}
-						else 
-							Children[i]->SetSizeParent(Width - listSlot->marginLeft, 0);
-					}
-					else
-					{
-						Children[i]->SetSizeParent(Width, unitHeight);
-						y += unitHeight + listSlot->marginTop;
-					}
-
-
-				}				
+					Children[i]->SetSizeParent(Width, unitHeight);
+					y += unitHeight + listSlot->marginTop;
+				}
 			}
 		}
 
@@ -141,49 +113,24 @@ void QFAUIList::CalculateChildren()
 				}
 				else
 					unitWidth = ListType == LTHorizon ? UnitWidth : Children[i]->InnerWidth;
-
-				if (marginMinus)
+				
+				QFAUISlot::SListSlot* listSlot = (QFAUISlot::SListSlot*)&Children[i]->Slot;
+				Children[i]->SetPositionParent(Position_x + x + listSlot->marginLeft, Position_y + listSlot->marginTop);
+				if (i == Children.Length() - 1 && StretchLastUnit)
 				{
-					QFAUISlot::SListSlot* listSlot = (QFAUISlot::SListSlot*)&Children[i]->Slot;
-					Children[i]->SetPositionParent(Position_x + x + listSlot->marginLeft, Position_y + listSlot->marginTop);
-
-					if (i == Children.Length() - 1 && StretchLastUnit)
+					if (Width > x + listSlot->marginLeft)
 					{
-						if (Width - listSlot->marginLeft > x)
-						{
-							Children[i]->SetSizeParent(Width - listSlot->marginLeft - x, Height - listSlot->marginTop);
-							x += Width - listSlot->marginLeft - x;
-						}
-						else
-							Children[i]->SetSizeParent(0, Height - listSlot->marginTop);
+						Children[i]->SetSizeParent(Width - (listSlot->marginLeft + x), Height - listSlot->marginTop);
+						x += Width - (listSlot->marginLeft + x);
 					}
 					else
-					{
-						Children[i]->SetSizeParent(unitWidth - listSlot->marginLeft, Height - listSlot->marginTop);
-						x += unitWidth;
-					}
+						Children[i]->SetSizeParent(0, Height - listSlot->marginTop);
 				}
 				else
 				{
-					QFAUISlot::SListSlot* listSlot = (QFAUISlot::SListSlot*)&Children[i]->Slot;
-					Children[i]->SetPositionParent(Position_x + x + listSlot->marginLeft, Position_y + listSlot->marginTop);
-
-					if (i == Children.Length() - 1 && StretchLastUnit)
-					{
-						if (Width > x + listSlot->marginLeft)
-						{
-							Children[i]->SetSizeParent(Width - (listSlot->marginLeft + x), Height - listSlot->marginTop);
-							x += Width - (listSlot->marginLeft + x);
-						}
-						else
-							Children[i]->SetSizeParent(0, Height - listSlot->marginTop);
-					}
-					else
-					{
-						Children[i]->SetSizeParent(unitWidth, Height);
-						x += unitWidth + listSlot->marginLeft;
-					}
-				}				
+					Children[i]->SetSizeParent(unitWidth, Height);
+					x += unitWidth + listSlot->marginLeft;
+				}			
 			}
 		}
 		

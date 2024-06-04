@@ -30,8 +30,6 @@ void QFAUIParent::SetBackgroundImage(QFAImage* image)
 	BackgroundImage.SetImage(image);
 }
 
-
-
 void QFAUIParent::RenderBackground(VkCommandBuffer comandebuffer)
 {
 	if (Parent->Type == QFAUIType::Scroll)

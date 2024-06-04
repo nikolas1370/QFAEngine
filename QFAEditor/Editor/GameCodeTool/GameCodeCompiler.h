@@ -1,15 +1,20 @@
 #pragma once
 #include <filesystem>
-
+#include <Object/Object.h>
 
 class QFAEditorMainWindow;
 class QFAEditorOverlord;
+class QFAGameCodeFunctions;
+class QFAUIEditorFileExplorer;
 class QFAGameCode
 {
 	friend QFAEditorMainWindow;
 	friend QFAEditorOverlord;
+	friend QFAUIEditorFileExplorer;
 	static void* GameCodeModule;// GameCodeModule is HMODULE, don't wanna include windows.h
 	const char SourceFolder[7] = "Source";
+	static QFAGameCodeFunctions* GameCodeAPIFunction;
+
 	enum CompileStatus
 	{
 		OK,

@@ -13,6 +13,17 @@ public:
 
 		return std::stof(str);
 	}
+
+	static std::u32string CharsTo32Chars(const char* str)
+	{
+		size_t strl = strlen(str);
+		std::u32string outStr;
+		outStr.resize(strl);
+		for (size_t i = 0; i < strl; i++)
+			outStr[i] = (char32_t)str[i];
+
+		return outStr;
+	}
 private:
 
 };

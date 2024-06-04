@@ -14,6 +14,7 @@ const char* QFAGameCode::CopyDllIn = "../x64/Release/GameCode.dll";
 #endif
 
 void* QFAGameCode::GameCodeModule = NULL; // HMODULE
+QFAGameCodeFunctions* QFAGameCode::GameCodeAPIFunction = nullptr;
 
 bool QFAGameCode::Compile()
 {
@@ -74,23 +75,14 @@ void QFAGameCode::CompileGameCode(void (*callback)(CompileStatus))
 
 void QFAGameCode::LoadCode()
 {
+
     HMODULE mod = LoadLibraryW(L"GameCode.dll");
     if (mod)
     {
+        std::cout << "lox in fish\n";
         FARPROC Functions = (FARPROC)GetProcAddress(mod, "QFAGetFunctions");
         if (Functions)
-        {
-            QFAGameCodeFunctions* funs = (QFAGameCodeFunctions*)Functions();
-
-            std::vector<QFAClassInfoBase*>* gameClassList = funs->GetGameClassList();
-            QFAClassInfoBase** classInfo = gameClassList->data();
-
-            for (size_t i = 0; i < gameClassList->size(); i++)
-            {
-                QObject* obj = funs->CreateObject(classInfo[i]->GetClassId());
-                funs->DeleteObject(obj);
-            }
-        }
+            GameCodeAPIFunction = (QFAGameCodeFunctions*)Functions();
         else
         {
             FreeLibrary(mod);

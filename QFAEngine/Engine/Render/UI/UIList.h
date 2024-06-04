@@ -7,7 +7,6 @@ protected:
 	void NewUnit(QFAUIUnit* unit) override;
 	void MySlotChange(QFAUIUnit* unit) override;
 
-
 	void ChangeSize(unsigned int w, unsigned int h) override;
 	void ChangePosition(int x, int y) override;
 
@@ -46,13 +45,6 @@ public:
 		StretchLastUnit = enable;
 	}
 private:
-	/*
-		if true
-		unit->Width -= lot->marginLeft;
-		unit->Height -= lot->marginTop;	
-	*/
-	bool marginMinus = true;
-
 	unsigned int UnitHeight = 50;
 	unsigned int UnitWidth = 150;
 

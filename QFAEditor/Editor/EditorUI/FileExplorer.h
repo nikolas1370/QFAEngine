@@ -20,15 +20,30 @@ class QFAUIEditorFileExplorer : public QFAParentHiddenChild
 	QFAText* ForwardButton;
 	QFAUIScroll* PathTextScroll;
 	QFAText* PathText;
-	
-	static const char32_t BackButtonIconCode = 61840;// f190
-	static const char32_t ForwardButtonIconCode = 61838;// f18e
+	static const char32_t BackButtonIconCode = 59972;		// Icomon Free (circle-right) https://icomoon.io/
+	static const char32_t ForwardButtonIconCode = 59970;	// Icomon Free (circle-left)
+	static const char32_t FolderButtonIconCode = 59651;		// Hawcons (folder1)
+	static const char32_t CppFileButtonIconCode = 59656;	// Hawcons (document-file-cpp)
 
-	QFAUICanvas* FileExplorerBottom;
-	QFAUIGrid* FolderItemList;
+	QFAUICanvas* FileExplorerMiddle;
 	QFAUIScroll* FolderItemListScroll;
+	QFAUIGrid* FolderItemList;
+	
+
+	QFAUIList* FileExplorerBottom;
+	QFAText* ExplorerButton;
+	QFAText* CppButton;
+
+
+	QFAUICanvas* CppCanvas;
+	QFAUIScroll* CppListScroll;
+	QFAUIGrid* CppItemList;
+
+	
+	bool FileExplorerSelected = true;
 
 	unsigned int FileExplorerTopHeight = 20;
+	unsigned int FileExplorerBottomHeight = 35;
 	QFAFileSystem::FolderUnit CurentFolder;
 protected:
 	void MySlotChange(QFAUIUnit* unit) override;
@@ -45,13 +60,17 @@ private:
 	std::function <void(size_t fileId)> DragFun;
 	/* FolderUnitList and folderContents[0] have same order */
 	std::vector<QFAEditorExplorerFolderUnit*> FolderUnitList; 
+	std::vector<QFAEditorExplorerFolderUnit*> CppUnitList;
 	std::vector<QFAFileSystem::FolderUnit> folderContents;
 	int folderUnitInUse = 0;
+	int CppUnitInUse = 0;
 
 	QFAEditorExplorerFolderUnit* FolderItemListInFocusUnit = nullptr;
 	QFAEditorExplorerFolderUnit* FolderItemListSelectUnit = nullptr;
 	void CreateTop();
+	void CreateMiddle();
 	void CreateBottom();
+	void CreateCppTop();
 
 	static void FolderItemListInFocus(QFAUIUnit* unit, void* _this);
 	static void FolderItemListOutFocus(void* _this);
@@ -60,6 +79,7 @@ private:
 
 
 	void UpdateFolderItemList();
+	void UpdateCppItemList();
 
 	const uint64_t MouseDownMaxTimeInMS = 400;
 	const uint64_t MouseDownMaxTime = MouseDownMaxTimeInMS * 10000;// convert from ms to 1/10 microseconds
@@ -69,6 +89,9 @@ private:
 	void NextFolder(QFAFileSystem::FolderUnit nextFolder);
 	static void NextFolderButton(QFAUIUnit* unit , void* _this);
 	static void PreviousFolderButton(QFAUIUnit* unit, void* _this);
+	static void ExplorerButtonE(QFAUIUnit* unit, void* _this);
+	static void CppButtonE(QFAUIUnit* unit, void* _this);
+
 
 	std::vector<QFAFileSystem::FolderUnit> PathHistory;
 	int CurentPathHistoryIndex = 0;
