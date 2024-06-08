@@ -39,7 +39,6 @@ QFAEditorMainWindow::QFAEditorMainWindow()
 
 QFAEditorMainWindow::~QFAEditorMainWindow()
 {
-
 	delete LoadCanvas;
 	delete Text;
 	delete LoadText;
@@ -68,8 +67,7 @@ void QFAEditorMainWindow::CreateMainEdirorUI()
 	FileExplorer->SetSlot(&slot);
 	WindowCanvas->AddUnit(FileExplorer);
 	mainViewPort->AddUnit(WindowCanvas);
-	
-	
+		
 	slot.Width = 0.3f;
 	slot.Height = 0.7f;
 	slot.x = 0.7f;
@@ -82,8 +80,7 @@ void QFAEditorMainWindow::CreateMainEdirorUI()
 	Window->SetSize(WorkWidth, WorkHeight);
 	Window->MoveToCenter();
 	Window->EnabelDecorated(true);	
-	PrepareGameViewport();
-	
+	PrepareGameViewport();	
 }
 
 #include <Render/UI/TextInput.h>
@@ -105,9 +102,40 @@ void QFAEditorMainWindow::PrepareGameViewport()
 }
 
 void QFAEditorMainWindow::PrepareCallback()
-{
-	
+{	
 	Input = new QFAInput(Window);
+	/*
+	Input->AddKeyPress(EKey::MOUSE_LEFT, "select", [this](EKey::Key key)
+		{
+			double x, y;
+			if (Window->GetMousePosition(x, y))
+			{
+				FVector2D pos = GameViewportInfo->ActorList->GetPosition();
+				FVector2D size = GameViewportInfo->ActorList->GetSize();
+
+				if (!(x >= pos.X && y >= pos.Y &&
+					x <= pos.X + size.X && y <= pos.Y + size.Y))
+				{
+					GameViewportInfo->ActorList->LostInputFocus();
+				}
+
+				pos = FileExplorer->GetPosition();
+				size = FileExplorer->GetSize();
+				if (!(x >= pos.X && y >= pos.Y &&
+					x <= pos.X + size.X && y <= pos.Y + size.Y))
+				{
+					//remove in SelectUnit
+						//FileExplorer->LostInputFocus();
+				}
+
+				return;
+			}
+
+			GameViewportInfo->ActorList->LostInputFocus();
+			//FileExplorer->LostInputFocus();
+		});
+	*/
+
 	Input->AddKeyPress(EKey::DELETE, "pressDelete", [this](EKey::Key key)
 		{
 			switch (Focus)
@@ -120,39 +148,6 @@ void QFAEditorMainWindow::PrepareCallback()
 					break;
 			}
 		});
-
-	Input->AddKeyPress(EKey::MOUSE_LEFT, "select", [this](EKey::Key key)
-		{
-			double x, y;			
-			if (Window->GetMousePosition(x, y))
-			{
-				FVector2D pos = GameViewportInfo->ActorList->GetPosition();
-				FVector2D size = GameViewportInfo->ActorList->GetSize();
-				
-				if (!(x >= pos.X && y >= pos.Y &&
-					x <= pos.X + size.X && y <= pos.Y + size.Y))
-				{
-					GameViewportInfo->ActorList->LostInputFocus();
-				}
-
-				pos = FileExplorer->GetPosition();
-				size = FileExplorer->GetSize();
-				if (!(x >= pos.X && y >= pos.Y &&
-					x <= pos.X + size.X && y <= pos.Y + size.Y))
-				{
-					FileExplorer->LostInputFocus();
-				}
-
-				return;
-			}
-
-			GameViewportInfo->ActorList->LostInputFocus();
-			FileExplorer->LostInputFocus();
-		});
-
-
-	
-	
 }
 
 void QFAEditorMainWindow::AddActorToWorlds(QActor* actor, SEditorFile& ef)
@@ -181,8 +176,6 @@ void QFAEditorMainWindow::CreateInput()
 		{
 			QFAEditorMainWindow::EndDragAndDrop(key);
 
-
-
 			double x, y;
 			if (Window->GetMousePosition(x, y))
 			{
@@ -192,11 +185,10 @@ void QFAEditorMainWindow::CreateInput()
 			}
 
 			EditorCamera->SetTick(false);
-		});// EKey::Key key
+		});
 
 	Input->AddKeyPress(EKey::MOUSE_LEFT, "lmbD", [this](EKey::Key key)
 		{
-
 			double x, y;
 			if (Window->GetMousePosition(x, y))
 			{
@@ -214,7 +206,6 @@ void QFAEditorMainWindow::CreateInput()
 					PickObjectLastCursorPos.X = -1.0f;
 					PickObjectLastCursorPos.Y = -1.0f;
 				}
-
 			}
 		});
 
@@ -236,7 +227,6 @@ void QFAEditorMainWindow::CreateInput()
 				QFAGameCode::CompileGameCode(QFAEditorMainWindow::GameCompileCallback);
 			}
 		});
-
 
 	Input->AddKeyRelease(EKey::DELETE, "delete_release", [this](EKey::Key key)
 		{
@@ -282,8 +272,6 @@ void QFAEditorMainWindow::EndDragAndDrop(EKey::Key key)
 	}
 }
 
-
-
 void QFAEditorMainWindow::PickMesh(EKey::Key key)
 {
 	Window->GetMeshUnderCursore([this](QMeshBaseComponent* mesh)
@@ -291,7 +279,6 @@ void QFAEditorMainWindow::PickMesh(EKey::Key key)
 			GameViewportInfo->SelectActor(mesh->GetActor());
 		});
 }
-
 
 void QFAEditorMainWindow::CreateLoadUI()
 {
@@ -335,4 +322,3 @@ void QFAEditorMainWindow::ChangeLoadInfo(std::u32string text, std::u32string tex
 		LoadText_2->SetText(text_2);
 	}
 }
-

@@ -17,6 +17,7 @@
 #include <EditorFileStorage.h>
 #include "../GameCodeTool/GameCodeCompiler.h"
 #include <Tools/String.h>
+#include <Render/UI/SelectUnit.h>
 
 QFAUIEditorFileExplorer::QFAUIEditorFileExplorer(QFAWindow *window, std::function <void(size_t fileId)> dragFun)
 {
@@ -90,29 +91,64 @@ void QFAUIEditorFileExplorer::CreateTop()
 void QFAUIEditorFileExplorer::CreateMiddle()
 {
 	FileExplorerMiddle = new QFAUICanvas;
-
-	FolderItemListScroll = new QFAUIScroll;
-	FolderItemListScroll->SetScrollType(QFAUIScroll::STVertical);
-
-	FolderItemList = new QFAUIGrid;
-	FolderItemListScroll->SetUnit(FolderItemList);
-	FolderItemList->SetPositionType(QFAUIGrid::UPTAuto);
-	FolderItemList->SetMin(100);
-
-	FolderItemList->SetOffsets(10, 10);
-	FolderItemList->SetRation(1.5);
+	SelectGrid = new QFAUISelectGrid;
+	SelectGrid->SetScrollType(QFAUIScroll::STVertical);
+	SelectGrid->SetPositionType(QFAUIGrid::UPTAuto);
+	SelectGrid->SetMin(100);
+	SelectGrid->SetOffsets(10, 10);
+	SelectGrid->SetRation(1.5);
+	SelectGrid->FocusColor = InFocusUnitColor;
+	SelectGrid->SelectColor = SelectUnit;
+	SelectGrid->SelectLostFocusColor = SelectUnitNotFocus;
 
 	QFAUISlot::SCanvasSlot slot;
 	slot.Height = 1.0f;
 	slot.Width = 1.0f;
 	slot.x = 0.0f;
 	slot.y = 0.0f;
-	FolderItemListScroll->SetSlot(&slot);
-	FileExplorerMiddle->AddUnit(FolderItemListScroll);
+	SelectGrid->SetSlot(&slot);
+	FileExplorerMiddle->AddUnit(SelectGrid);
 
-	FolderItemList->Events.SetInFocus(&QFAUIEditorFileExplorer::FolderItemListInFocus, this);
-	FolderItemList->Events.SetOutFocus(&QFAUIEditorFileExplorer::FolderItemListOutFocus, this);
-	FolderItemList->Events.SetLeftMouseDown(&QFAUIEditorFileExplorer::FolderItemListLeftMouseDown, this);
+	SelectGrid->SelectEvent.LeftMouseDown = ([this](QFAUIParent* unit)
+		{
+			NotifyMainEditorWindowDrag((QFAEditorExplorerFolderUnit*)unit);
+		});
+
+	SelectGrid->SelectEvent.DobleClick = ([this](QFAUIParent* unit)
+		{
+			for (size_t i = 0; i < FolderUnitList.size(); i++)
+			{
+				if (FolderUnitList[i] == unit)
+				{
+					if (folderContents[i].IsFolder)
+					{
+						unit->SetBackgroundColor(InFocusUnitColor);
+						NextFolder(folderContents[i]);
+					}
+					else
+					{
+						if (FileViewWindow)
+						{
+							if (FileViewWindow->IsClosed())
+							{
+								delete FileViewWindow;
+								FileViewWindow = new QFAEditorFileViewWindow();
+							}
+
+							FileViewWindow->AddFile(folderContents[i].id);
+						}
+						else
+						{
+							FileViewWindow = new QFAEditorFileViewWindow();
+							FileViewWindow->AddFile(folderContents[i].id);
+						}
+					}
+
+					return;
+				}
+			}
+		});
+	
 	AddHiddenChild(FileExplorerMiddle);
 }
 
@@ -151,7 +187,6 @@ void QFAUIEditorFileExplorer::CreateBottom()
 void QFAUIEditorFileExplorer::CreateCppTop()
 {
 	CppCanvas = new QFAUICanvas;
-
 	CppListScroll = new QFAUIScroll;
 	CppListScroll->SetScrollType(QFAUIScroll::STVertical);
 
@@ -177,7 +212,7 @@ void QFAUIEditorFileExplorer::CreateCppTop()
 void QFAUIEditorFileExplorer::UpdateFolderItemList()
 {	
 	folderContents.clear();
-	FolderItemList->removeAllUnit();
+	SelectGrid->RemoveAllUnit();
 	QFAEditorFileStorage::GetFolderContents(CurentFolder.id, folderContents);
 	folderUnitInUse = 0;
 	for (size_t i = 0; i < folderContents.size(); i++)
@@ -185,7 +220,7 @@ void QFAUIEditorFileExplorer::UpdateFolderItemList()
 		if (folderUnitInUse == FolderUnitList.size())
 			FolderUnitList.push_back(new QFAEditorExplorerFolderUnit);
 
-		FolderItemList->AddUnit(FolderUnitList[folderUnitInUse]);
+		SelectGrid->AddUnit(FolderUnitList[folderUnitInUse]);
 		FolderUnitList[folderUnitInUse]->ChangeImage(folderContents[i].IsFolder);
 		FolderUnitList[folderUnitInUse]->ChangeText(folderContents[i].name);
 		folderUnitInUse++;		
@@ -211,123 +246,6 @@ void QFAUIEditorFileExplorer::UpdateCppItemList()
 		CppUnitList[CppUnitInUse]->ChangeText(QFAString::CharsTo32Chars(classInfo[i]->GetClassName()));
 		CppUnitInUse++;
 	}
-}
-
-void QFAUIEditorFileExplorer::FolderItemListLeftMouseDown(QFAUIUnit* unit, void* _this)
-{
-	QFAUIEditorFileExplorer* thisUnit = (QFAUIEditorFileExplorer*)(_this);
-
-	if (unit == thisUnit->FolderItemListSelectUnit)
-		return thisUnit->NotifyMainEditorWindowDrag((QFAEditorExplorerFolderUnit*)unit);
-
-	if (thisUnit == unit)
-	{
-		thisUnit->FolderItemListSelectUnit = nullptr;
-		return;
-	}
-
-	QFAUIUnit* parent = unit;
-	while (true)
-	{
-		if (!parent || parent == (QFAUIUnit*)_this)
-			break;
-		
-		if (parent->GetEditoUnitType() == QFAEditorUIType::ExplorerFolderUnit)
-		{
-			thisUnit->NotifyMainEditorWindowDrag((QFAEditorExplorerFolderUnit*)parent);
-			if (parent == thisUnit->FolderItemListSelectUnit &&
-				QTime::GetSystemTime() - thisUnit->LastLeftMouseDownTime < thisUnit->MouseDownMaxTime)
-			{				
-				for (size_t i = 0; i < thisUnit->FolderUnitList.size(); i++)
-				{
-					if (thisUnit->FolderUnitList[i] == parent)
-					{					
-						if (thisUnit->folderContents[i].IsFolder)
-						{							
-							thisUnit->LastLeftMouseDownTime = 0;
-							thisUnit->FolderItemListSelectUnit->SetBackgroundColor(thisUnit->InFocusUnitColor);
-							thisUnit->FolderItemListSelectUnit = nullptr;
-							thisUnit->NextFolder(thisUnit->folderContents[i]);
-						}
-						else
-						{
-							QFAUIEditorFileExplorer* fe = (QFAUIEditorFileExplorer*)_this;
-							if (fe->FileViewWindow)
-							{
-								if (fe->FileViewWindow->IsClosed())
-								{
-									delete fe->FileViewWindow;
-									fe->FileViewWindow = new QFAEditorFileViewWindow();
-								}
-
-								fe->FileViewWindow->AddFile(thisUnit->folderContents[i].id);
-							}
-							else
-							{
-								fe->FileViewWindow = new QFAEditorFileViewWindow();
-								fe->FileViewWindow->AddFile(thisUnit->folderContents[i].id);
-							}
-						}
-
-						return;
-					}
-				}
-			}
-			else
-			{
-				if (thisUnit->FolderItemListSelectUnit)
-					thisUnit->FolderItemListSelectUnit->SetBackgroundColor(QFAColor(0, 0, 0, 0));
-
-				thisUnit->InputFocus = true;
-				thisUnit->LastLeftMouseDownTime = QTime::GetSystemTime();
-				thisUnit->FolderItemListSelectUnit = (QFAEditorExplorerFolderUnit*)parent;
-				thisUnit->FolderItemListSelectUnit->SetBackgroundColor(thisUnit->SelectUnit);				
-			}
-			
-			break;
-		}
-
-		parent = parent->GetParent();
-	}
-}
-
-void QFAUIEditorFileExplorer::FolderItemListInFocus(QFAUIUnit* unit, void* _this)
-{
-	QFAUIEditorFileExplorer* thisUnit = (QFAUIEditorFileExplorer*)(_this);
-	if (thisUnit->FolderItemListInFocusUnit && thisUnit->FolderItemListSelectUnit != thisUnit->FolderItemListInFocusUnit)
-		thisUnit->FolderItemListInFocusUnit->SetBackgroundColor(QFAColorF(0.0f, 0.0f, 0.0f, 0.0f));
-
-	thisUnit->FolderItemListInFocusUnit = nullptr;
-	if (_this == unit || unit == thisUnit->FolderItemListSelectUnit)
-		return;
-
-	QFAUIUnit* parent = unit;
-	while (true)
-	{
-		if (!parent || parent == (QFAUIUnit*)_this )
-			break;
-		
-		if (parent->GetEditoUnitType() == QFAEditorUIType::ExplorerFolderUnit)
-		{
-			if (thisUnit->FolderItemListSelectUnit == parent)
-				return;
-
-			thisUnit->FolderItemListInFocusUnit = (QFAEditorExplorerFolderUnit*)parent;
-			thisUnit->FolderItemListInFocusUnit->SetBackgroundColor(thisUnit->InFocusUnitColor);
-			break;
-		}
-
-		parent = parent->GetParent();
-	}
-}
-
-void QFAUIEditorFileExplorer::FolderItemListOutFocus(void* _this)
-{
-	QFAUIEditorFileExplorer* thisUnit = (QFAUIEditorFileExplorer*)(_this);
-	if (thisUnit->FolderItemListInFocusUnit && thisUnit->FolderItemListSelectUnit != thisUnit->FolderItemListInFocusUnit)
-		thisUnit->FolderItemListInFocusUnit->SetBackgroundColor(QFAColorF(0.0f, 0.0f, 0.0f, 0.0f));
-
-	thisUnit->FolderItemListInFocusUnit = nullptr;
 }
 
 void QFAUIEditorFileExplorer::NextFolder(QFAFileSystem::FolderUnit nextFolder)
@@ -418,8 +336,7 @@ void QFAUIEditorFileExplorer::CppButtonE(QFAUIUnit* unit, void* _this)
 
 		thisUnit->ChangeSize((unsigned int)thisUnit->Width, (unsigned int)thisUnit->Height);
 		thisUnit->ChangePosition((int)thisUnit->Position_x, (int)thisUnit->Position_y);				
-	}
-	
+	}	
 }
 
 void QFAUIEditorFileExplorer::PreviousFolderButton(QFAUIUnit* unit, void* _this)
@@ -460,23 +377,10 @@ void QFAUIEditorFileExplorer::NotifyMainEditorWindowDrag(QFAEditorExplorerFolder
 			return DragFun(folderContents[i].id);
 }
 
-void QFAUIEditorFileExplorer::LostInputFocus()
-{	
-	if (FolderItemListSelectUnit->IsValid())
-		FolderItemListSelectUnit->SetBackgroundColor(SelectUnitNotFocus);
-	
-	InputFocus = false;
-}
-
 void QFAUIEditorFileExplorer::PathChanged()
 {
 	PathText->SetText(CurentFolder.path);
 	UpdateFolderItemList();
-}
-
-void QFAUIEditorFileExplorer::MySlotChange(QFAUIUnit* unit)
-{
-
 }
 
 void QFAUIEditorFileExplorer::ChangeSize(unsigned int w, unsigned int h)
@@ -487,7 +391,6 @@ void QFAUIEditorFileExplorer::ChangeSize(unsigned int w, unsigned int h)
 	SetChildSize(FileExplorerTop, w, h);
 	SetChildSize(FileExplorerMiddle, w, h >= FileExplorerTopHeight ? (h - FileExplorerTopHeight - FileExplorerBottomHeight) : 0);
 	SetChildSize(FileExplorerBottom, w, FileExplorerBottomHeight);
-
 }
 
 void QFAUIEditorFileExplorer::ChangePosition(int x, int y)

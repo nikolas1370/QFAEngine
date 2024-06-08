@@ -91,8 +91,7 @@ protected:
 
 
 	EParentType ParentType = EParentType::NONEChild;
-
-
+	
 	void SetSizeParent(unsigned int w, unsigned int h) final;
 	void SetPositionParent(int x, int y) final;
 public:

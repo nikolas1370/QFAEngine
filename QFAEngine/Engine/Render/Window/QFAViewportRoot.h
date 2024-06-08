@@ -20,7 +20,10 @@ public:
 	QFAViewportRoot();
 	~QFAViewportRoot();
 
-
+	inline QFAViewport* GetViewport()
+	{
+		return Viewport;
+	}
 private:
 	float UpdateInnerHeight() override;
 	float UpdateInnerWidth() override;

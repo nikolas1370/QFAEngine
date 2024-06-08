@@ -275,6 +275,10 @@ public:
 	*/
 	void SetSlot(void* slot);
 
+	bool IsMyParent(QFAUIParent* parent);
+	QFAWindow* GetWindow();
+
+
 	inline QFAUIParent* GetParent()
 	{
 		return Parent;
@@ -374,7 +378,7 @@ protected:
 
 	void ProcessParentOverflow(UniformOverflow& param, QFAUIParent* parent);
 	float ProcessParentOpacity(float childOpacity , QFAUIParent* parent);
-
+	
 
 	/*
 		need for Scroll

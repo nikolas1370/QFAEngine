@@ -183,6 +183,7 @@
     <ClCompile Include="Engine\Render\UI\Canvas.cpp" />
     <ClCompile Include="Engine\Render\UI\Grid.cpp" />
     <ClCompile Include="Engine\Render\UI\Scroll.cpp" />
+    <ClCompile Include="Engine\Render\UI\SelectUnit.cpp" />
     <ClCompile Include="Engine\Render\UI\TextInput.cpp" />
     <ClCompile Include="Engine\Render\UI\UIImage.cpp" />
     <ClCompile Include="Engine\Render\UI\RenderUnit.cpp" />
@@ -237,6 +238,7 @@
     <ClInclude Include="Engine\Render\UI\Canvas.h" />
     <ClInclude Include="Engine\Render\UI\Grid.h" />
     <ClInclude Include="Engine\Render\UI\Scroll.h" />
+    <ClInclude Include="Engine\Render\UI\SelectUnit.h" />
     <ClInclude Include="Engine\Render\UI\TextInput.h" />
     <ClInclude Include="Engine\Render\UI\UIImage.h" />
     <ClInclude Include="Engine\Render\UI\RenderUnit.h" />

@@ -32,6 +32,26 @@ void QFAUIUnit::SetSlot(void* slot)
 		Parent->MySlotChange(this);
 }
 
+bool QFAUIUnit::IsMyParent(QFAUIParent* parent)
+{
+    if (!parent || !Parent)
+        return false;
+
+    while (true)
+    {
+        if (Parent == parent)
+            return true;
+
+        parent = parent->GetParent();
+        if (!parent)
+            return false;
+    }
+
+    return false;
+}
+
+
+
 QFAViewportRoot* QFAUIUnit::GetViewportRoot(unsigned int& countUnit)
 {
     countUnit = 0;
@@ -52,7 +72,19 @@ QFAViewportRoot* QFAUIUnit::GetViewportRoot(unsigned int& countUnit)
     return nullptr;
 }
 
+QFAWindow* QFAUIUnit::GetWindow()
+{
+    unsigned int countUnit;
+    QFAViewportRoot* vr = GetViewportRoot(countUnit);
+    if (!vr)
+        return nullptr;
+    
+    QFAViewport* viewport = vr->GetViewport();
+    if (!viewport)
+        return nullptr;
 
+    return viewport->GetWindow();
+}
 
 void QFAUIUnit::ProcessParentOverflow(UniformOverflow& param, QFAUIParent* parent)
 {

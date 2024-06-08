@@ -1,7 +1,6 @@
-#pragma once
+﻿#pragma once
 #include <Render/UI/UIParentHiddenChild.h>
 #include <Tools/File/FileSystem.h>
-
 
 class QFAUIList;
 class QFAUICanvas;
@@ -11,6 +10,7 @@ class QFAEditorExplorerFolderUnit;
 class QFAUIScroll;
 class QFAEditorMainWindow;
 class QFAEditorFileViewWindow;
+class QFAUISelectGrid;
 class QFAUIEditorFileExplorer : public QFAParentHiddenChild
 {
 	friend QFAEditorMainWindow;
@@ -26,19 +26,15 @@ class QFAUIEditorFileExplorer : public QFAParentHiddenChild
 	static const char32_t CppFileButtonIconCode = 59656;	// Hawcons (document-file-cpp)
 
 	QFAUICanvas* FileExplorerMiddle;
-	QFAUIScroll* FolderItemListScroll;
-	QFAUIGrid* FolderItemList;
+	QFAUISelectGrid* SelectGrid;
 	
-
 	QFAUIList* FileExplorerBottom;
 	QFAText* ExplorerButton;
 	QFAText* CppButton;
 
-
 	QFAUICanvas* CppCanvas;
 	QFAUIScroll* CppListScroll;
 	QFAUIGrid* CppItemList;
-
 	
 	bool FileExplorerSelected = true;
 
@@ -46,7 +42,7 @@ class QFAUIEditorFileExplorer : public QFAParentHiddenChild
 	unsigned int FileExplorerBottomHeight = 35;
 	QFAFileSystem::FolderUnit CurentFolder;
 protected:
-	void MySlotChange(QFAUIUnit* unit) override;
+	void MySlotChange(QFAUIUnit* unit) {} override;
 	void ChangeSize(unsigned int w, unsigned int h) override;
 	void ChangePosition(int x, int y) override;
 	float UpdateInnerHeight() override;
@@ -72,26 +68,15 @@ private:
 	void CreateBottom();
 	void CreateCppTop();
 
-	static void FolderItemListInFocus(QFAUIUnit* unit, void* _this);
-	static void FolderItemListOutFocus(void* _this);
-	static void FolderItemListLeftMouseDown(QFAUIUnit* unit, void* _this);
-	
-
-
 	void UpdateFolderItemList();
 	void UpdateCppItemList();
-
-	const uint64_t MouseDownMaxTimeInMS = 400;
-	const uint64_t MouseDownMaxTime = MouseDownMaxTimeInMS * 10000;// convert from ms to 1/10 microseconds
-	uint64_t LastLeftMouseDownTime;
-
+	
 	void PathChanged();
 	void NextFolder(QFAFileSystem::FolderUnit nextFolder);
 	static void NextFolderButton(QFAUIUnit* unit , void* _this);
 	static void PreviousFolderButton(QFAUIUnit* unit, void* _this);
 	static void ExplorerButtonE(QFAUIUnit* unit, void* _this);
 	static void CppButtonE(QFAUIUnit* unit, void* _this);
-
 
 	std::vector<QFAFileSystem::FolderUnit> PathHistory;
 	int CurentPathHistoryIndex = 0;
@@ -107,16 +92,7 @@ private:
 
 	void DropFiles(int path_count, const char* paths[]);
 
-
-
-
-
-
-
 	QFAEditorFileViewWindow* FileViewWindow = nullptr;
 
 	void NotifyMainEditorWindowDrag(QFAEditorExplorerFolderUnit* unit);
-
-	bool InputFocus = false;
-	void LostInputFocus();
 };

@@ -24,7 +24,6 @@ public:
 	 QFAUIGrid();
 	 ~QFAUIGrid() {};
 
-	
 	void SetColumnCount(unsigned int columnCount);
 	void SetOffsets(unsigned int columnOffset, unsigned int rowOffset);
 	void SetUnitWidth(unsigned int unitWidth);

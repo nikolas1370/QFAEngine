@@ -6,6 +6,7 @@
 #include <Render/Time.h>
 #include <Render/UI/TextInput.h>
 #include <Render/UI/UIParentHiddenChild.h>
+#include <Render/UI/SelectUnit.h>
 
 std::vector<QFAUIEvent*> QFAUIEvent::Events;
 
@@ -309,9 +310,10 @@ void QFAUIEvent::MouseButtonEvent(QFAUIUnit* unitUnderFocus)
 	/* process mose press and release */	
 	if (LeftMouseDown)
 	{
+		QFAUISelectUnit::WindowLeftMouseDown(Window, unitUnderFocus);
 		LeftMouseDown = false;
 		if (unitUnderFocus)
-		{
+		{			
 			unitUnderFocus->NotifyLeftMouseDown();
 			LeftMouseUnit = unitUnderFocus;
 		}
