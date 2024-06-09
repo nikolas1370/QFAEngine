@@ -153,7 +153,6 @@
     <ClCompile Include="Editor\EditorUI\FileExplorer.cpp" />
     <ClCompile Include="Editor\EditorUI\FileViewUnit.cpp" />
     <ClCompile Include="Editor\EditorUI\GameViewportInfo.cpp" />
-    <ClCompile Include="Editor\EditorUI\UIActorList.cpp" />
     <ClCompile Include="Editor\EditorWindows\FileViewWindow.cpp" />
     <ClCompile Include="Editor\GameCodeTool\GameCodeCompiler.cpp" />
     <ClCompile Include="Editor\ShaderCompiler\ShaderCompiler.cpp" />
@@ -170,7 +169,6 @@
     <ClInclude Include="Editor\EditorUI\FileExplorer.h" />
     <ClInclude Include="Editor\EditorUI\FileViewUnit.h" />
     <ClInclude Include="Editor\EditorUI\GameViewportInfo.h" />
-    <ClInclude Include="Editor\EditorUI\UIActorList.h" />
     <ClInclude Include="Editor\EditorWindows\FileViewWindow.h" />
     <ClInclude Include="Editor\GameCodeTool\GameCodeCompiler.h" />
     <ClInclude Include="Editor\ModelLoader.h" />

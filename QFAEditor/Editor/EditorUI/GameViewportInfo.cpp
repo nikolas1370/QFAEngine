@@ -1,4 +1,4 @@
-#include "GameViewportInfo.h"
+﻿#include "GameViewportInfo.h"
 #include <Render/UI/UIList.h>
 #include <Render/UI/Scroll.h>
 
@@ -7,9 +7,10 @@
 
 #include <EditorUI/UIActorList.h>
 #include <EditorUI/UIActorTransform.h>
-
-
-
+#include <Render/UI/SelectUnit.h>
+#include <Render/UI/Text.h>
+#include <filesystem>
+#include <Tools/String.h>
 
 QFAEditorGameViewportInfo::QFAEditorGameViewportInfo()
 {	
@@ -18,30 +19,45 @@ QFAEditorGameViewportInfo::QFAEditorGameViewportInfo()
 
 	QFAUISlot::SCanvasSlot slot;
 
-	ActorList = new QFAEditorUIActorList([this](QActor* actor) 
-		{
-			this->SelectActor(actor); 
-		});
-
 	slot.x = 0.0f;
 	slot.y = 0.0f;
 	slot.Width = 1.0f;
-	slot.Height = 0.5f;	
+	slot.Height = 0.5f;
+	ActorList = new QFAUISelectList;
+	ActorList->SetListType(QFAUIList::LTVertical);
+	ActorList->SetUnitHeight(25);
+	ActorList->FocusColor = InFocusUnitColor;
+	ActorList->SelectColor = SelectUnit;
+	ActorList->SelectLostFocusColor = SelectUnitNotFocus;
+	ActorList->SelectEvent.LeftMouseDown = [this](QFAUIParent* unit)
+		{
+			if(!unit || unit == ActorList)
+			{
+				this->SelectActor(nullptr);
+				return;
+			}
+			
+			for (size_t i = 0; i < ActorAndTextList.size(); i++)
+			{
+				if (ActorAndTextList[i].text == unit)
+				{
+					SelectActor(ActorAndTextList[i].actor);
+					return;
+				}
+			} 
+		};
+
 	ActorList->SetSlot(&slot);
 	Canvas->AddUnit(ActorList);
 
-
-	ActorInfoSCroll = new QFAUIScroll;
-	Canvas->AddUnit(ActorInfoSCroll);
-	slot.y = 0.5f;
-	ActorInfoSCroll->SetSlot(&slot);
-	
 	ActorInfoList = new QFAUIList;
-	ActorInfoSCroll->SetUnit(ActorInfoList);
 	
 	ActorTransform = new QFAUIActorTransform;
 	ActorInfoList->AddUnit(ActorTransform);
 	ActorInfoList->SetEnable(false);
+	slot.y = 0.5f;
+	ActorInfoList->SetSlot(&slot);
+	Canvas->AddUnit(ActorInfoList);
 }
 
 QFAEditorGameViewportInfo::~QFAEditorGameViewportInfo()
@@ -53,18 +69,73 @@ QFAEditorGameViewportInfo::~QFAEditorGameViewportInfo()
 
 void QFAEditorGameViewportInfo::SelectActor(QActor* actor)
 {
-	ActorInfoList->SetEnable(actor->IsValid());
+	if (!actor)
+		return ActorList->SetSelectUnit(nullptr);
+	
+	for (size_t i = 0; i < ActorAndTextList.size(); i++)
+	{
+		if (ActorAndTextList[i].actor == actor)
+		{
+			ActorList->SetSelectUnit(ActorAndTextList[i].text);
+			ActorInfoList->SetEnable(true);
+			ActorTransform->SelectActor(actor);
+			return;
+		}
+	}
+}
 
-	ActorList->SelectActor(actor);
-	ActorTransform->SelectActor(actor);
+void QFAEditorGameViewportInfo::AddActor(QActor* actor, SEditorFile& ef)
+{
+	QFATextBackground* text = new QFATextBackground;
+	ActorList->AddUnit(text);
+	text->SetTextSize(20);
+
+	size_t count = 0;
+	for (size_t i = 0; i < ActorTypes.size(); i++)
+	{
+		if (ActorTypes[i].fileId == ef.id)
+		{
+			count = ++ActorTypes[i].count;
+			break;
+		}
+	}
+
+	std::u32string name = std::filesystem::path(ef.path).filename().replace_extension("").u32string();
+	if (count == 0)
+	{
+		SActorTypes ats;
+		ats.fileId = ef.id;
+		ActorTypes.push_back(ats);
+	}
+	else
+		name.append(U"_").append(QFAString::NumToU32string(count));
+
+	actor->Name = name;
+	text->SetText(name);
+	SActor sActor;
+	sActor.actor = actor;
+	sActor.text = text;
+	ActorAndTextList.push_back(sActor);
 }
 
 void QFAEditorGameViewportInfo::PressedDelete()
 {
-	ActorList->PressDelete();
+	QFAUIParent* unit = ActorList->GetSelectedUnit();
+	if (!unit || !ActorList->GetFocus())
+		return;
+
+	for (size_t i = 0; i < ActorAndTextList.size(); i++)
+	{
+		if (ActorAndTextList[i].text == unit)
+		{
+			ActorList->RemoveUnit(ActorAndTextList[i].text);
+			delete ActorAndTextList[i].actor;
+			delete ActorAndTextList[i].text;
+			ActorAndTextList.erase(ActorAndTextList.begin() + i);
+			return;
+		}
+	}
 }
-
-
 
 void QFAEditorGameViewportInfo::MySlotChange(QFAUIUnit* unit)
 {

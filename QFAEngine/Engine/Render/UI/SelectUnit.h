@@ -21,9 +21,9 @@ class QFAUISelectUnit abstract : public QFAParentHiddenChild
 
 	static std::vector<QFAUISelectUnit*> SelectUnitList;
 public:
-	QFAColor FocusColor;
-	QFAColor SelectColor;
-	QFAColor SelectLostFocusColor;
+	QFAColor FocusColor = QFAColorF(1.0f, 1.0f, 1.0f, 0.05f);
+	QFAColor SelectColor = QFAColorF(0.5f, 0.5f, 0.5f, 1.0f);
+	QFAColor SelectLostFocusColor = QFAColorF(0.2f, 0.2f, 0.2f, 1.0f);
 
 	QFAUISelectUnit()
 	{
@@ -62,6 +62,22 @@ public:
 		DobleClickTime = time * 10000;
 	}
 	
+	inline QFAUIParent* GetSelectedUnit()
+	{
+		return SelectedUnit;
+	}
+
+	inline bool GetFocus()
+	{
+		return SelectedUnit ? SelectedUnitFocus : false;
+	}
+
+	void SetSelectUnit(QFAUIParent* unit);
+	void SetFocus(bool focus)
+	{
+		SelectedUnitFocus = focus;
+	}
+
 	SelectUnitEvent SelectEvent;	
 protected:
 	

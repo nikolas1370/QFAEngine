@@ -27,6 +27,32 @@ float QFAUISelectUnit::UpdateInnerWidth()
 	return Width;
 }
 
+void QFAUISelectUnit::SetSelectUnit(QFAUIParent* unit)
+{
+	if (!unit)
+	{
+		SelectedUnit->SetBackgroundColor(QFAColor(0, 0, 0, 0));
+		SelectedUnit = nullptr;
+		return;
+	}	
+
+	for (size_t i = 0; i < SelectUnitChild->Children.Length(); i++)
+	{
+		if (SelectUnitChild->Children[i] == unit)
+		{
+			LastClickUnit = nullptr;
+			if (SelectedUnit)
+				SelectedUnit->SetBackgroundColor(QFAColor(0, 0, 0, 0));
+
+			SelectedUnit = unit;
+			SelectedUnit->SetBackgroundColor(SelectColor);
+			return;
+		}
+	}
+
+	std::cout << "lox\n";
+}
+
 void QFAUISelectUnit::SetScrollChild(QFAUIParentMultipleUnit* child)
 {
 	SelectUnitChild = child;

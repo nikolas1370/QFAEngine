@@ -5,8 +5,6 @@
 #include <Object/Actor/Actor.h>
 #include <Tools/String.h>
 
-
-
 QFAUIActorTransform* QFAUIActorTransform::ActorTransform;
 
 QFAUIActorTransform::QFAUIActorTransform()

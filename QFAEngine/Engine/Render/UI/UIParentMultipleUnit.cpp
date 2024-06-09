@@ -62,7 +62,6 @@ void QFAUIParentMultipleUnit::RemoveUnitWithoutNotify(QFAUIUnit* unit)
 	unit->Parent = nullptr;
 }
 
-
 void QFAUIParentMultipleUnit::ParentEnable()
 {	
 	for (size_t i = 0; i < Children.Length(); i++)

@@ -33,8 +33,7 @@ class QFAUIEditorFileExplorer : public QFAParentHiddenChild
 	QFAText* CppButton;
 
 	QFAUICanvas* CppCanvas;
-	QFAUIScroll* CppListScroll;
-	QFAUIGrid* CppItemList;
+	QFAUISelectGrid* CppItemList;
 	
 	bool FileExplorerSelected = true;
 
@@ -42,7 +41,7 @@ class QFAUIEditorFileExplorer : public QFAParentHiddenChild
 	unsigned int FileExplorerBottomHeight = 35;
 	QFAFileSystem::FolderUnit CurentFolder;
 protected:
-	void MySlotChange(QFAUIUnit* unit) {} override;
+	void MySlotChange(QFAUIUnit* unit) override {} ;
 	void ChangeSize(unsigned int w, unsigned int h) override;
 	void ChangePosition(int x, int y) override;
 	float UpdateInnerHeight() override;

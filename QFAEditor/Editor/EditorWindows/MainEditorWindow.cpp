@@ -104,44 +104,13 @@ void QFAEditorMainWindow::PrepareGameViewport()
 void QFAEditorMainWindow::PrepareCallback()
 {	
 	Input = new QFAInput(Window);
-	/*
-	Input->AddKeyPress(EKey::MOUSE_LEFT, "select", [this](EKey::Key key)
-		{
-			double x, y;
-			if (Window->GetMousePosition(x, y))
-			{
-				FVector2D pos = GameViewportInfo->ActorList->GetPosition();
-				FVector2D size = GameViewportInfo->ActorList->GetSize();
-
-				if (!(x >= pos.X && y >= pos.Y &&
-					x <= pos.X + size.X && y <= pos.Y + size.Y))
-				{
-					GameViewportInfo->ActorList->LostInputFocus();
-				}
-
-				pos = FileExplorer->GetPosition();
-				size = FileExplorer->GetSize();
-				if (!(x >= pos.X && y >= pos.Y &&
-					x <= pos.X + size.X && y <= pos.Y + size.Y))
-				{
-					//remove in SelectUnit
-						//FileExplorer->LostInputFocus();
-				}
-
-				return;
-			}
-
-			GameViewportInfo->ActorList->LostInputFocus();
-			//FileExplorer->LostInputFocus();
-		});
-	*/
-
 	Input->AddKeyPress(EKey::DELETE, "pressDelete", [this](EKey::Key key)
 		{
 			switch (Focus)
 			{
 				case QFAEditorMainWindow::FActorList:
-					GameViewportInfo->ActorList->PressDelete(); break;
+					//GameViewportInfo->ActorList->PressDelete(); 
+					break;
 				case QFAEditorMainWindow::FFileExplorer:
 					break;
 				default:
@@ -153,8 +122,7 @@ void QFAEditorMainWindow::PrepareCallback()
 void QFAEditorMainWindow::AddActorToWorlds(QActor* actor, SEditorFile& ef)
 {
 	Worlds[0].AddActor(actor);
-	GameViewportInfo->ActorList->AddActor(actor, ef);
-
+	GameViewportInfo->AddActor(actor, ef);
 }
 
 void QFAEditorMainWindow::GameCompileCallback(QFAGameCode::CompileStatus status)

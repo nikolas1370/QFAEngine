@@ -5,14 +5,14 @@ class QFAViewport;
 class QFAWindow;
 class QFAUIUnit;
 class QFAUIEvent;
-//QFAUIParentUnit
+class QFAUISelectUnit;
 class QFAUIParentMultipleUnit : public QFAUIParent
 {
 	friend QFAUIUnit;
 	friend QFAViewport;
 	friend QFAWindow;	
 	friend QFAUIEvent;
-	
+	friend QFAUISelectUnit;
 protected:
 	QFAArray<QFAUIUnit*> Children;
 	// call if AddUnit success

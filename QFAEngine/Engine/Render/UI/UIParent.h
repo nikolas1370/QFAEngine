@@ -52,10 +52,6 @@ public:
 	};
 
 protected:
-
-
-	// child call if his slot change
-	virtual void MySlotChange(QFAUIUnit* unit) = 0;
 	/*
 
 	unit be remove from this parent and unit not be Notify about
@@ -64,6 +60,8 @@ protected:
 */
 	virtual void RemoveUnitWithoutNotify(QFAUIUnit* unit) = 0;
 
+	// child call if his slot change
+	virtual void MySlotChange(QFAUIUnit* unit) = 0;
 	/*
 		call in SetSizeParent	
 	*/

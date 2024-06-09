@@ -92,6 +92,7 @@ void QFAUIEditorFileExplorer::CreateMiddle()
 {
 	FileExplorerMiddle = new QFAUICanvas;
 	SelectGrid = new QFAUISelectGrid;
+
 	SelectGrid->SetScrollType(QFAUIScroll::STVertical);
 	SelectGrid->SetPositionType(QFAUIGrid::UPTAuto);
 	SelectGrid->SetMin(100);
@@ -187,24 +188,25 @@ void QFAUIEditorFileExplorer::CreateBottom()
 void QFAUIEditorFileExplorer::CreateCppTop()
 {
 	CppCanvas = new QFAUICanvas;
-	CppListScroll = new QFAUIScroll;
-	CppListScroll->SetScrollType(QFAUIScroll::STVertical);
+	CppItemList = new QFAUISelectGrid;
 
-	CppItemList = new QFAUIGrid;
-	CppListScroll->SetUnit(CppItemList);
+	CppItemList->SetScrollType(QFAUIScroll::STVertical);
 	CppItemList->SetPositionType(QFAUIGrid::UPTAuto);
 	CppItemList->SetMin(100);
-
 	CppItemList->SetOffsets(10, 10);
 	CppItemList->SetRation(1.5);
+	CppItemList->FocusColor = InFocusUnitColor;
+	CppItemList->SelectColor = SelectUnit;
+	CppItemList->SelectLostFocusColor = SelectUnitNotFocus;
 
 	QFAUISlot::SCanvasSlot slot;
 	slot.Height = 1.0f;
 	slot.Width = 1.0f;
 	slot.x = 0.0f;
 	slot.y = 0.0f;
-	CppListScroll->SetSlot(&slot);
-	CppCanvas->AddUnit(CppListScroll);
+	CppItemList->SetSlot(&slot);
+	CppCanvas->AddUnit(CppItemList);
+
 	CppCanvas->SetEnable(false);
 	AddHiddenChild(CppCanvas);
 }
@@ -234,7 +236,7 @@ void QFAUIEditorFileExplorer::UpdateCppItemList()
 
 	std::vector<QFAClassInfoBase*>* classList = QFAGameCode::GameCodeAPIFunction->GetGameClassList();
 	QFAClassInfoBase** classInfo = classList->data();
-	CppItemList->removeAllUnit();
+	CppItemList->RemoveAllUnit();
 	CppUnitInUse = 0;
 	for (size_t i = 0; i < classList->size(); i++)
 	{

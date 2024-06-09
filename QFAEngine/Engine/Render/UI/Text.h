@@ -6,6 +6,7 @@
 #include <Render/Window/Window.h>
 #include <Tools/Array.h>
 #include <Tools/Color.h>
+#include "UIParentHiddenChild.h"
 
 /* ttf type */
 typedef unsigned long  FT_ULong;
@@ -516,7 +517,6 @@ protected:
                 SymbolsForRender_.Clear();
         }
     };
-
     
     STextMetadata TextMetadata;
     unsigned int countTextRow = 0;
@@ -531,8 +531,93 @@ protected:
     static VkDescriptorSet PenDescriptorSet;
     // set pointer to input text
     void SetInputText(char32_t* pText, size_t pTextSize, size_t maxSize);
+};
 
 
+class QFATextBackground : public QFAParentHiddenChild
+{
+    QFAText Text;
+public:
+    QFATextBackground()
+    {
+        AddHiddenChild(&Text);
+    }
 
-    bool kio = false;
+    inline void SetText(std::u32string  text)
+    {
+        Text.SetText(text);
+    }
+
+    inline void SetTextSize(unsigned int height)
+    {
+        Text.SetTextSize(height);
+    }
+
+    inline void SetTextColor(QFAColor color)
+    {
+        Text.SetTextColor(color);
+    }
+
+    inline void SetTextColor(QFAColorB color)
+    {
+        Text.SetTextColor(color);
+    }
+
+    inline void SetTextColor(QFAColorF color)
+    {
+        Text.SetTextColor(color);
+    }
+
+    inline void SetTextColor(unsigned char r, unsigned char g, unsigned char b)
+    {
+        Text.SetTextColor(r, g, b);
+    }
+
+    inline QFAColorF GetTextColor()
+    {
+        return Text.GetTextColor();
+    }
+
+    inline void SetOverflowWrap(QFAText::EOverflowWrap wrap)
+    {
+        Text.SetOverflowWrap(wrap);
+    }
+    inline void SetTextAlign(QFAText::ETextAlign aligh)
+    {
+        Text.SetTextAlign(aligh);
+    }
+
+    inline bool SetFont(QFAText::SFont* font)
+    {
+        Text.SetFont(font);
+    }
+
+protected:
+    void ChangeSize(unsigned int w, unsigned int h)
+    {
+        Width = w;
+        Height = h;
+        SetChildSize(&Text, w, h);
+    }
+
+    virtual void ChangePosition(int x, int y) 
+    {
+        Position_x = x;
+        Position_y = y;
+        SetChildPosition(&Text, x, y);
+    }
+
+    virtual float UpdateInnerHeight() 
+    {
+        return Height;
+    }
+    virtual float UpdateInnerWidth() 
+    {
+        return Width;
+    }
+
+    // child call if his slot change
+    virtual void MySlotChange(QFAUIUnit* unit){}
+private:
+
 };

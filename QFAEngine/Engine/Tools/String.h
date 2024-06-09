@@ -24,6 +24,17 @@ public:
 
 		return outStr;
 	}
+
+	static std::u32string NumToU32string(size_t num)
+	{
+		std::string str = std::to_string(num);
+		std::u32string bigString;
+		bigString.resize(str.size());
+		for (size_t i = 0; i < bigString.size(); i++)
+			bigString[i] = (char32_t)str[i];
+
+		return bigString;
+	}
 private:
 
 };

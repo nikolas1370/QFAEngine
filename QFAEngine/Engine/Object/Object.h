@@ -4,11 +4,11 @@
 #include <string>
 #include <vector>
 
-class QFAEditorUIActorList;
+class QFAEditorGameViewportInfo;
 class QFAClassInfoBase;
 class QObject
 {
-	friend QFAEditorUIActorList;
+	friend QFAEditorGameViewportInfo;
 	friend QFAClassInfoBase;
 
 	static const unsigned int ValidNumber = 167031;
