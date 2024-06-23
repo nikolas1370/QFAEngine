@@ -5,7 +5,6 @@
 #include <Object/Actor/Actor.h>
 #include <Render/UI/Canvas.h>
 
-#include <EditorUI/UIActorList.h>
 #include <EditorUI/UIActorTransform.h>
 #include <Render/UI/SelectUnit.h>
 #include <Render/UI/Text.h>
@@ -84,7 +83,7 @@ void QFAEditorGameViewportInfo::SelectActor(QActor* actor)
 	}
 }
 
-void QFAEditorGameViewportInfo::AddActor(QActor* actor, SEditorFile& ef)
+void QFAEditorGameViewportInfo::AddActor(QActor* actor, std::u32string actorName, size_t id, bool isCppClass)
 {
 	QFATextBackground* text = new QFATextBackground;
 	ActorList->AddUnit(text);
@@ -93,25 +92,24 @@ void QFAEditorGameViewportInfo::AddActor(QActor* actor, SEditorFile& ef)
 	size_t count = 0;
 	for (size_t i = 0; i < ActorTypes.size(); i++)
 	{
-		if (ActorTypes[i].fileId == ef.id)
+		if (ActorTypes[i].fileId == id)
 		{
 			count = ++ActorTypes[i].count;
 			break;
 		}
 	}
 
-	std::u32string name = std::filesystem::path(ef.path).filename().replace_extension("").u32string();
 	if (count == 0)
 	{
 		SActorTypes ats;
-		ats.fileId = ef.id;
+		ats.fileId = id;
 		ActorTypes.push_back(ats);
 	}
 	else
-		name.append(U"_").append(QFAString::NumToU32string(count));
+		actorName.append(U"_").append(QFAString::NumToU32string(count));
 
-	actor->Name = name;
-	text->SetText(name);
+	actor->Name = actorName;
+	text->SetText(actorName);
 	SActor sActor;
 	sActor.actor = actor;
 	sActor.text = text;
@@ -130,7 +128,7 @@ void QFAEditorGameViewportInfo::PressedDelete()
 		{
 			ActorList->RemoveUnit(ActorAndTextList[i].text);
 			delete ActorAndTextList[i].actor;
-			delete ActorAndTextList[i].text;
+			delete ActorAndTextList[i].text;			
 			ActorAndTextList.erase(ActorAndTextList.begin() + i);
 			return;
 		}

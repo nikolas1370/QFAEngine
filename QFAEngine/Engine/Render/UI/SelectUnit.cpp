@@ -31,8 +31,11 @@ void QFAUISelectUnit::SetSelectUnit(QFAUIParent* unit)
 {
 	if (!unit)
 	{
-		SelectedUnit->SetBackgroundColor(QFAColor(0, 0, 0, 0));
-		SelectedUnit = nullptr;
+		if (SelectedUnit)
+		{
+			SelectedUnit->SetBackgroundColor(QFAColor(0, 0, 0, 0));
+			SelectedUnit = nullptr;
+		}
 		return;
 	}	
 

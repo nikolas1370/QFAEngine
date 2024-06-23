@@ -11,6 +11,7 @@ class QFAUIScroll;
 class QFAEditorMainWindow;
 class QFAEditorFileViewWindow;
 class QFAUISelectGrid;
+class QFAClassInfoBase;
 class QFAUIEditorFileExplorer : public QFAParentHiddenChild
 {
 	friend QFAEditorMainWindow;
@@ -48,15 +49,16 @@ protected:
 	float UpdateInnerWidth() override;
 	QFAWindow* Window;
 public:
-	QFAUIEditorFileExplorer(QFAWindow* window, std::function <void (size_t fileId)> dragFun);
+	QFAUIEditorFileExplorer(QFAWindow* window, std::function <void (bool isCppClass, size_t id)> dragFun);
 	~QFAUIEditorFileExplorer();
 
 private:
-	std::function <void(size_t fileId)> DragFun;
+	std::function <void(bool isCppClass, size_t id)> DragFun;
 	/* FolderUnitList and folderContents[0] have same order */
-	std::vector<QFAEditorExplorerFolderUnit*> FolderUnitList; 
-	std::vector<QFAEditorExplorerFolderUnit*> CppUnitList;
+	std::vector<QFAEditorExplorerFolderUnit*> FolderUnitList; 	
 	std::vector<QFAFileSystem::FolderUnit> folderContents;
+
+	std::vector<QFAEditorExplorerFolderUnit*> CppUnitList;
 	int folderUnitInUse = 0;
 	int CppUnitInUse = 0;
 

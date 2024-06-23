@@ -9,6 +9,7 @@ private:
 public:
     SomeCode(/* args */);
     ~SomeCode();
-};
+    int  l;
+}; 
 
 

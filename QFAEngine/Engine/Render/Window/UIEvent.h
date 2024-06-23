@@ -11,6 +11,7 @@ class QFAUITextInput;
 class QFAUIEvent
 {
 	friend QFAWindow;
+	friend QFAUIUnit;
 	QFAWindow* Window;
 
 	static std::vector<QFAUIEvent*> Events;
@@ -55,6 +56,8 @@ private:
 
 
 	static void CharCallback(GLFWwindow* window, unsigned int codepoint);
+	// call if QFAUIUnit delete
+	static void UnitUnderDelete(QFAUIUnit* deadUnit);
 };
 
 

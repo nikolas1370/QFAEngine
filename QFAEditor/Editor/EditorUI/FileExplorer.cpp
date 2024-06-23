@@ -19,7 +19,7 @@
 #include <Tools/String.h>
 #include <Render/UI/SelectUnit.h>
 
-QFAUIEditorFileExplorer::QFAUIEditorFileExplorer(QFAWindow *window, std::function <void(size_t fileId)> dragFun)
+QFAUIEditorFileExplorer::QFAUIEditorFileExplorer(QFAWindow *window, std::function <void(bool isCppClass, size_t fileId)> dragFun)
 {
 	DragFun = dragFun;
 	Window = window;
@@ -209,6 +209,11 @@ void QFAUIEditorFileExplorer::CreateCppTop()
 
 	CppCanvas->SetEnable(false);
 	AddHiddenChild(CppCanvas);
+
+	CppItemList->SelectEvent.LeftMouseDown = ([this](QFAUIParent* unit)
+		{
+			NotifyMainEditorWindowDrag((QFAEditorExplorerFolderUnit*)unit);
+		});
 }
 
 void QFAUIEditorFileExplorer::UpdateFolderItemList()
@@ -234,18 +239,17 @@ void QFAUIEditorFileExplorer::UpdateCppItemList()
 	if (!QFAGameCode::GameCodeAPIFunction)
 		return;
 
-	std::vector<QFAClassInfoBase*>* classList = QFAGameCode::GameCodeAPIFunction->GetGameClassList();
-	QFAClassInfoBase** classInfo = classList->data();
+	std::vector<QFAClass*>& classList = QFAGameCode::GameCodeAPIFunction->GetGameClassList();
 	CppItemList->RemoveAllUnit();
 	CppUnitInUse = 0;
-	for (size_t i = 0; i < classList->size(); i++)
+	for (size_t i = 0; i < classList.size(); i++)
 	{
 		if (CppUnitInUse == CppUnitList.size())
 			CppUnitList.push_back(new QFAEditorExplorerFolderUnit);
 		
 		CppItemList->AddUnit(CppUnitList[CppUnitInUse]);
 		CppUnitList[CppUnitInUse]->ChangeImage(false);
-		CppUnitList[CppUnitInUse]->ChangeText(QFAString::CharsTo32Chars(classInfo[i]->GetClassName()));
+		CppUnitList[CppUnitInUse]->ChangeText(QFAString::CharsTo32Chars(classList[i]->GetClassName()));
 		CppUnitInUse++;
 	}
 }
@@ -374,9 +378,19 @@ void QFAUIEditorFileExplorer::NotifyMainEditorWindowDrag(QFAEditorExplorerFolder
 	if (!unit)
 		return;
 
-	for (size_t i = 0; i < folderUnitInUse; i++)
-		if (FolderUnitList[i] == unit)
-			return DragFun(folderContents[i].id);
+	if (FileExplorerSelected)
+	{
+		for (size_t i = 0; i < folderUnitInUse; i++)
+			if (FolderUnitList[i] == unit)
+				return DragFun(false, folderContents[i].id);
+	} 
+	else
+	{
+		std::vector<QFAClass*>& classList = QFAGameCode::GameCodeAPIFunction->GetGameClassList();		
+		for (size_t i = 0; i < folderUnitInUse; i++)
+			if (CppUnitList[i] == unit)
+				return DragFun(true, classList[i]->GetClassId());
+	}
 }
 
 void QFAUIEditorFileExplorer::PathChanged()

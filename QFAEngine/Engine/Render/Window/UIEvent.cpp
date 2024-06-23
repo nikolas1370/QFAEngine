@@ -403,3 +403,15 @@ void QFAUIEvent::CharCallback(GLFWwindow* window, unsigned int codepoint)
 		}
 	}
 }
+
+void QFAUIEvent::UnitUnderDelete(QFAUIUnit* deadUnit)
+{
+	for (size_t i = 0; i < Events.size(); i++)
+	{
+		if(Events[i]->FocusUnit == deadUnit)
+		{
+			Events[i]->FocusUnit = nullptr;
+			return;
+		}
+	}
+}

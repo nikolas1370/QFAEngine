@@ -67,14 +67,15 @@ private:
 	// call in QFAEditorOverlord if initialization after start editor done
 	void CreateMainEdirorUI();
 
-	size_t CurentDragFileId = 0;
-	static void StartDragAndDrop(size_t fileId);
+	bool IsCppClass; // if false it's file(QFAEditorFileTypes) 
+	size_t CurentDragId = 0;// file or cpp class
+	static void StartDragAndDrop(bool isCppClass, size_t id);
 	static void EndDragAndDrop(EKey::Key key);
 	void PickMesh(EKey::Key key);
 	void PrepareGameViewport();
 	void PrepareCallback();
 
-	void AddActorToWorlds(QActor* actor, SEditorFile& ef);
+	void AddActorToWorlds(QActor* actor, std::u32string actorName, size_t id, bool isCppClass);
 
 	QFAInput* input;
 	FVector2D PickObjectLastCursorPos;

@@ -12,7 +12,6 @@
 #include <EditorFileStorage.h>
 #include <Object/Actor/StaticMeshActor.h>
 #include <EditorUI/GameViewportInfo.h>
-#include <EditorUI/UIActorList.h>
 
 QFAEditorMainWindow* QFAEditorMainWindow::MainWindow = nullptr;
 QFAText::SFont* QFAEditorMainWindow::Icomonfont;
@@ -119,10 +118,10 @@ void QFAEditorMainWindow::PrepareCallback()
 		});
 }
 
-void QFAEditorMainWindow::AddActorToWorlds(QActor* actor, SEditorFile& ef)
+void QFAEditorMainWindow::AddActorToWorlds(QActor* actor, std::u32string actorName, size_t id, bool isCppClass)
 {
 	Worlds[0].AddActor(actor);
-	GameViewportInfo->AddActor(actor, ef);
+	GameViewportInfo->AddActor(actor, actorName, id, isCppClass);
 }
 
 void QFAEditorMainWindow::GameCompileCallback(QFAGameCode::CompileStatus status)
@@ -204,37 +203,51 @@ void QFAEditorMainWindow::CreateInput()
 	PrepareCallback();
 }
 
-void QFAEditorMainWindow::StartDragAndDrop(size_t fileId)
+void QFAEditorMainWindow::StartDragAndDrop(bool isCppClass, size_t id)
 {
-	MainWindow->CurentDragFileId = fileId;
+	MainWindow->CurentDragId = id;
+	MainWindow->IsCppClass = isCppClass;
 }
 
 void QFAEditorMainWindow::EndDragAndDrop(EKey::Key key)
 {
-	if (MainWindow->CurentDragFileId)
+
+	//роби дроп c++
+
+	if (MainWindow->CurentDragId)
 	{
 		double viewportX = MainWindow->GameViewport->X;
 		double viewportY = MainWindow->GameViewport->Y;
 		double viewportWidth = MainWindow->GameViewport->Width;
 		double viewportHeight = MainWindow->GameViewport->Height;
 		
-		size_t id = MainWindow->CurentDragFileId;
-		MainWindow->CurentDragFileId = 0;
+		size_t id = MainWindow->CurentDragId;
+		MainWindow->CurentDragId = 0;
 
 		double x, y;
 		MainWindow->Window->GetMousePosition(x, y);
 		if (x >= viewportX && y >= viewportY &&
 			x <= viewportWidth && y <= viewportHeight)
 		{
-			SEditorFile ef = QFAEditorFileStorage::GetFile(id);
-			if (ef.id == 0)
-				return;
-			else if(ef.fileType == QFAEditorFileTypes::EFTMesh)
+			if (MainWindow->IsCppClass)
 			{
-				AStaticMeshActor* staticActor = new AStaticMeshActor;
-				staticActor->SetActorPosition(0);
-				staticActor->SetMesh((MeshData*)ef.file);
-				MainWindow->AddActorToWorlds(staticActor, ef);
+				// check if it's actor
+				
+			}// std::u32string name = std::filesystem::path(ef.path).filename().replace_extension("").u32string();
+			else
+			{
+				SEditorFile ef = QFAEditorFileStorage::GetFile(id);
+				if (ef.id == 0)
+					return;
+				else if (ef.fileType == QFAEditorFileTypes::EFTMesh)
+				{
+					AStaticMeshActor* staticActor = new AStaticMeshActor;
+					staticActor->SetActorPosition(0);
+					staticActor->SetMesh((MeshData*)ef.file);
+					MainWindow->AddActorToWorlds(staticActor, 
+						std::filesystem::path(ef.path).filename().replace_extension("").u32string(),
+						ef.id, false);
+				}
 			}			
 		}		
 	}

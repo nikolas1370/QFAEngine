@@ -20,17 +20,14 @@ void QObject::Destroy()
     delete this;
 }
 
-/*-----*/
-
-int QFAClassInfoBase::QfaClassCount = 0;
-std::vector<QFAClassInfoBase*> QFAClassInfoBase::QCI;
-QFAGameCodeFunctions QFAClassInfoBase::QFCFs;
-
+int QFAClass::QfaClassCount = 0;
+std::vector<QFAClass*> QFAClass::QCI;
+QFAGameCodeFunctions QFAClass::QFCFs;
 
 extern "C" QFAGameCodeFunctions* QFAGetFunctions()
 {
-    QFAClassInfoBase::QFCFs.CreateObject = &QFAClassInfoBase::CreateObject;
-    QFAClassInfoBase::QFCFs.DeleteObject = &QFAClassInfoBase::DeleteObject;
-    QFAClassInfoBase::QFCFs.GetGameClassList = &QFAClassInfoBase::GetGameClassList;
-    return &QFAClassInfoBase::QFCFs;
+    QFAClass::QFCFs.CreateObject = &QFAClass::CreateObject;
+    QFAClass::QFCFs.DeleteObject = &QFAClass::DeleteObject;
+    QFAClass::QFCFs.GetGameClassList = &QFAClass::GetGameClassList;
+    return &QFAClass::QFCFs;
 }

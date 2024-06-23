@@ -4,7 +4,7 @@
 
 
 
-
+int x = 2;
 
 class QTest : public QObject
 {
@@ -14,12 +14,12 @@ private:
 public:
     QTest()
     {
-        std::cout << "QTest constructor\n";
+        std::cout << "QTest constructor " <<x <<"\n";
     }
 
     ~QTest()
     {
-        std::cout << "~QTest detructor\n";
+        std::cout << "~QTest detructor " <<x <<"\n";
     }
 
 };
@@ -33,12 +33,12 @@ private:
 public:
     QTest_two()
     {
-        std::cout << "QTest_two constructor\n";
+        std::cout << "QTest_two constructor " <<x <<"\n";
     }
 
     ~QTest_two()
     {
-        std::cout << "~QTest_two detructor\n";
+        std::cout << "~QTest_two detructor " << x<<"\n";
     }
 
 };
@@ -51,12 +51,12 @@ private:
 public:
     QTest_tru()
     {
-        std::cout << "QTest_tru constructor\n";
+        std::cout << "QTest_tru constructor " <<x <<"\n";
     }
 
     ~QTest_tru()
     {
-        std::cout << "~QTest_tru detructor\n";
+        std::cout << "~QTest_tru detructor " << x<<"\n";
     }
 
 };

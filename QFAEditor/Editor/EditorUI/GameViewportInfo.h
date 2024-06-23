@@ -51,7 +51,7 @@ public:
 	
 private:
 	void SelectActor(QActor* actor);
-	void AddActor(QActor* actor, SEditorFile& ef);
+	void AddActor(QActor* actor, std::u32string actorName, size_t id, bool isCppClass);
 	void PressedDelete();
 
 	const QFAColorF InFocusUnitColor = QFAColorF(1.0f, 1.0f, 1.0f, 0.05f);

@@ -5,11 +5,11 @@
 #include <vector>
 
 class QFAEditorGameViewportInfo;
-class QFAClassInfoBase;
+class QFAClass;
 class QObject
 {
 	friend QFAEditorGameViewportInfo;
-	friend QFAClassInfoBase;
+	friend QFAClass;
 
 	static const unsigned int ValidNumber = 167031;
 	unsigned int Valid = ValidNumber;
@@ -17,7 +17,7 @@ class QObject
 	size_t ClassId;
 
 #if QFA_EDITOR_ONLY
-	// index in QFAClassInfoBase::ObjectArray
+	// index in QFAClass::ObjectArray
 	size_t CompileIndex;	
     bool CreateInGameCode = false;
     QObject(bool createInGameCode)
@@ -64,7 +64,15 @@ public:
 	}
 };
 
-/* game class*/
+/* 
+*
+* 
+* 
+* game class
+* 
+* 
+* 
+*/
 // use inside QObject class
 #define QFAClassIn(className) static QFAClassInfo<className> _QFAClassInfo;
 
@@ -72,12 +80,12 @@ public:
 #define QFAClassOut(className) QFAClassInfo<className> className::_QFAClassInfo;
 /* use for editor game viewport */
 
-class QFAClassInfoBase;
+class QFAClass;
 struct QFAGameCodeFunctions
 {
     QObject* (*CreateObject)(size_t classId);
     void (*DeleteObject)(QObject* object);
-    std::vector<QFAClassInfoBase*>* (*GetGameClassList)();
+    std::vector<QFAClass*>& (*GetGameClassList)();
 };
 
 extern "C" __declspec(dllexport) QFAGameCodeFunctions * QFAGetFunctions();
@@ -86,18 +94,20 @@ class GameCodeCompiler;
 /*
     only this class and child class can change some inside
 */
-class QFAClassInfoBase
+class QFAClass
 {
     friend QFAGameCodeFunctions* QFAGetFunctions();
     static QFAGameCodeFunctions QFCFs;
 protected:
     static int QfaClassCount;
-    size_t ClassId;
-    static std::vector<QFAClassInfoBase*> QCI;
+    /*
+        0 is reserved first id 1
+        this id temporary, can change between compilations
+    */
+    size_t ClassId; 
+    static std::vector<QFAClass*> QCI;
     const char* ClassName;
     const char* ClassRawName;
-
-    QFAClassInfoBase() {}
 
 #if QFA_EDITOR_ONLY
     /*
@@ -112,13 +122,13 @@ protected:
 
     static QObject* CreateObject(size_t classId)
     {        
-        if (QCI.size() <= classId)
+        if (QCI.size() < classId)
         {
-            std::cout << "QFAClassInfoBase::CreateObject nulptr\n";
+            std::cout << "QFAClass::CreateObject nulptr\n";
             return nullptr;
         }
 
-        return QCI[classId]->CreateObjectInside();
+        return QCI[classId - 1]->CreateObjectInside();
     }
 
     static void DeleteObject(QObject* object)
@@ -126,12 +136,12 @@ protected:
         if (!object->IsValid())
             return;
 
-        QCI[object->ClassId]->DeleteObjectInside(object);
+        QCI[object->ClassId - 1]->DeleteObjectInside(object);
     }
 
-    static std::vector<QFAClassInfoBase*>* GetGameClassList()
+    static std::vector<QFAClass*>& GetGameClassList()
     {
-        return &QCI;
+        return QCI;
     }
 
     inline void SetCompileIndex(QObject* object, size_t index)
@@ -164,20 +174,34 @@ public:
     {
         return ClassId;
     }        
+
+    static QFAClass* GetClass(size_t classId)
+    {
+        if (QCI.size() < classId)
+        {
+            std::cout << "QFAClass::GetClass nulptr\n";
+            return nullptr;
+        }
+
+        return QCI[classId - 1];
+    }
 };
 
+class QActor;
+class QSceneComponent;
+class QActorComponent;
 template<typename T>
-class QFAClassInfo : public QFAClassInfoBase
+class QFAClassInfo : public QFAClass // QFAClassInfoBase
 {
 public:
     QFAClassInfo()
     {// if false compile error        
         static_assert(std::is_base_of<QObject, T>::value, "class " __FUNCTION__" must inherited from base QObject");
-
+        
         ClassName = typeid(T).name();
         ClassRawName = typeid(T).raw_name();
         QCI.push_back(this);
-        ClassId = QfaClassCount++;
+        ClassId = ++QfaClassCount;
     }
 private:
 #if QFA_EDITOR_ONLY

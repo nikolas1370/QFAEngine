@@ -1,6 +1,8 @@
 #include "UIUnit.h"
 #include <Render/UI/UIParentMultipleUnit.h>
 #include <Render/Window/Viewport.h>
+#include <Render/Window/UIEvent.h>
+
 void QFAUIUnit::SetPosition(unsigned int x, unsigned int y)
 {
 	if (!Parent || Parent->GetIsRoot())
@@ -20,6 +22,7 @@ QFAUIUnit::~QFAUIUnit()
 		    Parent->RemoveUnitWithoutNotify(this);
 
     UnitValid = false;
+    QFAUIEvent::UnitUnderDelete(this);
 }
 
 void QFAUIUnit::SetSlot(void* slot)
@@ -55,7 +58,6 @@ bool QFAUIUnit::IsMyParent(QFAUIParent* parent)
 QFAViewportRoot* QFAUIUnit::GetViewportRoot(unsigned int& countUnit)
 {
     countUnit = 0;
-
     QFAUIUnit* parent = this;
     while (true)
     {        
