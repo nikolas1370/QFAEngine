@@ -1,7 +1,6 @@
 #pragma once
 #include <vulkan/vulkan.h>
 #include <Render/vk/VKInstance.h>
-#include <optional>
 #include "VKStruct.h"
 
 class QFAVKPhysicalDevice

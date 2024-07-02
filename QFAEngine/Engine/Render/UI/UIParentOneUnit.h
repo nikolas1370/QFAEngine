@@ -3,7 +3,7 @@
 
 class QFAWindow;
 class QFAUIEvent;
-class QFAUIParentOneUnit : public QFAUIParent
+class QFAEXPORT QFAUIParentOneUnit : public QFAUIParent
 {
 	friend QFAWindow;
 	friend QFAUIEvent;

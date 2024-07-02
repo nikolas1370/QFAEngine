@@ -1,4 +1,5 @@
-﻿#include "FileExplorer.h"
+﻿#include "epch.h"
+#include "FileExplorer.h"
 #include <Tools/VulkanSuff.h>
 #include <Render/UI/UIList.h>
 #include <Render/UI/Canvas.h>
@@ -249,7 +250,7 @@ void QFAUIEditorFileExplorer::UpdateCppItemList()
 		
 		CppItemList->AddUnit(CppUnitList[CppUnitInUse]);
 		CppUnitList[CppUnitInUse]->ChangeImage(false);
-		CppUnitList[CppUnitInUse]->ChangeText(QFAString::CharsTo32Chars(classList[i]->GetClassName()));
+		CppUnitList[CppUnitInUse]->ChangeText(QFAString::CharsTo32Chars(classList[i]->GetName()));
 		CppUnitInUse++;
 	}
 }
@@ -386,10 +387,10 @@ void QFAUIEditorFileExplorer::NotifyMainEditorWindowDrag(QFAEditorExplorerFolder
 	} 
 	else
 	{
-		std::vector<QFAClass*>& classList = QFAGameCode::GameCodeAPIFunction->GetGameClassList();		
-		for (size_t i = 0; i < folderUnitInUse; i++)
+		std::vector<QFAClass*>& classList = QFAGameCode::GameCodeAPIFunction->GetGameClassList();
+		for (size_t i = 0; i < CppUnitInUse; i++)
 			if (CppUnitList[i] == unit)
-				return DragFun(true, classList[i]->GetClassId());
+				return DragFun(true, classList[i]->GetId());
 	}
 }
 

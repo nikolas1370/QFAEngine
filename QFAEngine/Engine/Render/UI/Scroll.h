@@ -3,7 +3,7 @@
 #include <vector>
 
 class QFAUIEvent;
-class QFAUIScroll : public QFAUIParentOneUnit
+class QFAEXPORT QFAUIScroll : public QFAUIParentOneUnit
 {
 	friend QFAUIEvent;
 public:

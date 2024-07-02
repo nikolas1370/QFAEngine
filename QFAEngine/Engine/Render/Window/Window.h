@@ -1,29 +1,11 @@
 #pragma once
 #include <Tools/Array.h>
 #include <Tools/VulkanSuff.h>
-#include <Math/Math.h>
-#include <Render/vk/VKInstance.h>
-#include <Render/vk/PhysicalDevice.h>
-#include <Render/vk/LogicalDevice.h>
-#include <Render/vk/SwapChain.h>
 #include <string>
 #include <Math/Vector.h>
-#include <Render/vk/QueueFamilies.h>
 
-#include <Render/Image.h>
-#include <Render/vk/ImageView.h>
-#include <Render/vk/TextureSampler.h>
-#include <Render/Buffer/VertexBuffer.h>
-#include <Render/Buffer/IndexBuffer.h>
 
-#include <Render/RenderPass/RenderPassDepth.h>
-#include <Render/Framebuffer/ShadowFrameBuffer.h>
-#include <Render/RenderPass/TextRenderPass.h>
-#include <Render/vk/PresentImage.h>
-#include <Render/UI/UIUnit.h>
-#include <Render/Window/Viewport.h>
-#include <Render/Window/UIEvent.h>
-
+#include <functional>
 struct UniformBufferObject
 {// more detail https://fvcaputo.github.io/2019/02/06/memory-alignment.html
 	/*
@@ -52,7 +34,19 @@ class QFAUIImage;
 class QFAVKRenderPassSwapChain;
 class QFAInput;
 class MeshData;
-class QFAWindow
+class QFAVKSwapChain;
+class QFAUIEvent;
+class QFAViewport;
+class QFAPresentImage;
+class QFAViewportRoot;
+class QFAVKTextRenderPass;
+class QFAVKShadowFrameBuffer;
+class QFAVKImageView;
+class QFAVKTextureSampler;
+class QFAVKBuffer;
+class QFAVKRenderPassDepth;
+class QFAVKInstance;
+class QFAEXPORT QFAWindow
 {
 
 	friend QFAText;; 
@@ -66,7 +60,6 @@ class QFAWindow
 	friend MeshData;
 
 	static std::vector<QFAWindow*> Windows;
-	//static QFAWindow* MainWindow;
 	static QFAWindow* CurentProcessWindow;
 	GLFWwindow* glfWindow;
 	
@@ -172,21 +165,9 @@ public:
 	{
 		return Viewports.Length();
 	}
-	inline bool ShouldClose()
-	{
-		return glfwWindowShouldClose(glfWindow) || NeedClose;
-	}
+	bool ShouldClose();
 
-
-	/*
-	
-	закоментуй і дивись
-	
-	*/
-	inline static QFAWindow* GetMainWindow()
-	{
-		return Windows[0];
-	}
+	static QFAWindow* GetMainWindow();
 	
 
 	inline void Close()
@@ -216,33 +197,10 @@ public:
 		DropFunction = fun;
 	}
 
-	void GetFocus()
-	{
-		glfwFocusWindow(glfWindow);
-	}
-
-	void EnabelDecorated(bool enabel)
-	{
-		glfwSetWindowAttrib(glfWindow, GLFW_DECORATED, enabel);
-	}
-
-	void SetSize(int w, int h)
-	{
-		glfwSetWindowSize(glfWindow, w, h);
-		Width = w;
-		Height = h;
-	}
-
-	void MoveToCenter()
-	{
-		GLFWmonitor* pm = glfwGetPrimaryMonitor();
-		int x, y, w, h;
-
-		glfwGetMonitorWorkarea(pm, &x, &y, &w, &h);
-		std::cout << x << " " << y << "\n";
-		glfwSetWindowPos(glfWindow, w / 2 - Width / 2  + x, h / 2 - Height / 2 + y);
-	}
-
+	void GetFocus();
+	void EnabelDecorated(bool enabel);
+	void SetSize(int w, int h);		
+	void MoveToCenter();
 
 private:
 	std::function<void(int path_count, const char* paths[])> DropFunction;

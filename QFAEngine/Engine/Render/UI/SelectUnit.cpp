@@ -1,4 +1,5 @@
-﻿#include "SelectUnit.h"
+﻿#include "pch.h"
+#include "SelectUnit.h"
 #include <Render/Time.h>
 
 std::vector<QFAUISelectUnit*> QFAUISelectUnit::SelectUnitList;
@@ -25,6 +26,18 @@ float QFAUISelectUnit::UpdateInnerHeight()
 float QFAUISelectUnit::UpdateInnerWidth()
 {
 	return Width;
+}
+
+QFAUISelectUnit::QFAUISelectUnit()
+{
+	SelectUnitList.push_back(this);
+}
+
+QFAUISelectUnit::~QFAUISelectUnit()
+{
+	for (size_t i = 0; i < SelectUnitList.size(); i++)
+		if (SelectUnitList[i] == this)
+			SelectUnitList.erase(SelectUnitList.begin() + i);
 }
 
 void QFAUISelectUnit::SetSelectUnit(QFAUIParent* unit)

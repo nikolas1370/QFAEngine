@@ -13,7 +13,7 @@ class QMeshBaseComponent;
 class QFAUIUnit;
 class QFAUIParentMultipleUnit;
 class QFAEditorMainWindow;
-class QFAViewport
+class QFAEXPORT QFAViewport
 {
 	friend QFAWindow;
 	friend QFAUIParentMultipleUnit;

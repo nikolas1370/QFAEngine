@@ -1,26 +1,33 @@
-﻿#include "Window.h"
-
+﻿#include "pch.h"
 #include <Object/ActorComponent/SceneComponent/Camera/Camera.h>
-
 #include <Render/Time.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
 #include <Object/World/DirectionLight/DirectionLight.h>
-#include <Overlord/Overlord.h>
 #include <Render/Window/Viewport.h>
-#include <chrono>
 #include <Object/Actor/Actor.h>
-#include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
 #include <Render/UI/UIImage.h>
-
 #include <Render/UI/Text.h>
 #include <Render/RenderPass/RenderPassSwapChain.h>
-
 #include <Render/Framebuffer/MeshFrameBuffer.h> 
 #include <Render/UI/UIParentMultipleUnit.h>
 #include <Render/Pipline/Pipline.h>
 #include <Render/UI/UIParentOneUnit.h>
 #include <Render/UI/UIParentHiddenChild.h>
-
+#include <Render/Window/UIEvent.h>
+#include <Render/Window/Viewport.h>
+#include <Render/UI/UIUnit.h>
+#include <Render/vk/PresentImage.h>
+#include <Render/RenderPass/TextRenderPass.h>
+#include <Render/Framebuffer/ShadowFrameBuffer.h>
+#include <Render/RenderPass/RenderPassDepth.h>
+#include <Render/vk/ImageView.h>
+#include <Render/vk/TextureSampler.h>
+#include <Render/Image.h>
+#include <Render/vk/QueueFamilies.h>
+#include <Render/vk/SwapChain.h>
+#include <Render/vk/LogicalDevice.h>
+#include <Render/vk/VKInstance.h>
+#include <GLFW/glfw3.h>
 
 VkCommandPool QFAWindow::commandPool;
 
@@ -401,13 +408,13 @@ void QFAWindow::DrawOffscreenBuffer()
 	VkRect2D scissor{};
 	scissor.offset = { 0, 0 };
 	scissor.extent = SwapChain->swapChainExtent;
-	vkCmdSetScissor(FinisCommandBuffer, 0, 1, &scissor);
-
+	vkCmdSetScissor(FinisCommandBuffer, 0, 1, &scissor);	
 	vkCmdBindPipeline(FinisCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, PresentImage->Pipeline->GetPipeline());
 
-	recordCommandBufferTestImege();
+	recordCommandBufferTestImege(); 
 
 	vkCmdEndRenderPass(FinisCommandBuffer);
+	
 }
 
 void QFAWindow::recordCommandBufferTestImege()
@@ -418,11 +425,12 @@ void QFAWindow::recordCommandBufferTestImege()
 	vkCmdBindVertexBuffers(FinisCommandBuffer, 0, 1, vertexBuffers, offsets);
 
 	VkDescriptorSet descSet = PresentImage->Pipeline->GetSet(0, 0);
-
+	
 	vkCmdBindDescriptorSets(FinisCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
 		PresentImage->Pipeline->GetPipelineLayout(), 0, 1, &descSet , 0, nullptr);
 	
-	vkCmdDraw(FinisCommandBuffer, static_cast<uint32_t>(6), 1, 0, 0);
+	vkCmdDraw(FinisCommandBuffer, static_cast<uint32_t>(6), 1, 0, 0); 
+	
 }
 
 void QFAWindow::QueueSubmitPresent(std::vector<VkSemaphore>& listSemi)
@@ -446,9 +454,9 @@ void QFAWindow::QueueSubmitPresent(std::vector<VkSemaphore>& listSemi)
 
 
 
-	if (vkEndCommandBuffer(FinisCommandBuffer) != VK_SUCCESS)
+	if (vkEndCommandBuffer(FinisCommandBuffer) != VK_SUCCESS) 
 		stopExecute("failed to record command buffer!");
-
+	
 	if (vkQueueSubmit(QFAVKLogicalDevice::GetGraphicsQueue(), 1, &submitInfo, nullptr) != VK_SUCCESS)
 		stopExecute("failed to submit draw command buffer!");
 
@@ -657,14 +665,15 @@ void QFAWindow::ShadowRender(QFAViewport* _viewport)
 
 void QFAWindow::RenderWindows()
 { 
-
-
 	ViewportProcess = 0;
+	
 	QMeshBaseComponent::StartFrame();
 	QFAText::StartFrame();
+	
 	NextWaitSemi = nullptr;
 	// https://docs.vulkan.org/samples/latest/samples/performance/command_buffer_usage/README.html
 	//vkResetCommandPool(QFAVKLogicalDevice::GetDevice(), commandPool, 0);
+
 	for (size_t i = 0; i < Windows.size(); i++)
 	{
 		if (Windows[i]->minimized)
@@ -683,6 +692,8 @@ void QFAWindow::RenderWindows()
 
 		Windows[i]->RenderWindow(lastWindows);		
 	}
+
+	
 
 	PresentWindows();
 }
@@ -713,29 +724,30 @@ void QFAWindow::PresentWindows()
 	vkResetCommandBuffer(FinisCommandBuffer, 0);
 	VkCommandBufferBeginInfo beginInfo{};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
+	
 	if (vkBeginCommandBuffer(FinisCommandBuffer, &beginInfo) != VK_SUCCESS)
 		stopExecute("failed to begin recording command buffer!");
 
 	static std::vector<VkSemaphore> finishSmiList;
 	finishSmiList.clear();
+	
 	for (size_t i = 0; i < Windows.size(); i++)
 	{
 		if (Windows[i]->minimized)
 			continue;
 
-		Windows[i]->DrawOffscreenBuffer();		// draw offscreen buffer to swapchain buffer
+		Windows[i]->DrawOffscreenBuffer();// draw offscreen buffer to swapchain buffer
 		finishSmiList.push_back(Windows[i]->FinisSemaphore);
 	}
-
+	
 	QueueSubmitPresent(finishSmiList); // submit all drawcall swapchain buffers
-
+	
 	for (size_t i = 0; i < Windows.size(); i++)
 	{
 		if (Windows[i]->minimized)
 			continue;
-		
-		Windows[i]->PresentFrame(finishSmiList[i]);
+
+		Windows[i]->PresentFrame(finishSmiList[i]); 
 	}
 }
 
@@ -953,3 +965,37 @@ void QFAWindow::CreateViewPortStuff()
 }
 
 
+void QFAWindow::GetFocus()
+{
+	glfwFocusWindow(glfWindow);
+}
+
+bool QFAWindow::ShouldClose()
+{
+	return glfwWindowShouldClose(glfWindow) || NeedClose;
+}
+
+QFAWindow* QFAWindow::GetMainWindow()
+{
+	return Windows[0];
+}
+
+void QFAWindow::EnabelDecorated(bool enabel)
+{
+	glfwSetWindowAttrib(glfWindow, GLFW_DECORATED, enabel);
+}
+
+void QFAWindow::SetSize(int w, int h)
+{
+	glfwSetWindowSize(glfWindow, w, h);
+	Width = w;
+	Height = h;
+}
+
+void QFAWindow::MoveToCenter()
+{
+	GLFWmonitor* pm = glfwGetPrimaryMonitor();
+	int x, y, w, h;
+	glfwGetMonitorWorkarea(pm, &x, &y, &w, &h);
+	glfwSetWindowPos(glfWindow, w / 2 - Width / 2 + x, h / 2 - Height / 2 + y);
+}

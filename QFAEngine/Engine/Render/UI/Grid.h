@@ -1,7 +1,7 @@
 #pragma once
 #include "UIParentMultipleUnit.h"
 
-class  QFAUIGrid : public QFAUIParentMultipleUnit
+class  QFAEXPORT QFAUIGrid : public QFAUIParentMultipleUnit
 {
 public:
 	/*

@@ -4,7 +4,7 @@
 
 class QFAUIEvent;
 class QFAUIScroll;
-class QFAUITextInput : public QFAParentHiddenChild
+class QFAEXPORT QFAUITextInput : public QFAParentHiddenChild
 {
 	friend QFAUIEvent;
 	friend QFAUIScroll;

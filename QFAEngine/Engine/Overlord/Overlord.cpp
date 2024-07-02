@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Overlord.h"
 #include <Render/Window/Window.h>
 #include <Object/World/World.h>
@@ -10,8 +11,9 @@
 #include <Input/Input.h>
 #include <Render/UI/Text.h>
 #include <Tools/File/FileSystem.h>
-#include <Windows.h>
 #include <Tools/VulkanSuff.h>
+#include <Render/vk/LogicalDevice.h>
+#include <GLFW/glfw3.h>
 
 #pragma comment(lib, "Winmm.lib")  // for timeBeginPeriod , timeEndPeriod
 
@@ -73,13 +75,48 @@ bool QFAOverlord::Init(std::vector<QFAVKPipeline::SShaderData> shaderData, bool 
     return true;
 }
 
+void QFAOverlord::SetLimitFpsCount(float framesCount)
+{
+    if (framesCount > 0)
+    {
+        FrameCount = framesCount;
+        FrameTime = 1000 / FrameCount;
+    }
+}
+
+float QFAOverlord::GetLimitFpsCount()
+{
+    return FrameCount;
+}
+
+void QFAOverlord::EnableFpsLock(bool enable)
+{
+    FpsLock = enable;
+}
+
+inline bool QFAOverlord::GetFpsLock()
+{
+    return FpsLock;
+}
+
+void QFAOverlord::SetShdowFpsInConsole(bool enable)
+{
+    ShdowFpsInConsole = enable;
+}
+
+std::thread::id QFAOverlord::GetMainThreadId()
+{
+    return MainThreadId;
+}
+
 void QFAOverlord::MainLoop()
 {
     static int count = 0;
     static double deltaAcum = 0;
     float timePassedAcum = 0;
 
-    while ( Life)
+    //while ( Life)
+    while (true)
     {   
         if (FrameStarted)
             FrameStarted();

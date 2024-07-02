@@ -1,7 +1,7 @@
 #pragma once
 #include <Tools/VulkanSuff.h>
 
-class QFAVKMeshRenderPass
+class QFAEXPORT QFAVKMeshRenderPass
 {
 public:
 	QFAVKMeshRenderPass();

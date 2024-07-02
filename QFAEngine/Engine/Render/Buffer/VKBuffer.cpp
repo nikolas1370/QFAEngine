@@ -1,3 +1,4 @@
+﻿#include "pch.h"
 #include "VKBuffer.h"
 #include <cstring>
 #include <Render/vk/LogicalDevice.h>
@@ -40,6 +41,12 @@ QFAVKBuffer::QFAVKBuffer(VkDeviceSize size, const void* data, bool inHost, VkBuf
     if (data == nullptr || !inHost)
         return;
     
+
+
+
+
+    
+
     memcpy(MapData, data, static_cast<size_t>(size));
 }
 

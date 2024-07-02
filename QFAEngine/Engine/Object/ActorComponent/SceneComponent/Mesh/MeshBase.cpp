@@ -1,9 +1,11 @@
+#include "pch.h"
 #include "MeshBase.h"
 #include <Object/Actor/Actor.h>
 #include <Render/vk/LogicalDevice.h>
 #include <Tools/VulkanSuff.h>
 #include <Render/Buffer/VKBuffer.h>
 #include <Render/Pipline/Pipline.h>
+#include <Render/Buffer/VertexBuffer.h>
 
 QMeshBaseComponent::SShaderDirLight QMeshBaseComponent::ShaderDL;
 
@@ -100,6 +102,41 @@ QMeshBaseComponent::~QMeshBaseComponent()
 		/*	
 		delete all
 	*/
+}
+
+void* QMeshBaseComponent::GetModelBuffer()
+{
+	if (SetsInUse >= Set1Buffers.size())
+		createDescriptorSet1();
+
+	return Set1Buffers[SetsInUse].vertexBuffer->MapData;
+}
+
+void* QMeshBaseComponent::GetFragmentBuffer()
+{
+	if (SetsInUse >= Set1Buffers.size())
+		createDescriptorSet1();
+
+	return Set1Buffers[SetsInUse].fragmentBuffer->MapData;
+}
+
+void* QMeshBaseComponent::GetShadowBuffer()
+{
+	return QFAWindow::ViewportStuff[QFAWindow::ViewportProcess].buffers.shadowBuffer->MapData;
+}
+
+std::array<VkDescriptorSet, 2> QMeshBaseComponent::GetNextSets()
+{
+	return std::array<VkDescriptorSet, 2>
+	{
+		Pipeline->GetSet(0, QFAWindow::CurentProcessWindow->ViewportProcess),
+			Pipeline->GetSet(1, SetsInUse++)
+	};
+}
+
+VkDescriptorSet QMeshBaseComponent::GetShadowNextSet()
+{
+	return ShadowPipline->GetSet(0, QFAWindow::CurentProcessWindow->ViewportProcess);
 }
 
 void QMeshBaseComponent::EndLife()

@@ -1,11 +1,15 @@
 #pragma once
+#include <Tools/Stuff.h>
 #include <string>
 #include <fstream>
 #include <vector>
 
 class QFAFileSystem;
 class QFAOverlord;
-class QFAFile
+
+
+
+class QFAEXPORT QFAFile
 {
 	friend QFAOverlord;
 	friend QFAFileSystem;
@@ -37,21 +41,7 @@ public:
 		file = nullptr;
 	}
 
-	void DeleteFile()
-	{
-		if(file)
-			delete[] file;
-
-		for (size_t i = 0; i < Datas.size(); i++)
-		{
-			if (Datas[i] == file)
-			{
-				Datas.erase(Datas.begin() + i);
-				file = nullptr;
-				return;
-			}
-		}		
-	}
+	void Delete();
 
 	/*
 		if the data is not need use QFAFile::ReleaseData
@@ -97,7 +87,7 @@ private:
 
 
 // FindFirstChangeNotification https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-findfirstchangenotificationa?redirectedfrom=MSDN
-class QFAFileSystem
+class QFAEXPORT QFAFileSystem
 {
 public:
 	struct FolderUnit

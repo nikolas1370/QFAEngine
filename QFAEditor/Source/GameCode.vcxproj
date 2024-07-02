@@ -9,30 +9,49 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.default.props" />
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <EnableASAN>false</EnableASAN>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PreprocessorDefinitions>QFA_EDITOR_ONLY;_NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <SDLCheck>true</SDLCheck>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <CallingConvention>Cdecl</CallingConvention>
+      <CompileAs>Default</CompileAs>
     </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>../../x64/$(Configuration);C:\Users\Jahi\Desktop\QFAEngine\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>QFAEngine.lib</AdditionalDependencies>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+    </Link>
   </ItemDefinitionGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F2B7D9EF-4BAC-4452-AFF7-7920DD8DE140}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <PlatformToolset>v143</PlatformToolset>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <IncludePath>C:\VulkanSDK\1.3.275.0\Include;</IncludePath>
+    <IncludePath>C:\VulkanSDK\1.3.280.0\Include;../../QFAEngine/Engine/;../../External/glfw-3.4.bin.WIN64/include</IncludePath>
+    <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SomeCode.cpp" />
+
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="main.h" />
     <ClInclude Include="SomeCode.h" />
+    <ClInclude Include="main.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Targets" />
 </Project>

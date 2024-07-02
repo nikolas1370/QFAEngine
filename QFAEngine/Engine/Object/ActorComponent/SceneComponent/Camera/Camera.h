@@ -5,7 +5,7 @@ class QFAOverlord;
 class QFAViewport;
 class QWorld;
 class ACameraEditor;
-class QCameraComponent : public QSceneComponent
+class QFAEXPORT QCameraComponent : public QSceneComponent
 {
 	friend QFAWindow;
 	friend QFAOverlord;

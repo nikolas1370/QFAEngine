@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "SwapChain.h"
 #include <Render/vk/QueueFamilies.h>
 #include <algorithm>
@@ -5,6 +6,7 @@
 #include <Render/Image.h>
 #include <Render/Buffer/VKBuffer.h>
 #include <Render/Window/Window.h>
+#include <GLFW/glfw3.h>
 
 QFAVKSwapChain::QFAVKSwapChain(GLFWwindow* window, VkSurfaceKHR surface, VkCommandPool _commandPool)
 { 

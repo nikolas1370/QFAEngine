@@ -4,7 +4,7 @@
 #include <Math/Vector.h>
 #include <Math/Vector2D.h>
 
-class ACameraActor : public QActor
+class QFAEXPORT ACameraActor : public QActor
 {
 	
 protected:

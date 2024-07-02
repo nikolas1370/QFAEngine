@@ -1,62 +1,61 @@
 #pragma once
 #include <iostream>
 #include "../../QFAEngine/Engine/Object/Object.h"
+#include "../../QFAEngine/Engine/Object/Actor/Actor.h"
 
 
+int x = 15;
 
-int x = 2;
-
-class QTest : public QObject
+class Test : public QObject
 {
-    QFAClassIn(QTest)
+    QFAClassIn(Test)    
 private:
     
 public:
-    QTest()
+    Test()
     {
         std::cout << "QTest constructor " <<x <<"\n";
     }
 
-    ~QTest()
+    ~Test()
     {
         std::cout << "~QTest detructor " <<x <<"\n";
     }
-
 };
 
 
-class QTest_two : public QObject
+class QTest_ActorMinusOne //: public QActor
 {
-    QFAClassIn(QTest_two)
+    //QFAClassIn(QTest_ActorMinusOne)
 private:
     
 public:
-    QTest_two()
+    QTest_ActorMinusOne()
     {
-        std::cout << "QTest_two constructor " <<x <<"\n";
+        std::cout << "QTest_ActorMinusOne constructor " <<x <<"\n";
     }
 
-    ~QTest_two()
+    ~QTest_ActorMinusOne()
     {
-        std::cout << "~QTest_two detructor " << x<<"\n";
+        std::cout << "~QTest_ActorMinusOne detructor " << x<<"\n";
     }
 
 };
 
-class QTest_tru : public QObject
+class QTest_Actor : public QActor
 {
-    QFAClassIn(QTest_tru)
+    QFAClassIn(QTest_Actor)
 private:
     
 public:
-    QTest_tru()
+    QTest_Actor()
     {
-        std::cout << "QTest_tru constructor " <<x <<"\n";
+        std::cout << "QTest_Actor constructor " <<x <<"\n";
     }
 
-    ~QTest_tru()
+    ~QTest_Actor()
     {
-        std::cout << "~QTest_tru detructor " << x<<"\n";
+        std::cout << "~QTest_Actor detructor " << x<<"\n";
     }
 
 };

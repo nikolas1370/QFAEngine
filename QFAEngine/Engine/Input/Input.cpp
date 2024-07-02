@@ -1,7 +1,9 @@
+#include "pch.h"
 #include "Input.h"
 #include <iostream>
 #include <Tools/VulkanSuff.h>
 #include <Render/Window/Window.h>
+#include <GLFW/glfw3.h>
 std::vector<QFAWindow*> QFAInput::WindowList;
 
 QFAArray<QFAInput::Sinput> QFAInput::Inputs;

@@ -21,7 +21,7 @@ class QFAText;
 class QFAUIBackground;
 class QFAUITextInput;
 
-class QFAUIParent : public QFAUIUnit
+class QFAEXPORT QFAUIParent : public QFAUIUnit
 {
 	friend QFAUIParentMultipleUnit;
 	friend QFAUIParentOneUnit;

@@ -1,3 +1,4 @@
+﻿#include "pch.h"
 #include "Actor.h"
 #include <Object/World/World.h>
 #include <Object/ActorComponent/SceneComponent/SceneComponent.h>
@@ -11,7 +12,7 @@ QActor::~QActor()
 	RootComponent->Destroy();
 
 	if (ActorWorld->IsValid())
-		ActorWorld->ForgetActor(this);
+		ActorWorld->RemoveActor(this);
 }
 
 void QActor::SetActorPosition(const FVector& position)
@@ -116,3 +117,21 @@ bool QActor::SetRootComponent(QSceneComponent* component, bool inseparable)
 	RootComponent->SetScale(Scale);
 	return true;
 }
+
+#if QFA_EDITOR_ONLY
+void QActor::ReplaceMe(QObject* newActor)
+{
+	if(ActorWorld)
+	{
+		QActor* actor = (QActor*)newActor;
+		ActorWorld->Actors[WorldIndex] = actor;
+		actor->WorldIndex = WorldIndex;
+		ActorWorld = nullptr;
+		actor->Name = Name;
+
+		actor->SetActorPosition(Position);
+		actor->SetActorRotation(Rotation);
+		actor->SetActorScale(Scale);
+	}
+}
+#endif 

@@ -1,4 +1,6 @@
+#include "pch.h"
 #include "MeshFrameBuffer.h"
+#include <Tools/Stuff.h>
 
 QFAVKMeshFrameBuffer::QFAVKMeshFrameBuffer(VkCommandPool commandPool, int w, int h, VkFormat imageFormat)
 {

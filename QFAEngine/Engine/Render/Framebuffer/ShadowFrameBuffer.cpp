@@ -1,5 +1,7 @@
+#include "pch.h"
 #include "ShadowFrameBuffer.h"
 #include <Render/vk/LogicalDevice.h>
+#include <Tools/Stuff.h>
 
 QFAVKShadowFrameBuffer::QFAVKShadowFrameBuffer(VkCommandPool commandPool, VkRenderPass renderPass)
 {

@@ -1,4 +1,5 @@
-﻿#include "StaticMesh.h"
+﻿#include "pch.h"
+#include "StaticMesh.h"
 #include <Tools/VulkanSuff.h>
 
 QStaticMesh::QStaticMesh(MeshData* meshData)

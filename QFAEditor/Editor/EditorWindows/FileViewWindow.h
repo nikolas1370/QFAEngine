@@ -1,7 +1,6 @@
 ﻿#pragma once
-#include <string>
-#include <vector>
 #include <Tools/File/FileSystem.h>
+#include <Object/World/World.h>
 class QFAWindow;
 class QWorld;
 class QFAImage;

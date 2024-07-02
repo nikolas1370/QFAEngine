@@ -2,6 +2,7 @@
 #include <Render/UI/Text.h>
 #include <EditorFileStorage.h>
 #include <GameCodeTool/GameCodeCompiler.h>
+#include <Input/Input.h>
 
 class QFAWindow;
 class QFAUIEditorFileExplorer;

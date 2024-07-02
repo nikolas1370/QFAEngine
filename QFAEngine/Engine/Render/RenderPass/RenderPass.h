@@ -2,7 +2,7 @@
 #include <vulkan/vulkan.h>
 class QFAWindow;
 
-class QFAVKRenderPass
+class QFAEXPORT QFAVKRenderPass
 {
 
 	friend QFAWindow;

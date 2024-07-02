@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "CameraActor.h"
 #include <Render/Window/Viewport.h>
 ACameraActor::ACameraActor()

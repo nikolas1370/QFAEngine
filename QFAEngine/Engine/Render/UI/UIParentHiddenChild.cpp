@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "UIParentHiddenChild.h"
 
 QFAParentHiddenChild::QFAParentHiddenChild()

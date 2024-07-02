@@ -1,10 +1,13 @@
-﻿#include "GameCodeCompiler.h"
+﻿#include "epch.h"
+#include "GameCodeCompiler.h"
 
 #include <Tools/File/FileSystem.h>
 #include <Windows.h> 
 #include <iostream>
 #include <processthreadsapi.h>
 #include <Tools/VulkanSuff.h>
+#include <Object/Actor/Actor.h>
+#include <Object/Class.h>
 
 QFAGameCode::DllFile QFAGameCode::CurentDllFile = QFAGameCode::DllFile::None;
 bool QFAGameCode::DllWasCompiled = false;
@@ -14,45 +17,43 @@ bool QFAGameCode::DllWasCompiled = false;
 const wchar_t* QFAGameCode::LoadDllPath = L"GameCode.dll";
 /*
     create shipped version
-    and in QFAGameCode::CopyDll
 */
 #if _DEBUG
-    const char* QFAGameCode::CopyDllFrom = "Source/x64/debug/GameCode.dll";
-    const char* QFAGameCode::CopyPdbFrom = "Source/x64/debug/GameCode.pdb";
-    const char* QFAGameCode::CopyDllIn = "../x64/Debug/GameCode.dll";
-    const char* QFAGameCode::CopyPdbIn = "../x64/Debug/GameCode.pdb";
+const char* QFAGameCode::CopyDllFrom = "Source/x64/debug/GameCode.dll";
+const char* QFAGameCode::CopyPdbFrom = "Source/x64/debug/GameCode.pdb";
+const char* QFAGameCode::CopyDllIn = "../x64/Debug/GameCode.dll";
+const char* QFAGameCode::CopyPdbIn = "../x64/Debug/GameCode.pdb";
 
-    const wchar_t* QFAGameCode::HotFolder_1Path = L"Source/x64/debug/HotReload_1";
-    const wchar_t* QFAGameCode::HotFolder_2Path = L"Source/x64/debug/HotReload_2";
+const wchar_t* QFAGameCode::HotFolder_1Path = L"Source/x64/debug/HotReload_1";
+const wchar_t* QFAGameCode::HotFolder_2Path = L"Source/x64/debug/HotReload_2";
 
-    const wchar_t* QFAGameCode::DllHotPath = L"Source/x64/debug/GameCode.dll";
-    const wchar_t* QFAGameCode::DllHot_1Path = L"Source/x64/debug/HotReload_1/GameCode_HotReload_1.dll";
-    const wchar_t* QFAGameCode::DllHot_2Path = L"Source/x64/debug/HotReload_2/GameCode_HotReload_2.dll";
-    const wchar_t* QFAGameCode::PdbHot_1Path = L"Source/x64/debug/HotReload_1/GameCode_HotReload_1.pdb";
-    const wchar_t* QFAGameCode::PdbHot_2Path = L"Source/x64/debug/HotReload_2/GameCode_HotReload_2.pdb";
+const wchar_t* QFAGameCode::DllHotPath = L"Source/x64/debug/GameCode.dll";
+const wchar_t* QFAGameCode::DllHot_1Path = L"Source/x64/debug/HotReload_1/GameCode.dll";
+const wchar_t* QFAGameCode::DllHot_2Path = L"Source/x64/debug/HotReload_2/GameCode.dll";
+const wchar_t* QFAGameCode::PdbHot_1Path = L"Source/x64/debug/HotReload_1/GameCode.pdb";
+const wchar_t* QFAGameCode::PdbHot_2Path = L"Source/x64/debug/HotReload_2/GameCode.pdb";
 #else
-    const char* QFAGameCode::CopyDllFrom = "Source/x64/release/GameCode.dll";
-    const char* QFAGameCode::CopyPDBFrom = "Source/x64/release/GameCode.pdb";
-    const char* QFAGameCode::CopyDllIn = "../x64/Release/GameCode.dll";
-    const char* QFAGameCode::CopyPdbIn = "../x64/Release/GameCode.pdb";
+const char* QFAGameCode::CopyDllFrom = "Source/x64/release/GameCode.dll";
+const char* QFAGameCode::CopyPdbFrom = "Source/x64/release/GameCode.pdb";
+const char* QFAGameCode::CopyDllIn = "../x64/Release/GameCode.dll";
+const char* QFAGameCode::CopyPdbIn = "../x64/Release/GameCode.pdb";
 
-    const wchar_t* QFAGameCode::HotFolder_1Path = L"Source/x64/release/HotReload_1";
-    const wchar_t* QFAGameCode::HotFolder_2Path = L"Source/x64/release/HotReload_2";
+const wchar_t* QFAGameCode::HotFolder_1Path = L"Source/x64/release/HotReload_1";
+const wchar_t* QFAGameCode::HotFolder_2Path = L"Source/x64/release/HotReload_2";
 
-    const wchar_t* QFAGameCode::DllHotPath = L"Source/x64/release/GameCode.dll";
-    const wchar_t* QFAGameCode::DllHot_1Path = L"Source/x64/release/HotReload_1/GameCode_HotReload_1.dll";
-    const wchar_t* QFAGameCode::DllHot_2Path = L"Source/x64/release/HotReload_2/GameCode_HotReload_2.dll";
-    const wchar_t* QFAGameCode::PdbHot_1Path = L"Source/x64/release/HotReload_1/GameCode_HotReload_1.pdb";
-    const wchar_t* QFAGameCode::PdbHot_2Path = L"Source/x64/release/HotReload_2/GameCode_HotReload_2.pdb";
+const wchar_t* QFAGameCode::DllHotPath = L"Source/x64/release/GameCode.dll";
+const wchar_t* QFAGameCode::DllHot_1Path = L"Source/x64/release/HotReload_1/GameCode.dll";
+const wchar_t* QFAGameCode::DllHot_2Path = L"Source/x64/release/HotReload_2/GameCode.dll";
+const wchar_t* QFAGameCode::PdbHot_1Path = L"Source/x64/release/HotReload_1/GameCode.pdb";
+const wchar_t* QFAGameCode::PdbHot_2Path = L"Source/x64/release/HotReload_2/GameCode.pdb";
 #endif
 
 void* QFAGameCode::GameCodeModule = NULL; // HMODULE
-void* QFAGameCode::OldGameCodeModule = NULL; 
+void* QFAGameCode::OldGameCodeModule = NULL;
 QFAGameCodeFunctions* QFAGameCode::GameCodeAPIFunction = nullptr;
 
 bool QFAGameCode::Compile()
 {
-
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
 
@@ -60,7 +61,7 @@ bool QFAGameCode::Compile()
     si.cb = sizeof(si);
     ZeroMemory(&pi, sizeof(pi));// /t:rebuild    
     TCHAR lox2[] = L"\"C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe\" Source/GameCode.vcxproj /p:configuration=debug /p:platform=x64";
-    std::filesystem::remove(CopyPdbFrom); // witout it got compile error
+    std::filesystem::remove(CopyPdbFrom); // without it got compile error
     std::error_code xa;
 
     if (!CreateProcessW(0,   // No module name (use command line)
@@ -82,12 +83,12 @@ bool QFAGameCode::Compile()
     // Wait until child process exits.
     WaitForSingleObject(pi.hProcess, INFINITE);
     bool succeed = false;
-    
+
     DWORD ExitCode;
     GetExitCodeProcess(pi.hProcess, &ExitCode);
     if (!ExitCode)
         succeed = true;
-    
+
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
     if (succeed)
@@ -100,8 +101,52 @@ void QFAGameCode::ReplacementOldDllObject()
 {
     if (OldGameCodeModule)
     {
-        FreeLibrary((HMODULE)OldGameCodeModule);
-        OldGameCodeModule = nullptr;
+        FARPROC Functions = (FARPROC)GetProcAddress((HMODULE)OldGameCodeModule, "___QFAGAMECODEEXPORTFUNCTIONGETFUNCTIONS___");
+        if (Functions)
+        {
+            QFAGameCodeFunctions* oldApi = (QFAGameCodeFunctions*)Functions();
+
+            std::vector<QFAClass*>& oldClasses = oldApi->GetGameClassList();
+            for (size_t i = 0; i < oldClasses.size(); i++) 
+            {
+                if (QFAClass* newClasses = FindInNewClass(oldClasses[i]->GetName())) 
+                {// write check if old and current class have one parent tree if not du some
+                    if (oldClasses[i]->GetBaseOn() == QFAClass::Actor && newClasses->GetBaseOn() == QFAClass::Actor)
+                    {
+                        std::vector<QObject*>& OldActorList = oldApi->GetGameObjectList(oldClasses[i]->GetId());
+                        for (size_t j = 0; j < OldActorList.size(); j++)
+                            OldActorList[j]->ReplaceMe(GameCodeAPIFunction->CreateObject(newClasses->GetId()));
+                    }
+                    else
+                        stopExecute("Restart editor")
+                }
+                else 
+                {
+                    if (oldClasses[i]->GetBaseOn() == QFAClass::Actor)
+                    {
+                        std::vector<QObject*>& OldActorList = oldApi->GetGameObjectList(oldClasses[i]->GetId());
+                        for (size_t j = 0; j < OldActorList.size(); j++)
+                            OldActorList[j]->ReplaceMe(new QActor);
+                    }                    
+                }
+            }
+
+            for (size_t i = 0; i < oldClasses.size(); i++) // 
+            {
+                std::vector<QObject*>& OldObjectList = oldApi->GetGameObjectList(oldClasses[i]->GetId());
+                for (size_t j = 0; j < OldObjectList.size(); j++)
+                    delete OldObjectList[j];
+            }
+
+
+            FreeLibrary((HMODULE)OldGameCodeModule);
+            OldGameCodeModule = nullptr;
+        }
+        else
+        {
+            stopExecute("")
+                return;
+        }
     }
 }
 
@@ -110,7 +155,7 @@ bool QFAGameCode::CopyDll(DllFile f)
     std::filesystem::copy_options co = std::filesystem::copy_options::update_existing;
     if (f == DllFile::None)
         return false;
-    else if(f == DllFile::GameCode)
+    else if (f == DllFile::GameCode)
     {
         try
         {
@@ -121,7 +166,7 @@ bool QFAGameCode::CopyDll(DllFile f)
         {
             std::cout << as.what();
             stopExecute("")
-            return false;
+                return false;
         }
     }
     else
@@ -129,6 +174,7 @@ bool QFAGameCode::CopyDll(DllFile f)
         std::filesystem::create_directories(f == DllFile::GameCode_HotReload_1 ? HotFolder_1Path : HotFolder_2Path);
         try
         {
+            std::filesystem::remove(f == DllFile::GameCode_HotReload_1 ? PdbHot_1Path : PdbHot_2Path); // without it VS lock pdb file
             std::filesystem::copy_file(CopyDllFrom, f == DllFile::GameCode_HotReload_1 ? DllHot_1Path : DllHot_2Path, co);
             std::filesystem::copy_file(CopyPdbFrom, f == DllFile::GameCode_HotReload_1 ? PdbHot_1Path : PdbHot_2Path, co);
         }
@@ -136,17 +182,29 @@ bool QFAGameCode::CopyDll(DllFile f)
         {
             std::cout << as.what();
             stopExecute("")
-            return false;
+                return false;
         }
     }
 
     return true;
 }
 
+QFAClass* QFAGameCode::FindInNewClass(const char* className)
+{
+    std::vector<QFAClass*>& newClasses = GameCodeAPIFunction->GetGameClassList();
+    for (size_t i = 0; i < newClasses.size(); i++)
+        if (std::strcmp(className, newClasses[i]->GetName()) == 0)
+            return newClasses[i];
+
+    return nullptr;
+}
+
+
+
 void (*QFAGameCode::CompileCallback)(QFAGameCode::CompileStatus);
 void QFAGameCode::CompileGameCode(void (*callback)(CompileStatus))
 {
-	CompileCallback = callback;
+    CompileCallback = callback;
     if (Compile())
     {
         if (LoadCode())
@@ -159,7 +217,7 @@ void QFAGameCode::CompileGameCode(void (*callback)(CompileStatus))
 }
 
 bool QFAGameCode::LoadCode()
-{        
+{
     bool needReplacement = false;
     LPCWSTR loadPath = nullptr;
     if (CurentDllFile == DllFile::None)
@@ -167,7 +225,7 @@ bool QFAGameCode::LoadCode()
         bool main = std::filesystem::exists(CopyDllIn);
         bool hoot = std::filesystem::exists(CopyDllFrom);
 
-        if (main && hoot) 
+        if (main && hoot)
         {
             time_t timeMain = std::filesystem::last_write_time(CopyDllIn).time_since_epoch().count();
             time_t timeHot = std::filesystem::last_write_time(CopyDllFrom).time_since_epoch().count();
@@ -178,21 +236,21 @@ bool QFAGameCode::LoadCode()
         else if (hoot)
         {
             if (!CopyDll(DllFile::GameCode))
-                return false;            
+                return false;
         }
-        else 
-            return false;        
+        else if(!main)
+            return false;
 
         CurentDllFile = DllFile::GameCode;
         loadPath = LoadDllPath;
     }
-    else if(CurentDllFile == DllFile::GameCode)
-    {        
+    else if (CurentDllFile == DllFile::GameCode)
+    {
         if (!DllWasCompiled)
             return false;
 
         if (std::filesystem::exists(CopyDllFrom))
-        {     
+        {
             if (!CopyDll(DllFile::GameCode_HotReload_1))
                 return false;
 
@@ -200,7 +258,7 @@ bool QFAGameCode::LoadCode()
             loadPath = DllHot_1Path;
         }
         else
-            return false;        
+            return false;
     }
     else
     {
@@ -208,7 +266,7 @@ bool QFAGameCode::LoadCode()
             return false;
 
         if (CurentDllFile == DllFile::GameCode_HotReload_1)
-        {            
+        {
             if (!CopyDll(DllFile::GameCode_HotReload_2))
                 return false;
 
@@ -216,7 +274,7 @@ bool QFAGameCode::LoadCode()
             loadPath = DllHot_2Path;
         }
         else
-        {            
+        {
             if (!CopyDll(DllFile::GameCode_HotReload_1))
                 return false;
 
@@ -224,27 +282,27 @@ bool QFAGameCode::LoadCode()
             loadPath = DllHot_1Path;
         }
     }
-    
+
     DllWasCompiled = false;
-    HMODULE mod = LoadLibraryW(loadPath); 
+    HMODULE mod = LoadLibraryW(loadPath);
     if (mod)
     {
-        FARPROC Functions = (FARPROC)GetProcAddress(mod, "QFAGetFunctions");
+        FARPROC Functions = (FARPROC)GetProcAddress(mod, "___QFAGAMECODEEXPORTFUNCTIONGETFUNCTIONS___");
         if (Functions)
             GameCodeAPIFunction = (QFAGameCodeFunctions*)Functions();
         else
         {
             FreeLibrary(mod);
-            stopExecute("dead end\n")
+            stopExecute("dead end\n");
             return false;
         }
 
         if (GameCodeModule)
         {
             needReplacement = true;
-            OldGameCodeModule = GameCodeModule;            
+            OldGameCodeModule = GameCodeModule;
         }
-        
+
         GameCodeModule = (void*)mod;
     }
     else

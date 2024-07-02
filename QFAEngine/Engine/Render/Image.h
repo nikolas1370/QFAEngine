@@ -1,5 +1,4 @@
 #pragma once
-#include <string>
 #include <Tools/VulkanSuff.h>
 #include <Render/vk/ImageView.h>
 class QFAVKBuffer;
@@ -8,7 +7,7 @@ class QFAWindow;
 /*
 	Store image in cpu and gpu side;
 */
-class QFAImage
+class QFAEXPORT QFAImage
 {	
 	friend QFAVKBuffer;
 	friend QFAVKImageView;

@@ -1,8 +1,9 @@
 #pragma once
 #include <vulkan/vulkan.h>
+#include <Tools/Stuff.h>
 class QFAWindow;
 
-class QFAVKTextRenderPass
+class QFAEXPORT QFAVKTextRenderPass
 {
 
 	friend QFAWindow;

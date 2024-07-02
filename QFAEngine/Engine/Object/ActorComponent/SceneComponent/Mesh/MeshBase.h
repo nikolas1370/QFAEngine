@@ -32,7 +32,9 @@ struct Material // struct in fragment shader
 
 class QStaticMesh;
 class QMeshBaseComponent;
-class MeshData
+class QFAVKVertexBuffer;
+class QFAVKIndexBuffer;
+class QFAEXPORT MeshData
 {
 	/*
 	in memory
@@ -142,7 +144,7 @@ class QFAOverlord;
 #include <Render/Buffer/VertexBuffer.h>
 
 
-class QMeshBaseComponent : public QSceneComponent 
+class QFAEXPORT QMeshBaseComponent : public QSceneComponent
 {
 	friend QStaticMesh;
 	friend QFAWindow;
@@ -184,41 +186,18 @@ public:
 	virtual void UpdateBuffers(VkCommandBuffer commandBuffer, uint64_t startFrameTime, bool isShadow, const FVector& cameraPos) = 0;
 	
 
-	inline void* GetModelBuffer()
-	{
-		if (SetsInUse >= Set1Buffers.size())
-			createDescriptorSet1();
-
-		return Set1Buffers[SetsInUse].vertexBuffer->MapData;
-	}
-
-	inline void* GetFragmentBuffer()
-	{
-		if (SetsInUse >= Set1Buffers.size())
-			createDescriptorSet1();
-		
-		return Set1Buffers[SetsInUse].fragmentBuffer->MapData;
-	}
-
-	inline void* GetShadowBuffer()
-	{			
-		return QFAWindow::ViewportStuff[QFAWindow::ViewportProcess].buffers.shadowBuffer->MapData;
-	}
+	void* GetModelBuffer();
+	
+	void* GetFragmentBuffer();
+	
+	void* GetShadowBuffer();
+	
 
 
- 	inline std::array<VkDescriptorSet, 2> GetNextSets()
-	{
-		return std::array<VkDescriptorSet, 2>
-		{
-			Pipeline->GetSet(0, QFAWindow::CurentProcessWindow->ViewportProcess),
-			Pipeline->GetSet(1, SetsInUse++)
-		};
-	}
+	std::array<VkDescriptorSet, 2> GetNextSets();
 
-	inline VkDescriptorSet GetShadowNextSet()
-	{ 
-		return ShadowPipline->GetSet(0, QFAWindow::CurentProcessWindow->ViewportProcess);
-	}
+	VkDescriptorSet GetShadowNextSet();
+	
 
 
 	struct SShaderDirLight

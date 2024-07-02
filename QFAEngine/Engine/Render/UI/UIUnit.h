@@ -4,6 +4,7 @@
 #include <Math/Vector2D.h>
 #include <Math/Vector.h>
 #include <functional>
+#include <Tools/Stuff.h>
 namespace QFAUIType
 {
 	enum Type : unsigned char
@@ -102,7 +103,7 @@ class QFAViewportRoot;
 class QFAUIList;
 class QFAParentHiddenChild;
 class QFAUIBackground;
-class QFAUIUnit
+class QFAEXPORT QFAUIUnit
 {
 	friend QFAViewport;
 	friend QFAWindow;
@@ -169,7 +170,7 @@ protected:
 	bool UnitValid = true;
 public:
 
-	class EventFunctions
+	class QFAEXPORT EventFunctions
 	{
 		struct Callback
 		{

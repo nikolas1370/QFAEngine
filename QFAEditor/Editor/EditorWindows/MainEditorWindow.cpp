@@ -1,4 +1,5 @@
-﻿#include "MainEditorWindow.h"
+﻿#include "epch.h"
+#include "MainEditorWindow.h"
 #include <Render/Window/Window.h>
 #include <EditorUI/FileExplorer.h>
 #include <Tools/VulkanSuff.h>
@@ -12,6 +13,8 @@
 #include <EditorFileStorage.h>
 #include <Object/Actor/StaticMeshActor.h>
 #include <EditorUI/GameViewportInfo.h>
+#include <Render/Window/Viewport.h>
+#include <Tools/String.h>
 
 QFAEditorMainWindow* QFAEditorMainWindow::MainWindow = nullptr;
 QFAText::SFont* QFAEditorMainWindow::Icomonfont;
@@ -103,7 +106,7 @@ void QFAEditorMainWindow::PrepareGameViewport()
 void QFAEditorMainWindow::PrepareCallback()
 {	
 	Input = new QFAInput(Window);
-	Input->AddKeyPress(EKey::DELETE, "pressDelete", [this](EKey::Key key)
+	Input->AddKeyPress(EKey::DELETE_KEY, "pressDelete", [this](EKey::Key key)
 		{
 			switch (Focus)
 			{
@@ -195,7 +198,7 @@ void QFAEditorMainWindow::CreateInput()
 			}
 		});
 
-	Input->AddKeyRelease(EKey::DELETE, "delete_release", [this](EKey::Key key)
+	Input->AddKeyRelease(EKey::DELETE_KEY, "delete_release", [this](EKey::Key key)
 		{
 			GameViewportInfo->PressedDelete();
 		});
@@ -211,9 +214,6 @@ void QFAEditorMainWindow::StartDragAndDrop(bool isCppClass, size_t id)
 
 void QFAEditorMainWindow::EndDragAndDrop(EKey::Key key)
 {
-
-	//роби дроп c++
-
 	if (MainWindow->CurentDragId)
 	{
 		double viewportX = MainWindow->GameViewport->X;
@@ -231,9 +231,22 @@ void QFAEditorMainWindow::EndDragAndDrop(EKey::Key key)
 		{
 			if (MainWindow->IsCppClass)
 			{
-				// check if it's actor
-				
-			}// std::u32string name = std::filesystem::path(ef.path).filename().replace_extension("").u32string();
+				if (!QFAGameCode::GameCodeAPIFunction)
+					return;
+			
+				QFAClass* newObjectClass = (QFAGameCode::GameCodeAPIFunction->GetGameClassList()[id - 1]);
+				if (newObjectClass->GetBaseOn() == QFAClass::EBaseOn::Actor)
+				{
+					QActor* newActor = (QActor*)QFAGameCode::GameCodeAPIFunction->CreateObject(newObjectClass->GetId());
+					newActor->SetActorPosition(0);
+					MainWindow->AddActorToWorlds(newActor,
+						QFAString::CharsTo32Chars(newObjectClass->GetName()),
+						newObjectClass->GetId(), true);
+					
+				}
+				else
+					std::cout << "Class not based on Actor\n";
+			}
 			else
 			{
 				SEditorFile ef = QFAEditorFileStorage::GetFile(id);

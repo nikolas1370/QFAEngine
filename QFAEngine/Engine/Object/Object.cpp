@@ -1,4 +1,5 @@
-﻿#include "Object.h"
+﻿#include "pch.h"
+#include "Object.h"
 
 QObject::QObject()
 {
@@ -18,16 +19,4 @@ void QObject::Destroy()
         return;
     
     delete this;
-}
-
-int QFAClass::QfaClassCount = 0;
-std::vector<QFAClass*> QFAClass::QCI;
-QFAGameCodeFunctions QFAClass::QFCFs;
-
-extern "C" QFAGameCodeFunctions* QFAGetFunctions()
-{
-    QFAClass::QFCFs.CreateObject = &QFAClass::CreateObject;
-    QFAClass::QFCFs.DeleteObject = &QFAClass::DeleteObject;
-    QFAClass::QFCFs.GetGameClassList = &QFAClass::GetGameClassList;
-    return &QFAClass::QFCFs;
 }

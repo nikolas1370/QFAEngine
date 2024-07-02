@@ -1,8 +1,9 @@
 #pragma once
 #include <vulkan/vulkan.h>
+#include <Tools/Stuff.h>
 class QFAWindow;
 
-class QFAVKRenderPassSwapChain
+class QFAEXPORT QFAVKRenderPassSwapChain
 {
 
 	friend QFAWindow;

@@ -2,7 +2,7 @@
 #include <Render/Image.h>
 
 class QFAWindow;
-class QFAVKShadowFrameBuffer
+class QFAEXPORT QFAVKShadowFrameBuffer
 {
 	friend QFAWindow;
 public:

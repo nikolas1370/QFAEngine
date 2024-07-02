@@ -6,7 +6,7 @@ class QActor;
 /*
 	in future be some do
 */
-class QActorComponent : public QObject
+class QFAEXPORT QActorComponent : public QObject
 {
 	friend QWorld;
 	friend QActor;

@@ -3,7 +3,7 @@
 #include <Tools/VulkanSuff.h>
 #include <Render/Image.h>
 #include <Render/vk/LogicalDevice.h>
-class QFAVKMeshFrameBuffer
+class QFAEXPORT QFAVKMeshFrameBuffer
 {
 	
 	void CreateBuffer(VkCommandPool commandPool, int w, int h);

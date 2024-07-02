@@ -6,7 +6,7 @@ class QFAVKPipeline;
 class QFAUIScroll;
 class QFAUIParentOneUnit;
 class QFAUIParentMultipleUnit;
-class QFAUIRenderUnit : public QFAUIUnit
+class QFAEXPORT QFAUIRenderUnit : public QFAUIUnit
 {
 	friend QFAWindow;
 	friend QFAUIScroll;

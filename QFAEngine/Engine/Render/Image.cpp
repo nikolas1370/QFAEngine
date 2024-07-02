@@ -1,12 +1,13 @@
+#include "pch.h"
 #include "Image.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
 
 #include <Render/Buffer/VKBuffer.h>
 #include <Render/vk/PhysicalDevice.h>
 #include <Render/vk/LogicalDevice.h>
 #include <Tools/File/FileSystem.h>
 #include <Render/Window/Window.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 QFAImage::QFAImage(SImageCreateInfo& ici)
 {

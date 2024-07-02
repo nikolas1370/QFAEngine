@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "UIEvent.h"
 #include <Render/Window/QFAViewportRoot.h>
 #include <Render/Window/Window.h>
@@ -7,6 +8,7 @@
 #include <Render/UI/TextInput.h>
 #include <Render/UI/UIParentHiddenChild.h>
 #include <Render/UI/SelectUnit.h>
+#include <GLFW/glfw3.h>
 
 std::vector<QFAUIEvent*> QFAUIEvent::Events;
 

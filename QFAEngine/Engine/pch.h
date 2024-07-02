@@ -1,0 +1,12 @@
+#pragma once
+#include <Windows.h>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <array>
+#include <functional>
+#include <thread>
+#include <optional>
+#include <fstream>
+#include <filesystem>
+#include <Render/UI/Text.h>

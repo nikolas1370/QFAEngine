@@ -6,7 +6,7 @@ class QFAWindow;
 class QFAUIUnit;
 class QFAUIEvent;
 class QFAUISelectUnit;
-class QFAUIParentMultipleUnit : public QFAUIParent
+class QFAEXPORT QFAUIParentMultipleUnit : public QFAUIParent
 {
 	friend QFAUIUnit;
 	friend QFAViewport;

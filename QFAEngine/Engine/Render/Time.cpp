@@ -1,5 +1,8 @@
+#include "pch.h"
 #include "Time.h"
 #include <Tools/VulkanSuff.h>
+#include <Tools/Stuff.h>
+#include <GLFW/glfw3.h>
 uint64_t QTime::StartTime = 0;
 uint64_t QTime::WorkTime = 0;
 double QTime::DeltaTime = 0.0;
@@ -28,4 +31,24 @@ void QTime::CalcDeltaTime()
 	}
 	else
 		WorkTime += timu;
+}
+
+double QTime::GetDeltaTime()
+{
+	return DeltaTime;
+}
+
+uint64_t QTime::GetTime()
+{// in future
+	return glfwGetTimerValue() - StartTime;
+}
+
+uint64_t QTime::GetWorkTime()
+{
+	return (glfwGetTimerValue() - WorkTime) + WorkTime;
+}
+
+uint64_t QTime::GetSystemTime()
+{
+	return glfwGetTimerValue();
 }

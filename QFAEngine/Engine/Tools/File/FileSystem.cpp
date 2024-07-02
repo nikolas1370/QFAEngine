@@ -1,7 +1,7 @@
+#include "pch.h"
 #include "FileSystem.h"
 #include <Tools/VulkanSuff.h>
 #include <filesystem>
-
 
 std::vector<void*> QFAFile::Datas;
 
@@ -9,6 +9,22 @@ void QFAFile::EndLife()
 {
 	for (size_t i = 0; i < Datas.size(); i++)
 		delete[] Datas[i];
+}
+
+void QFAFile::Delete()
+{
+	if (file)
+		delete[] file;
+
+	for (size_t i = 0; i < Datas.size(); i++)
+	{
+		if (Datas[i] == file)
+		{
+			Datas.erase(Datas.begin() + i);
+			file = nullptr;
+			return;
+		}
+	}
 }
 
 void QFAFile::DisableAutoDeleteFileData()

@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include <Render/UI/UIParentHiddenChild.h>
-#include <array>
 class QFAUICanvas;
 class QFAUITextInput;
 class QFAUIBackground;

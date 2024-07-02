@@ -10,10 +10,13 @@ class QFAEditorMainWindow;
 
 
 
-class QWorld : public QObject
+class QFAEXPORT QWorld : public QObject
 {
 
-	static int lox;
+#if QFA_EDITOR_ONLY
+	friend QActor;// for QActor::ReplaceMe
+#endif 
+	
 
 	friend QFAOverlord;
 	friend QFAEditorMainWindow;
@@ -31,9 +34,8 @@ private:
 	QDirectionLight DirectionLight;
 
 	static QFAArray<QWorld*> Worlds;
-
-	// call only from QActor Destructor
-	void ForgetActor(QActor* actor);
+	
+	
 
 	bool IsActive = true;
 	static void ProcessTicks();
@@ -57,7 +59,8 @@ public:
 	~QWorld();
 
 	void AddActor(QActor* actor);
-	
+	void RemoveActor(QActor* actor);
+
 	inline QDirectionLight* GetDirectionDight()
 	{
 		return &DirectionLight;
@@ -73,6 +76,8 @@ public:
 	{
 		Enable = enable;
 	}
+
+
 private:
 	void SetEditorActor(QActor* actor);
 };

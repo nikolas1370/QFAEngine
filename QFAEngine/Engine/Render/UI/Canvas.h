@@ -2,7 +2,7 @@
 #include <Render/UI/UIParentMultipleUnit.h>
 #include <Math/Vector2D.h>
 
-class QFAUICanvas : public QFAUIParentMultipleUnit
+class QFAEXPORT QFAUICanvas : public QFAUIParentMultipleUnit
 {
 
 

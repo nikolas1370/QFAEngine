@@ -1,24 +1,19 @@
-#pragma once
+﻿#pragma once
 #include <vulkan/vulkan.h>
 #include <vector>
 #include "VKStruct.h"
 #include <Tools/VulkanSuff.h>
 #include <Render/Image.h>
 
+
 class QFAWindow;
-
-/* 
-
-	don't know how it work
-	
-*/
+struct GLFWwindow;
 class QFAVKSwapChain
 {
 
 
 	friend QFAWindow;
-	
-	
+		
 	VkSurfaceKHR Surface;
 	GLFWwindow *Window;
 	

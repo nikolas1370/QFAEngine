@@ -1,3 +1,4 @@
+#include "epch.h"
 #include "EditorOverlord.h"
 
 #include <Render/Time.h>
@@ -36,7 +37,6 @@ void QFAEditorOverlord::Init()
         this need to get time compiling shaders 
     */
     QTime::Init();
-
     compiler.ProcessShaders();
     QFAOverlord::Init(compiler.ShaderData, false, QFAEditorOverlord::StartFrame, QFAEditorOverlord::EndFrame);
 
@@ -66,8 +66,6 @@ void QFAEditorOverlord::StartFrame()
         NewLoadText = false;
         MainWindow->ChangeLoadInfo(LoadText, LoadText_2);        
     }
-
-    //std::cout << "lox\n";
 }
 
 void QFAEditorOverlord::EndFrame()

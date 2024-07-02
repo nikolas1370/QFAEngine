@@ -1,8 +1,11 @@
-﻿#include "EditorFileStorage.h"
+﻿#include "epch.h"
+#define STB_IMAGE_IMPLEMENTATION 
+#include "EditorFileStorage.h" // #include <stb_image.h>
 #include <filesystem>
 #include <unicode/unistr.h>
-#include <stb_image.h>
 #include <ModelLoader.h>
+
+
 
 size_t QFAEditorFileStorage::Id = 0;
 size_t QFAEditorFileStorage::folderId = 0;

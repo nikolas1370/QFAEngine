@@ -1,7 +1,7 @@
 #pragma once
 #include <Render/UI/UIParentOneUnit.h>
 
-class QFAUIBackground : public QFAUIParentOneUnit
+class QFAEXPORT QFAUIBackground : public QFAUIParentOneUnit
 {
 
 	void MySlotChange(QFAUIUnit* unit) override;

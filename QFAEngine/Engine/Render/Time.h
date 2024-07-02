@@ -1,9 +1,9 @@
 #pragma once
-#include <GLFW/glfw3.h>
+#include <Tools/Stuff.h>
+#include <stdint.h>
+
 class Render;
-
-
-class QTime // microseconds
+class QFAEXPORT QTime // microseconds
 {
 public:
 	// call after glfwInit
@@ -17,9 +17,6 @@ private:
 	static double DeltaTime;
 	static uint64_t LastTime;
 	
-	
-	
-	
 public:
 
 	/*
@@ -30,38 +27,21 @@ public:
 	static void CalcDeltaTime();
 
 
-	static inline double GetDeltaTime()
-	{
-		return DeltaTime;
-	}
+	static double GetDeltaTime();
+	
 
 	// in 1 / 10 microseconds(system up time) (0.000 000 1)  from start program
-	static inline uint64_t GetTime()
-	{// in future
-		return glfwGetTimerValue() - StartTime;
-	}
+	static  uint64_t GetTime();
 
 	/*
 		in 1 / 10 microseconds(system up time) (0.000 000 1) 
 		count only when program work( pc(program) not sleep )
 	*/
-	static inline uint64_t GetWorkTime()
-	{
-		return (glfwGetTimerValue() - WorkTime) + WorkTime;
-	}
+	static uint64_t GetWorkTime();
+
 
 	// in 1/10 microseconds (system up time) (0.000 000 1)
-	static inline uint64_t GetSystemTime()
-	{
-		return glfwGetTimerValue();
-	}
-	/*
-	static inline double GetTimeDoublePrecision()
-	{
-		return glfwGetTime();
-	}
-	*/
-	// in 1/10 microseconds
+	static uint64_t GetSystemTime();
 private:
 
 };

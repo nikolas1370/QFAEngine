@@ -7,7 +7,9 @@ class QWorld;
 class QSceneComponent;
 class QFAOverlord;
 class QMeshBaseComponent;
-class QActor : public QObject
+class QFAGameCode;
+class QFAWindow;
+class QFAEXPORT QActor : public QObject
 {
 	/*
 	for write on position rotation scale
@@ -16,14 +18,14 @@ class QActor : public QObject
 	friend QWorld;
 	friend QFAOverlord;
 	friend QMeshBaseComponent;
-	// SceneComponent
-
+	friend QFAGameCode;
+	friend QFAWindow;
 	
 	
 	
 	// actor live in this world
 	QWorld* ActorWorld;
-
+	QSceneComponent* RootComponent;
 protected:
 	FVector Position = FVector(0);
 	FVector Rotation = FVector(0);
@@ -33,8 +35,8 @@ protected:
 	virtual void Tick(float deltaTime) {};
 public:
 
-	// in private
-	QSceneComponent* RootComponent;
+	
+	
 
 
 	QActor();
@@ -88,6 +90,19 @@ public:
 	{
 		CanTick = enable;
 	}
+
+private:
+	// pointer to this actor in QWorld::Actors
+	size_t WorldIndex;
+#if QFA_EDITOR_ONLY
+	/*
+		used only for HotReload
+		replace this actor in parent world to actor
+	*/
+	void ReplaceMe(QObject* newActor) override;
+#endif 
+
+	
 
 };
 

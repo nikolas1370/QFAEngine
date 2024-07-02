@@ -1,14 +1,14 @@
 #pragma once
 #include <Tools/VulkanSuff.h>
-
 #include <vector>
+
 class QFAWindow;
 class QFAVKVertexBuffer;
 class QFAVKIndexBuffer;
 class QFAImage;
 class QFAOverlord;
 
-class QFAVKBuffer
+class QFAEXPORT QFAVKBuffer
 {
 	friend QFAOverlord;
 	friend QFAImage;

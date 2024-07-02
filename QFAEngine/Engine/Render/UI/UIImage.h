@@ -29,7 +29,7 @@ class QFAVKTextureSampler;
 class QFAUIParent;
 class QFAVKPipeline;
 
-class QFAUIImage : public QFAUIRenderUnit
+class QFAEXPORT QFAUIImage : public QFAUIRenderUnit
 {
     
     friend QFAWindow;
@@ -135,10 +135,8 @@ private:
 
     void ChangeQuad();
 
-    inline QFAVKPipeline* GetPipeline() override
-    {
-        return Pipeline;
-    }
+    QFAVKPipeline* GetPipeline() override;
+    
 protected:
     void ParentEnable() override;
     void ParentDisable() override;

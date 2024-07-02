@@ -7,7 +7,7 @@ class QFAText;
 class QFAUIImage;
 class QFAUITextInput;
 class QMeshBaseComponent;
-class QFAVKVertexBuffer
+class QFAEXPORT QFAVKVertexBuffer
 {
 	friend QFAWindow;
 	friend QFAText;

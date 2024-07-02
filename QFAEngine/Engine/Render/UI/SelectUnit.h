@@ -6,7 +6,7 @@
 #include <Tools/Color.h>
 
 class QFAUIEvent;
-class QFAUISelectUnit abstract : public QFAParentHiddenChild
+class QFAEXPORT QFAUISelectUnit abstract : public QFAParentHiddenChild
 {
 	friend QFAUIEvent;
 
@@ -25,17 +25,10 @@ public:
 	QFAColor SelectColor = QFAColorF(0.5f, 0.5f, 0.5f, 1.0f);
 	QFAColor SelectLostFocusColor = QFAColorF(0.2f, 0.2f, 0.2f, 1.0f);
 
-	QFAUISelectUnit()
-	{
-		SelectUnitList.push_back(this);
-	}
+	QFAUISelectUnit();
 
-	~QFAUISelectUnit()
-	{
-		for (size_t i = 0; i < SelectUnitList.size(); i++)
-			if (SelectUnitList[i] == this)
-				SelectUnitList.erase(SelectUnitList.begin() + i);
-	}
+	~QFAUISelectUnit();
+	
 
 	inline void AddUnit(QFAUIParent* unit)
 	{

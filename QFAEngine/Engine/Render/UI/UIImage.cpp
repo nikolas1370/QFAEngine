@@ -1,4 +1,5 @@
-﻿#include "UIImage.h"
+﻿#include "pch.h"
+#include "UIImage.h"
 #include <iostream>
 #include <Render/vk/LogicalDevice.h>
 #include <Render/Image.h>
@@ -246,7 +247,12 @@ void QFAUIImage::ChangeQuad()
     quad[5] = quad[1];
     vertexBufer->UpdateData(sizeof(quad), &quad);
     UpdateUniforms();
-} 
+}
+QFAVKPipeline* QFAUIImage::GetPipeline()
+{
+    return Pipeline;
+}
+
 
 void QFAUIImage::SetSizeParent(unsigned int w, unsigned int h)
 {

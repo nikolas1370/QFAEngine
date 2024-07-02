@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "UIParent.h"
 
 void QFAUIParent::SetSizeParent(unsigned int w, unsigned int h)

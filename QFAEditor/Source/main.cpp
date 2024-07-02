@@ -1,9 +1,6 @@
-
+#include <Object/Class.cpp>
 #include "main.h"
-#include "EngineFiles.h"
 
-
-
-QFAClassOut(QTest)
-QFAClassOut(QTest_two)
-QFAClassOut(QTest_tru)
+QFAClassOut(Test)
+//QFAClassOut(QTest_ActorMinusOne)
+QFAClassOut(QTest_Actor)

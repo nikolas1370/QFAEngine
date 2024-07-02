@@ -26,6 +26,7 @@ class QFAEditorGameViewportInfo : public QFAParentHiddenChild
 	{
 		size_t fileId;
 		size_t count = 0;
+		bool isCpp;
 	};
 
 	QFAUICanvas* Canvas;

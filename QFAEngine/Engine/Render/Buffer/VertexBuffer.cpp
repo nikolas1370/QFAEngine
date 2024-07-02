@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "VertexBuffer.h"
 #include <Render/vk/LogicalDevice.h>
 #include <Render/vk/PhysicalDevice.h>

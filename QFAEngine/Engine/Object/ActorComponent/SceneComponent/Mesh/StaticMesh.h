@@ -2,7 +2,7 @@
 
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h> // remove to this file
 
-class QStaticMesh :  public QMeshBaseComponent
+class QFAEXPORT QStaticMesh :  public QMeshBaseComponent
 {
 public:
 

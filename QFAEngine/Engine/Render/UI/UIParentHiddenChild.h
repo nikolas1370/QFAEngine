@@ -8,7 +8,7 @@
 */
 class QFAWindow;
 class QFAUIEvent;
-class QFAParentHiddenChild : public QFAUIParent
+class QFAEXPORT QFAParentHiddenChild : public QFAUIParent
 {
 	friend QFAWindow;
 	friend QFAUIEvent;

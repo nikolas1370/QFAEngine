@@ -1,4 +1,5 @@
-﻿#include "GameViewportInfo.h"
+﻿#include "epch.h"
+#include "GameViewportInfo.h"
 #include <Render/UI/UIList.h>
 #include <Render/UI/Scroll.h>
 
@@ -90,18 +91,22 @@ void QFAEditorGameViewportInfo::AddActor(QActor* actor, std::u32string actorName
 	text->SetTextSize(20);
 
 	size_t count = 0;
-	for (size_t i = 0; i < ActorTypes.size(); i++)
+	if(!isCppClass)
 	{
-		if (ActorTypes[i].fileId == id)
+		for (size_t i = 0; i < ActorTypes.size(); i++)
 		{
-			count = ++ActorTypes[i].count;
-			break;
+			if (ActorTypes[i].fileId == id)
+			{
+				count = ++ActorTypes[i].count;
+				break;
+			}
 		}
 	}
 
 	if (count == 0)
 	{
 		SActorTypes ats;
+		ats.isCpp = isCppClass;
 		ats.fileId = id;
 		ActorTypes.push_back(ats);
 	}

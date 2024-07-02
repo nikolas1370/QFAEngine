@@ -3,7 +3,7 @@
 #include <Render/Buffer/VKBuffer.h>
 
 class QMeshBaseComponent;
-class QFAVKIndexBuffer
+class QFAEXPORT QFAVKIndexBuffer
 {
 	friend QFAWindow;
 	friend QMeshBaseComponent;

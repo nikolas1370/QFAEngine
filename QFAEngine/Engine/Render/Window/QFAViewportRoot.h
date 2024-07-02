@@ -3,7 +3,7 @@
 
 class QFAViewport;
 class QFAWindow;
-class QFAViewportRoot : public QFAUIParentMultipleUnit
+class QFAEXPORT QFAViewportRoot : public QFAUIParentMultipleUnit
 {
 	friend QFAViewport;
 	friend QFAWindow;

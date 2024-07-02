@@ -1,10 +1,12 @@
-﻿#include "Text.h"
+﻿#include "pch.h"
+#include "Text.h"
 #include <Render/vk/LogicalDevice.h>
 #include <Render/Image.h>
 #include <Render/Buffer/VertexBuffer.h>
 #include <Render/UI/UIParentMultipleUnit.h>
 #include <Render/Pipline/Pipline.h>
 #include "UIParent.h"
+#include <Render/vk/TextureSampler.h>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H  
@@ -680,6 +682,43 @@ QFAText::ELoadFontResult QFAText::LoadFont(const char* fontPath, SFont*& outFont
     return ELoadFontResult::LRFSucceed;
 }
 
+QFAText::SFont* QFAText::GetFont(size_t index)
+{
+    return Fonts[index];
+}
+
+QFAText::SFont* QFAText::GetFont(std::u32string familyName, std::u32string styleName)
+{
+    for (size_t i = 0; i < Fonts.size(); i++)
+        if (Fonts[i]->familyName == familyName && Fonts[i]->styleName == styleName)
+            return Fonts[i];
+
+    return nullptr;
+}
+
+size_t QFAText::GetFontCount()
+{
+    return Fonts.size();
+}
+
+bool QFAText::SetFont(SFont* font)
+{
+    if (!font)
+        return false;
+
+    for (size_t i = 0; i < Fonts.size(); i++)
+    {
+        if (Fonts[i] == font)
+        {
+            CurentFontIndex = i;
+            TextChange = true;
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void QFAText::SetSizeParent(unsigned int w, unsigned int h)
 {
     if (Text.size() > 0 && w != Width) // in curent time text only horizon
@@ -818,6 +857,11 @@ void QFAText::RecreateTextParameterSet(VkBuffer buffer, VkBuffer VertexBuffer)
     descriptorSetInfo[2].DescriptorBufferInfos = &BufferInfo_Vertex;   
 
     Pipeline->CreateSet(1, descriptorSetInfo.data());    
+}
+
+QFAVKPipeline* QFAText::GetPipeline()
+{
+    return Pipeline;
 }
 
 void QFAText::GetPenPosition(QFAText::GlyphShader& gs)
@@ -1018,4 +1062,34 @@ void QFAText::CreatePipeline()
         DII[i].sampler = AtlassSampler->textureSampler;
         GlyphAtlasList[i] = gi;      
     }
+}
+
+bool QFAText::SFont::SetFamilyName(std::u32string newFamilyName)
+{
+    for (size_t i = 0; i < Fonts.size(); i++)
+    {
+        if (Fonts[i] == this)
+            continue;
+
+        if (Fonts[i]->familyName == newFamilyName && Fonts[i]->styleName == styleName)
+            return false;
+    }
+
+    familyName = newFamilyName;
+    return true;
+}
+
+bool QFAText::SFont::SetStyleName(std::u32string newStyleName)
+{
+    for (size_t i = 0; i < Fonts.size(); i++)
+    {
+        if (Fonts[i] == this)
+            continue;
+
+        if (Fonts[i]->familyName == familyName && Fonts[i]->styleName == newStyleName)
+            return false;
+    }
+
+    styleName = newStyleName;
+    return true;
 }

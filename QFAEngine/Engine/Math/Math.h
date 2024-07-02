@@ -6,11 +6,11 @@
 #define EqualToZero(value) (abs(value) < 0.00001)
 #define NotEqualToZero(value) !(abs(value) < 0.00001)
 
+#include <Tools/Stuff.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-
-class Math
+class QFAEXPORT Math
 {
 public:
 	static const glm::mat4 DefauldMatrix4;

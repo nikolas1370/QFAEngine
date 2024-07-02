@@ -7,7 +7,7 @@
 class QSceneComponent;
 class QFAWindow;
 
-class QFAOverlord 
+class QFAEXPORT QFAOverlord
 {
 	static bool Life;
 	static bool isInit;
@@ -43,39 +43,19 @@ public:
 	static bool Init(std::vector<QFAVKPipeline::SShaderData> shaderData, bool createWindow, std::function<void()> frameStarted, std::function<void()> frameEnded);
 
 
-	static void SetLimitFpsCount(float framesCount)
-	{
-		if (framesCount > 0)
-		{
-			FrameCount = framesCount;
-			FrameTime = 1000 / FrameCount;
-		}
-	}
+	static void SetLimitFpsCount(float framesCount);
+	
 
-	static inline float GetLimitFpsCount()
-	{
-		return FrameCount;
-	}
+	static float GetLimitFpsCount();
 
-	static void EnableFpsLock(bool enable)
-	{
-		FpsLock = enable;
-	}
+	static void EnableFpsLock(bool enable);
+	
 
-	static inline bool GetFpsLock()
-	{
-		return FpsLock;
-	}
+	static bool GetFpsLock();
 
-	static inline void SetShdowFpsInConsole(bool enable)
-	{
-		ShdowFpsInConsole = enable;
-	}
+	static void SetShdowFpsInConsole(bool enable);
 
-	static std::thread::id GetMainThreadId()
-	{
-		return MainThreadId;
-	}
+	static std::thread::id GetMainThreadId();
 private:
 
 	static void MainLoop();

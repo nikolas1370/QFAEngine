@@ -2,7 +2,7 @@
 #include <iostream>
 
 QFAClassOut(SomeCode)
-SomeCode::SomeCode(/* args */)
+SomeCode::SomeCode()
 {
     std::cout << "SomeCode constructor\n" ;
 }

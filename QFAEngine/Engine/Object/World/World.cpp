@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "World.h"
 #include <Object/Actor/Actor.h>
 #include <Overlord/Overlord.h>
@@ -6,19 +7,6 @@
 #include <Render/Window/Window.h>
 
 QFAArray<QWorld*> QWorld::Worlds;
-
-#define lopoid(val) int val::lox;
-
-lopoid(QWorld)
-
-void QWorld::ForgetActor(QActor* actor)
-{
-	if (!actor->IsValid())
-		return;
-
-	actor->ActorWorld = nullptr;
-	Actors.Remove(actor);
-}
 
 void QWorld::ProcessTicks()
 {	
@@ -94,16 +82,25 @@ QWorld::~QWorld()
 
 void QWorld::AddActor(QActor* actor)
 {
-	if (!actor)
+	if (!actor->IsValid())
 		return;
 
 	if (actor->ActorWorld->IsValid())		
-		actor->ActorWorld->ForgetActor(actor);
+		actor->ActorWorld->RemoveActor(actor);
 
 	actor->ActorWorld = this;
-
-
+	actor->WorldIndex = Actors.Length();
 	Actors.Add(actor);
+}
+
+void QWorld::RemoveActor(QActor* actor)
+{
+	if (!actor->IsValid())
+		return;
+
+	actor->ActorWorld = nullptr;
+	Actors.RemoveAt(actor->WorldIndex);
+	Actors[actor->WorldIndex]->WorldIndex = actor->WorldIndex;
 }
 
 void QWorld::SetEditorActor(QActor* actor)

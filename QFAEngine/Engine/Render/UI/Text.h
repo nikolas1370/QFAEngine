@@ -30,7 +30,7 @@ class QFAVKTextureSampler;
 class QFAUITextInput;
 class QFAUIScroll;
 
-class QFAText : public QFAUIRenderUnit
+class QFAEXPORT QFAText : public QFAUIRenderUnit
 {
     friend QFAViewport;
     friend QFAOverlord;
@@ -226,39 +226,13 @@ public:
         
         return false if in newFamilyName exist font with styleName
         */
-        bool SetFamilyName(std::u32string newFamilyName)
-        {
-            for (size_t i = 0; i < Fonts.size(); i++)
-            {
-                if (Fonts[i] == this)
-                    continue;
-
-                if (Fonts[i]->familyName == newFamilyName && Fonts[i]->styleName == styleName)
-                    return false;
-            }
-
-            familyName = newFamilyName;
-            return true;
-        }
+        bool SetFamilyName(std::u32string newFamilyName);
 
         /*  
         
         return false if font with newStyleName in familyName exist
         */
-        bool SetStyleName(std::u32string newStyleName)
-        {
-            for (size_t i = 0; i < Fonts.size(); i++)
-            {
-                if (Fonts[i] == this)
-                    continue;
-
-                if (Fonts[i]->familyName == familyName && Fonts[i]->styleName == newStyleName)
-                    return false;
-            }
-
-            styleName = newStyleName;
-            return true;
-        }
+        bool SetStyleName(std::u32string newStyleName);
 
     private:        
         SFont()
@@ -284,42 +258,15 @@ public:
     };
     
     static ELoadFontResult LoadFont(const char* fontPath, SFont*& outFont, std::u32string* familyName = nullptr, std::u32string* styleName = nullptr);
-    inline static SFont* GetFont(size_t index)
-    {
-        return Fonts[index];
-    }
+    static SFont* GetFont(size_t index);
+    
 
-    static SFont* GetFont(std::u32string familyName, std::u32string styleName)
-    {
-        for (size_t i = 0; i < Fonts.size(); i++)
-            if (Fonts[i]->familyName == familyName && Fonts[i]->styleName == styleName)
-                return Fonts[i];
+    static SFont* GetFont(std::u32string familyName, std::u32string styleName);
 
-        return nullptr;
-    }
+    static size_t GetFontCount();
+    
 
-    inline static size_t GetFontCount()
-    {
-        return Fonts.size();
-    }
-
-    bool SetFont(SFont* font)
-    {
-        if (!font)
-            return false;
-
-        for (size_t i = 0; i < Fonts.size(); i++)
-        {
-            if (Fonts[i] == font)
-            {
-                CurentFontIndex = i;
-                TextChange = true;
-                return true;
-            }
-        }
-
-        return false;
-    }
+    bool SetFont(SFont* font);
 
 private:
     static std::vector<SFont*> Fonts;
@@ -442,10 +389,8 @@ private:
         float offsetX;
     };
 
-    inline QFAVKPipeline* GetPipeline() override
-    {
-        return Pipeline;
-    }
+    QFAVKPipeline* GetPipeline() override;
+    
 
 protected:
     struct SText

@@ -1,7 +1,7 @@
 #pragma once
 #include <Render/UI/UIParentMultipleUnit.h>
 
-class QFAUIList : public QFAUIParentMultipleUnit
+class QFAEXPORT QFAUIList : public QFAUIParentMultipleUnit
 {
 protected:
 	void NewUnit(QFAUIUnit* unit) override;

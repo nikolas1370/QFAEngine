@@ -8,6 +8,7 @@ class QFAViewportRoot;
 class QFAWindow;
 class QFAUIScroll;
 class QFAUITextInput;
+struct GLFWwindow;
 class QFAUIEvent
 {
 	friend QFAWindow;
@@ -18,7 +19,7 @@ class QFAUIEvent
 
 	QFAUIEvent(QFAWindow* window, GLFWwindow* _glfWindow);
 	~QFAUIEvent();
-private:
+
 	GLFWwindow* glfWindow;
 	//in start of array number smaller
 	QFAArray<QFAUIUnit*> SortUIUnits;

@@ -14,7 +14,7 @@ class QFAOverlord;
 */
 
 
-class QSceneComponent : public QActorComponent
+class QFAEXPORT QSceneComponent : public QActorComponent
 {
 
 

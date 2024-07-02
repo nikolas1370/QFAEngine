@@ -1,6 +1,7 @@
 #pragma once
 #include <filesystem>
-#include <Object/Object.h>
+#include <Object/Class.h>
+
 
 class QFAEditorMainWindow;
 class QFAEditorOverlord;
@@ -30,7 +31,7 @@ class QFAGameCode
 		Error
 	};
 
-public:
+public:// QueueSubmitPresent
 
 private:
 	static DllFile CurentDllFile;
@@ -69,5 +70,12 @@ private:
 		return true if copy done
 	*/
 	static bool CopyDll(DllFile f);
+
+	/*
+		search class in new Game module
+		return QFAClass from new game module
+		return null if class not found
+	*/
+	static QFAClass* FindInNewClass(const char* className);	
 };
 

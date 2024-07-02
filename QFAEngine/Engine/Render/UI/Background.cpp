@@ -1,4 +1,5 @@
-﻿#include "Background.h"
+﻿#include "pch.h"
+#include "Background.h"
 
 QFAUIBackground::QFAUIBackground()
 {	

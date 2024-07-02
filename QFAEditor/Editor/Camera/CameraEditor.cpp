@@ -1,3 +1,4 @@
+#include "epch.h"
 #include "CameraEditor.h"
 
 ACameraEditor::ACameraEditor()

@@ -6,7 +6,7 @@ class QFAShaderProgram;
 class QFAViewport;
 class QFAWindow;
 
-class QDirectionLight : public QObject
+class QFAEXPORT QDirectionLight : public QObject
 {
 	friend QFAViewport;
 	friend QFAWindow;
