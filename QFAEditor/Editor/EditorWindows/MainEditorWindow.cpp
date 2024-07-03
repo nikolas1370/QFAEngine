@@ -256,7 +256,7 @@ void QFAEditorMainWindow::EndDragAndDrop(EKey::Key key)
 				{
 					AStaticMeshActor* staticActor = new AStaticMeshActor;
 					staticActor->SetActorPosition(0);
-					staticActor->SetMesh((MeshData*)ef.file);
+					staticActor->SetMesh((QFAMeshData*)ef.file);
 					MainWindow->AddActorToWorlds(staticActor, 
 						std::filesystem::path(ef.path).filename().replace_extension("").u32string(),
 						ef.id, false);

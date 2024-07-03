@@ -14,6 +14,7 @@
 #include <Tools/VulkanSuff.h>
 #include <Render/vk/LogicalDevice.h>
 #include <GLFW/glfw3.h>
+#include <Overlord/ContentManager.h>
 
 #pragma comment(lib, "Winmm.lib")  // for timeBeginPeriod , timeEndPeriod
 
@@ -50,13 +51,17 @@ bool QFAOverlord::StartLife()
 }
 
 
-bool QFAOverlord::Init(std::vector<QFAVKPipeline::SShaderData> shaderData, bool createWindow, std::function<void()> frameStarted, std::function<void()> frameEnded)
+bool QFAOverlord::Init(std::vector<QFAVKPipeline::SShaderData> shaderData, bool createWindow, std::function<void()> frameStarted, std::function<void()> frameEnded, QFAContentManager* cm)
 {
     if (isInit)
         return false;
 
     FrameStarted = frameStarted;
     FrameEnded = frameEnded;
+    if(cm)
+        QFAContentManager::Manager = cm;
+    else
+        stopExecute("necessary set QFAContentManager")
 
     QTime::Init();    
     QFAVKPipeline::SetShaderData(shaderData);

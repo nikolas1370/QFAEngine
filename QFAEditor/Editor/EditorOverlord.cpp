@@ -16,10 +16,16 @@ bool QFAEditorOverlord::NewLoadText = false;
 std::u32string QFAEditorOverlord::LoadText;
 std::u32string QFAEditorOverlord::LoadText_2;
 QFAEditorMainWindow* QFAEditorOverlord::MainWindow;
-
+bool QFAEditorOverlord::IsInit = false;
+QFAEditorFileStorage QFAEditorOverlord::Storage;
 
 void QFAEditorOverlord::StartLife()
 {
+    if (IsInit)
+        return;
+    else
+        IsInit = true;
+
     Init();
     LoadThread = new std::thread(QFAEditorOverlord::PrepareToWork);
     QFAOverlord::StartLife();
@@ -38,7 +44,7 @@ void QFAEditorOverlord::Init()
     */
     QTime::Init();
     compiler.ProcessShaders();
-    QFAOverlord::Init(compiler.ShaderData, false, QFAEditorOverlord::StartFrame, QFAEditorOverlord::EndFrame);
+    QFAOverlord::Init(compiler.ShaderData, false, QFAEditorOverlord::StartFrame, QFAEditorOverlord::EndFrame, &Storage);
 
     MainWindow = new QFAEditorMainWindow;    
 }

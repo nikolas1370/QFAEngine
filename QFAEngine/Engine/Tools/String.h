@@ -25,6 +25,16 @@ public:
 		return outStr;
 	}
 
+	static std::wstring U32stringToWString(std::u32string& str)
+	{		
+		std::wstring outStr;
+		outStr.resize(str.size());
+		for (size_t i = 0; i < str.size(); i++)
+			outStr[i] = (wchar_t)str[i];
+
+		return outStr;
+	}
+
 	static std::u32string NumToU32string(size_t num)
 	{
 		std::string str = std::to_string(num);

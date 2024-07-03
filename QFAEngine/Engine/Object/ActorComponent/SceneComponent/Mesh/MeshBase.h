@@ -34,7 +34,7 @@ class QStaticMesh;
 class QMeshBaseComponent;
 class QFAVKVertexBuffer;
 class QFAVKIndexBuffer;
-class QFAEXPORT MeshData
+class QFAEXPORT QFAMeshData
 {
 	/*
 	in memory
@@ -62,7 +62,7 @@ private:
 	SMeshInfo Mi;
 	QFAVKVertexBuffer* VertexBufer = nullptr;
 	QFAVKIndexBuffer* IndexBuffer = nullptr;
-	// call when set MeshData in staticMesh
+	// call when set QFAMeshData in staticMesh
 	void CreateVertextIndexBuffer();
 public:
 
@@ -71,13 +71,13 @@ public:
 		uniqueIndexCount = count SSVertex in memory
 		indexCount = count of indices in list who represent all of mesh
 	*/	
-	MeshData( int uniqueIndexCount, int indexCount, int materialCount);// false to true
-	MeshData(int VertexCount, int indexCount, int materialCount, int notNed);	
-	MeshData(SMeshInfo* mi, void* framesData);
+	QFAMeshData( int uniqueIndexCount, int indexCount, int materialCount);// false to true
+	QFAMeshData(int VertexCount, int indexCount, int materialCount, int notNed);
+	QFAMeshData(SMeshInfo* mi, void* framesData);
 
 
 
-	~MeshData()
+	~QFAMeshData()
 	{
 		delete VertexBufer;
 		delete IndexBuffer;
@@ -284,7 +284,7 @@ protected:
 
 	static glm::mat4 LightMatrix;
 
-	MeshData* Mf;
+	QFAMeshData* Mf;
 
 	struct UBOVertex
 	{

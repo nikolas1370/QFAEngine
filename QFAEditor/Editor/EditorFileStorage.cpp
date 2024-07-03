@@ -4,7 +4,7 @@
 #include <filesystem>
 #include <unicode/unistr.h>
 #include <ModelLoader.h>
-
+#include <Tools/String.h>
 
 
 size_t QFAEditorFileStorage::Id = 0;
@@ -91,20 +91,20 @@ void QFAEditorFileStorage::DropFiles(size_t folderId, int path_count, const char
 		QFAEditorFileOnDisk ef;
 		SEditorFileInside efi;
 		QFAFileSystem::FolderUnit fu;
-		ef.version = EditorFileVersion;
+		ef.version = QFAEditorFileOnDisk::EditorFileVersion;
 		if (ext == ".obj" || ext == ".fbx")
 		{
 			/*
 				QFAEditorFileOnDisk
-				MeshData::SMeshInfo
-				MeshData::FramesData
+				QFAMeshData::SMeshInfo
+				QFAMeshData::FramesData
 			*/
 
 			/*
 				create fun when load model and get aiScene check if valid
 				and after use aiScene like SeparateModel or solid
 			*/
-			MeshData* md = QFAModelLoader::LoadModel(paths[i]);
+			QFAMeshData* md = QFAModelLoader::LoadModel(paths[i]);
 			if (!md)
 			{
 				std::cout << "DropFile not load\n";
@@ -120,7 +120,7 @@ void QFAEditorFileStorage::DropFiles(size_t folderId, int path_count, const char
 
 			QFAFileSystem::WriteFile(curentPath.u32string(), &ef, sizeof(ef));
 
-			MeshData::SMeshInfo mi = md->GetMeshInfo();
+			QFAMeshData::SMeshInfo mi = md->GetMeshInfo();
 			QFAFile writeFile;
 			QFAFileSystem::OpenFile(curentPath.u32string(), &writeFile, false);
 			QFAFileSystem::AppendFile(&writeFile, &mi, sizeof(mi));
@@ -270,7 +270,6 @@ void QFAEditorFileStorage::GetFolderContents(size_t folderId, std::vector<QFAFil
 			{ // second add files
 				if (!Folders[i].folderUnits[j].IsFolder)
 				{
-
 					for (size_t k = 0; k < EditorFile.size(); k++)
 					{
 						if (Folders[i].folderUnits[j].id == EditorFile[k].id)
@@ -306,6 +305,23 @@ SEditorFile QFAEditorFileStorage::GetFile(size_t fileId)
 	SEditorFile ef;
 	ef.id = 0;
 	return ef;
+}
+
+QFAMeshData* QFAEditorFileStorage::GetMeshPath(std::u32string path)
+{	
+	std::filesystem::path meshPath(path);
+	for (size_t i = 0; i < EditorFile.size(); i++)
+	{
+		if (std::filesystem::path(EditorFile[i].path) == path) // "Content/SomeQFAFile.qfa" == "Content\SomeQFAFile.qfa"
+		{
+			if (EditorFile[i].type == QFAEditorFileTypes::EFTMesh)
+				return (QFAMeshData*)EditorFile[i].fileData;
+
+			return nullptr;
+		}
+	}
+
+	return nullptr;
 }
 
 void QFAEditorFileStorage::LoadFile(std::u32string qfaFilePAth, SEditorFileInside& sfile)
@@ -347,9 +363,9 @@ void QFAEditorFileStorage::LoadFile(std::u32string qfaFilePAth, SEditorFileInsid
 	}
 	else if (eFile->type == QFAEditorFileTypes::EFTMesh)
 	{
-		MeshData* meshData = new MeshData(
-			(MeshData::SMeshInfo*)((char*)eFile + sizeof(*eFile)),
-			((char*)eFile + sizeof(*eFile) + sizeof(MeshData::SMeshInfo))
+		QFAMeshData* meshData = new QFAMeshData(
+			(QFAMeshData::SMeshInfo*)((char*)eFile + sizeof(*eFile)),
+			((char*)eFile + sizeof(*eFile) + sizeof(QFAMeshData::SMeshInfo))
 		);
 
 		sfile.type = QFAEditorFileTypes::EFTMesh;

@@ -10,7 +10,7 @@ AStaticMeshActor::~AStaticMeshActor()
 {
 }
 
-void AStaticMeshActor::SetMesh(MeshData* md)
+void AStaticMeshActor::SetMesh(QFAMeshData* md)
 {
 	Mesh.SetMesh(md);
 }

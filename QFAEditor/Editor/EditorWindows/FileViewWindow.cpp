@@ -141,7 +141,7 @@ void QFAEditorFileViewWindow::InFocus(SFile* file)
 		Camera.SetActorRotation(0);
 		Actor.SetActorPosition(0);
 
-		Mesh.SetMesh((MeshData*)file->ef.file);
+		Mesh.SetMesh((QFAMeshData*)file->ef.file);
 	}
 	else
 	{

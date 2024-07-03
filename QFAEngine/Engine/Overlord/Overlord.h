@@ -5,6 +5,7 @@
 #include <functional>
 #include <thread>
 class QSceneComponent;
+class QFAContentManager;
 class QFAWindow;
 
 class QFAEXPORT QFAOverlord
@@ -39,8 +40,10 @@ public:
 	/*
 		if createWindow == false
 			need create new window before QFAText::LoadFont
+
+		cm == class based on QFAContentManager, game code can get resources in editor manager
 	*/
-	static bool Init(std::vector<QFAVKPipeline::SShaderData> shaderData, bool createWindow, std::function<void()> frameStarted, std::function<void()> frameEnded);
+	static bool Init(std::vector<QFAVKPipeline::SShaderData> shaderData, bool createWindow, std::function<void()> frameStarted, std::function<void()> frameEnded, QFAContentManager* cm);
 
 
 	static void SetLimitFpsCount(float framesCount);

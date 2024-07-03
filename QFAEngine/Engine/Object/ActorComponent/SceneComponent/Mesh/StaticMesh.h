@@ -8,9 +8,9 @@ public:
 
     QStaticMesh(){}
 
-    QStaticMesh(MeshData* meshData);
+    QStaticMesh(QFAMeshData* meshData);
     
-    void SetMesh(MeshData* meshData);
+    void SetMesh(QFAMeshData* meshData);
 
     // remove startFrameTime
     void UpdateBuffers(VkCommandBuffer commandBuffer, uint64_t startFrameTime, bool isShadow, const FVector& cameraPos) override;

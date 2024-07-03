@@ -2,12 +2,12 @@
 #include "StaticMesh.h"
 #include <Tools/VulkanSuff.h>
 
-QStaticMesh::QStaticMesh(MeshData* meshData)
+QStaticMesh::QStaticMesh(QFAMeshData* meshData)
 {
 	SetMesh(meshData);
 }
 
-void QStaticMesh::SetMesh(MeshData* meshData)
+void QStaticMesh::SetMesh(QFAMeshData* meshData)
 {
 	if (!meshData)
 	{

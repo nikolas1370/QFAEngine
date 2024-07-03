@@ -32,7 +32,7 @@ std::vector<VkDescriptorSet> QMeshBaseComponent::ShadowDescriptorSets;
 std::vector<QMeshBaseComponent*> QMeshBaseComponent::MeshIdList;
 unsigned int QMeshBaseComponent::MaxMeshId;
 
-MeshData::MeshData(int uniqueIndexCount, int indexCount, int materialCount)
+QFAMeshData::QFAMeshData(int uniqueIndexCount, int indexCount, int materialCount)
 {
 	
 	Mi.UniqueIndexCount = uniqueIndexCount;
@@ -47,7 +47,7 @@ MeshData::MeshData(int uniqueIndexCount, int indexCount, int materialCount)
 	FramesData = (char*)malloc(Mi.AmountData);
 }
 
-MeshData::MeshData(int vertexCount, int indexCount, int materialCount, int notNed)
+QFAMeshData::QFAMeshData(int vertexCount, int indexCount, int materialCount, int notNed)
 {	
 	Mi.MaterialCount = materialCount;
 	Mi.IndexCount = indexCount;
@@ -59,13 +59,13 @@ MeshData::MeshData(int vertexCount, int indexCount, int materialCount, int notNe
 	FramesData = (char*)malloc(Mi.AmountData);
 }
 
-MeshData::MeshData(SMeshInfo* mi, void* framesData)
+QFAMeshData::QFAMeshData(SMeshInfo* mi, void* framesData)
 {
 	FramesData = (char*)framesData;
 	Mi = *mi;
 }
 
-void MeshData::CreateVertextIndexBuffer()
+void QFAMeshData::CreateVertextIndexBuffer()
 {
 	if (VertexBufer)
 		return;
@@ -75,7 +75,7 @@ void MeshData::CreateVertextIndexBuffer()
 	IndexBuffer = new QFAVKIndexBuffer(GetIndexCount() * sizeof(int), GetIndexData(), QFAWindow::commandPool);
 }
 
-SSVertexMaterial* MeshData::GetFrameData() const
+SSVertexMaterial* QFAMeshData::GetFrameData() const
 {
 	return (SSVertexMaterial*)&FramesData[0];
 }
@@ -84,7 +84,7 @@ SSVertexMaterial* MeshData::GetFrameData() const
 	SMeshInfo GetMeshInfo() const;
 
 */
-MeshData::SMeshInfo MeshData::GetMeshInfo() const
+QFAMeshData::SMeshInfo QFAMeshData::GetMeshInfo() const
 {
 	return Mi;
 }

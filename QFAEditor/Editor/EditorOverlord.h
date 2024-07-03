@@ -2,11 +2,14 @@
 
 #include "ShaderCompiler/ShaderCompiler.h"
 #include <thread>
+#include <EditorFileStorage.h>
 class QFAEditorMainWindow;
 class QFAEditorOverlord
 {
 	static QFAShaderCompiler compiler;
 	static QFAEditorMainWindow* MainWindow;
+	static bool IsInit;
+	static QFAEditorFileStorage Storage;
 public:
 	static void StartLife();
 private:

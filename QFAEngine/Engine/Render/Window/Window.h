@@ -33,7 +33,7 @@ class QFAUIUnit;
 class QFAUIImage;
 class QFAVKRenderPassSwapChain;
 class QFAInput;
-class MeshData;
+class QFAMeshData;
 class QFAVKSwapChain;
 class QFAUIEvent;
 class QFAViewport;
@@ -57,7 +57,7 @@ class QFAEXPORT QFAWindow
 	friend QFAVKSwapChain;
 	friend QFAImage;
 	friend QWorld;
-	friend MeshData;
+	friend QFAMeshData;
 
 	static std::vector<QFAWindow*> Windows;
 	static QFAWindow* CurentProcessWindow;

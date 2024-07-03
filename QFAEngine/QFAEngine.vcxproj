@@ -213,6 +213,7 @@
     </ClCompile>
     <ClCompile Include="Engine\Object\World\World.cpp" />
     <ClCompile Include="Engine\Input\Input.cpp" />
+    <ClCompile Include="Engine\Overlord\ContentManager.cpp" />
     <ClCompile Include="Engine\Overlord\Overlord.cpp" />
     <ClCompile Include="Engine\Render\Framebuffer\MeshFrameBuffer.cpp" />
     <ClCompile Include="Engine\Render\Framebuffer\ShadowFrameBuffer.cpp" />
@@ -277,6 +278,7 @@
     <ClInclude Include="Engine\Object\Object.h" />
     <ClInclude Include="Engine\Object\World\World.h" />
     <ClInclude Include="Engine\Input\Input.h" />
+    <ClInclude Include="Engine\Overlord\ContentManager.h" />
     <ClInclude Include="Engine\Overlord\Overlord.h" />
     <ClInclude Include="Engine\Render\Framebuffer\MeshFrameBuffer.h" />
     <ClInclude Include="Engine\Render\Framebuffer\ShadowFrameBuffer.h" />

@@ -25,6 +25,7 @@
       <BufferSecurityCheck>true</BufferSecurityCheck>
       <CallingConvention>Cdecl</CallingConvention>
       <CompileAs>Default</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>../../x64/$(Configuration);C:\Users\Jahi\Desktop\QFAEngine\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -47,7 +48,6 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SomeCode.cpp" />
-
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SomeCode.h" />
