@@ -1,8 +1,8 @@
 #pragma once
 
-#include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h> // remove to this file
+#include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
 
-class QFAEXPORT QStaticMesh :  public QMeshBaseComponent
+class QFAEXPORT QStaticMesh : public QMeshBaseComponent
 {
 public:
 

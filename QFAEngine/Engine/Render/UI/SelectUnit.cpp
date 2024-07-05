@@ -65,8 +65,6 @@ void QFAUISelectUnit::SetSelectUnit(QFAUIParent* unit)
 			return;
 		}
 	}
-
-	std::cout << "lox\n";
 }
 
 void QFAUISelectUnit::SetScrollChild(QFAUIParentMultipleUnit* child)
@@ -83,6 +81,7 @@ void QFAUISelectUnit::SetScrollChild(QFAUIParentMultipleUnit* child)
 void QFAUISelectUnit::InFocus(QFAUIUnit* unit, void* _this)
 {
 	QFAUISelectUnit* su = (QFAUISelectUnit*)_this;
+	su->LastClickUnit = nullptr;
 	if (su->FocusUnit)
 	{
 		su->FocusUnit->SetBackgroundColor(QFAColor(0, 0, 0, 0));
@@ -147,8 +146,7 @@ void QFAUISelectUnit::LeftMouseDown(QFAUIUnit* unit, void* _this)
 		}
 
 		if (su->SelectEvent.LeftMouseDown)
-			su->SelectEvent.LeftMouseDown(su);
-
+			su->SelectEvent.LeftMouseDown(su);		
 		return;
 	}
 	
@@ -158,7 +156,7 @@ void QFAUISelectUnit::LeftMouseDown(QFAUIUnit* unit, void* _this)
 		if (!parent || !parent->GetParent())
 			return;
 		else if (parent->GetParent() == su->SelectUnitChild)
-		{			
+		{						
 			if (su->SelectedUnit)
 				su->SelectedUnit->SetBackgroundColor(QFAColor(0, 0, 0, 0));
 

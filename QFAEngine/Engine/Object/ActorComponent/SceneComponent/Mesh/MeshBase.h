@@ -1,4 +1,4 @@
-#pragma once
+пїњ#pragma once
 #include <Math/Vector.h>
 #include <Object/ActorComponent/SceneComponent/SceneComponent.h>
 
@@ -64,25 +64,41 @@ private:
 	QFAVKIndexBuffer* IndexBuffer = nullptr;
 	// call when set QFAMeshData in staticMesh
 	void CreateVertextIndexBuffer();
-public:
-
-
 	/*
-		uniqueIndexCount = count SSVertex in memory
-		indexCount = count of indices in list who represent all of mesh
-	*/	
-	QFAMeshData( int uniqueIndexCount, int indexCount, int materialCount);// false to true
+	static void operator delete (void* p) 
+	{
+		delete ((QFAMeshData*)p)->VertexBufer;
+		delete ((QFAMeshData*)p)->IndexBuffer;
+		free(((QFAMeshData*)p)->FramesData);
+		delete p;
+	}
+	*/
+
+
+	inline Material* GetDefaultMaterials() const
+	{
+		return (Material*)&FramesData[Mi.FrameSize + sizeof(unsigned int) * Mi.IndexCount];
+	}
+
+
+public:
 	QFAMeshData(int VertexCount, int indexCount, int materialCount, int notNed);
 	QFAMeshData(SMeshInfo* mi, void* framesData);
 
-
-
+	
+	// move in private
+	inline void SetMaterial(Material material, int index)
+	{
+		((Material*)&FramesData[Mi.FrameSize + sizeof(unsigned int) * Mi.IndexCount])[index] = material;
+	}
+	
 	~QFAMeshData()
 	{
 		delete VertexBufer;
 		delete IndexBuffer;
 		free((void*)FramesData);		
 	}
+	
 
 	SSVertexMaterial* GetFrameData() const;
 	SMeshInfo GetMeshInfo() const;
@@ -91,16 +107,14 @@ public:
 		return (unsigned int*)&FramesData[Mi.FrameSize ];
 	}
 
-	inline Material* GetMaterialData() const
+	inline Material GetDefaultMaterial(size_t index) const
 	{
-		return (Material*)&FramesData[Mi.FrameSize + sizeof(unsigned int) * Mi.IndexCount];
-	}
+		if (Mi.MaterialCount >= index)
+			return Material(0);
 
-	inline void SetMaterial(Material material, int index)
-	{
-		((Material*)&FramesData[Mi.FrameSize  + sizeof(unsigned int) * Mi.IndexCount])[index] = material;
+		return GetDefaultMaterials()[index];
 	}
-
+	
 
 	inline unsigned char GetMaterialCount() const
 	{
@@ -124,7 +138,7 @@ public:
 		return Mi.VerticesSize;
 	}
 
-	// може прийдец€ удалить const
+
 	inline SSVertexMaterial* GetVerticesDate() const
 	{
 		return (SSVertexMaterial*)FramesData;
@@ -164,6 +178,13 @@ protected:
 		unsigned int meshId;
 	};
 
+	// if Materials == nulptr use Default Material
+	Material* Materials = nullptr;
+
+	inline Material* GetMaterials() const
+	{
+		return (Materials ? Materials : Mf->GetDefaultMaterials());
+	}
 public:	
 
 	QMeshBaseComponent();
@@ -192,7 +213,31 @@ public:
 	
 	void* GetShadowBuffer();
 	
+	
+	inline Material GetMaterial(size_t index) const
+	{
+		if (index >= Mf->GetMaterialCount())
+			return Material(0);
 
+		return (Materials ? Materials[index] : Mf->GetDefaultMaterials()[index]);
+	}
+
+	inline bool SetMaterial(Material mat, size_t index)
+	{
+		if (index >= Mf->GetMaterialCount())
+			return false;
+
+		if (!Materials)
+			Materials = new Material[Mf->GetMaterialCount()];
+
+		Materials[index] = mat;
+		return true;
+	}
+
+	inline size_t GetMaterialCount() const
+	{
+		return Mf->GetMaterialCount();
+	}
 
 	std::array<VkDescriptorSet, 2> GetNextSets();
 

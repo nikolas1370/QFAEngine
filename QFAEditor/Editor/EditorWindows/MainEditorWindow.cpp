@@ -249,10 +249,11 @@ void QFAEditorMainWindow::EndDragAndDrop(EKey::Key key)
 			}
 			else
 			{
-				SEditorFile ef = QFAEditorFileStorage::GetFile(id);
+				
+				QFAEditorFileStorage::QFAContentFile ef = QFAEditorFileStorage::GetFile(id);
 				if (ef.id == 0)
 					return;
-				else if (ef.fileType == QFAEditorFileTypes::EFTMesh)
+				else if (ef.fileType == QFAEditorFileStorage::QFAFileTypes::EFTMesh)
 				{
 					AStaticMeshActor* staticActor = new AStaticMeshActor;
 					staticActor->SetActorPosition(0);

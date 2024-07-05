@@ -16,7 +16,7 @@ class QFAEXPORT QFAUISelectUnit abstract : public QFAParentHiddenChild
 		std::function<void(QFAUIParent* unit)> InFocus;
 		std::function<void()> OutFocus;
 		std::function<void(QFAUIParent* unitUnderCursore)> LeftMouseDown;
-		std::function<void(QFAUIParent* unitUnderCursore)> DobleClick;
+		std::function<void(QFAUIParent* unitUnderCursore)> DobleClick; 
 	};
 
 	static std::vector<QFAUISelectUnit*> SelectUnitList;

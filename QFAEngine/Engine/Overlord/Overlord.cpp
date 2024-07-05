@@ -51,17 +51,13 @@ bool QFAOverlord::StartLife()
 }
 
 
-bool QFAOverlord::Init(std::vector<QFAVKPipeline::SShaderData> shaderData, bool createWindow, std::function<void()> frameStarted, std::function<void()> frameEnded, QFAContentManager* cm)
+bool QFAOverlord::Init(std::vector<QFAVKPipeline::SShaderData> shaderData, bool createWindow, std::function<void()> frameStarted, std::function<void()> frameEnded)
 {
     if (isInit)
         return false;
 
     FrameStarted = frameStarted;
     FrameEnded = frameEnded;
-    if(cm)
-        QFAContentManager::Manager = cm;
-    else
-        stopExecute("necessary set QFAContentManager")
 
     QTime::Init();    
     QFAVKPipeline::SetShaderData(shaderData);

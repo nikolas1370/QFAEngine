@@ -114,14 +114,6 @@ inline void QFAModelLoader::WriteVertex(const aiScene* scene, const aiNode* node
             rotations = FVector(Math::RadiansToDegrees(rotation.x), Math::RadiansToDegrees(rotation.y), Math::RadiansToDegrees(rotation.z));            
         }
 
-        //aiMatrix4x4::ro
-        /*
-        aiVector3D vector(0,0,1);
-        aiMatrix4x4 finiteMatrix_2;
-        finiteMatrix.Rotation(90, vector, finiteMatrix_2);
-        finiteMatrix = finiteMatrix_2;
-        */
-
         for (size_t i = 0; i < node->mNumMeshes; i++)
         {
             unsigned int meshIndex = node->mMeshes[i];

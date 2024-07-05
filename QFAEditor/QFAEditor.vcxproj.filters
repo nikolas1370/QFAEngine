@@ -74,9 +74,6 @@
     <ClInclude Include="Editor\EditorUI\FileExplorer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Editor\EditorFileTypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Editor\EditorWindows\FileViewWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -102,6 +99,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Editor\epch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorMeshData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

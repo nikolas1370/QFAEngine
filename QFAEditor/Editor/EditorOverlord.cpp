@@ -44,7 +44,7 @@ void QFAEditorOverlord::Init()
     */
     QTime::Init();
     compiler.ProcessShaders();
-    QFAOverlord::Init(compiler.ShaderData, false, QFAEditorOverlord::StartFrame, QFAEditorOverlord::EndFrame, &Storage);
+    QFAOverlord::Init(compiler.ShaderData, false, QFAEditorOverlord::StartFrame, QFAEditorOverlord::EndFrame);
 
     MainWindow = new QFAEditorMainWindow;    
 }
@@ -55,7 +55,7 @@ void QFAEditorOverlord::PrepareToWork()
     LoadText = U"Load Game code";
     QFAGameCode::LoadCode();
     LoadText = U"Load file : ";
-    QFAEditorFileStorage::LoadEditorFiles(LoadText_2, NewLoadText);
+    QFAEditorFileStorage::LoadContent(U"Content", LoadText_2, NewLoadText);
     InitializationDon = true;
 }
 

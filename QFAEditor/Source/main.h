@@ -22,21 +22,33 @@ public:
     }
 };
 
-
+#include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
 class QTest_ActorMinusOne : public QActor
 {
-    QFAClassIn(QTest_ActorMinusOne)
+    QFAClassIn(QTest_ActorMinusOne);
+    static bool Red;
 private:
-    
+    QStaticMesh* mesh;
 public:
     QTest_ActorMinusOne()
     {
-        std::cout << "Get mesh " << QFAContentManager::GetMesh(U"Content\Arrow.qfa") << "\n";
+        //mesh = new QStaticMesh(QFAContentManager::GetMesh(U"Content\\Arrow.qfa"));        
+        mesh = new QStaticMesh(QFAContentManager::GetMesh(U"Content\\untitled.qfa"));
+
+        if (Red)
+            mesh->SetMaterial(Material( FVector(255,0,0), 0), 0);
+        else
+            mesh->SetMaterial(Material(FVector(0, 0, 255), 0), 0);
+
+        SetRootComponent(mesh);
+
+        Red = !Red;
     }
 
     ~QTest_ActorMinusOne()
     {
-        
+        std::cout << "delete\n";
+        delete mesh;
     }
 
 };
@@ -58,3 +70,5 @@ public:
     }
 
 };
+
+

@@ -43,7 +43,7 @@ public:
 
 		cm == class based on QFAContentManager, game code can get resources in editor manager
 	*/
-	static bool Init(std::vector<QFAVKPipeline::SShaderData> shaderData, bool createWindow, std::function<void()> frameStarted, std::function<void()> frameEnded, QFAContentManager* cm);
+	static bool Init(std::vector<QFAVKPipeline::SShaderData> shaderData, bool createWindow, std::function<void()> frameStarted, std::function<void()> frameEnded);
 
 
 	static void SetLimitFpsCount(float framesCount);

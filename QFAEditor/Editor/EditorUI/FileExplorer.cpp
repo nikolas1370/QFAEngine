@@ -10,10 +10,7 @@
 #include "ExplorerFolderUnit.h"
 #include <EditorWindows/MainEditorWindow.h>
 #include <Render/Time.h>
-
 #include <filesystem>
-
-#include <EditorFileTypes.h>
 #include <EditorWindows/FileViewWindow.h>
 #include <EditorFileStorage.h>
 #include "../GameCodeTool/GameCodeCompiler.h"
@@ -118,6 +115,7 @@ void QFAUIEditorFileExplorer::CreateMiddle()
 
 	SelectGrid->SelectEvent.DobleClick = ([this](QFAUIParent* unit)
 		{
+			std::cout << "DobleClick\n";
 			for (size_t i = 0; i < FolderUnitList.size(); i++)
 			{
 				if (FolderUnitList[i] == unit)

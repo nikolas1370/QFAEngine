@@ -40,7 +40,7 @@ void QStaticMesh::UpdateBuffers(VkCommandBuffer commandBuffer, uint64_t startFra
 
 		char* tem = (char*)faragbuf + sizeof(SShaderDirLight);
 
-		memcpy(tem, Mf->GetMaterialData(), sizeof(Material) * Mf->GetMaterialCount()); // for material create new buffer
+		memcpy(tem, GetMaterials(), sizeof(Material) * Mf->GetMaterialCount()); // for material create new buffer
 
 		memcpy(faragbuf, &ShaderDL, sizeof(SShaderDirLight));
 	}

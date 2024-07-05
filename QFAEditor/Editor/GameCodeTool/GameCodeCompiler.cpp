@@ -9,6 +9,7 @@
 #include <Object/Actor/Actor.h>
 #include <Object/Class.h>
 
+
 QFAGameCode::DllFile QFAGameCode::CurentDllFile = QFAGameCode::DllFile::None;
 bool QFAGameCode::DllWasCompiled = false;
 
@@ -117,7 +118,7 @@ void QFAGameCode::ReplacementOldDllObject()
                         for (size_t j = 0; j < OldActorList.size(); j++)
                             OldActorList[j]->ReplaceMe(GameCodeAPIFunction->CreateObject(newClasses->GetId()));
                     }
-                    else
+                    else if(oldClasses[i]->GetBaseOn() == QFAClass::Actor && newClasses->GetBaseOn() != QFAClass::Actor)
                         stopExecute("Restart editor")
                 }
                 else 

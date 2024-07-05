@@ -8,7 +8,6 @@
 #include "Render/UI/Scroll.h"	 
 #include <EditorUI/FileViewUnit.h>
 #include <Tools/File/FileSystem.h>
-#include <EditorFileTypes.h>
 #include <Render/Image.h>
 #include <Render/Window/Viewport.h>
 #include <filesystem>
@@ -131,7 +130,8 @@ void QFAEditorFileViewWindow::AddFile(size_t fileId)
 
 void QFAEditorFileViewWindow::InFocus(SFile* file)
 {
-	if (file->ef.fileType == QFAEditorFileTypes::EFTMesh)
+	
+	if (file->ef.fileType == QFAContentManager::QFAFileTypes::EFTMesh)
 	{
 		if (CurentActiveType == ECurentType::CTImage)
 			DisplayImage->SetImage(nullptr);

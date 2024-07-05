@@ -66,7 +66,6 @@ void QFAClass::DeleteObject(QObject* object)
 
 std::vector<QFAClass*>& QFAClass::GetGameClassList()
 {
-    std::cout << "QFAClass::GetGameClassList \n";
     return QCI;
 }
 

@@ -18,6 +18,7 @@ class QFAEditorUIFileViewUnit;
 #include <Object/Actor/Actor.h>
 #include <Camera/CameraEditor.h>
 #include <EditorFileStorage.h>
+#include <Overlord/ContentManager.h>
 class QFAEditorFileViewWindow
 {
 	bool Closed = false;
@@ -47,7 +48,7 @@ private:
 	
 	struct SFile
 	{
-		SEditorFile ef;
+		QFAContentManager::QFAContentFile ef;
 		/*
 		std::u32string path;
 		QStaticMesh* mesh = nullptr;
