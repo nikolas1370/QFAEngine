@@ -81,7 +81,6 @@ void QFAUISelectUnit::SetScrollChild(QFAUIParentMultipleUnit* child)
 void QFAUISelectUnit::InFocus(QFAUIUnit* unit, void* _this)
 {
 	QFAUISelectUnit* su = (QFAUISelectUnit*)_this;
-	su->LastClickUnit = nullptr;
 	if (su->FocusUnit)
 	{
 		su->FocusUnit->SetBackgroundColor(QFAColor(0, 0, 0, 0));
@@ -90,6 +89,7 @@ void QFAUISelectUnit::InFocus(QFAUIUnit* unit, void* _this)
 
 	if (unit == su || unit == &su->Scroll || unit == su->SelectUnitChild)
 	{
+		su->LastClickUnit = nullptr;
 		if (su->SelectEvent.InFocus)
 			su->SelectEvent.InFocus(su);
 
@@ -105,6 +105,7 @@ void QFAUISelectUnit::InFocus(QFAUIUnit* unit, void* _this)
 		{			
 			if (parent != su->SelectedUnit)
 			{	
+				su->LastClickUnit = nullptr;
 				su->FocusUnit = (QFAUIParent*)parent;
 				su->FocusUnit->SetBackgroundColor(su->FocusColor);
 			}			
@@ -171,10 +172,15 @@ void QFAUISelectUnit::LeftMouseDown(QFAUIUnit* unit, void* _this)
 			{
 				if ((QTime::GetTime() - su->LastClickTime) < su->DobleClickTime && 
 					su->SelectEvent.DobleClick && su->LastClickUnit == parent)
-						su->SelectEvent.DobleClick(su->SelectedUnit);
-
-				su->LastClickTime = 0;
-				su->LastClickUnit = nullptr;
+				{
+					su->LastClickUnit = nullptr;
+					su->SelectEvent.DobleClick(su->SelectedUnit);
+				}
+				else
+				{
+					su->LastClickTime = QTime::GetTime();
+					su->LastClickUnit = (QFAUIParent*)parent;
+				}				
 			}
 			else
 			{

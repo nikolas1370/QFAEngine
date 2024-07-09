@@ -1,6 +1,5 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Image.h"
-
 #include <Render/Buffer/VKBuffer.h>
 #include <Render/vk/PhysicalDevice.h>
 #include <Render/vk/LogicalDevice.h>
@@ -16,44 +15,23 @@ QFAImage::QFAImage(SImageCreateInfo& ici)
     if(ici.createBuffer)
         buffer = new QFAVKBuffer(imageSize, nullptr, true);
 
-    createImage(ici.Width, ici.Height, ici.format, VK_IMAGE_TILING_OPTIMAL, ici.usage);
+    CreateImageVK(ici.Width, ici.Height, ici.format, VK_IMAGE_TILING_OPTIMAL, ici.usage);
     QFAVKBuffer::transitionImageLayout(TextureImage, ici.format, VK_IMAGE_LAYOUT_UNDEFINED, ici.layout, QFAWindow::QFAWindow::commandPool, ici.aspect);
     ImageView.CreateView(this, ici.aspect);
     Width = ici.Width;
     Height = ici.Height;
 }
 
-QFAImage::QFAImage( int Width, int Height, unsigned int channelCount,  VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspect , VkImageCreateFlags flags)
+QFAImage::QFAImage( int width, int height, unsigned int channelCount,  VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspect , VkImageCreateFlags flags)
 {
     ImageFormat = format;
-    VkDeviceSize imageSize = Width * Height * channelCount;
+    VkDeviceSize imageSize = width * height * channelCount;
     buffer = new QFAVKBuffer(imageSize, nullptr, true);
-    createImage(Width, Height, format, VK_IMAGE_TILING_OPTIMAL, usage, flags);
+    CreateImageVK(width, height, format, VK_IMAGE_TILING_OPTIMAL, usage, flags);
     QFAVKBuffer::transitionImageLayout(TextureImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, QFAWindow::QFAWindow::commandPool, aspect);
     ImageView.CreateView(this, aspect);
-    Width = Width;
-    Height = Height;
-}
-
-QFAImage::QFAImage( const std::string src)
-{   
-    ImageFormat = VK_FORMAT_R8G8B8A8_SRGB;
-    int texWidth, texHeight, texChannels;
-    stbi_uc* pixels = stbi_load(src.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-    VkDeviceSize imageSize = texWidth * texHeight * 4; 
-
-    if (!pixels)
-        stopExecute("failed to load texture image!");
-
-    buffer = new QFAVKBuffer( imageSize, pixels, true);
-    stbi_image_free(pixels);
-    
-    createImage(texWidth, texHeight, ImageFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
-    buffer->copyInImage(this, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), QFAWindow::commandPool);
-
-    ImageView.CreateView(this, VK_IMAGE_ASPECT_COLOR_BIT);
-    Width = texWidth;
-    Height = texHeight;
+    Width = width;
+    Height = height;
 }
 
 QFAImage::QFAImage(const std::u32string src)
@@ -72,14 +50,13 @@ QFAImage::QFAImage(const std::u32string src)
     buffer = new QFAVKBuffer(imageSize, pixels, true);
     stbi_image_free(pixels);
 
-    createImage(texWidth, texHeight, ImageFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+    CreateImageVK(texWidth, texHeight, ImageFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
     buffer->copyInImage(this, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), QFAWindow::commandPool);
 
     ImageView.CreateView(this, VK_IMAGE_ASPECT_COLOR_BIT);
     Width = texWidth;
     Height = texHeight;
 }
-
 
 void QFAImage::SetImage(void* pixels)
 {
@@ -93,10 +70,40 @@ void QFAImage::SetImage(void* pixels)
 
 QFAImage::~QFAImage()
 {
-    vmaDestroyImage(QFAVKBuffer::allocator, TextureImage, ImageAllocation);
+    if(TextureImage)
+        vmaDestroyImage(QFAVKBuffer::allocator, TextureImage, ImageAllocation);
+
     if (buffer)
         delete buffer;
 }
+
+#if QFA_EDITOR_ONLY
+    void QFAImage::UpdateImage(QFAImage* image)
+    {
+        if (!image)
+            return;
+     
+        for (size_t i = 0; i < Images.size(); i++)
+        {
+            Images[i]->Image = nullptr;
+            Images[i]->SetImage(image);
+        }
+
+        delete this;
+    }
+
+    void QFAImage::DeleteMeFromList(QFAUIImage* image)
+    {
+        for (size_t i = 0; i < Images.size(); i++)
+        {
+            if (Images[i] == image)
+            {
+                Images.erase(Images.begin() + i);
+                return;
+            }
+        }
+    }
+#endif
 
 void QFAImage::DeleteImageInCpuSide()
 {
@@ -107,9 +114,7 @@ void QFAImage::DeleteImageInCpuSide()
     }
 }
 
-
-
-void QFAImage::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkImageCreateFlags       flags)
+void QFAImage::CreateImageVK(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkImageCreateFlags       flags)
 {
     VkImageCreateInfo imageInfo{};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;

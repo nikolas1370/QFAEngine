@@ -20,7 +20,7 @@ void QWorld::ProcessTicks()
 				Worlds[i]->EditorActor->Tick(delta);
 				ProcessSceneComponentTick(Worlds[i]->EditorActor->RootComponent);
 			}
-
+			
 			continue;
 		}
 
@@ -102,21 +102,24 @@ void QWorld::RemoveActor(QActor* actor)
 	Actors.RemoveAt(actor->WorldIndex);
 	Actors[actor->WorldIndex]->WorldIndex = actor->WorldIndex;
 }
+#if QFA_EDITOR_ONLY
 
-void QWorld::SetEditorActor(QActor* actor)
-{
-	if (!actor->IsValid())
+	void QWorld::SetEditorActor(QActor* actor)
 	{
+		if (!actor->IsValid())
+		{
+			if (EditorActor->IsValid())
+				EditorActor->ActorWorld = nullptr;
+	
+			EditorActor = nullptr;
+			return;
+		}
+	
 		if (EditorActor->IsValid())
 			EditorActor->ActorWorld = nullptr;
-
-		EditorActor = nullptr;
-		return;
+	
+		actor->ActorWorld = this;
+		EditorActor = actor;
 	}
 
-	if (EditorActor->IsValid())
-		EditorActor->ActorWorld = nullptr;
-
-	actor->ActorWorld = this;
-	EditorActor = actor;
-}
+#endif

@@ -21,6 +21,7 @@ QFAImage* QFAUIImage::VoidImage = nullptr;
 
 VkDescriptorSet QFAUIImage::CurentDescriptorSetProject;
 
+
 QFAUIImage::QFAUIImage(QFAImage* image, bool iBackground)
 {
     CanRender = true;
@@ -87,10 +88,10 @@ void QFAUIImage::UpdateUniforms()
     ip.BackgroundEnable = !Image;
     ip.BackgroundColor = BackgroundColor;
 
-    memcpy(ImageIndexs[Index].buffer->MapData, &ip, sizeof(SImageParam));
+    memcpy(ImageIndexs[Index].buffer->GetData(), &ip, sizeof(SImageParam));
 
     SImageVertexParam IVP = { UnitScroll + Position_y, Position_x};
-    memcpy(ImageIndexs[Index].bufferVertex->MapData, &IVP, sizeof(SImageVertexParam));
+    memcpy(ImageIndexs[Index].bufferVertex->GetData(), &IVP, sizeof(SImageVertexParam));
 }
 
 
@@ -139,10 +140,6 @@ void QFAUIImage::CreateProjectionSet(VkBuffer buffer)
 
     Pipeline->CreateSet(0, descriptorSetInfo.data());    
 }
-
-
-
-
 
 void QFAUIImage::ChangeQuad()
 {//     
@@ -275,7 +272,6 @@ void QFAUIImage::SetPositionParent(int x, int y)
     Position_y = y;
 }
 
-
 void QFAUIImage::SetImage(QFAImage* image)
 {
     if (!image)
@@ -284,6 +280,11 @@ void QFAUIImage::SetImage(QFAImage* image)
         return DisableImage();
     }
 
+#if QFA_EDITOR_ONLY
+    image->Images.push_back(this);
+    if (Image)
+        Image->DeleteMeFromList(this);
+#endif
     Image = image;
     CallPrepareSet = true;
     ChangeQuad();

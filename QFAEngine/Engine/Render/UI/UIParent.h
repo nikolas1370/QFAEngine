@@ -52,6 +52,17 @@ public:
 	};
 
 protected:
+	EBackgroundType BackgroundType = EBackgroundType::BTNONE;
+	QFAUIImage BackgroundImage = QFAUIImage(nullptr, true);
+	QFAImage* Image = nullptr;;
+	QFAColorF BackgroundColor;
+
+	
+
+	EOverflow Overflow = EOverflow::Visible;
+
+	EParentType ParentType = EParentType::NONEChild;
+	
 	/*
 
 	unit be remove from this parent and unit not be Notify about
@@ -59,13 +70,12 @@ protected:
 
 */
 	virtual void RemoveUnitWithoutNotify(QFAUIUnit* unit) = 0;
-
 	// child call if his slot change
 	virtual void MySlotChange(QFAUIUnit* unit) = 0;
 	/*
-		call in SetSizeParent	
+		call in SetSizeParent
 	*/
-	virtual void ChangeSize(unsigned int w, unsigned int h)  = 0;
+	virtual void ChangeSize(unsigned int w, unsigned int h) = 0;
 	/*
 		call in SetPositionParent
 	*/
@@ -78,20 +88,26 @@ protected:
 	virtual float UpdateInnerHeight() = 0;
 	virtual float UpdateInnerWidth() = 0;
 
-	/*	
-		child call if inner Height/Width change	
+	/*
+		child call if inner Height/Width change
 	*/
 	virtual void ChildInnerChange(QFAUIUnit* child) {};
 
-	EOverflow Overflow = EOverflow::Visible;
-
-	
-
-
-	EParentType ParentType = EParentType::NONEChild;
-	
 	void SetSizeParent(unsigned int w, unsigned int h) final;
 	void SetPositionParent(int x, int y) final;
+
+	void RenderBackground(VkCommandBuffer comandebuffer);
+
+	inline QFAVKPipeline* GetBackgroundPipeline()
+	{
+		return BackgroundImage.GetPipeline();
+	}
+
+	// use only in child class with unit type QFAUIType::CustomUnit
+	void SetChildPosition(QFAUIUnit* childUnit, int x, int y);
+	// use only at child class with unit type QFAUIType::CustomUnit
+	void SetChildSize(QFAUIUnit* childUnit, int w, int h);
+
 public:
 	QFAUIParent();
 	~QFAUIParent();
@@ -136,23 +152,4 @@ public:
 	{
 		return ParentType;
 	}
-
-
-protected:
-	EBackgroundType BackgroundType = EBackgroundType::BTNONE;
-	QFAUIImage BackgroundImage = QFAUIImage(nullptr, true);
-	QFAImage* Image = nullptr;;
-	QFAColorF BackgroundColor;
-
-	void RenderBackground(VkCommandBuffer comandebuffer);
-
-	inline QFAVKPipeline* GetBackgroundPipeline()
-	{
-		return BackgroundImage.GetPipeline();
-	}
-
-	// use only in child class with unit type QFAUIType::CustomUnit
-	void SetChildPosition(QFAUIUnit* childUnit, int x, int y);
-	// use only at child class with unit type QFAUIType::CustomUnit
-	void SetChildSize(QFAUIUnit* childUnit, int w, int h);
 };

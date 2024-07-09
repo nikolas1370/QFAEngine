@@ -20,10 +20,45 @@ class QFAEXPORT QFAUISelectUnit abstract : public QFAParentHiddenChild
 	};
 
 	static std::vector<QFAUISelectUnit*> SelectUnitList;
+
+private:
+	QFAUIParentMultipleUnit* SelectUnitChild; // it's grid or list
+
+	QFAUIParent* FocusUnit = nullptr;// can't be equal to SelectedUnit
+	QFAUIParent* SelectedUnit = nullptr;
+	bool SelectedUnitFocus = false;
+
+	QFAUIParent* LastClickUnit = nullptr;
+	size_t DobleClickTime = 400 * 10000;// convert from ms to 1/10 microseconds	
+	size_t LastClickTime = 0;
 public:
 	QFAColor FocusColor = QFAColorF(1.0f, 1.0f, 1.0f, 0.05f);
 	QFAColor SelectColor = QFAColorF(0.5f, 0.5f, 0.5f, 1.0f);
 	QFAColor SelectLostFocusColor = QFAColorF(0.2f, 0.2f, 0.2f, 1.0f);
+
+	SelectUnitEvent SelectEvent;
+
+private:
+	// call in QFAUIEvent need for track focus
+	static void WindowLeftMouseDown(QFAWindow* window, QFAUIUnit* unitUnderFocus);
+	static void InFocus(QFAUIUnit* unit, void* _this);
+	static void OutFocus(void* _this);
+	static void LeftMouseDown(QFAUIUnit* unit, void* _this);
+
+
+protected:
+
+	void SetScrollChild(QFAUIParentMultipleUnit* child);
+
+	void MySlotChange(QFAUIUnit* unit) final {}
+	void ChangeSize(unsigned int w, unsigned int h) final;
+
+	void ChangePosition(int x, int y) final;
+
+	float UpdateInnerHeight() final;
+	float UpdateInnerWidth() final;
+
+public:
 
 	QFAUISelectUnit();
 
@@ -71,36 +106,7 @@ public:
 		SelectedUnitFocus = focus;
 	}
 
-	SelectUnitEvent SelectEvent;	
-protected:
-	
-	void SetScrollChild(QFAUIParentMultipleUnit* child);
 
-	void MySlotChange(QFAUIUnit* unit) final {} 
-	void ChangeSize(unsigned int w, unsigned int h) final;
-	
-	void ChangePosition(int x, int y) final;
-
-	float UpdateInnerHeight() final;
-	float UpdateInnerWidth() final;
-
-private:
-	QFAUIParentMultipleUnit* SelectUnitChild; // it's grid or list
-
-	QFAUIParent* FocusUnit = nullptr;// can't be equal to SelectedUnit
-	QFAUIParent* SelectedUnit = nullptr; 
-	bool SelectedUnitFocus = false;
-
-	QFAUIParent* LastClickUnit = nullptr;
-	size_t DobleClickTime = 400 * 10000;// convert from ms to 1/10 microseconds	
-	size_t LastClickTime = 0;
-
-	static void InFocus(QFAUIUnit* unit, void* _this);
-	static void OutFocus(void* _this);
-	static void LeftMouseDown(QFAUIUnit* unit, void* _this);
-
-	// call in QFAUIEvent need for track focus
-	static void WindowLeftMouseDown(QFAWindow* window, QFAUIUnit* unitUnderFocus);
 };
 
 class QFAUISelectGrid : public QFAUISelectUnit

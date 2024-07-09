@@ -5,13 +5,10 @@ class QFAWindow;
 
 class QFAEXPORT QFAVKTextRenderPass
 {
-
 	friend QFAWindow;
 	VkRenderPass renderPass;	
+
 public:
 	QFAVKTextRenderPass(VkFormat imageFormat, bool clear);
 	~QFAVKTextRenderPass();
-
-private:
-
 };

@@ -100,7 +100,7 @@ void QFAEditorMainWindow::PrepareGameViewport()
 	EditorCamera->SetActorRotation(0);
 	EditorCamera->ActivateCamera(GameViewport);
 
-	Worlds[0].SetEditorActor(EditorCamera);		
+	((QEditorWorld*)&Worlds[0])->SetEditorActor(EditorCamera);
 }
 
 void QFAEditorMainWindow::PrepareCallback()
@@ -248,10 +248,9 @@ void QFAEditorMainWindow::EndDragAndDrop(EKey::Key key)
 					std::cout << "Class not based on Actor\n";
 			}
 			else
-			{
-				
-				QFAEditorFileStorage::QFAContentFile ef = QFAEditorFileStorage::GetFile(id);
-				if (ef.id == 0)
+			{				
+				QFAEditorFileStorage::QFAContentFile& ef = QFAEditorFileStorage::GetFile(id);
+				if (ef.Id == 0)
 					return;
 				else if (ef.fileType == QFAEditorFileStorage::QFAFileTypes::EFTMesh)
 				{
@@ -260,7 +259,7 @@ void QFAEditorMainWindow::EndDragAndDrop(EKey::Key key)
 					staticActor->SetMesh((QFAMeshData*)ef.file);
 					MainWindow->AddActorToWorlds(staticActor, 
 						std::filesystem::path(ef.path).filename().replace_extension("").u32string(),
-						ef.id, false);
+						ef.Id, false);
 				}
 			}			
 		}		

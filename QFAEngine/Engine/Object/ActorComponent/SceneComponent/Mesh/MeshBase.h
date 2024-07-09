@@ -8,7 +8,8 @@
 #include <Render/vk/TextureSampler.h>
 #include <Render/vk/ImageView.h>
 #include <Render/Pipline/Pipline.h>
-
+#include <Render/Buffer/IndexBuffer.h>
+#include <Render/Buffer/VertexBuffer.h>
 struct VertexMaterial// 
 {
 	FVector Position;
@@ -21,7 +22,7 @@ struct SSVertexMaterial // structure input vertex Shader
 {
 	FVector Position;
 	FVector Normal;
-	int materialIndex = 0;
+	int MaterialIndex = 0;
 };
 
 struct Material // struct in fragment shader
@@ -32,22 +33,13 @@ struct Material // struct in fragment shader
 
 class QStaticMesh;
 class QMeshBaseComponent;
-class QFAVKVertexBuffer;
-class QFAVKIndexBuffer;
+class QFAContentManager;
+class QFAFile;
 class QFAEXPORT QFAMeshData
-{
-	/*
-	in memory
-	{ without Interpolation
-		[SSVertexFrame1,.., SSVertexFrameLast] // successively frame after frame
-		Indexes,
-		Materials  
-	}
-	*/	
-	char* FramesData; 
+{	
 	friend QStaticMesh;
 	friend QMeshBaseComponent;
-public:
+	friend QFAContentManager;
 	struct SMeshInfo
 	{
 		size_t FrameSize;
@@ -58,47 +50,100 @@ public:
 		size_t MaterialCount;
 		size_t AmountData;
 	};
-private:
+
+	/*
+	in memory
+	{ without Interpolation
+		[SSVertexFrame1,.., SSVertexFrameLast] // successively frame after frame
+		Indexes,
+		Materials
+	}
+	*/
+	char* FramesData;
+	QFAFile* QFile = nullptr; // if QFile == null free(FramesData) else delete QFile
+
 	SMeshInfo Mi;
 	QFAVKVertexBuffer* VertexBufer = nullptr;
 	QFAVKIndexBuffer* IndexBuffer = nullptr;
-	// call when set QFAMeshData in staticMesh
-	void CreateVertextIndexBuffer();
-	/*
-	static void operator delete (void* p) 
+	
+#if QFA_EDITOR_ONLY
+	// all QMeshBaseComponent why use this QFAMeshData need for update mesh
+	std::vector<QMeshBaseComponent*> Meshs; 
+	void DeleteMeFromList(QMeshBaseComponent* mesh)
 	{
-		delete ((QFAMeshData*)p)->VertexBufer;
-		delete ((QFAMeshData*)p)->IndexBuffer;
-		free(((QFAMeshData*)p)->FramesData);
+		for (size_t i = 0; i < Meshs.size(); i++)
+		{
+			if (Meshs[i] == mesh)
+			{
+				Meshs.erase(Meshs.begin() + i);
+				return;
+			}
+		}
+	}
+#endif
+	// not forget call it's if create QFAMeshData and set all data
+	void CreateVertextIndexBuffer();
+	QFAMeshData(int VertexCount, int indexCount, int materialCount, int notNed);
+	QFAMeshData(SMeshInfo* mi, void* framesData, QFAFile* file);
+	~QFAMeshData()
+	{
+		DeleteData();
+	}
+
+	void DeleteData()
+	{
+		if (VertexBufer)
+			delete VertexBufer;
+
+		if (IndexBuffer)
+			delete IndexBuffer;
+				
+		if (FramesData)
+		{
+			if (QFile)
+				delete QFile;
+			else
+				free(FramesData);
+		}
+	}
+
+protected:
+	// child class can use this
+	static QFAMeshData* CreateMeshData(int VertexCount, int indexCount, int materialCount, int notNed)
+	{
+		return new QFAMeshData(VertexCount, indexCount, materialCount, notNed);
+	}
+	// child class can use this
+	static QFAMeshData* CreateMeshData(SMeshInfo* mi, void* framesData, QFAFile* file)
+	{
+		return new QFAMeshData(mi, framesData, file);
+	}
+	
+	static void operator delete (void* p)
+	{
 		delete p;
 	}
-	*/
 
+	inline void SetMaterial(Material material, int index)
+	{
+		((Material*)&FramesData[Mi.FrameSize + sizeof(unsigned int) * Mi.IndexCount])[index] = material;
+	}
 
 	inline Material* GetDefaultMaterials() const
 	{
 		return (Material*)&FramesData[Mi.FrameSize + sizeof(unsigned int) * Mi.IndexCount];
 	}
 
+#if QFA_EDITOR_ONLY
+	/*
+		in end delete this
 
-public:
-	QFAMeshData(int VertexCount, int indexCount, int materialCount, int notNed);
-	QFAMeshData(SMeshInfo* mi, void* framesData);
+		need in QFAContentManager::AddFile
+	*/
+	void UpdateMeshData(QFAMeshData* meshData);
+#endif
 
-	
-	// move in private
-	inline void SetMaterial(Material material, int index)
-	{
-		((Material*)&FramesData[Mi.FrameSize + sizeof(unsigned int) * Mi.IndexCount])[index] = material;
-	}
-	
-	~QFAMeshData()
-	{
-		delete VertexBufer;
-		delete IndexBuffer;
-		free((void*)FramesData);		
-	}
-	
+public:	
 
 	SSVertexMaterial* GetFrameData() const;
 	SMeshInfo GetMeshInfo() const;
@@ -114,13 +159,11 @@ public:
 
 		return GetDefaultMaterials()[index];
 	}
-	
 
 	inline unsigned char GetMaterialCount() const
 	{
 		return Mi.MaterialCount;
 	}
-	
 
 	inline int GetIndexCount() const
 	{
@@ -138,15 +181,11 @@ public:
 		return Mi.VerticesSize;
 	}
 
-
 	inline SSVertexMaterial* GetVerticesDate() const
 	{
 		return (SSVertexMaterial*)FramesData;
 	}
-	
-	
 };
-
 
 class QFAShaderProgram;
 class QFAViewport;
@@ -154,9 +193,6 @@ class QFAWindow;
 class QFAVKPipeline;
 class QStaticMesh;
 class QFAOverlord;
-#include <Render/Buffer/IndexBuffer.h>
-#include <Render/Buffer/VertexBuffer.h>
-
 
 class QFAEXPORT QMeshBaseComponent : public QSceneComponent
 {
@@ -164,32 +200,125 @@ class QFAEXPORT QMeshBaseComponent : public QSceneComponent
 	friend QFAWindow;
 	friend QFAViewport;
 	friend QFAOverlord;
+	friend QFAMeshData;
+private:
+	struct SBufferVertex
+	{
+		VkBuffer BufferVertex;
+		VkDeviceMemory BufferVertexMemory;
+		void* BufferVertexMapped;
+	};
 
-protected:
-	
+	struct SSet1Buffers
+	{
+		QFAVKBuffer* VertexBuffer;
+		QFAVKBuffer* FragmentBuffer;
+	};
 
-	bool CastShadow = true;
+protected:	
+	struct SShaderDirLight
+	{
+		alignas(16) FVector Direction = FVector(0.0f, 0.0f, 1.0f);
+		alignas(16) FVector Ambient = FVector(0.1f);
+		alignas(16) FVector Diffuse = FVector(1.0f);
+		alignas(16) FVector Specular = FVector(1.0f);
+	};
 
-	glm::mat4 ModelMatrix = Math::DefauldMatrix4;
-	void UpdateModelMatrix() override;
+	struct UBOFragment
+	{// DirLight
+		SShaderDirLight DL;
+		alignas(16) Material Material[101];
+	};
 
 	struct SPushConstantPickId
 	{
-		unsigned int meshId;
+		unsigned int MeshId;
 	};
 
+	struct UBOVertex
+	{
+		alignas(64) glm::mat4 Projection;// put in start mesh render		
+		alignas(64) glm::mat4 CameraR;
+		alignas(64) glm::mat4 DirectionLightMatrix;
+	};
+
+	struct UBOShadowVertex
+	{
+		alignas(64) glm::mat4 DepthMVP;
+	};
+
+private:
+	static QFAVKPipeline* Pipeline;
+	static QFAVKPipeline* ShadowPipline;
+	static VkCommandPool CommandPool;
+	static VkRenderPass RenderPass;
+	static  VkRenderPass ShadowRenderPass;
+	static  VkDescriptorPool DescriptorPool;
+	static  std::vector<VkDescriptorPool> DescriptorPoolsTwo;
+	static  std::vector<VkDescriptorPool> DescriptorPoolsShadow;
+	static  VkDescriptorSet DescriptorSetShadow;
+	static unsigned int SetsInUse; // in one frame
+	static const unsigned int DescriptorSets1Amount = 100;
+	static const unsigned int DescriptorSets0Amount = 10; // for viewport set
+	static std::vector<SSet1Buffers> Set1Buffers;
+	static std::vector<VkDescriptorSet> ShadowDescriptorSets;
+	static unsigned int MaxMeshId;
+	static std::vector<QMeshBaseComponent*> MeshIdList;
+	static SShaderDirLight ShaderDL;
+
+protected:
+	static glm::mat4 LightMatrix;
+
+private:
+	SPushConstantPickId PickId;
+	bool CastShadow = true;
 	// if Materials == nulptr use Default Material
 	Material* Materials = nullptr;
+	glm::mat4 ModelMatrix = Math::DefauldMatrix4;
+	QFAMeshData* Mf;
 
+public:
+	virtual int GetIndexCount() = 0;
+	virtual void UpdateBuffers(VkCommandBuffer commandBuffer, uint64_t startFrameTime, bool isShadow, const FVector& cameraPos) = 0;
+
+private:
+	static void StartFrame();
+	static void StartShadowFrameViewport(glm::mat4& lmat);
+	static void EndLife();
+	static void createDescriptorSet0(VkBuffer buffer, VkBuffer shadeowBuffer);
+	static void createDescriptorSet1();
+	static void Init(VkRenderPass renderPass, VkRenderPass ShadowRenderPass, VkCommandPool commandPool_);
+	static void CreatePipeline();
+	static void CreateShadowPipline();
+
+protected:
+	static void StartFrameViewpoet(glm::mat4& viewPortProjection, glm::mat3& cameraRotationMatrix, glm::mat4& directionLightMatrix, int viewportIndex);
+
+private:
+	void UpdateModelMatrix() override;
 	inline Material* GetMaterials() const
 	{
 		return (Materials ? Materials : Mf->GetDefaultMaterials());
 	}
+
+	// call only if Mf != nullptr
+	void Render(VkCommandBuffer commandBuffer, bool shadow, FVector cameraPosition);
+
+protected:
+	void ResetMaterials()
+	{
+		if (Materials)
+		{
+			delete Materials;
+			Materials = nullptr;
+		}
+	}
+
 public:	
 
 	QMeshBaseComponent();
 	~QMeshBaseComponent();
-
+	virtual void SetMesh(QFAMeshData* meshData) = 0;
 	inline void SetCastShadow(bool castShadow)
 	{
 		CastShadow = castShadow;
@@ -199,13 +328,6 @@ public:
 	{
 		return CastShadow;
 	}
-	
-	
-	virtual int GetIndexCount() = 0;
-
-
-	virtual void UpdateBuffers(VkCommandBuffer commandBuffer, uint64_t startFrameTime, bool isShadow, const FVector& cameraPos) = 0;
-	
 
 	void* GetModelBuffer();
 	
@@ -228,7 +350,12 @@ public:
 			return false;
 
 		if (!Materials)
+		{
 			Materials = new Material[Mf->GetMaterialCount()];
+#if QFA_EDITOR_ONLY
+			Mf->Meshs.push_back(this);
+#endif
+		}
 
 		Materials[index] = mat;
 		return true;
@@ -242,111 +369,4 @@ public:
 	std::array<VkDescriptorSet, 2> GetNextSets();
 
 	VkDescriptorSet GetShadowNextSet();
-	
-
-
-	struct SShaderDirLight
-	{
-		alignas(16) FVector direction = FVector(0.0f, 0.0f, 1.0f);
-		alignas(16) FVector ambient = FVector(0.1f);
-		alignas(16) FVector diffuse = FVector(1.0f);
-		alignas(16) FVector specular = FVector(1.0f);
-	};
-
-	struct UBOFragment
-	{// DirLight
-		SShaderDirLight DL;
-		alignas(16) Material material[101];
-	};
-
-protected:
-	static SShaderDirLight ShaderDL;
-
-private:
-	static void StartFrame();
-	static void StartShadowFrameViewport(glm::mat4& lmat);
-
-	
-	static void EndLife();
-
-	
-	static void createDescriptorSet0(VkBuffer buffer, VkBuffer shadeowBuffer);
-	static void createDescriptorSet1();
-
-
-	static void Init(VkRenderPass renderPass, VkRenderPass ShadowRenderPass, VkCommandPool commandPool_);
-	
-
-	static void CreatePipeline();
-	static void CreateShadowPipline();
-
-	static QFAVKPipeline* Pipeline;
-	static QFAVKPipeline* ShadowPipline;
-
-
-
-	static VkCommandPool commandPool;
-	static VkRenderPass RenderPass;
-	static  VkRenderPass ShadowRenderPass;
-
-
-	static  VkDescriptorPool descriptorPool;
-	static  std::vector<VkDescriptorPool> descriptorPoolsTwo;
-	static  std::vector<VkDescriptorPool> descriptorPoolsShadow;
-
-	struct SBufferVertex
-	{
-		VkBuffer BufferVertex;
-		VkDeviceMemory BufferVertexMemory;
-		void* BufferVertexMapped;
-	};
-
-	static  VkDescriptorSet descriptorSetShadow; 
-
-
-	struct SSet1Buffers
-	{
-		QFAVKBuffer* vertexBuffer;
-		QFAVKBuffer* fragmentBuffer;
-	};
-
-	static unsigned int SetsInUse ; // in one frame
-	
-	static const unsigned int DescriptorSets1Amount = 100;
-	static const unsigned int DescriptorSets0Amount = 10; // for viewport set
-
-	static std::vector<SSet1Buffers> Set1Buffers;
-
-	static std::vector<VkDescriptorSet> ShadowDescriptorSets;
-
-
-	static unsigned int MaxMeshId;
-	static std::vector<QMeshBaseComponent*> MeshIdList;
-	SPushConstantPickId PickId;
-	// call only if Mf != nullptr
-	void Render(VkCommandBuffer commandBuffer, bool shadow, FVector cameraPosition);
-protected:
-
-	static glm::mat4 LightMatrix;
-
-	QFAMeshData* Mf;
-
-	struct UBOVertex
-	{
-		alignas(64) glm::mat4 projection;// put in start mesh render		
-		alignas(64) glm::mat4 cameraR;
-		alignas(64) glm::mat4 directionLightMatrix;
-	};
-
-
-
-	struct UBOShadowVertex
-	{
-		alignas(64) glm::mat4 depthMVP;
-	};
-
-
-
-	static void StartFrameViewpoet(glm::mat4& viewPortProjection, glm::mat3& cameraRotationMatrix,  glm::mat4& directionLightMatrix, int viewportIndex);
-
 };

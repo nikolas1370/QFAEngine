@@ -22,7 +22,14 @@ class QFAEXPORT QObject
 	// index in QFAClassInfo::ObjectListInside
 	size_t CompileIndex;	
     bool CreateInGameCode = false;
+#endif // QFAEDITORONLY
+protected:
 
+	std::u32string Name;
+
+private:
+
+#if QFA_EDITOR_ONLY
     QObject(bool createInGameCode)
     {
         CreateInGameCode = createInGameCode;        
@@ -37,17 +44,8 @@ class QFAEXPORT QObject
     };
 #endif // QFAEDITORONLY
 
-    
-protected:
-
-	std::u32string Name;
-
-
-
 public:
 	QObject();
-
-	
 
 	/*
 	* about virtual destructor

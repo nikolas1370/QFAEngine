@@ -11,7 +11,6 @@ class QFAEditorOverlord;
 class QFAShaderCompiler
 {
 	friend QFAEditorOverlord;
-	shaderc_compiler_t Compiler;
 
 	/*
 	ShaderList structure (in file)
@@ -30,18 +29,21 @@ class QFAShaderCompiler
 		size_t shaderCount = 0;
 	};
 
-	ShaderListStart DefaultList;
 	struct ShaderPath
 	{
 		std::u32string path;
 		size_t writeTime;
 	};
 
-
-	void ProcessShaders();
+	shaderc_compiler_t Compiler;
+	ShaderListStart DefaultList;
+	std::vector<QFAVKPipeline::SShaderData> ShaderData;
+	std::vector<shaderc_compilation_result_t> ShadercCompilationResult;
 
 	QFAShaderCompiler();
 	~QFAShaderCompiler();
+
+	void ProcessShaders();
 
 	void EndLife()
 	{
@@ -50,12 +52,6 @@ class QFAShaderCompiler
 
 		shaderc_compiler_release(Compiler);
 	}
-	
-	std::vector<QFAVKPipeline::SShaderData> ShaderData;
-private:
-
-
-	std::vector< shaderc_compilation_result_t> ShadercCompilationResult;
 
 	void Compile(std::u32string filePath, shaderc_shader_kind kind, int indexInList, std::vector<ShaderPath>& sp, std::filesystem::path compiledFilePath);
 };

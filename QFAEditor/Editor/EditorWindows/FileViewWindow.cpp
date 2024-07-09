@@ -98,7 +98,7 @@ void QFAEditorFileViewWindow::AddFile(size_t fileId)
 	Window->GetFocus();
 	for (size_t i = 0; i < CurentEnableFolderCount; i++)
 	{
-		if (Files[i].ef.id == fileId)
+		if (Files[i].FileId == fileId)
 		{
 			CurentViewUnit = Files[i].viewUnit;
 			CurentViewUnit->Enable(true);
@@ -108,8 +108,8 @@ void QFAEditorFileViewWindow::AddFile(size_t fileId)
 	}
 
 	SFile sfile;
-	sfile.ef = QFAEditorFileStorage::GetFile(fileId);
-	if (!sfile.ef.id)
+	sfile.FileId = QFAEditorFileStorage::GetFile(fileId).Id;
+	if (!sfile.FileId)
 		return;
 
 	if (Files.size() == CurentEnableFolderCount)
@@ -128,10 +128,11 @@ void QFAEditorFileViewWindow::AddFile(size_t fileId)
 	CurentViewUnit->Enable(true);
 }
 
+
 void QFAEditorFileViewWindow::InFocus(SFile* file)
 {
-	
-	if (file->ef.fileType == QFAContentManager::QFAFileTypes::EFTMesh)
+	QFAContentManager::QFAContentFile& cf = QFAEditorFileStorage::GetFile(file->FileId);
+	if (cf.fileType == QFAContentManager::QFAFileTypes::EFTMesh)
 	{
 		if (CurentActiveType == ECurentType::CTImage)
 			DisplayImage->SetImage(nullptr);
@@ -141,7 +142,7 @@ void QFAEditorFileViewWindow::InFocus(SFile* file)
 		Camera.SetActorRotation(0);
 		Actor.SetActorPosition(0);
 
-		Mesh.SetMesh((QFAMeshData*)file->ef.file);
+		Mesh.SetMesh((QFAMeshData*)cf.file);
 	}
 	else
 	{
@@ -152,8 +153,8 @@ void QFAEditorFileViewWindow::InFocus(SFile* file)
 		for (size_t i = 0; i < CurentEnableFolderCount; i++)
 		{
 			if (Files[i].viewUnit == CurentViewUnit)
-			{
-				DisplayImage->SetImage((QFAImage*)Files[i].ef.file);
+			{				
+				DisplayImage->SetImage((QFAImage*)QFAEditorFileStorage::GetFile(Files[i].FileId).file);
 				return;
 			}
 		}
@@ -166,8 +167,8 @@ void QFAEditorFileViewWindow::UpdateList()
 	QFAUISlot::SListSlot listSlot;
 	listSlot.marginLeft = 10;
 	for (size_t i = 0; i < CurentEnableFolderCount; i++)
-	{
-		Files[i].viewUnit->SetText(std::filesystem::path(Files[i].ef.path).filename().u32string());
+	{		
+		Files[i].viewUnit->SetText(std::filesystem::path(QFAEditorFileStorage::GetFile(Files[i].FileId).path).filename().u32string());
 		TopList->AddUnit(Files[i].viewUnit);
 		Files[i].viewUnit->SetSlot(&listSlot);
 	}

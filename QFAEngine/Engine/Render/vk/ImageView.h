@@ -1,7 +1,7 @@
 #pragma once
 #include <Tools/VulkanSuff.h>
 class QFAImage;
-class QFAVKImageView
+class QFAEXPORT QFAVKImageView
 {
 	/*
 		Image objects are not directly accessed by pipeline shaders
@@ -11,14 +11,16 @@ class QFAVKImageView
 		compatible types, and must represent a valid subset of image subresources.
 	*/
 	friend QFAImage;
-	void CreateView(QFAImage* ti, VkImageAspectFlags as);
+
 public:
 	VkImageView ImageView;
+
+private:
+	void CreateView(QFAImage* ti, VkImageAspectFlags as);
+	void UpdateView(QFAVKImageView* view);
+public:	
 	QFAVKImageView();
 	QFAVKImageView(QFAImage* ti, VkImageAspectFlags as = VK_IMAGE_ASPECT_COLOR_BIT);
 
 	~QFAVKImageView();
-	
-private:
-
 };

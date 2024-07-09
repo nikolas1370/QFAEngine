@@ -5,8 +5,7 @@
 #include <assimp/material.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
 #include <Tools/VulkanSuff.h>
-
-
+#include <EngineClassesInterface.h>
 
 class QFAModelLoader
 {   
@@ -27,7 +26,7 @@ class QFAModelLoader
     */
     static void WriteIndex(const aiScene* scene, const aiNode* node, unsigned int* meshIndexes, unsigned int& unicueIndex, unsigned int& indexCount, bool processChildren);
     static void WriteVertex(const aiScene* scene, const aiNode* node, unsigned int& verticeCound, SSVertexMaterial* meshVertex, EFileFormat fileFormat, bool processChildren);
-    static void WriteMaterial(const aiScene* scene, const aiNode* node, QFAMeshData* mesDataReal, bool processChildren);
+    static void WriteMaterial(const aiScene* scene, const aiNode* node, QFAEditorMeshData* mesDataReal, bool processChildren);
     static aiMatrix4x4 GetFiniteMatrix(const aiNode* node);
 public:
 	QFAModelLoader();
@@ -43,6 +42,7 @@ public:
 private:
     static void GetMesh(const aiScene* scene, const aiNode* node, EFileFormat fileFormat, std::vector<QFAMeshData*>& vector);
 };
+
 inline QFAModelLoader::EFileFormat QFAModelLoader::GetFileFormat(const aiScene* scene)
 {
     aiString objFormat("Wavefront Object Importer"); 
@@ -137,7 +137,7 @@ inline void QFAModelLoader::WriteVertex(const aiScene* scene, const aiNode* node
                     meshVertex[verticeCound].Normal = meshVertex[verticeCound].Normal.RotateAngleAxis(rotations.Z, FVector(0, 0, 1));
                 }
 
-                meshVertex[verticeCound].materialIndex = scene->mMeshes[meshIndex]->mMaterialIndex;
+                meshVertex[verticeCound].MaterialIndex = scene->mMeshes[meshIndex]->mMaterialIndex;
                 verticeCound++;
             }
         }
@@ -148,7 +148,7 @@ inline void QFAModelLoader::WriteVertex(const aiScene* scene, const aiNode* node
             WriteVertex(scene, node->mChildren[i],  verticeCound, meshVertex, fileFormat, processChildren);
 }
 
-inline void QFAModelLoader::WriteMaterial(const aiScene* scene, const aiNode* node, QFAMeshData* mesDataReal, bool processChildren)
+inline void QFAModelLoader::WriteMaterial(const aiScene* scene, const aiNode* node, QFAEditorMeshData* mesDataReal, bool processChildren)
 {
     aiColor3D color(0.f, 0.f, 0.f);
     for (size_t i = 0; i < node->mNumMeshes; i++)
@@ -219,7 +219,7 @@ QFAMeshData* QFAModelLoader::LoadModel(const std::string& pFile)
     for (size_t i = 0; i < scene->mRootNode->mNumChildren; i++)
         CalculateIndex(scene, scene->mRootNode->mChildren[i], allIndexCound, verticeCound, true);
 
-    QFAMeshData* mesDataReal = new QFAMeshData(verticeCound, allIndexCound, scene->mNumMaterials, 0);
+    QFAMeshData* mesDataReal = QFAMeshData::CreateMeshData(verticeCound, allIndexCound, scene->mNumMaterials, 0);
     SSVertexMaterial* meshVertex = mesDataReal->GetFrameData();
     unsigned int* meshIndexes = mesDataReal->GetIndexData();
     allIndexCound = 0;
@@ -232,7 +232,7 @@ QFAMeshData* QFAModelLoader::LoadModel(const std::string& pFile)
         WriteVertex(scene, scene->mRootNode->mChildren[i], verticeCound, meshVertex, fileFormat, true);
 
     for (size_t i = 0; i < scene->mRootNode->mNumChildren; i++)
-        WriteMaterial(scene, scene->mRootNode->mChildren[i], mesDataReal, true);
+        WriteMaterial(scene, scene->mRootNode->mChildren[i], (QFAEditorMeshData*)mesDataReal, true);
     
     importer.FreeScene();
     return mesDataReal;
@@ -275,7 +275,7 @@ void QFAModelLoader::GetMesh(const aiScene* scene, const aiNode* node, EFileForm
 
         CalculateIndex(scene, node->mChildren[i], allIndexCound, verticeCound, false);
 
-        QFAMeshData* mesDataReal = new QFAMeshData(verticeCound, allIndexCound, scene->mNumMaterials, 0);
+        QFAMeshData* mesDataReal = QFAMeshData::CreateMeshData(verticeCound, allIndexCound, scene->mNumMaterials, 0);
         SSVertexMaterial* meshVertex = mesDataReal->GetFrameData();
         unsigned int* meshIndexes = mesDataReal->GetIndexData();        
         allIndexCound = 0;
@@ -283,7 +283,7 @@ void QFAModelLoader::GetMesh(const aiScene* scene, const aiNode* node, EFileForm
         
         WriteIndex(scene, node->mChildren[i], meshIndexes, unicueIndex, allIndexCound, false);
         WriteVertex(scene, node->mChildren[i], verticeCound, meshVertex, fileFormat, false);
-        WriteMaterial(scene, node->mChildren[i], mesDataReal, false);
+        WriteMaterial(scene, node->mChildren[i], (QFAEditorMeshData*)mesDataReal, false);
         vector.push_back(mesDataReal);
 
         for (size_t j = 0; j < node->mChildren[i]->mNumChildren; j++)

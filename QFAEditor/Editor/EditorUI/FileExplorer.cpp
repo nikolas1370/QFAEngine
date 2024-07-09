@@ -115,7 +115,6 @@ void QFAUIEditorFileExplorer::CreateMiddle()
 
 	SelectGrid->SelectEvent.DobleClick = ([this](QFAUIParent* unit)
 		{
-			std::cout << "DobleClick\n";
 			for (size_t i = 0; i < FolderUnitList.size(); i++)
 			{
 				if (FolderUnitList[i] == unit)

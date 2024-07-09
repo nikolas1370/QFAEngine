@@ -5,6 +5,12 @@ class QFAWindow;
 class QFAEXPORT QFAVKShadowFrameBuffer
 {
 	friend QFAWindow;
+
+	QFAImage* depthImageQFA;
+	VkImageView depthImageView;
+	static const int shadowResolution = 2000;
+	VkFramebuffer Framebuffer;
+
 public:
 	QFAVKShadowFrameBuffer(VkCommandPool commandPool, VkRenderPass renderPass);
 	~QFAVKShadowFrameBuffer();
@@ -13,11 +19,4 @@ public:
 	{
 		return shadowResolution;
 	}
-private:
-
-	QFAImage* depthImageQFA;
-	VkImageView depthImageView;
-
-	static const int shadowResolution = 2000;
-	VkFramebuffer Framebuffer;
 };

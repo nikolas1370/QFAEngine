@@ -14,8 +14,4 @@ public:
 	~ACameraActor();
 
 	void ActivateCamera(QFAViewport* viewport = nullptr);
-
-	
-private:
-
 };

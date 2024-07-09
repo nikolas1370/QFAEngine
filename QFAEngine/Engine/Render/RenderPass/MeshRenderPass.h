@@ -4,12 +4,10 @@
 class QFAEXPORT QFAVKMeshRenderPass
 {
 public:
+	VkRenderPass renderPass = nullptr;
+
 	QFAVKMeshRenderPass();
 	~QFAVKMeshRenderPass();
 
-	void CreateRenderPass(bool Clear, VkFormat imageFormat);
-
-	VkRenderPass renderPass = nullptr;
-private:
-
+	void CreateRenderPass(bool Clear, VkFormat imageFormat);	
 };

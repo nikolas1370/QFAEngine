@@ -32,11 +32,7 @@ public:
 	}
 	QCameraComponent(float fov, float viewDistance);
 
-
-
-
 	void UpdateModelMatrix() override;
-
 	
 	/* 
 	
@@ -47,8 +43,6 @@ public:
 	virtual FVector GetForwardVector() const final;
 	virtual FVector GetRightVector() const final;
 	virtual FVector GetUpVector() const final;
-	/**/
-
 
 	void SetFov(float fov);
 	void SetViewDistance(float viewDistance);
@@ -57,7 +51,5 @@ public:
 	{
 		return IsActive;
 	}
-private:
-
 };
 

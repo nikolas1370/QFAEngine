@@ -10,15 +10,7 @@ class QFAEXPORT QFAUITextInput : public QFAParentHiddenChild
 	friend QFAUIScroll;
 	friend QFAText;
 
-	static const int MaxTextCount = 256;
-	QFAText *Text;
-	char32_t Texts[MaxTextCount];
-	QFAText::PrepareData pd[MaxTextCount];
 
-	static char convertStr[21];
-
-	float  ValidFLoat = 0.0f;
-	int  ValidInt = 0;
 public:
 	enum ENumberType
 	{
@@ -26,11 +18,52 @@ public:
 		Int,
 		Float
 	};
-private:
-	ENumberType NumberType;
-public:
-	
 
+private:
+	static const int MaxTextCount = 256;
+protected:
+	// pen blink
+	const float MaxPenTime = 0.5f; // static
+
+private:
+	static char convertStr[21];
+	QFAText* Text;
+	char32_t Texts[MaxTextCount];
+	QFAText::PrepareData pd[MaxTextCount];
+	
+	float  ValidFLoat = 0.0f;
+	int  ValidInt = 0;
+	ENumberType NumberType;
+
+protected:
+	std::function<void(QFAUITextInput*)> OutFocusFun;
+	
+	float PenTime = 0.0f;
+
+	void MySlotChange(QFAUIUnit* unit) override {};
+
+	void ChangeSize(unsigned int w, unsigned int h) override;
+	void ChangePosition(int x, int y) override;
+	float UpdateInnerHeight() override;
+	float UpdateInnerWidth() override;
+
+	void InInputfocus(unsigned int cursorX, unsigned int cursorY);
+	void OutInputfocus();
+	void AddChar(unsigned int charCode);
+	void RemoveChar();
+
+
+
+	void PenLeft();
+	void PenRight();
+
+	void UpdateUnitOffset(bool removeChar = false);
+
+	void NewFrame(float delta);
+
+	void ChildInnerChange(QFAUIUnit* child) override;
+
+public:
 	QFAUITextInput(ENumberType numberT = ENumberType::None);
 	~QFAUITextInput();
 
@@ -57,36 +90,6 @@ public:
 	void SetValue(float value);
 	void SetValue(int value);
 	void SetValue(std::u32string value);
-	
+
 	void SetOutFocusFun(std::function<void(QFAUITextInput*)> fun);
-protected:
-	std::function<void(QFAUITextInput*)> OutFocusFun;
-
-	void MySlotChange(QFAUIUnit* unit) override {};
-
-	void ChangeSize(unsigned int w, unsigned int h) override;
-	void ChangePosition(int x, int y) override;
-	float UpdateInnerHeight() override;
-	float UpdateInnerWidth() override;
-
-	void InInputfocus(unsigned int cursorX, unsigned int cursorY);
-	void OutInputfocus();
-	void AddChar(unsigned int charCode);
-	void RemoveChar();
-
-
-
-	void PenLeft();
-	void PenRight();
-
-	void UpdateUnitOffset(bool removeChar = false);
-
-	void NewFrame(float delta);
-
-	// pen blink
-	const float MaxPenTime = 0.5f; // static
-	float PenTime = 0.0f;
-
-	void ChildInnerChange(QFAUIUnit* child) override;
-
 };

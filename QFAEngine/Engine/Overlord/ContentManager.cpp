@@ -1,12 +1,15 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "ContentManager.h"
 #include <Render/Image.h>
 #include <filesystem>
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
+#include <Render/UI/UIImage.h>
 #include <stb_image.h>
+#include <Tools/String.h>
+
+const unsigned short MeshFileVersion = 1;
+const unsigned short ImageFileVersion = 1;
 std::vector<void*> QFAContentManager::Stbi_image; // <stbi_uc*>
-size_t QFAContentManager::FileId; 
-size_t QFAContentManager::FolderId;
 std::vector<QFAContentManager::QFAContentFile> QFAContentManager::Files;
 std::vector<QFAContentManager::QFAContentFolder> QFAContentManager::Folders;
 std::vector<QFAFileSystem::FolderUnit> QFAContentManager::FolderContents; 
@@ -20,79 +23,99 @@ void QFAContentManager::LoadContent(std::u32string contentFolderPath, std::u32st
 		stopExecute("Content folder not exist or not folder");
 
 	QFAContentFolder mainFolder;
+	Folders.push_back(mainFolder);		// zero id(index)
+	Files.push_back(QFAContentFile{});	// zero id(index)
+	
 	mainFolder.path = contentFolderPath;
-	mainFolder.id = ++FolderId;
+	mainFolder.Id = Folders.size();
 	Folders.push_back(mainFolder);
 
 	for (size_t i = 0; i < Folders.size(); i++)
-	{
-		FolderContents.clear();
 		LoadFilesInfolder(i, textForDisplay, ifTextChange);
-	}
 }
 
 void QFAContentManager::LoadFilesInfolder(size_t folderIndex, std::u32string& textForDisplay, bool& ifTextChange)
 {
+	FolderContents.clear();
 	QFAFileSystem::GetFolderContents(Folders[folderIndex].path, FolderContents);
 	for (size_t i = 0; i < FolderContents.size(); i++)
 	{
 		if (FolderContents[i].IsFolder)
 		{
 			QFAContentFolder sfolder;
-			sfolder.id = ++FolderId;
+			sfolder.Id = Folders.size();
 			sfolder.path = FolderContents[i].path;
 			Folders.push_back(sfolder);
-
-			QFAFileSystem::FolderUnit fu;
-			fu.id = sfolder.id;
-			fu.IsFolder = true;
-			fu.path = sfolder.path;
-			fu.name = std::filesystem::path(sfolder.path).filename().u32string();
-			Folders[folderIndex].folderUnits.push_back(fu);
+			Folders[folderIndex].folderUnits.push_back(EditorFolderUnit{ sfolder.Id , true });
 		}
 		else if (std::filesystem::path(FolderContents[i].name).extension() == U".qfa")
 		{
 			QFAContentFile sfile;
 			ifTextChange = true;
-			textForDisplay = FolderContents[i].path;
-			LoadFile(FolderContents[i].path, sfile);
-			if (sfile.id > 0)
+			textForDisplay = FolderContents[i].path;			
+			if (LoadFile(FolderContents[i].path, sfile))
 			{
+				sfile.Id = Files.size();
 				Files.push_back(sfile);
-				QFAFileSystem::FolderUnit fu;
-				fu.id = sfile.id;
-				fu.IsFolder = false;
-				fu.name = std::filesystem::path(sfile.path).filename().u32string();
-				fu.path = sfile.path;
-				Folders[folderIndex].folderUnits.push_back(fu);
+				Folders[folderIndex].folderUnits.push_back(EditorFolderUnit{ sfile.Id , false});
 			}
 		}
 	}
 }
 
-void QFAContentManager::LoadFile(std::u32string qfaFilePAth, QFAContentFile& sfile)
+QFAContentManager::QFAContentFile QFAContentManager::WriteMesh(std::u32string filePath, QFAMeshData* mesh)
+{
+	QFAContentFile cf;		
+	QFAFileOnDisk fd(QFAFileTypes::EFTMesh, MeshFileVersion);
+
+	QFAFileSystem::WriteFile(filePath, &fd, sizeof(fd));
+
+	QFAMeshData::SMeshInfo mi = mesh->GetMeshInfo();
+	QFAFile writeFile;
+	QFAFileSystem::OpenFile(filePath, &writeFile, false);
+	QFAFileSystem::AppendFile(&writeFile, &mi, sizeof(mi));
+
+	QFAFileSystem::AppendFile(&writeFile, mesh->GetFrameData(), mi.AmountData);
+	QFAFileSystem::CloseFile(&writeFile);
+
+	cf.fileType = QFAFileTypes::EFTMesh;
+	cf.file = mesh;
+	cf.path = filePath;
+	return cf;
+}
+
+QFAContentManager::QFAContentFile QFAContentManager::WriteImage(std::u32string filePath, QFAImage* image)
+{
+	QFAContentFile cf;
+	QFAFileOnDisk fd(QFAFileTypes::EFTImage, ImageFileVersion);
+	
+	QFAFileSystem::WriteFile(filePath, &fd, sizeof(fd));
+
+	QFAFile writeFile;
+	QFAFileSystem::OpenFile(filePath, &writeFile, false);
+	QFAFileSystem::AppendFile(&writeFile, image->File->GetData(), image->File->GetFileSize());
+	QFAFileSystem::CloseFile(&writeFile);
+	
+	cf.fileType = QFAFileTypes::EFTImage;
+	cf.file = image;
+	cf.path = filePath;
+	return cf;
+}
+
+bool QFAContentManager::LoadFile(std::u32string qfaFilePAth, QFAContentFile& sfile)
 {
 	sfile.path = qfaFilePAth;
 	QFAFile* file = new QFAFile;
-	sfile.file = file;
 	if (QFAFileSystem::LoadFile(qfaFilePAth, file))
-	{
-		sfile.id = 0;
-		return;
-	}
-
+		return false;
+	
 	QFAFileOnDisk* eFile = (QFAFileOnDisk*)file->GetData();
-	sfile.id = ++FileId;
 	if (eFile->type == QFAFileTypes::EFTImage)
 	{
 		int texWidth, texHeight, texChannels;
 		stbi_uc* pixels = stbi_load_from_memory(((const unsigned char*)eFile + sizeof(*eFile)), (int)file->GetDataSize() - sizeof(*eFile), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 		if (!pixels)
-		{
-			--FileId;
-			sfile.id = 0;
-			return;
-		}
+			return false;
 
 		QFAImage::SImageCreateInfo ici;
 		ici.Width = texWidth;
@@ -106,119 +129,98 @@ void QFAContentManager::LoadFile(std::u32string qfaFilePAth, QFAContentFile& sfi
 
 		sfile.fileType = QFAFileTypes::EFTImage;
 		sfile.file = image;
+		delete file;
 	}
 	else if (eFile->type == QFAFileTypes::EFTMesh)
-	{
+	{ // mesh data not need delete here, in ~QFAMeshData delete file
 		QFAMeshData* meshData = new QFAMeshData(
 			(QFAMeshData::SMeshInfo*)((char*)eFile + sizeof(*eFile)),
-			((char*)eFile + sizeof(*eFile) + sizeof(QFAMeshData::SMeshInfo))
-		);
+			((char*)eFile + sizeof(*eFile) + sizeof(QFAMeshData::SMeshInfo)), file);
 
 		sfile.fileType = QFAFileTypes::EFTMesh;
 		sfile.file = meshData;
 	}
 	else
-	{
-		--FileId;
-		sfile.id = 0;
-	}
+		return false;
+
+	return true;
 }
 
-QFAContentManager::QFAContentFile QFAContentManager::GetFile(size_t fileId) 
+QFAContentManager::QFAContentFile& QFAContentManager::GetFile(size_t fileId) 
 {
-	// write binary search std::binary_search
-	for (size_t i = 0; i < Files.size(); i++)
-	{
-		if (Files[i].id == fileId)
-		{
-			QFAContentFile ef;
-			ef.id = Files[i].id;
-			ef.path = Files[i].path;
-			ef.fileType = Files[i].fileType;
-			ef.file = Files[i].file;
-			return ef;
-		}
-	}
-
+	if(fileId < Files.size())
+		return Files[fileId];
+		
+	stopExecute("");
 	QFAContentFile ef;
-	ef.id = 0;
+	ef.Id = 0;
 	return ef;
 }
 
-QFAContentManager::QFAContentFolder QFAContentManager::GetFolder(size_t folderId)
-{
-	// write binary search std::binary_search
+std::u32string QFAContentManager::GetFolderPath(size_t folderId)
+{	
 	for (size_t i = 0; i < Folders.size(); i++)
-		if (Folders[i].id == folderId)
-			return Folders[i];
-
-	QFAContentFolder cf;
-	cf.id = 0;
-	return QFAContentFolder();
+		if (Folders[i].Id == folderId)
+			return Folders[i].path;
+	
+	return std::u32string();
 }
-
 
 void QFAContentManager::GetFolderContents(size_t folderId, std::vector<QFAFileSystem::FolderUnit>& folderContents)
 {
-	// write binary search std::binary_search
-	for (size_t i = 0; i < Folders.size(); i++)
-	{
-		if (Folders[i].id == folderId)
-		{
-			for (size_t j = 0; j < Folders[i].folderUnits.size(); j++)
-			{// first add folder
-				if (Folders[i].folderUnits[j].IsFolder)
-				{
-					for (size_t k = 0; k < Folders.size(); k++)
-					{
-						if (Folders[i].folderUnits[j].id == Folders[k].id)
-						{
-							folderContents.push_back(Folders[i].folderUnits[j]);
-							break;
-						}
-					}
-				}
-			}
-
-			for (size_t j = 0; j < Folders[i].folderUnits.size(); j++)
-			{ // second add files
-				if (!Folders[i].folderUnits[j].IsFolder)
-				{
-					for (size_t k = 0; k < Files.size(); k++)
-					{
-						if (Folders[i].folderUnits[j].id == Files[k].id)
-						{
-							folderContents.push_back(Folders[i].folderUnits[j]);
-							break;
-						}
-					}
-				}
-			}
-
-			return;
+	QFAContentFolder& Folder = Folders[folderId];
+	QFAFileSystem::FolderUnit fc;
+	for (size_t i = 0; i < Folder.folderUnits.size(); i++)
+	{		
+		fc.id = Folder.folderUnits[i].Id;
+		if (Folder.folderUnits[i].IsFolder)
+		{			
+			fc.IsFolder = true;
+			fc.name = std::filesystem::path(Folders[fc.id].path).filename().u32string();
+			fc.path = Folders[fc.id].path;						
 		}
+		else
+		{
+			fc.IsFolder = false;
+			fc.name = std::filesystem::path(Files[fc.id].path).filename().u32string();
+			fc.path = Files[fc.id].path;
+		}
+
+		folderContents.push_back(fc);
 	}
 }
 
-void QFAContentManager::AddFile(size_t folderId, QFAContentFile& contentFile)
+void QFAContentManager::AddFile(size_t folderId, std::u32string filePath, QFAFileTypes fyleType, void* file)
 {
-	contentFile.id = ++FileId;
-	Files.push_back(contentFile);
+	QFAContentFile contentFile;
+	if (fyleType == QFAFileTypes::EFTImage)
+		contentFile = WriteImage(filePath, (QFAImage*)file);
+	else if (fyleType == QFAFileTypes::EFTMesh)
+		contentFile = WriteMesh(filePath, (QFAMeshData*)file);
 
-	QFAFileSystem::FolderUnit fu;
-	fu.id = contentFile.id;
-	fu.IsFolder = false;
-	fu.name = std::filesystem::path(contentFile.path).filename().u32string();
-	fu.path = contentFile.path;
-	// write binary search std::binary_search
-	for (size_t i = 0; i < Folders.size(); i++)
-	{
-		if (Folders[i].id == folderId)
+	for (size_t i = 0; i < Folders[folderId].folderUnits.size(); i++)
+	{		
+		if (Files[Folders[folderId].folderUnits[i].Id].path == filePath)
 		{
-			Folders[i].folderUnits.push_back(fu);
+			QFAContentFile& confile = Files[Folders[folderId].folderUnits[i].Id];
+			if (fyleType == QFAFileTypes::EFTImage)
+			{
+				((QFAImage*)confile.file)->UpdateImage((QFAImage*)file);
+				confile.file = file;
+			}
+			else if (fyleType == QFAFileTypes::EFTMesh)
+			{
+				((QFAMeshData*)confile.file)->UpdateMeshData((QFAMeshData*)file);
+				confile.file = file;
+			}
+
 			return;
 		}
 	}
+
+	contentFile.Id = Files.size();
+	Files.push_back(contentFile);
+	Folders[folderId].folderUnits.push_back(EditorFolderUnit{ contentFile.Id, false });
 }
 
 void QFAContentManager::AddStbImage(void* image)
@@ -236,15 +238,15 @@ delete files
 		stbi_image_free(Stbi_image[i]);
 }
 
-QFAMeshData* QFAContentManager::GetMesh(std::u32string path) 
+void* QFAContentManager::GetFileForUser(std::u32string path, QFAFileTypes ft)
 {
 	std::filesystem::path meshPath(path);
 	for (size_t i = 0; i < Files.size(); i++)
 	{
 		if (std::filesystem::path(Files[i].path) == path) // "Content/SomeQFAFile.qfa" == "Content\SomeQFAFile.qfa"
 		{
-			if (Files[i].fileType == QFAFileTypes::EFTMesh)
-				return (QFAMeshData*)Files[i].file;
+			if (Files[i].fileType == ft)
+				return Files[i].file;
 
 			return nullptr;
 		}

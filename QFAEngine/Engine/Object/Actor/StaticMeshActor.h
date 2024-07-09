@@ -9,6 +9,4 @@ public:
 	~AStaticMeshActor();
 
 	void SetMesh(QFAMeshData* md);
-private:
-
 };

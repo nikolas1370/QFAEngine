@@ -6,10 +6,8 @@ class QActor;
 class QFAOverlord;
 class QFAViewport;
 class QSceneComponent;
-class QFAEditorMainWindow;
-
-
-
+class QFAWindow;
+class QFALevel;
 class QFAEXPORT QWorld : public QObject
 {
 
@@ -17,29 +15,16 @@ class QFAEXPORT QWorld : public QObject
 	friend QActor;// for QActor::ReplaceMe
 #endif 
 	
-
 	friend QFAOverlord;
-	friend QFAEditorMainWindow;
-	
-public:
-
-
-private:
-	
-	
-
-
 	friend QActor;
 	friend QFAViewport;
+	friend QFAWindow;
+	friend QFALevel;
+
+protected:
 	QDirectionLight DirectionLight;
-
 	static QFAArray<QWorld*> Worlds;
-	
-	
-
 	bool IsActive = true;
-	static void ProcessTicks();
-	static void ProcessSceneComponentTick(QSceneComponent* component);
 
 	/*
 		if Enable == false tick provces in EditorActor
@@ -47,13 +32,15 @@ private:
 	*/
 	QActor* EditorActor = nullptr;
 	bool Enable = true;
-public:
-	
-
 	QFAArray<QActor*> Actors;
 
-	/*--*/
-
+	static void ProcessTicks();
+	static void ProcessSceneComponentTick(QSceneComponent* component);
+#if QFA_EDITOR_ONLY
+	void SetEditorActor(QActor* actor);
+#endif 
+	
+public:
 
 	QWorld();
 	~QWorld();
@@ -65,7 +52,6 @@ public:
 	{
 		return &DirectionLight;
 	}
-
 	
 	inline bool GetEnable()
 	{
@@ -76,8 +62,4 @@ public:
 	{
 		Enable = enable;
 	}
-
-
-private:
-	void SetEditorActor(QActor* actor);
 };

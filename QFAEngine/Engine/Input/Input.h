@@ -156,98 +156,124 @@ class QFAWindow;
 */
 class QFAEXPORT QFAInput
 {
-	friend QFAWindow; // remove and see
+	friend QFAWindow; 
+	friend QFAOverlord;
+	friend QFAInputAxis1D;
+	friend QFAInputAxis2D;
+	friend QFAInputAxis3D;
+
 	struct SKeyFunction
 	{		
-		std::function<void(EKey::Key)> fun;
-		EKey::Key key;
-
-		std::string id;
+		std::function<void(EKey::Key)> Fun;
+		EKey::Key Key;
+		std::string Id;
 	};
 
 	struct SPressedAnyKey
 	{
-		std::function<void(EKey::Key)> fun;
-		bool active = false;
+		std::function<void(EKey::Key)> Fun;
+		bool Active = false;
 	};
 
 	struct SWheelAxis
 	{
-		std::function<void(float)> fun;
-		bool active = false;
+		std::function<void(float)> Fun;
+		bool Active = false;
 	};
 
 	struct SMouseMove
 	{
-		std::function<void(FVector2D)> fun;
-		bool active = false;
+		std::function<void(FVector2D)> Fun;
+		bool Active = false;
 	};
-	
-
 	
 	struct SKeyHold
 	{
-		std::function<void(EKey::Key)> fun;
-		EKey::Key key;
-
-		std::string id;
+		std::function<void(EKey::Key)> Fun;
+		EKey::Key Key;
+		std::string Id;
 		float HoldTime;
-		float timeButtonPressed = 0.0f;
-		bool pressed = false;
+		float TimeButtonPressed = 0.0f;
+		bool Pressed = false;
 	};
 
 	struct SKeyAxis1D
 	{		
-		EKey::Key key;
-
-		std::string id;
+		EKey::Key Key;
+		std::string Id;
 		float AxisValue;
-		bool pressed = false;				
+		bool Pressed = false;				
 	};
 
 	struct SAxis1D
 	{	
-		std::string id;
-		std::function<void(float)> fun;
+		std::string Id;
+		std::function<void(float)> Fun;
 		QFAArray<SKeyAxis1D> Keys;
 	};
 
 	struct SKeyAxis2D
 	{
-		EKey::Key key;
-
-		std::string id;
+		EKey::Key Key;
+		std::string Id;
 		FVector2D AxisValue;
-		bool pressed = false;
+		bool Pressed = false;
 	};
 
 	struct SAxis2D
 	{
-		std::string id;
-		std::function<void(FVector2D)> fun;
+		std::string Id;
+		std::function<void(FVector2D)> Fun;
 		QFAArray<SKeyAxis2D> Keys;
 	};
 
 	struct SKeyAxis3D
 	{
-		EKey::Key key;
+		EKey::Key Key;
 
-		std::string id;
+		std::string Id;
 		FVector AxisValue;
-		bool pressed = false;
+		bool Pressed = false;
 	};
 
 	struct SAxis3D
 	{
-		std::string id;
-		std::function<void(FVector)> fun;
+		std::string Id;
+		std::function<void(FVector)> Fun;
 		QFAArray<SKeyAxis3D> Keys;
 	};
 
-	friend QFAOverlord;
-	friend QFAInputAxis1D;
-	friend QFAInputAxis2D;
-	friend QFAInputAxis3D;
+	struct Sinput
+	{
+		QFAWindow* Window;
+		QFAInput* Input;
+		QFAInput* operator->() const
+		{
+			return Input;
+		}
+	};
+
+	static std::vector<QFAWindow*> WindowList;
+	static QFAArray<Sinput> Inputs;
+	static FVector2D LastMousePosition;
+
+	GLFWwindow* Window;
+	GLFWwindow* GlfWindow;
+	
+	bool InputValid = true;
+
+	QFAArray<SKeyFunction> KeyPressList;
+	QFAArray<SKeyFunction> KeyReleaseList;
+	QFAArray<SKeyHold> KeyHoldList;
+	QFAArray<SAxis1D> AxisList;
+	QFAArray<SAxis2D> Axis2DList;
+	QFAArray<SAxis3D> Axis3DList;
+	bool BlockInput = false;
+
+	SPressedAnyKey Any;
+	SWheelAxis WheelAxis;
+	SMouseMove MouseMove;
+	SMouseMove MouseMoveAxis;	
 
 	/*
 		GLFW_REPEAT not match with count frame in game
@@ -275,35 +301,24 @@ class QFAEXPORT QFAInput
 	*/
 	static void WindowClosed(QFAWindow* window);
 	
-	struct Sinput 
-	{
-		QFAWindow* window;
-		QFAInput *input;
-		QFAInput* operator->() const
-		{
-			return input;
-		}
-	};
+	/*
+	fun be call every frame even when button not push
+*/
+	static void AddKeyToAxis1D(QFAInput* input, std::string axisId, EKey::Key key, float axisValue, std::string keyId);
+	static void RemoveKeyFromAxis1D(QFAInput* input, std::string axisId, std::string keyId);
 
-	static std::vector<QFAWindow*> WindowList;
-	GLFWwindow* Window;
-	GLFWwindow* GlfWindow;		
-	static QFAArray<Sinput> Inputs;
-	bool InputValid = true;
-	
-	QFAArray<SKeyFunction> KeyPressList;
-	QFAArray<SKeyFunction> KeyReleaseList;
-	QFAArray<SKeyHold> KeyHoldList;
-	QFAArray<SAxis1D> AxisList;
-	QFAArray<SAxis2D> Axis2DList;
-	QFAArray<SAxis3D> Axis3DList;
-	bool BlockInput = false;
+	/*
+		fun be call every frame even when button not push
+	*/
+	static void AddKeyToAxis2D(QFAInput* input, std::string axisId, EKey::Key key, FVector2D axisValue, std::string keyId);
+	static void RemoveKeyFromAxis2D(QFAInput* input, std::string axisId, std::string keyId);
 
-	SPressedAnyKey Any;
-	SWheelAxis WheelAxis;
-	SMouseMove MouseMove;
-	SMouseMove MouseMoveAxis;
-	static FVector2D LastMousePosition;
+	/*
+		fun be call every frame even when button not push
+	*/
+	static void AddKeyToAxis3D(QFAInput* input, std::string axisId, EKey::Key key, FVector axisValue, std::string keyId);
+	static void RemoveKeyFromAxis3D(QFAInput* input, std::string axisId, std::string keyId);
+
 public:
 	/*
 		input attach to main window
@@ -385,24 +400,6 @@ public:
 	{
 		return this && InputValid;
 	}
-private:
-	/*
-		fun be call every frame even when button not push
-	*/
-	static void AddKeyToAxis1D(QFAInput* input, std::string axisId, EKey::Key key, float axisValue, std::string keyId);
-	static void RemoveKeyFromAxis1D(QFAInput* input, std::string axisId, std::string keyId);
-
-	/*
-		fun be call every frame even when button not push
-	*/
-	static void AddKeyToAxis2D(QFAInput* input, std::string axisId, EKey::Key key, FVector2D axisValue, std::string keyId);
-	static void RemoveKeyFromAxis2D(QFAInput* input, std::string axisId, std::string keyId);
-
-	/*
-		fun be call every frame even when button not push
-	*/
-	static void AddKeyToAxis3D(QFAInput* input, std::string axisId, EKey::Key key, FVector axisValue, std::string keyId);
-	static void RemoveKeyFromAxis3D(QFAInput* input, std::string axisId, std::string keyId);
 };
 
 
@@ -468,12 +465,9 @@ public:
 		Id = id;
 		Input = input;
 	}
-	
-
 	// if id exis Ekey::key be changed
 	inline void AddKey(EKey::Key key, FVector axisValue, std::string id)
-	{
-		
+	{		
 		QFAInput::AddKeyToAxis3D(Input,  Id, key, axisValue, id);
 	}
 

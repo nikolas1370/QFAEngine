@@ -3,6 +3,29 @@
 
 class QFAEXPORT QFAUIList : public QFAUIParentMultipleUnit
 {
+public:
+	enum EListType
+	{
+		LTVertical,
+		LTHorizon,
+		/* right now work only for text */
+		LTHorizonInner, // instead UnitWidth use childUnit.innerWidth
+		LTVerticalInner // instead UnitHeight use childUnit.innerHeight
+	};
+
+private:
+	EListType ListType = EListType::LTVertical;
+	unsigned int UnitHeight = 50;
+	unsigned int UnitWidth = 150;
+
+protected:
+	bool StretchLastUnit = false;
+
+private:
+	void CalculateChildren();
+	void ChildInnerChange(QFAUIUnit* child) override;
+	void UnitWasRemoved() override;
+
 protected:
 	void NewUnit(QFAUIUnit* unit) override;
 	void MySlotChange(QFAUIUnit* unit) override;
@@ -14,17 +37,8 @@ protected:
 	float UpdateInnerWidth() override;
 	
 	// if true last unit be have height or width like free space in list
-	bool StretchLastUnit = false;
-public:
-	enum EListType
-	{
-		LTVertical, 
-		LTHorizon,
-		/* right now work only for text */
-		LTHorizonInner, // instead UnitWidth use childUnit.innerWidth
-		LTVerticalInner // instead UnitHeight use childUnit.innerHeight
-	};
 
+public:
 	QFAUIList();
 	~QFAUIList();
 
@@ -44,15 +58,4 @@ public:
 	{
 		StretchLastUnit = enable;
 	}
-private:
-	unsigned int UnitHeight = 50;
-	unsigned int UnitWidth = 150;
-
-	EListType ListType = EListType::LTVertical;
-
-	void CalculateChildren();
-
-	void ChildInnerChange(QFAUIUnit* child) override;
-
-	void UnitWasRemoved() override;
 };

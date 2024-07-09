@@ -62,8 +62,6 @@ public:
         return TVector<T> { X / V, Y / V, Z / V };
     }
 
-    
-
     TVector<T> operator*(const TVector<T>& V) const
     {
         return TVector<T>(X * V.X, Y * V.Y, Z * V.Z);
@@ -81,9 +79,6 @@ public:
         Z = V.Z;
     }
     
-
-
-
     void operator+=(T V)
     {
         X += V;
@@ -140,13 +135,11 @@ public:
     
     template<typename T>
     friend std::ostream& operator <<(std::ostream& os, const TVector<T>& c);
-
     
     TVector();
 	TVector(T InF);
 	TVector(T X, T Y, T Z);
     TVector(const glm::vec3 &lo);
-
 
     /*
     * Axis must be length 1
@@ -223,16 +216,9 @@ std::ostream& operator<<(std::ostream& os, const TVector<T>& c)
     return os << "X=" << c.X << ", Y=" << c.Y << ", Z=" << c.Z;
 }
 
-
-
 template<typename T> const TVector<T> TVector<T>::ForwardVector(1, 0, 0);
-//template<typename T> const TVector<T> TVector<T>::BackwardVector(-1, 0, 0);
 template<typename T> const TVector<T> TVector<T>::RightVector(0, 1, 0);
-//template<typename T> const TVector<T> TVector<T>::LeftVector(0, -1, 0);
 template<typename T> const TVector<T> TVector<T>::UpVector(0, 0, 1);
-//template<typename T> const TVector<T> TVector<T>::DownVector(0, 0, -1);
-//template<typename T> const TVector<T> TVector<T>::ZeroVector(0, 0, 0);
-
 
 template<typename T>
 TVector<T>::TVector() 
@@ -259,8 +245,6 @@ inline TVector<T>::TVector(const glm::vec3& lo)
 {
 
 }
-
-
 
 template<typename T>
 inline TVector<T> TVector<T>::RotateAngleAxis(const T AngleDeg, const TVector<T>& Axis) const
@@ -314,4 +298,3 @@ inline TVector<T> TVector<T>::Normalize() const
 
     return TVector<T>{X / len, Y / len, Z / len};
 }
-

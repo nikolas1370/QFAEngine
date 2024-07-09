@@ -16,7 +16,6 @@ typedef struct FT_LibraryRec_* FT_Library;
 typedef struct FT_FaceRec_* FT_Face;
 /* ------ */
 
-
 class QFAViewport;
 class QFAOverlord;
 
@@ -107,7 +106,6 @@ class QFAEXPORT QFAText : public QFAUIRenderUnit
     };
     struct PrepareData
     {
-
         unsigned int symbolIndex;
         // row( row at screen) where be symbol
         unsigned int row;
@@ -122,7 +120,92 @@ class QFAEXPORT QFAText : public QFAUIRenderUnit
         QFAVKImageView* view;
     };
 
-    QFAColorF Color = QFAColor(255).GetColorF();
+    struct UniformBufferTextParam
+    {
+        alignas(16) FVector textColor;
+        int outline;
+        FVector outlineColor;
+        float opacity;
+        UniformOverflow overflow;
+        int pen = 0;
+    };
+
+    struct UniformBufferTextParamVertex
+    {
+        float offset;
+        float offsetX;
+    };
+
+protected:
+    struct SText
+    {
+        std::u32string text;
+        char32_t* pText = nullptr; // need for textInput
+        size_t pTextSize = 0; // if pTextSize == 0 use std::u32string text
+        size_t maxSize;  // set in textInput
+        bool penEnable = false;
+        bool inputFocus = false; // if input have focus for text input
+        bool CanSeePen = false;
+        // symbol index when pan stay
+        unsigned int pen = 0; // carriage
+
+        SText() {}
+        SText(std::u32string& string)
+        {
+            text = string;
+        }
+
+        inline size_t size()
+        {
+            return pTextSize == 0 ? text.size() : pTextSize;
+        }
+
+        inline char32_t operator[](size_t index) const
+        {
+            return pTextSize == 0 ? text[index] : pText[index];
+        }
+    };
+    /*
+        store list symbol with metadata( struct PrepareData ) for second render step
+        and for calculate pen
+
+        for all non textinput text use one block memory
+        each textinput have own metadata block memory
+    */
+    struct STextMetadata
+    {// QFAArray<PrepareData> SymbolsForRender_;
+        friend QFAText;
+        bool onlyText = true;
+        size_t count = 0;
+        PrepareData* inputData = nullptr;
+        inline size_t size()
+        {
+            return count;
+        }
+
+        inline PrepareData& operator[](size_t index) const
+        {
+            return onlyText ? SymbolsForRender_[index] : inputData[index];
+        }
+
+        void Add(PrepareData pd)
+        {
+            if (onlyText)
+                SymbolsForRender_.Add(pd);
+            else
+                inputData[count] = pd;
+
+            count++;
+        }
+
+        void Clear()
+        {
+            count = 0;
+            if (onlyText)
+                SymbolsForRender_.Clear();
+        }
+    };
+
 public:
     enum EOverflowWrap
     {
@@ -139,10 +222,168 @@ public:
         TARight
     };
 
+    class QFAStringConventor
+    {
 
+    public:
+        static std::u32string ToU32String(const char* str)
+        {
+            if (!str)
+                return std::u32string();
+
+            std::u32string string;
+            size_t strL = strlen(str);
+            string.resize(strL);
+            for (size_t i = 0; i < strL; i++)
+                string[i] = (char32_t)str[i];
+
+            return string;
+        }
+    };
+
+    struct SFont
+    {
+        friend QFAText;
+        std::u32string familyName;
+        std::u32string styleName;
+        FT_Face face;
+        QFAArray<Symbol> Symbols;
+        std::u32string GetFamilyName()
+        {
+            return familyName;
+        }
+
+        std::u32string GetStyleName()
+        {
+            return styleName;
+        }
+
+        /*
+
+        return false if in newFamilyName exist font with styleName
+        */
+        bool SetFamilyName(std::u32string newFamilyName);
+
+        /*
+
+        return false if font with newStyleName in familyName exist
+        */
+        bool SetStyleName(std::u32string newStyleName);
+
+        SFont(){}
+    };
+
+    enum ELoadFontResult
+    {
+        LRFSucceed = 0,
+        LRFLoadError = 1,
+        LRFFontStyleNameExist = 2,
+        LRFFontFamilyNameNotFound = 3,// if ib font FamilyName == null, not return if in familyName not void
+        LRFFontStyleNameNotFound = 4,// if ib font StyleName == null, not return if in styleName not void
+        LRFPathWasNull = 5,
+        LRFFreeTypeError = 6, //Could not init FreeType Library
+        LRFEngineNotInit = 7 // if LoadFont called before Engine was initialized and first window be created
+    };
+
+private:
+    static std::vector<SFont*> Fonts;
+    static QFAVKVertexBuffer* PenVertexBufer;
+    static const unsigned int FontLoadCharHeight = 50;// 'j' == 47/50(Height) after render 62
+    static const unsigned int AtlasRowHeight = (unsigned int)((float)FontLoadCharHeight * 1.4f); // after call FT_Render_Glyph Glyph becomes bigger
+    static const int OffsetBetweenGlyph = 2;//  
+    static FT_Library ft;
+
+    static const unsigned int defaultTextSize = 30;
+    static const int GlyphAtlasHeight = 1000;
+    static const int GlyphAtlasWidth = 1000;
+    static QFAVKPipeline* Pipeline;
+    static QFAVKPipeline* OldPipeline;
+    static unsigned int CountGlyphInBuffer;
+
+    /*
+        use for all non textinput text
+        textinput have own exemplar
+    */
+    static GlyphShader* GlyphInfoData;
+    // not use directly get from TextMetadata
+    static QFAArray<PrepareData> SymbolsForRender_; // remove '_'
+    static VkCommandPool commandPool;
+    static QFAVKTextureSampler* AtlassSampler;
+    static VkRenderPass RenderPass;
+    static unsigned int MaxAttlas;
+    static std::vector<SGlyphAtlas> GlyphAtlasList;
+    static VkDescriptorSet CurentDescriptorSet;
+    static VkDescriptorSet CurentDescriptorSetProject;
+    static std::vector<QFAVKBuffer*> textParamBuffers;
+    static std::vector<QFAVKBuffer*> textVertexParamBuffers;
+    static std::vector<VkDescriptorImageInfo> DII;
+    static const int AmountSetsInTextParamPool = 20;
+    static int maxTextInframe;
+    static int NumberTextInFrame;
+    static const int MinNumberTextInFrame = 1;// zero index reserv fore pen set
+
+protected:
+    static VkDescriptorSet PenDescriptorSet;
+
+private:
+    QFAColorF Color = QFAColor(255).GetColorF();
+    size_t CurentFontIndex;// store font for this text
+    bool TextChange;
+    QFAVKVertexBuffer* vertexBufer;
+    EOverflowWrap OverflowWrap = EOverflowWrap::OWWord;
+    ETextAlign TextAlign = ETextAlign::TALeft;
+    unsigned int FontHeight = -1;// curent text height
+    unsigned int CountGlyphInGUP = 100;
+    unsigned int CountSymbolForRender = 0; // replase to TextMetadata.size()
+
+protected:
+    SText Text;
+    STextMetadata TextMetadata;
+    unsigned int countTextRow = 0;
+    UniformBufferTextParam TextUniformParam;
+
+public:
     QFAColorF OutlineColor ; // need create set function for OutlineColor
     bool Outline = false;
 
+private:
+    static void AddGlyph(FT_ULong symbol, SFont* font);
+    static void StartFrame();
+    static void Init(VkRenderPass renderPass, VkCommandPool commandPool);
+    static void EndLife();
+    static void CreatePipeline();
+    static void RecreatePipeline();
+    static void CreateTextProjectionSet(VkBuffer buffer);
+    static void CreateTextParameterSet();
+    static void RecreateTextParameterSet(VkBuffer buffer, VkBuffer VertexBuffer);
+
+public:
+    static ELoadFontResult LoadFont(const char* fontPath, SFont*& outFont, std::u32string* familyName = nullptr, std::u32string* styleName = nullptr);
+    static SFont* GetFont(size_t index);
+    static SFont* GetFont(std::u32string familyName, std::u32string styleName);
+    static size_t GetFontCount();
+
+private:
+
+    void SetSizeParent(unsigned int w, unsigned int h) override;
+    void SetPositionParent(int x, int y) override;
+    void updateUniformBuffer();
+    void PrepareSymbolsToGpu();
+    void ProcessText();
+    void Render(VkCommandBuffer comandebuffer) override;
+    void RenderPen(VkCommandBuffer comandebuffer);
+    QFAVKPipeline* GetPipeline() override;
+
+protected:
+    /*
+        in position not include position_x and position_y
+    */
+    void GetPenPosition(QFAText::GlyphShader& gs);
+    void WritePenInfo();
+    // set pointer to input text
+    void SetInputText(char32_t* pText, size_t pTextSize, size_t maxSize);
+
+public:
     QFAText();
     ~QFAText();
 
@@ -184,304 +425,42 @@ public:
     void Destroy();
     void SetOverflowWrap(EOverflowWrap wrap);
     void SetTextAlign(ETextAlign aligh);
-
-
-
-    class QFAStringConventor
-    {
-
-    public:
-        static std::u32string ToU32String(const char* str)
-        {
-            if (!str)
-                return std::u32string();
-
-            std::u32string string;
-            size_t strL = strlen(str);
-            string.resize(strL);
-            for (size_t i = 0; i < strL; i++)
-                string[i] = (char32_t)str[i];
-
-            return string;
-        }
-    };
-
-    
-
-    struct SFont
-    {
-        friend QFAText;
-
-        std::u32string GetFamilyName()
-        {
-            return familyName;
-        }
-
-        std::u32string GetStyleName()
-        {
-            return styleName;
-        }
-
-        /*
-        
-        return false if in newFamilyName exist font with styleName
-        */
-        bool SetFamilyName(std::u32string newFamilyName);
-
-        /*  
-        
-        return false if font with newStyleName in familyName exist
-        */
-        bool SetStyleName(std::u32string newStyleName);
-
-    private:        
-        SFont()
-        {
-
-        }
-        std::u32string familyName;
-        std::u32string styleName; 
-        FT_Face face;
-        QFAArray<Symbol> Symbols;
-    };
-    
-    enum ELoadFontResult
-    {
-        LRFSucceed = 0,
-        LRFLoadError = 1,
-        LRFFontStyleNameExist = 2,
-        LRFFontFamilyNameNotFound = 3,// if ib font FamilyName == null, not return if in familyName not void
-        LRFFontStyleNameNotFound = 4,// if ib font StyleName == null, not return if in styleName not void
-        LRFPathWasNull = 5,
-        LRFFreeTypeError = 6, //Could not init FreeType Library
-        LRFEngineNotInit = 7 // if LoadFont called before Engine was initialized and first window be created
-    };
-    
-    static ELoadFontResult LoadFont(const char* fontPath, SFont*& outFont, std::u32string* familyName = nullptr, std::u32string* styleName = nullptr);
-    static SFont* GetFont(size_t index);
-    
-
-    static SFont* GetFont(std::u32string familyName, std::u32string styleName);
-
-    static size_t GetFontCount();
-    
-
     bool SetFont(SFont* font);
-
-private:
-    static std::vector<SFont*> Fonts;
-
-    size_t CurentFontIndex;// store font for this text
-
-
-    void SetSizeParent(unsigned int w, unsigned int h) override;
-    void SetPositionParent(int x, int y) override;
-
-
-    void updateUniformBuffer();
-    void PrepareSymbolsToGpu();
-    void ProcessText();
-    static void AddGlyph(FT_ULong symbol, SFont* font);
-
-
-
-
-    void Render(VkCommandBuffer comandebuffer) override;
-    void RenderPen(VkCommandBuffer comandebuffer);
-    static void StartFrame();
-
-
-    static void Init(VkRenderPass renderPass, VkCommandPool commandPool);
-    static void EndLife();
-
-
-
-    bool TextChange;
-
-    QFAVKVertexBuffer* vertexBufer;
-    static QFAVKVertexBuffer* PenVertexBufer;
-
-    EOverflowWrap OverflowWrap = EOverflowWrap::OWWord;
-
-    ETextAlign TextAlign = ETextAlign::TALeft;
-   
-
-    unsigned int FontHeight = -1;// curent text height
-    unsigned int CountGlyphInGUP = 100;
-    unsigned int CountSymbolForRender = 0; // replase to TextMetadata.size()
-    
-
-
-    static const unsigned int FontLoadCharHeight = 50;// 'j' == 47/50(Height) after render 62
-    static const unsigned int AtlasRowHeight = (unsigned int)((float)FontLoadCharHeight * 1.4f); // after call FT_Render_Glyph Glyph becomes bigger
-    static const int OffsetBetweenGlyph = 2;//  
-    static FT_Library ft;
-
-    static const unsigned int defaultTextSize = 30;
-    static const int GlyphAtlasHeight = 1000;
-    static const int GlyphAtlasWidth = 1000;
-
-
-
-    static QFAVKPipeline* Pipeline;
-    static QFAVKPipeline* OldPipeline;
-
-
-    static unsigned int CountGlyphInBuffer;
-
-    /*
-        use for all non textinput text
-        textinput have own exemplar
-    */
-    static GlyphShader* GlyphInfoData;
-    
-    // not use directly get from TextMetadata
-    static QFAArray<PrepareData> SymbolsForRender_; // remove '_'
-
-    static VkCommandPool commandPool;
-
-
-    static QFAVKTextureSampler* AtlassSampler;
-
-
-    static VkRenderPass RenderPass;
-
-    static unsigned int MaxAttlas;
-    static std::vector<SGlyphAtlas> GlyphAtlasList;
-
-    
-    static VkDescriptorSet CurentDescriptorSet;
-    static VkDescriptorSet CurentDescriptorSetProject;
-
-    static std::vector<QFAVKBuffer*> textParamBuffers;
-    static std::vector<QFAVKBuffer*> textVertexParamBuffers;
-    
-    static std::vector<VkDescriptorImageInfo> DII;
-
-    
-    static void CreatePipeline();
-    static void RecreatePipeline();
-
-
-    static void CreateTextProjectionSet(VkBuffer buffer);
-
-    static void CreateTextParameterSet();
-    static void RecreateTextParameterSet(VkBuffer buffer, VkBuffer VertexBuffer);
-
-    static const int AmountSetsInTextParamPool = 20;
-    static int maxTextInframe;
-
-    static int NumberTextInFrame;
-    static const int MinNumberTextInFrame = 1;// zero index reserv fore pen set
-    struct UniformBufferTextParam
-    {
-        alignas(16) FVector textColor;
-        int outline;
-        FVector outlineColor;
-        float opacity;
-        UniformOverflow overflow;
-        int pen = 0;
-    };
-
-    struct UniformBufferTextParamVertex
-    {
-        float offset; 
-        float offsetX;
-    };
-
-    QFAVKPipeline* GetPipeline() override;
-    
-
-protected:
-    struct SText
-    {
-        SText() {}
-        SText(std::u32string& string)
-        {
-            text = string;
-        }
-
-        std::u32string text;
-        char32_t* pText = nullptr; // need for textInput
-        size_t pTextSize = 0; // if pTextSize == 0 use std::u32string text
-        size_t maxSize;  // set in textInput
-        bool penEnable = false;
-        bool inputFocus = false; // if input have focus for text input
-        bool CanSeePen = false;
-        // symbol index when pan stay
-        unsigned int pen = 0; // carriage
-        inline size_t size()
-        {
-            return pTextSize == 0 ? text.size() : pTextSize;
-        }
-
-        inline char32_t operator[](size_t index) const
-        {
-            return pTextSize == 0 ? text[index] : pText[index];
-        }
-    };
-    SText Text;
-
-    /*    
-        store list symbol with metadata( struct PrepareData ) for second render step
-        and for calculate pen
-
-        for all non textinput text use one block memory
-        each textinput have own metadata block memory
-    */
-    struct STextMetadata
-    {// QFAArray<PrepareData> SymbolsForRender_;
-        friend QFAText;
-        bool onlyText = true; 
-        size_t count = 0;
-        PrepareData* inputData = nullptr;
-        inline size_t size()
-        {
-            return count;
-        }
-
-        inline PrepareData& operator[](size_t index) const
-        {
-            return onlyText ? SymbolsForRender_[index] : inputData[index];
-        }
-
-        void Add(PrepareData pd)
-        {
-            if (onlyText)
-                SymbolsForRender_.Add(pd);
-            else
-                inputData[count] = pd;
-
-            count++;
-        }
-
-        void Clear()
-        {
-            count = 0;
-            if (onlyText)
-                SymbolsForRender_.Clear();
-        }
-    };
-    
-    STextMetadata TextMetadata;
-    unsigned int countTextRow = 0;
-
-    /*
-        in position not include position_x and position_y
-    */
-    void GetPenPosition(QFAText::GlyphShader& gs);
-    void WritePenInfo();
-
-    UniformBufferTextParam TextUniformParam;
-    static VkDescriptorSet PenDescriptorSet;
-    // set pointer to input text
-    void SetInputText(char32_t* pText, size_t pTextSize, size_t maxSize);
 };
 
 
 class QFATextBackground : public QFAParentHiddenChild
 {
     QFAText Text;
+
+
+protected:
+    void ChangeSize(unsigned int w, unsigned int h)
+    {
+        Width = w;
+        Height = h;
+        SetChildSize(&Text, w, h);
+    }
+
+    virtual void ChangePosition(int x, int y)
+    {
+        Position_x = x;
+        Position_y = y;
+        SetChildPosition(&Text, x, y);
+    }
+
+    virtual float UpdateInnerHeight()
+    {
+        return Height;
+    }
+    virtual float UpdateInnerWidth()
+    {
+        return Width;
+    }
+
+    // child call if his slot change
+    virtual void MySlotChange(QFAUIUnit* unit) {}
+
 public:
     QFATextBackground()
     {
@@ -537,32 +516,6 @@ public:
         Text.SetFont(font);
     }
 
-protected:
-    void ChangeSize(unsigned int w, unsigned int h)
-    {
-        Width = w;
-        Height = h;
-        SetChildSize(&Text, w, h);
-    }
-
-    virtual void ChangePosition(int x, int y) 
-    {
-        Position_x = x;
-        Position_y = y;
-        SetChildPosition(&Text, x, y);
-    }
-
-    virtual float UpdateInnerHeight() 
-    {
-        return Height;
-    }
-    virtual float UpdateInnerWidth() 
-    {
-        return Width;
-    }
-
-    // child call if his slot change
-    virtual void MySlotChange(QFAUIUnit* unit){}
 private:
 
 };

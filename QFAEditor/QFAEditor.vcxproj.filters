@@ -101,7 +101,7 @@
     <ClInclude Include="Editor\epch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Editor\EditorMeshData.h">
+    <ClInclude Include="Editor\EngineClassesInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

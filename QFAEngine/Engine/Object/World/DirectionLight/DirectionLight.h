@@ -10,6 +10,7 @@ class QFAEXPORT QDirectionLight : public QObject
 {
 	friend QFAViewport;
 	friend QFAWindow;
+
 	unsigned int depthMapFBO;
 	//const unsigned int SHADOW_WIDTH = 1000, SHADOW_HEIGHT = 1000;
 	unsigned int depthMap;
@@ -24,14 +25,8 @@ class QFAEXPORT QDirectionLight : public QObject
 
 	
 public:
-
-
-
-
 	QDirectionLight();
 	~QDirectionLight();
-
-
 
 	glm::mat4 GetLightMatrix();
 
@@ -40,16 +35,9 @@ public:
 		return CastShadows;
 	}
 
-
-
 	inline void SetCastShadow(bool castShadow)
 	{
 		CastShadows = castShadow;
 	}
-
-
-
-private:
-
 };
 

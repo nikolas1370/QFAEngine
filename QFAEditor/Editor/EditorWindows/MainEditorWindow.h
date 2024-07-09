@@ -3,6 +3,12 @@
 #include <EditorFileStorage.h>
 #include <GameCodeTool/GameCodeCompiler.h>
 #include <Input/Input.h>
+#include <Object/World/World.h>
+
+class QEditorWorld : public QWorld
+{
+	friend QFAEditorMainWindow;
+};
 
 class QFAWindow;
 class QFAUIEditorFileExplorer;
@@ -14,8 +20,22 @@ class QFAEditorGameViewportInfo;
 class QFAEditorMainWindow
 {
 	friend QFAEditorOverlord;
+	enum EFocus
+	{
+		FNone,
+		FActorList,
+		FFileExplorer
+	};
+
+	const int LoaderWidth = 500;
+	const int LoaderHeight = 200;
+	const int WorkWidth = 1000;
+	const int WorkHeight = 600;
 
 	static QFAEditorMainWindow* MainWindow;
+	static QFAText::SFont* Icomonfont;
+	
+
 	QFAWindow* Window;
 	QFAViewport* GameViewport;
 
@@ -25,66 +45,52 @@ class QFAEditorMainWindow
 	QFAText* LoadText;
 	QFAText* LoadText_2;
 
-	/**/
 	QFAUICanvas* WindowCanvas = nullptr;
 	QFAUIEditorFileExplorer* FileExplorer;
 
 	QFAEditorGameViewportInfo* GameViewportInfo;
 
-	static QFAText::SFont* Icomonfont;
-	static const int LoaderWidth = 500;
-	static const int LoaderHeight = 200;
-	static const int WorkWidth = 1000;
-	static const int WorkHeight = 600;
-
 	QFAInput* Input;
+	EFocus Focus = EFocus::FNone;
+	bool IsCppClass; // if false it's file(QFAEditorFileTypes) 
+	size_t CurentDragId = 0;// file or cpp class
+	FVector2D PickObjectLastCursorPos;
 
+	bool LeftCTRLPress = false;
+	bool CompileStarted = false;
 	/*
 		Worlds[0] == EditorWorld
 		Worlds[1] == GameWorld
 	*/
 	QWorld* Worlds = nullptr; // allocated with new[]
 	ACameraEditor* EditorCamera = nullptr;
-public:
-	QFAEditorMainWindow();
-	~QFAEditorMainWindow();
 
+	static void StartDragAndDrop(bool isCppClass, size_t id);
+	static void EndDragAndDrop(EKey::Key key);
+	static void GameCompileCallback(QFAGameCode::CompileStatus status);
+
+public:
 	inline static QFAText::SFont* GetIcomonFont()
 	{
 		return Icomonfont;
 	}
-private:
-	enum EFocus
-	{
-		FNone,
-		FActorList,
-		FFileExplorer
-	};
 
-	EFocus Focus = EFocus::FNone;
+private:
 
 	void CreateLoadUI();
 	void ChangeLoadInfo(std::u32string text, std::u32string text_2);
 	// call in QFAEditorOverlord if initialization after start editor done
 	void CreateMainEdirorUI();
 
-	bool IsCppClass; // if false it's file(QFAEditorFileTypes) 
-	size_t CurentDragId = 0;// file or cpp class
-	static void StartDragAndDrop(bool isCppClass, size_t id);
-	static void EndDragAndDrop(EKey::Key key);
 	void PickMesh(EKey::Key key);
 	void PrepareGameViewport();
 	void PrepareCallback();
 
 	void AddActorToWorlds(QActor* actor, std::u32string actorName, size_t id, bool isCppClass);
 
-	QFAInput* input;
-	FVector2D PickObjectLastCursorPos;
-
-	bool LeftCTRLPress = false;
-	static void GameCompileCallback(QFAGameCode::CompileStatus status);
-	bool CompileStarted = false;
-
 	void CreateInput();
-};
 
+public:
+	QFAEditorMainWindow();
+	~QFAEditorMainWindow();
+};

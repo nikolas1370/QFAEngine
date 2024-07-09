@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "MeshBase.h"
 #include <Object/Actor/Actor.h>
 #include <Render/vk/LogicalDevice.h>
@@ -6,6 +6,7 @@
 #include <Render/Buffer/VKBuffer.h>
 #include <Render/Pipline/Pipline.h>
 #include <Render/Buffer/VertexBuffer.h>
+#include <Tools/File/FileSystem.h>
 
 QMeshBaseComponent::SShaderDirLight QMeshBaseComponent::ShaderDL;
 
@@ -14,15 +15,15 @@ glm::mat4 QMeshBaseComponent::LightMatrix;
 QFAVKPipeline* QMeshBaseComponent::Pipeline;
 QFAVKPipeline* QMeshBaseComponent::ShadowPipline;
 
-VkCommandPool QMeshBaseComponent::commandPool;
+VkCommandPool QMeshBaseComponent::CommandPool;
 VkRenderPass QMeshBaseComponent::RenderPass;
 VkRenderPass QMeshBaseComponent::ShadowRenderPass;
 
-VkDescriptorPool QMeshBaseComponent::descriptorPool;
-std::vector<VkDescriptorPool> QMeshBaseComponent::descriptorPoolsTwo;
-std::vector<VkDescriptorPool> QMeshBaseComponent::descriptorPoolsShadow;
+VkDescriptorPool QMeshBaseComponent::DescriptorPool;
+std::vector<VkDescriptorPool> QMeshBaseComponent::DescriptorPoolsTwo;
+std::vector<VkDescriptorPool> QMeshBaseComponent::DescriptorPoolsShadow;
 
-VkDescriptorSet QMeshBaseComponent::descriptorSetShadow;
+VkDescriptorSet QMeshBaseComponent::DescriptorSetShadow;
 
 std::vector<QMeshBaseComponent::SSet1Buffers> QMeshBaseComponent::Set1Buffers;
 unsigned int QMeshBaseComponent::SetsInUse = 0;
@@ -45,21 +46,37 @@ QFAMeshData::QFAMeshData(int vertexCount, int indexCount, int materialCount, int
 	FramesData = (char*)malloc(Mi.AmountData);
 }
 
-QFAMeshData::QFAMeshData(SMeshInfo* mi, void* framesData)
+QFAMeshData::QFAMeshData(SMeshInfo* mi, void* framesData, QFAFile* file)
 {
 	FramesData = (char*)framesData;
 	Mi = *mi;
+	QFile = file;
 }
 
 void QFAMeshData::CreateVertextIndexBuffer()
 {
 	if (VertexBufer)
 		return;
-	
-	
+
 	VertexBufer = new QFAVKVertexBuffer(GetVerticesSize(), GetVerticesDate(), QFAWindow::commandPool);
 	IndexBuffer = new QFAVKIndexBuffer(GetIndexCount() * sizeof(int), GetIndexData(), QFAWindow::commandPool);
 }
+
+#if QFA_EDITOR_ONLY
+void QFAMeshData::UpdateMeshData(QFAMeshData* meshData)
+{
+	if (!meshData)
+		return;
+
+	for (size_t i = 0; i < Meshs.size(); i++)
+	{
+		Meshs[i]->Mf = nullptr;
+		Meshs[i]->SetMesh(meshData);
+	}
+	
+	delete this;
+}
+#endif
 
 SSVertexMaterial* QFAMeshData::GetFrameData() const
 {
@@ -80,8 +97,13 @@ QMeshBaseComponent::QMeshBaseComponent()
 
 QMeshBaseComponent::~QMeshBaseComponent()
 {
-	if(Materials)
+	if (Materials)
+	{
+#if QFA_EDITOR_ONLY
+		Mf->DeleteMeFromList(this);
+#endif
 		delete[] Materials;
+	}
 		/*	
 		delete all
 	*/
@@ -92,7 +114,7 @@ void* QMeshBaseComponent::GetModelBuffer()
 	if (SetsInUse >= Set1Buffers.size())
 		createDescriptorSet1();
 
-	return Set1Buffers[SetsInUse].vertexBuffer->MapData;
+	return Set1Buffers[SetsInUse].VertexBuffer->MapData;
 }
 
 void* QMeshBaseComponent::GetFragmentBuffer()
@@ -100,7 +122,7 @@ void* QMeshBaseComponent::GetFragmentBuffer()
 	if (SetsInUse >= Set1Buffers.size())
 		createDescriptorSet1();
 
-	return Set1Buffers[SetsInUse].fragmentBuffer->MapData;
+	return Set1Buffers[SetsInUse].FragmentBuffer->MapData;
 }
 
 void* QMeshBaseComponent::GetShadowBuffer()
@@ -149,11 +171,9 @@ void QMeshBaseComponent::StartShadowFrameViewport(glm::mat4& lmat)
 void QMeshBaseComponent::Render(VkCommandBuffer commandBuffer, bool shadow, FVector cameraPosition)
 {
 	UpdateBuffers(commandBuffer, 0, shadow, cameraPosition);
-
-
 	VkDeviceSize offsets[] = { 0 };
 	if (shadow)
-	{		
+	{				
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &Mf->VertexBufer->GpuSideBuffer->Buffer, offsets);
 		vkCmdBindIndexBuffer(commandBuffer, Mf->IndexBuffer->GpuSideBuffer->Buffer, 0, VK_INDEX_TYPE_UINT32);
 		auto nextSet = GetShadowNextSet();
@@ -165,7 +185,7 @@ void QMeshBaseComponent::Render(VkCommandBuffer commandBuffer, bool shadow, FVec
 	else
 	{
 		MeshIdList.push_back(this);
-		PickId.meshId = ++MaxMeshId;
+		PickId.MeshId = ++MaxMeshId;
 		vkCmdPushConstants(commandBuffer, Pipeline->GetPipelineLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PickId), &PickId);
 
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &Mf->VertexBufer->GpuSideBuffer->Buffer, offsets);
@@ -185,11 +205,11 @@ void QMeshBaseComponent::StartFrameViewpoet(glm::mat4& viewPortProjection, glm::
 {
 	QMeshBaseComponent::UBOVertex ubo{};
 
-	ubo.projection = viewPortProjection;
+	ubo.Projection = viewPortProjection;
 	
-	ubo.cameraR = glm::mat4(cameraRotationMatrix);
-	ubo.directionLightMatrix = directionLightMatrix;	
-	memcpy(QFAWindow::ViewportStuff[QFAWindow::ViewportProcess].buffers.worldProjectionBuffer->MapData, &ubo.projection, sizeof(ubo) );
+	ubo.CameraR = glm::mat4(cameraRotationMatrix);
+	ubo.DirectionLightMatrix = directionLightMatrix;	
+	memcpy(QFAWindow::ViewportStuff[QFAWindow::ViewportProcess].buffers.worldProjectionBuffer->MapData, &ubo.Projection, sizeof(ubo) );
 }
 
 void QMeshBaseComponent::createDescriptorSet0(VkBuffer buffer, VkBuffer shadeowBuffer)
@@ -231,18 +251,18 @@ void QMeshBaseComponent::createDescriptorSet1()
 	VkDeviceSize bufferSize = sizeof(glm::mat4);
 	VkDeviceSize bufferSizeFragment = sizeof(UBOFragment);
 	SSet1Buffers Buffers;
-	Buffers.vertexBuffer = new QFAVKBuffer(bufferSize, nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
-	Buffers.fragmentBuffer = new QFAVKBuffer(bufferSizeFragment, nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+	Buffers.VertexBuffer = new QFAVKBuffer(bufferSize, nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+	Buffers.FragmentBuffer = new QFAVKBuffer(bufferSizeFragment, nullptr, true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 	Set1Buffers.push_back(Buffers);
 
 
 	VkDescriptorBufferInfo bufferInfoVertexMatrix{};	
-	bufferInfoVertexMatrix.buffer = Set1Buffers.back().vertexBuffer->Buffer;
+	bufferInfoVertexMatrix.buffer = Set1Buffers.back().VertexBuffer->Buffer;
 	bufferInfoVertexMatrix.offset = 0;
 	bufferInfoVertexMatrix.range = bufferSize;
 
 	VkDescriptorBufferInfo bufferInfoFragment{};
-	bufferInfoFragment.buffer = Set1Buffers.back().fragmentBuffer->Buffer;
+	bufferInfoFragment.buffer = Set1Buffers.back().FragmentBuffer->Buffer;
 	bufferInfoFragment.offset = 0;
 	bufferInfoFragment.range = sizeof(UBOFragment);
 
@@ -262,7 +282,7 @@ void QMeshBaseComponent::createDescriptorSet1()
 
 void QMeshBaseComponent::Init(VkRenderPass renderPass, VkRenderPass shadowRenderPass, VkCommandPool commandPool_)
 {
-	commandPool = commandPool_;
+	CommandPool = commandPool_;
 	RenderPass = renderPass;
 	ShadowRenderPass = shadowRenderPass;
 
@@ -302,7 +322,7 @@ void QMeshBaseComponent::CreatePipeline()
 	attributeDescriptions[2].binding = 0;
 	attributeDescriptions[2].location = 2;
 	attributeDescriptions[2].format = VK_FORMAT_R32_SINT;
-	attributeDescriptions[2].offset = offsetof(SSVertexMaterial, materialIndex);
+	attributeDescriptions[2].offset = offsetof(SSVertexMaterial, MaterialIndex);
 	PipelineInfo.VertexInputInfo.VertexAttributeDescriptions = attributeDescriptions.data();
 
 

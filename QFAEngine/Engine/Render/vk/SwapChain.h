@@ -10,8 +10,6 @@ class QFAWindow;
 struct GLFWwindow;
 class QFAVKSwapChain
 {
-
-
 	friend QFAWindow;
 		
 	VkSurfaceKHR Surface;
@@ -26,23 +24,19 @@ class QFAVKSwapChain
 
 	QFAVKStruct::SwapChainSupportDetails swapChainSupport;
 	VkCommandPool commandPool;
-public:
-	
-
-	QFAVKSwapChain(GLFWwindow* window, VkSurfaceKHR surface, VkCommandPool _commandPool);
-	~QFAVKSwapChain();
-	void createFramebuffers(VkRenderPass renderPass);
+	QFAImage* depthImage;
+	VkImageView depthImageView;
 private:
 	QFAVKStruct::SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-	
-
 	void CreateImageViews();
 	VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
-	
-	void createDepthResources();	
-	QFAImage* depthImage;
-	VkImageView depthImageView;
+	void createDepthResources();
+
+public:
+	QFAVKSwapChain(GLFWwindow* window, VkSurfaceKHR surface, VkCommandPool _commandPool);
+	~QFAVKSwapChain();
+	void createFramebuffers(VkRenderPass renderPass);
 };

@@ -14,8 +14,8 @@ class QFAEXPORT QFAViewportRoot : public QFAUIParentMultipleUnit
 
 	void NewUnit(QFAUIUnit* unit) final;
 	void MySlotChange(QFAUIUnit* unit) final;
-protected:
-	
+	float UpdateInnerHeight() override;
+	float UpdateInnerWidth() override;
 public:
 	QFAViewportRoot();
 	~QFAViewportRoot();
@@ -24,8 +24,5 @@ public:
 	{
 		return Viewport;
 	}
-private:
-	float UpdateInnerHeight() override;
-	float UpdateInnerWidth() override;
 };
 

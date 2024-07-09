@@ -6,22 +6,18 @@
 
 class QFAVKInstance
 {
-	std::vector<const char*> getRequiredExtensions();
 
 
+#ifdef _DEBUG
+	VkDebugUtilsMessengerEXT debugMessenger;
+#endif
 public:
 	VkInstance instance;
-	QFAVKInstance();
-
-
-
-
 
 #ifdef _DEBUG
 
 	static const std::vector<const char*> validationLayers;
 private:
-	VkDebugUtilsMessengerEXT debugMessenger;
 
 	bool checkValidationLayerSupport();
 	void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
@@ -34,6 +30,11 @@ private:
 	void setupDebugMessenger();
 	VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
 #endif
+private:
+	std::vector<const char*> getRequiredExtensions();
+
+public:
+	QFAVKInstance();
 };
 
 

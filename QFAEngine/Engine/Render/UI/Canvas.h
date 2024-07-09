@@ -4,14 +4,9 @@
 
 class QFAEXPORT QFAUICanvas : public QFAUIParentMultipleUnit
 {
-
-
-	
-protected:
-	
+protected:	
 	void NewUnit(QFAUIUnit* unit) override;
 	void MySlotChange(QFAUIUnit* unit) override;
-
 
 	void ChangeSize(unsigned int w, unsigned int h) override;
 	void ChangePosition(int x, int y) override;
@@ -19,13 +14,8 @@ protected:
 
 	float UpdateInnerHeight() override;
 	float UpdateInnerWidth() override;
+
 public:
 	QFAUICanvas();
 	~QFAUICanvas();
-
-
-
-	
-
-private:	
 };

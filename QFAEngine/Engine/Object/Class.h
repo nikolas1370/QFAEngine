@@ -29,42 +29,49 @@ public:
         ActorComponent
     };
 
-
 protected:
+    const char* ClassName;
+    const char* ClassRawName;
+
+    static std::vector<QFAClass*> QCI;
     static int QfaClassCount;
+
     /*
         0 is reserved first id 1
         this id temporary, can change between compilations
     */
     size_t ClassId;
-    static std::vector<QFAClass*> QCI;    
-    const char* ClassName;
-    const char* ClassRawName;
-    virtual QObject* CreateObjectInside() = 0;
-    
-
-#if QFA_EDITOR_ONLY
-
-    std::vector<QObject*> ObjectList;
-    static std::vector<QObject*>& GetListObject(size_t classId);
-
-    void SetCompileIndex(QObject* object, size_t index);
-    size_t GetCompileIndex(QObject* object);
-
-#endif
-    
-    void PushNewClass();
     EBaseOn BaseOn;
 
+#if QFA_EDITOR_ONLY
+    std::vector<QObject*> ObjectList;
+
+#endif
+
+    virtual QObject* CreateObjectInside() = 0;
     static QObject* CreateObject(size_t classId);    
     static void DeleteObject(QObject* object);
     static std::vector<QFAClass*>& GetGameClassList();
-public:
 
-    static size_t GetGameClassCount(); 
+#if QFA_EDITOR_ONLY
+    static std::vector<QObject*>& GetListObject(size_t classId);
+#endif
+
+public:
+    static size_t GetGameClassCount();
     static QFAClass* GetClass(size_t classId);
     static QFAClass* GetClass(QObject* object);
     static QFAClass* GetClassByIndex(size_t index);
+
+protected:
+#if QFA_EDITOR_ONLY
+    void SetCompileIndex(QObject* object, size_t index);
+    size_t GetCompileIndex(QObject* object);
+    void PushNewClass();
+
+#endif
+
+public:
 
     const char* GetName()
     {

@@ -11,16 +11,17 @@ class QFAVKPhysicalDevice
 	static VkPhysicalDevice PhysicalDevice;	
 public:
 	static const std::vector<const char*> deviceExtensions;
-	static void Init(QFAVKInstance* instance, VkSurfaceKHR surface);
-	static inline VkPhysicalDevice GetDevice()
-	{
-		return PhysicalDevice;
-	}
 private:
 	static bool isDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface);
 	static bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 	static QFAVKStruct::SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR surface);
 
+public:
+	static void Init(QFAVKInstance* instance, VkSurfaceKHR surface);
+	static inline VkPhysicalDevice GetDevice()
+	{
+		return PhysicalDevice;
+	}
 };
 
 	

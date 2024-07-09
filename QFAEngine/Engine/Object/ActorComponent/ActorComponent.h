@@ -15,17 +15,9 @@ protected:
 	// remove and see what happens
 	bool InWorldComponent = false;
 
-
 	bool CanTick = false;
 	virtual void TickComponent(float deltaTime) {};
 public:
 	QActorComponent();
 	~QActorComponent();
-
-
-
-
-
-private:
-
 };

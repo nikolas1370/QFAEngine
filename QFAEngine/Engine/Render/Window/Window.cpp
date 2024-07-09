@@ -631,10 +631,10 @@ void QFAWindow::ShadowRender(QFAViewport* _viewport)
 	QDirectionLight* dl = world->GetDirectionDight();
 	glm::mat4 liteMat = dl->GetLightMatrix();
 	
-	QMeshBaseComponent::ShaderDL.ambient = dl->Ambient;
-	QMeshBaseComponent::ShaderDL.diffuse = dl->Diffuse;
-	QMeshBaseComponent::ShaderDL.direction = dl->Direction;
-	QMeshBaseComponent::ShaderDL.specular = dl->Specular;
+	QMeshBaseComponent::ShaderDL.Ambient = dl->Ambient;
+	QMeshBaseComponent::ShaderDL.Diffuse = dl->Diffuse;
+	QMeshBaseComponent::ShaderDL.Direction = dl->Direction;
+	QMeshBaseComponent::ShaderDL.Specular = dl->Specular;
 	
 	CurentCameraPosition = _viewport->CurentCamera->WorldPosition;
 	QMeshBaseComponent::StartShadowFrameViewport(liteMat);

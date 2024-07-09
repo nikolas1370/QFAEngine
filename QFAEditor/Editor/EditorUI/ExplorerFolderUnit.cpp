@@ -2,8 +2,8 @@
 #include "ExplorerFolderUnit.h"
 #include <Render/UI/Canvas.h>
 #include  <Render/UI/UIImage.h>
-#include <Render/Image.h>
 #include <Render/UI/Text.h>
+#include <EngineClassesInterface.h>
 
 QFAImage* QFAEditorExplorerFolderUnit::FolderImage = nullptr;
 QFAImage* QFAEditorExplorerFolderUnit::FileImage = nullptr;
@@ -18,10 +18,9 @@ QFAEditorExplorerFolderUnit::QFAEditorExplorerFolderUnit()
 
 	if (!FolderImage)
 	{
-		FolderImage = new QFAImage(U"SomeImage/folder-png-download-png-1024px-1024.png");
-		FileImage = new QFAImage(U"SomeImage/file-text-icon-1360881626.png");
+		FolderImage = QFAEditorImage::CreateImage(U"SomeImage/folder-png-download-png-1024px-1024.png");
+		FileImage = QFAEditorImage::CreateImage(U"SomeImage/file-text-icon-1360881626.png");
 	}
-
 
 	Icon = new QFAUIImage(nullptr);
 	UnitText = new QFAText;

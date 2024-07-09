@@ -45,7 +45,5 @@ public:
 
 		return bigString;
 	}
-private:
-
 };
 

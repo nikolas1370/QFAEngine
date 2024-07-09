@@ -10,7 +10,11 @@ class QFAUIActorTransform : public QFAParentHiddenChild
 {
 	friend QFAEditorGameViewportInfo;
 
+	const int InputHeight = 25;	
+
 	static QFAUIActorTransform* ActorTransform;
+
+	QActor* CurentSelectActor = nullptr;
 	QFAUICanvas* Canvas;
 	/*
 		[0, 1, 2] Position
@@ -20,24 +24,18 @@ class QFAUIActorTransform : public QFAParentHiddenChild
 	std::array<QFAUITextInput*, 9> Inputs;
 	std::array<QFAUIBackground*, 9> InputBackgrounds;
 	
-public:
-	QFAUIActorTransform();
-	~QFAUIActorTransform();
+	static void InputOut(QFAUITextInput* input);
 
-private:
 	void MySlotChange(QFAUIUnit* unit) override;
 	void ChangeSize(unsigned int w, unsigned int h) override;
-	
-	void ChangePosition(int x, int y) override;
 
+	void ChangePosition(int x, int y) override;
 
 	float UpdateInnerHeight() override;
 	float UpdateInnerWidth() override;
-
-	const int InputHeight = 25;
-
-	static void InputOut(QFAUITextInput* input);
-
-	QActor* CurentSelectActor = nullptr;
 	void SelectActor(QActor* actor);
+
+public:
+	QFAUIActorTransform();
+	~QFAUIActorTransform();
 };

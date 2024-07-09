@@ -13,7 +13,6 @@ typedef struct FT_LibraryRec_  *FT_Library;
 typedef struct FT_FaceRec_*  FT_Face;
 /* ------ */
 
-
 class QFAViewport;
 class QFAOverlord;
 class QFAWindow;
@@ -25,37 +24,11 @@ class QFAVKImageView;
 class QFAVKTextureSampler;
 
 class QFAVKPipeline;
-
 class QFAPresentImage
 {
-    
     friend QFAWindow;
-    
 
-public:
-  
-
-    QFAPresentImage(VkCommandPool _commandPool, VkRenderPass renderPass, QFAImage* image, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT);
-    ~QFAPresentImage();
-
-
-private: 
-    
-    static void EndLife();
-
-    
-
-    QFAVKVertexBuffer* vertexBufer;
-    QFAVKPipeline* Pipeline; // one QFAPresentImage one pipeline
-    static VkCommandPool commandPool;
-    static QFAVKTextureSampler* ImageSampler;
-
-
-
-    static std::array< VkDescriptorImageInfo, 1> imageInfos;
-    QFAVKImageView* view;
-
-
+private:
     struct ImageShaderVertex
     {
         float x;
@@ -64,8 +37,19 @@ private:
         float textureY;
     };
 
+    static VkCommandPool commandPool;
+    static QFAVKTextureSampler* ImageSampler;
+    static std::array< VkDescriptorImageInfo, 1> imageInfos;
+
+    QFAVKVertexBuffer* vertexBufer;
+    QFAVKPipeline* Pipeline; // one QFAPresentImage one pipeline
+    QFAVKImageView* view;
     ImageShaderVertex quad[6];
 
+    static void EndLife();
 
 
+public:
+    QFAPresentImage(VkCommandPool _commandPool, VkRenderPass renderPass, QFAImage* image, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT);
+    ~QFAPresentImage();
 };

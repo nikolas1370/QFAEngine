@@ -147,7 +147,7 @@ void QFAUITextInput::InInputfocus(unsigned int cursorX, unsigned int cursorY)
 	}
 	
 
-	QFAText::GlyphShader *gs = (QFAText::GlyphShader*)Text->vertexBufer->CpuSideBuffer->MapData;
+	QFAText::GlyphShader *gs = (QFAText::GlyphShader*)Text->vertexBufer->CpuSideBuffer->GetData();
 	int index = 0;
 	for (size_t i = 0; i < Text->Text.pTextSize; i++)
 	{

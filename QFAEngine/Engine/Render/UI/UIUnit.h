@@ -83,10 +83,6 @@ namespace QFAUISlot
 		int marginLeft = 0;
 		int marginTop = 0;
 	};
-
-
-	
-	
 }
 
 class QFAViewport;
@@ -128,48 +124,7 @@ protected:
 		float rightBottomX;
 		float rightBottomY;
 	};
-
-	// parent set size
-	virtual void SetSizeParent(unsigned int w, unsigned int h) = 0;
-	// parent set position
-	virtual void SetPositionParent(int x, int y) = 0;
-private:
-
-	QFAUISlot::SCanvasSlot l;
-
-
-
-
-	//IsRoot == true only for QFAViewportRoot
-	bool IsRoot = false;
-protected:
-	bool IsEnable = true;
-
-	bool CanBeParent = false;
-	QFAUIType::Type Type = QFAUIType::NONE;
-	QFAEditorUIType::Type EditorType = QFAEditorUIType::Type::NONE;
-
-	bool CanRender = false;
-
-	/*
-	* if true QFAViewportRoot call SetSizeParent or SetPositionParent
-			when QFAViewportRoot resize or move
-			need if Unit::CanBeParent = true
-	*/
-	bool SelfResizable = false;
-
-	int Width = 300;
-	int Height = 120;
-	int Position_x = 0;
-	int Position_y = 0;	
-	QFAUIParent* Parent = nullptr;
-
-	float Opacity = 1;
-	int ZIndex = 0;
-
-	bool UnitValid = true;
 public:
-
 	class QFAEXPORT EventFunctions
 	{
 		struct Callback
@@ -199,7 +154,7 @@ public:
 		CallbackWithUnit ForwardMouseDown;
 		CallbackWithUnit BackwardMouseDown;
 
-		EventFunctions() {};		
+		EventFunctions() {};
 	public:
 		/*
 			QFAUIUnit* unit,
@@ -210,9 +165,9 @@ public:
 			if child have focus parents also have focus
 			QFAUIUnit* unit in focus
 		*/
-		void SetInFocus(void (*fun)(QFAUIUnit*, void* ), void* userData);
-		/*		
-			if child have outfocus parents 
+		void SetInFocus(void (*fun)(QFAUIUnit*, void*), void* userData);
+		/*
+			if child have outfocus parents
 			also have outfocus only if parent
 			not have new child in focus or self in focus.
 			if parents have new child focus
@@ -223,10 +178,10 @@ public:
 		/*
 			parents also notified
 		*/
-		void SetLeftMouseDown(void (*fun)(QFAUIUnit*, void*), void* userData );
-		void SetLeftMouseUp(void (*fun)(QFAUIUnit*, void*), void* userData );
+		void SetLeftMouseDown(void (*fun)(QFAUIUnit*, void*), void* userData);
+		void SetLeftMouseUp(void (*fun)(QFAUIUnit*, void*), void* userData);
 		void SetRightMouseDown(void (*fun)(QFAUIUnit*, void*), void* userData);
-		void SetRightMouseUp(void (*fun)(QFAUIUnit*, void*), void* userData );
+		void SetRightMouseUp(void (*fun)(QFAUIUnit*, void*), void* userData);
 		void SetForwardMouseDown(void (*fun)(QFAUIUnit*, void*), void* userData);
 		void SetBackwardMouseDown(void (*fun)(QFAUIUnit*, void*), void* userData);
 
@@ -242,13 +197,112 @@ public:
 		void SetRightMouseDownUp(void (*fun)(QFAUIUnit*, void*), void* userData);
 	};
 
-	
+private:
+	QFAUISlot::SCanvasSlot l;
+	//IsRoot == true only for QFAViewportRoot
+	bool IsRoot = false;
 
+protected:
+	bool IsEnable = true;
+	bool CanBeParent = false;
+	QFAUIType::Type Type = QFAUIType::NONE;
+	QFAEditorUIType::Type EditorType = QFAEditorUIType::Type::NONE;
+
+	bool CanRender = false;
+
+	/*
+	* if true QFAViewportRoot call SetSizeParent or SetPositionParent
+			when QFAViewportRoot resize or move
+			need if Unit::CanBeParent = true
+	*/
+	bool SelfResizable = false;
+
+	int Width = 300;
+	int Height = 120;
+	int Position_x = 0;
+	int Position_y = 0;	
+	QFAUIParent* Parent = nullptr;
+
+	float Opacity = 1;
+	int ZIndex = 0;
+	bool UnitValid = true;
+	QFAUISlot::SParentSlot Slot;
+
+	/*
+		need for Scroll
+		Height inside unit
+		if innerHeight < Height, Scroll use Height
+	*/
+	unsigned int InnerHeight = 0;
+	unsigned int InnerWidth = 0;
+
+public:
+	std::string UnitName;
+	EventFunctions Events;
+
+
+protected:
+
+	// parent set size
+	virtual void SetSizeParent(unsigned int w, unsigned int h) = 0;
+	// parent set position
+	virtual void SetPositionParent(int x, int y) = 0;
+
+
+	/*
+	* call if one of parent was enable or QFAViewport camera enable.
+	* and call if parent can be rendered
+	*/
+	inline virtual void ParentEnable() {}
+	// call if one of parent was disable or QFAViewport camera disable.
+	inline virtual void ParentDisable() {}
+
+	/*
+	* call if this unit was disconect or one of parent was attach.
+	* call if parent change.
+	*/
+	inline virtual void ParentAttach() {}
+	/*
+		call if this unit was disconect or one of parent was disconect
+		if Parent == null this unit be disconect from parent
+	*/
+	inline virtual void ParentDisconect() {}
+
+
+	void ProcessParentOverflow(UniformOverflow& param, QFAUIParent* parent);
+	float ProcessParentOpacity(float childOpacity, QFAUIParent* parent);
+
+
+	/*
+		Notify this unit and all parents of infocus event
+			call FunInFocus
+	*/
+	void NotifyInFocus();
+	/*
+		Notify this unit and all parents of outfocus event
+			call FunOutFocus
+
+		if onlyOneUnit == true Notify only this unit
+	*/
+	void NotifyOutFocus(bool onlyOneUnit);
+
+
+	void NotifyLeftMouseDown();
+	void NotifyLeftMouseUp();
+	void NotifyRightMouseDown();
+	void NotifyRightMouseUp();
+
+	void NotifyForwardMouseDown();
+	void NotifyBackwardMouseDown();
+
+	void NotifyLeftMouseDownUp();
+	void NotifyRightMouseDownUp();
+
+public:
 	bool IsValid()
 	{
 		return this && UnitValid;
 	}
-
 
 	/*
 		Position be change if parent is RootUnit
@@ -279,7 +333,6 @@ public:
 	bool IsMyParent(QFAUIParent* parent);
 	QFAWindow* GetWindow();
 
-
 	inline QFAUIParent* GetParent()
 	{
 		return Parent;
@@ -305,7 +358,6 @@ public:
 		IsEnable = enable;
 	}
 
-	/*-----*/
 	inline void Destroy()
 	{
 		if (IsValid())
@@ -314,7 +366,6 @@ public:
 			delete this;
 		}
 	}
-
 
 	inline void SetOpacity(float opacity)
 	{
@@ -331,8 +382,6 @@ public:
 	{
 		return ZIndex ;
 	}
-	
-	std::string UnitName;
 
 	/*
 		return null if viewport Root not found
@@ -340,10 +389,6 @@ public:
 		countUnit == amount parentsUnit of this unit plus one
 	*/
 	QFAViewportRoot* GetViewportRoot(unsigned int& countUnit);
-	
-	
-	EventFunctions Events;
-
 
 	inline QFAUIType::Type GetUnitType()
 	{
@@ -354,66 +399,4 @@ public:
 	{
 		return EditorType;
 	}
-protected:
-	QFAUISlot::SParentSlot Slot;
-
-	/*
-	* call if one of parent was enable or QFAViewport camera enable. 
-	* and call if parent can be rendered
-	*/
-	inline virtual void ParentEnable() {}
-	// call if one of parent was disable or QFAViewport camera disable.
-	inline virtual void ParentDisable() {}
-
-	/*
-	* call if this unit was disconect or one of parent was attach.
-	* call if parent change.
-	*/
-	inline virtual void ParentAttach() {}
-	/*
-		call if this unit was disconect or one of parent was disconect 
-		if Parent == null this unit be disconect from parent
-	*/
-	inline virtual void ParentDisconect() {}
-
-
-	void ProcessParentOverflow(UniformOverflow& param, QFAUIParent* parent);
-	float ProcessParentOpacity(float childOpacity , QFAUIParent* parent);
-	
-
-	/*
-		need for Scroll
-		Height inside unit
-		if innerHeight < Height, Scroll use Height
-	*/
-	unsigned int InnerHeight = 0;
-	unsigned int InnerWidth = 0;
-
-	
-
-	/*		
-		Notify this unit and all parents of infocus event
-			call FunInFocus
-	*/
-	void NotifyInFocus();
-	/*
-		Notify this unit and all parents of outfocus event
-			call FunOutFocus
-
-		if onlyOneUnit == true Notify only this unit
-	*/
-	void NotifyOutFocus(bool onlyOneUnit);
-
-
-	void NotifyLeftMouseDown();
-	void NotifyLeftMouseUp();
-	void NotifyRightMouseDown();
-	void NotifyRightMouseUp();
-
-	void NotifyForwardMouseDown();
-	void NotifyBackwardMouseDown();
-
-	void NotifyLeftMouseDownUp();
-	void NotifyRightMouseDownUp();
-
 };

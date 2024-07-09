@@ -10,15 +10,12 @@ public:
 
     QStaticMesh(QFAMeshData* meshData);
     
-    void SetMesh(QFAMeshData* meshData);
+    void SetMesh(QFAMeshData* meshData) override;
 
     // remove startFrameTime
     void UpdateBuffers(VkCommandBuffer commandBuffer, uint64_t startFrameTime, bool isShadow, const FVector& cameraPos) override;
 
     int GetIndexCount() override;
-
-private:
-    
 };
 
 

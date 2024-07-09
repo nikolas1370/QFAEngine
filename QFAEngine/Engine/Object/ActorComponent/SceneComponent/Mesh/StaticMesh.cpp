@@ -14,9 +14,14 @@ void QStaticMesh::SetMesh(QFAMeshData* meshData)
 		Mf = nullptr;
 		return;
 	}
-
+#if QFA_EDITOR_ONLY
+	meshData->Meshs.push_back(this);
+	if (Mf)
+		Mf->DeleteMeFromList(this);
+#endif
 	Mf = meshData;
-	Mf->CreateVertextIndexBuffer();
+	ResetMaterials();
+	Mf->CreateVertextIndexBuffer();	
 }
 
 void QStaticMesh::UpdateBuffers(VkCommandBuffer commandBuffer, uint64_t startFrameTime, bool isShadow, const FVector &cameraPos)
@@ -29,8 +34,8 @@ void QStaticMesh::UpdateBuffers(VkCommandBuffer commandBuffer, uint64_t startFra
 	{
 		QMeshBaseComponent::UBOShadowVertex ubo{};
 		
-		ubo.depthMVP = LightMatrix * ModelMatrix;
-		memcpy(GetShadowBuffer(), &ubo.depthMVP, sizeof(ubo));
+		ubo.DepthMVP = LightMatrix * ModelMatrix;
+		memcpy(GetShadowBuffer(), &ubo.DepthMVP, sizeof(ubo));
 	}
 	else
 	{

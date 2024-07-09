@@ -90,7 +90,5 @@ public:
     {
         return vector.data();
     }
-private:
-
 };
 

@@ -1,5 +1,4 @@
 #pragma once
-
 #include "ShaderCompiler/ShaderCompiler.h"
 #include <thread>
 #include <EditorFileStorage.h>
@@ -10,13 +9,13 @@ class QFAEditorOverlord
 	static QFAEditorMainWindow* MainWindow;
 	static bool IsInit;
 	static QFAEditorFileStorage Storage;
-public:
-	static void StartLife();
-private:
+
 	static bool InitializationDon;
 	static bool NewLoadText;
 	static std::u32string LoadText;
 	static std::u32string LoadText_2;
+
+	static std::thread* LoadThread;
 
 	static void Init();
 	// call from not main thread
@@ -25,5 +24,6 @@ private:
 	static void StartFrame();
 	static void EndFrame();
 
-	static std::thread* LoadThread;
+public:
+	static void StartLife();
 };

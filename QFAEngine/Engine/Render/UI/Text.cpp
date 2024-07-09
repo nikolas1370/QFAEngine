@@ -749,7 +749,7 @@ void QFAText::updateUniformBuffer()
     
     ProcessParentOverflow(TextUniformParam.overflow, Parent);
     TextUniformParam.pen = 0;
-    memcpy(textParamBuffers[NumberTextInFrame]->MapData, &TextUniformParam, sizeof(UniformBufferTextParam));
+    memcpy(textParamBuffers[NumberTextInFrame]->GetData(), &TextUniformParam, sizeof(UniformBufferTextParam));
     
     UniformBufferTextParamVertex ubtpv = { UnitScroll, UnitOffsetX };
     if (InnerWidth > Width && TextAlign == ETextAlign::TARight)
@@ -758,7 +758,7 @@ void QFAText::updateUniformBuffer()
     ubtpv.offsetX += Position_x;
     ubtpv.offset += Position_y;
 
-    memcpy(textVertexParamBuffers[NumberTextInFrame]->MapData, &ubtpv, sizeof(UniformBufferTextParamVertex));
+    memcpy(textVertexParamBuffers[NumberTextInFrame]->GetData(), &ubtpv, sizeof(UniformBufferTextParamVertex));
 }
 
 
@@ -866,7 +866,7 @@ QFAVKPipeline* QFAText::GetPipeline()
 
 void QFAText::GetPenPosition(QFAText::GlyphShader& gs)
 {
-    QFAText::GlyphShader* ownGlyphInfoData = (QFAText::GlyphShader*)vertexBufer->CpuSideBuffer->MapData;   
+    QFAText::GlyphShader* ownGlyphInfoData = (QFAText::GlyphShader*)vertexBufer->CpuSideBuffer->GetData();
     unsigned int penH = 1;
     float yOffset = FontHeight < 25 ? 1 : 0;// if  font have low size need minus 1 to gs.leftTop_1.x
     if (TextMetadata.size() == 0)

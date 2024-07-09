@@ -20,12 +20,20 @@ class QFAEXPORT QFAViewport
 	friend QFAUIUnit;
 	friend QFAEditorMainWindow;
 
-	QFAWindow* Window;
+public:
+	static const float MinMaxZIndexUI;
 
+protected:
+	/*
+		in this buffer store  QMeshBaseComponent::UBOVertex
+		use for render mesh
+	*/
+	static std::vector<QFAVKBuffer*> MeshVertexBuffers;
+
+private:
+	QFAWindow* Window;
 	glm::mat4 MatrixPerspective;
 	QCameraComponent* CurentCamera = nullptr;
-
-	
 	int X, Y;
 	int Width = 1;
 	int Height = 1;
@@ -33,21 +41,19 @@ class QFAEXPORT QFAViewport
 	float XP = 0, YP = 0;
 	float WidthP = 1;
 	float HeightP = 1;
-
 	uint64_t StartFrameTime;
-	
 	QWorld* CurentFrameWorld;
-
-
-	
-
 	glm::mat4 UIProjection;
-
-
-
-	void Settup(int windowWidth, int windowHeight);	
 	bool IsActive = true;
 	QFAViewportRoot Root;
+
+private:
+	void Settup(int windowWidth, int windowHeight);
+
+protected:
+	void WindowAddMe(QFAWindow* window);
+	void WindowRemoveMe();
+
 public:
 	QFAViewport();
 	~QFAViewport();
@@ -84,13 +90,10 @@ public:
 		Root.removeUnit(unit);
 	}
 
-	static const float MinMaxZIndexUI;
-
 	inline QFAWindow* GetWindow()
 	{
 		return Window;
 	}
-	
 	
 	QWorld* GetWorld();
 
@@ -108,17 +111,4 @@ public:
 	{
 		return FVector2D(X, Y);
 	}
-
-protected:
-
-
-
-	void WindowAddMe(QFAWindow* window);
-	void WindowRemoveMe();
-
-	/*
-		in this buffer store  QMeshBaseComponent::UBOVertex
-		use for render mesh
-	*/
-	static std::vector<QFAVKBuffer*> MeshVertexBuffers;
 };

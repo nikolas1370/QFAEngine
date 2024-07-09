@@ -21,6 +21,7 @@ void QFAVKImageView::CreateView(QFAImage* ti, VkImageAspectFlags as)
         stopExecute("failed to create texture image view!");
 }
 
+
 QFAVKImageView::QFAVKImageView()
 {
 }
@@ -46,7 +47,17 @@ QFAVKImageView::QFAVKImageView(QFAImage* ti, VkImageAspectFlags as)
 
 QFAVKImageView::~QFAVKImageView()
 {
-    vkDestroyImageView(QFAVKLogicalDevice::GetDevice(), ImageView, nullptr);
+    if(ImageView)
+        vkDestroyImageView(QFAVKLogicalDevice::GetDevice(), ImageView, nullptr);
 }
 
 
+void QFAVKImageView::UpdateView(QFAVKImageView* view)
+{
+    if (ImageView)
+        vkDestroyImageView(QFAVKLogicalDevice::GetDevice(), ImageView, nullptr);
+
+    ImageView = view->ImageView;
+
+    view->ImageView = nullptr;// not need delete view, QFAVKImageView not create with new 
+}

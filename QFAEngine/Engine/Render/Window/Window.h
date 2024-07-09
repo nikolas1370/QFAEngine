@@ -4,7 +4,6 @@
 #include <string>
 #include <Math/Vector.h>
 
-
 #include <functional>
 struct UniformBufferObject
 {// more detail https://fvcaputo.github.io/2019/02/06/memory-alignment.html
@@ -48,7 +47,6 @@ class QFAVKRenderPassDepth;
 class QFAVKInstance;
 class QFAEXPORT QFAWindow
 {
-
 	friend QFAText;; 
 	friend QFAUIImage;
 	friend QFAOverlord;
@@ -59,61 +57,6 @@ class QFAEXPORT QFAWindow
 	friend QWorld;
 	friend QFAMeshData;
 
-	static std::vector<QFAWindow*> Windows;
-	static QFAWindow* CurentProcessWindow;
-	GLFWwindow* glfWindow;
-	
-
-	int Width;
-	int Height;
-	int NewHeight;
-	int NewWidth;
-	bool WindowSizeChanched = false;
-	static QFAVKInstance* Instance;
-	VkSurfaceKHR surface;	
-	QFAVKSwapChain *SwapChain;
-
-
-	static QFAVKRenderPassSwapChain* RenderPassSwapChain;
-	static QFAVKRenderPassDepth* RenderPassOffScreen;
-	static QFAVKTextRenderPass* TextRenderPass;
-	static QFAVKTextRenderPass* TextRenderPassClear;
-
-
-
-	QFAArray<QFAViewport*> Viewports;
-
-	// call Overloed
-	static void ProcessUIEvent();
-	// use after all render and present done
-	static void CheckIfNeedResizeWindows();
-	void StartFrame();
-	
-
-	// call Overlord
-	static void RenderWindows();	
-	void RenderWindow(bool lastWindow);
-	static void PresentWindows();
-public:
-
-	 
-	
-private:
-	static int ViewportProcess;
-	// all windows use same ShadowFrameBuffer
-	static QFAVKShadowFrameBuffer* ShadowFrameBuffer;
-	static QFAVKImageView* ShadowImagesView;
-	static QFAVKTextureSampler* ShadowSampler;
-	static VkFormat depthFormat; // VK_FORMAT_D32_SFLOAT
-
-
-	void BeginCommandBuffer();
-	void EndCommandBufferAndQueueSubmit();
-	void ShadowRender(QFAViewport* viewport);
-
-	/*----*/
-
-	static VkCommandPool commandPool;
 
 	struct SViewportSemi
 	{
@@ -137,27 +80,114 @@ private:
 		VkCommandBuffer comandBuffer;
 		SViewportBuffers buffers;
 	};
+	const float shadowResolution = 2000;
 
+	static std::vector<QFAWindow*> Windows;
+	static QFAWindow* CurentProcessWindow;
+	static QFAVKInstance* Instance;
+	static QFAVKRenderPassSwapChain* RenderPassSwapChain;
+	static QFAVKRenderPassDepth* RenderPassOffScreen;
+	static QFAVKTextRenderPass* TextRenderPass;
+	static QFAVKTextRenderPass* TextRenderPassClear;
+	static int ViewportProcess;
+	// all windows use same ShadowFrameBuffer
+	static QFAVKShadowFrameBuffer* ShadowFrameBuffer;
+	static QFAVKImageView* ShadowImagesView;
+	static QFAVKTextureSampler* ShadowSampler;
+	static VkFormat depthFormat; // VK_FORMAT_D32_SFLOAT
 	/*
-		this use only for viewports in windows.
-		In process of drawing when execute RenderWindow
-	*/
+	this use only for viewports in windows.
+	In process of drawing when execute RenderWindow
+*/
 	static std::vector<SViewportStuff> ViewportStuff;
+	static VkCommandBuffer FinisCommandBuffer;
+	static VkSemaphore* NextWaitSemi;
+	static QFAImage* ShadowImage;
+	static VkCommandPool commandPool;
+
+
+	GLFWwindow* glfWindow;
+	int Width;
+	int Height;
+	int NewHeight;
+	int NewWidth;
+	bool WindowSizeChanched = false;
+	VkSurfaceKHR surface;
+	QFAVKSwapChain* SwapChain;
+
+	QFAArray<QFAViewport*> Viewports;
+	
 	VkSemaphore FinisSemaphore;
 	VkSemaphore FinisSemiOtherWindow;
 	VkSemaphore GetImageSemaphore;
-	static VkCommandBuffer FinisCommandBuffer;
-
-	void CreateViewPortStuff();
-
+	
 	bool NeedClose = false;
 	// call if window closed and delete
 	std::function<void()> ClosedFun;
+
+	std::function<void(int path_count, const char* paths[])> DropFunction;
+
+	uint32_t imageIndex; // next image in sqp shain
+	bool minimized = false;
+	bool ProcessTickIfWindowsMinimized = false;
+	QFAPresentImage* PresentImage;
+
+	// Depth bias (and slope) are used to avoid shadowing artifacts
+// Constant depth bias factor (always applied)
+	float depthBiasConstant = 3.05f; // 1.25f   2.05f
+	// Slope depth bias factor, applied depending on polygon's slope
+	float depthBiasSlope = 3.55f; // 1.75f    2.55f
+
+	// VkFormat
+	QFAVKMeshFrameBuffer* frameBuffer;
+	FVector CurentCameraPosition;
+	//in start of array number bigger
+	QFAArray<QFAUIUnit*> SortUIUnits;
+	bool CursorOnWindow = false;
+	QFAUIEvent* UIEvent;
+	VkCommandBuffer CurentComandBuffer = nullptr;
+	QFAVKBuffer* PickBuffer;
+	std::function<void(QMeshBaseComponent*)> GetMeshCallback;
+
+	static void QueueSubmitPresent(std::vector<VkSemaphore>& listSemi);
+	// call after QFAWindow::CheckIfNeedResizeWindows
+	static void ProcessGetMeshId();
+	static void PresentWindows();
+	// call Overloed
+	static void ProcessUIEvent();
+	// use after all render and present done
+	static void CheckIfNeedResizeWindows();
+	// call Overlord
+	static void RenderWindows();
+
+public:
+	static QFAWindow* GetMainWindow();
+
+private:
+	void StartFrame();
+	void RenderWindow(bool lastWindow);
+	void BeginCommandBuffer();
+	void EndCommandBufferAndQueueSubmit();
+	void ShadowRender(QFAViewport* viewport);
+	void CreateViewPortStuff();
+	void createCommandPool();
+	void recreateSwapChain();
+	void DrawActors(QFAViewport* viewport, bool clear, int viewportIndex);
+	unsigned int ProcessMeshComponent(QSceneComponent* component, bool shadow);
+	void DrawUI(QFAViewport* viewport, int viewportIndex, bool clear);
+	void DrawOffscreenBuffer();
+	void recordCommandBufferTestImege();
+	void createSyncObject();
+	void createCommandBuffer();
+	void PresentFrame(VkSemaphore finishSemi);
+	void StartUIRenderViewPort(int viewportIndex);
+	void CreateShadow();
+	void SortUIs(QFAViewportRoot* root);
+	void AddUnit(QFAUIUnit* unit);	
+
 public:
 	QFAWindow(int width, int height, std::string name, bool inCenter = false, bool decorated = true, std::function<void ()> closedFun = nullptr);
 	~QFAWindow();
-
-
 	void AddViewport(QFAViewport* viewport);
 	void RemoveViewport(QFAViewport* viewport);
 	QFAViewport* GetViewport(size_t index);
@@ -166,9 +196,6 @@ public:
 		return Viewports.Length();
 	}
 	bool ShouldClose();
-
-	static QFAWindow* GetMainWindow();
-	
 
 	inline void Close()
 	{
@@ -190,8 +217,6 @@ public:
 		ProcessTickIfWindowsMinimized = processTickIfWindowsMinimized;
 	}
 
-	
-
 	inline void SetDropFun(std::function<void (int path_count, const char* paths[])> fun)
 	{
 		DropFunction = fun;
@@ -201,96 +226,5 @@ public:
 	void EnabelDecorated(bool enabel);
 	void SetSize(int w, int h);		
 	void MoveToCenter();
-
-private:
-	std::function<void(int path_count, const char* paths[])> DropFunction;
-
-	uint32_t imageIndex; // next image in sqp shain
-	bool minimized = false;
-	bool ProcessTickIfWindowsMinimized = false;
-
-	void createCommandPool();
-	
-	void recreateSwapChain();
-
-	void DrawActors(QFAViewport* viewport, bool clear, int viewportIndex);
-
-	unsigned int ProcessMeshComponent(QSceneComponent* component, bool shadow);
-
-
-	void DrawUI(QFAViewport* viewport, int viewportIndex, bool clear);
-
-
-	void DrawOffscreenBuffer();
-	void recordCommandBufferTestImege();
-
-	static void QueueSubmitPresent(std::vector<VkSemaphore> &listSemi);
-
-	void createSyncObject();
-	void createCommandBuffer();
-
-	void PresentFrame(VkSemaphore finishSemi);
-	
-
-	QFAPresentImage* PresentImage;
-
-	/*----*/
-
-	// Depth bias (and slope) are used to avoid shadowing artifacts
-// Constant depth bias factor (always applied)
-	float depthBiasConstant = 3.05f; // 1.25f   2.05f
-	// Slope depth bias factor, applied depending on polygon's slope
-	float depthBiasSlope = 3.55f; // 1.75f    2.55f
-	
-
-
-
-	void StartUIRenderViewPort(int viewportIndex);
-public:
-
 	void GetMeshUnderCursore(std::function<void(QMeshBaseComponent*)> callback);
-private:
-	const float shadowResolution = 2000;
-	// VkFormat
-	
-
-
-
-	QFAVKMeshFrameBuffer* frameBuffer; 
-
-	/*---*/
-	
-	static QFAImage* ShadowImage;
-	
-	
-
-	
-
-	void CreateShadow();
-
-
-	FVector CurentCameraPosition;
-
-	//in start of array number bigger
-	QFAArray<QFAUIUnit*> SortUIUnits;
-
-	void SortUIs(QFAViewportRoot* root);
-	void AddUnit(QFAUIUnit* unit);
-
-	QFAUIEvent *UIEvent;
-
-	bool CursorOnWindow = false;
-
-
-	VkCommandBuffer CurentComandBuffer = nullptr;
-
-	static VkSemaphore* NextWaitSemi;
-
-
-	QFAVKBuffer* PickBuffer;
-
-	
-	std::function<void(QMeshBaseComponent*)> GetMeshCallback;
-	// call after QFAWindow::CheckIfNeedResizeWindows
-	static void ProcessGetMeshId();
 };

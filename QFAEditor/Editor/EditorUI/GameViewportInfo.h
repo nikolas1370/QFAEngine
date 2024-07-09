@@ -16,6 +16,7 @@ class QFAEditorGameViewportInfo : public QFAParentHiddenChild
 {
 	friend QFAEditorMainWindow;
 	friend QFAEditorUIActorList;
+
 	struct SActor
 	{
 		QActor* actor;
@@ -28,6 +29,10 @@ class QFAEditorGameViewportInfo : public QFAParentHiddenChild
 		size_t count = 0;
 		bool isCpp;
 	};
+
+	const QFAColorF InFocusUnitColor = QFAColorF(1.0f, 1.0f, 1.0f, 0.05f);
+	const QFAColorF SelectUnit = QFAColor(14, 134, 255, 255).GetColorF();
+	const QFAColorF SelectUnitNotFocus = QFAColor(64, 87, 111, 255).GetColorF();
 
 	QFAUICanvas* Canvas;
 	QFAUIList* ActorInfoList;// transforma and etc
@@ -45,17 +50,11 @@ class QFAEditorGameViewportInfo : public QFAParentHiddenChild
 
 	float UpdateInnerHeight() override;
 	float UpdateInnerWidth() override;
-public:
-	QFAEditorGameViewportInfo();
-	~QFAEditorGameViewportInfo();
 
-	
-private:
 	void SelectActor(QActor* actor);
 	void AddActor(QActor* actor, std::u32string actorName, size_t id, bool isCppClass);
 	void PressedDelete();
-
-	const QFAColorF InFocusUnitColor = QFAColorF(1.0f, 1.0f, 1.0f, 0.05f);
-	const QFAColorF SelectUnit = QFAColor(14, 134, 255, 255).GetColorF();
-	const QFAColorF SelectUnitNotFocus = QFAColor(64, 87, 111, 255).GetColorF();
+public:
+	QFAEditorGameViewportInfo();
+	~QFAEditorGameViewportInfo();
 };

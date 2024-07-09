@@ -12,10 +12,6 @@ class QFAGameCode
 	friend QFAEditorMainWindow;
 	friend QFAEditorOverlord;
 	friend QFAUIEditorFileExplorer;
-	static void* GameCodeModule;// GameCodeModule is HMODULE, don't wanna include windows.h
-	static void* OldGameCodeModule;
-	const char SourceFolder[7] = "Source";
-	static QFAGameCodeFunctions* GameCodeAPIFunction;
 
 	enum DllFile
 	{
@@ -31,11 +27,7 @@ class QFAGameCode
 		Error
 	};
 
-public:// QueueSubmitPresent
-
-private:
-	static DllFile CurentDllFile;
-	static bool DllWasCompiled;
+	const char SourceFolder[7] = "Source";
 	static const char* CopyDllFrom;
 	static const char* CopyPdbFrom;
 	static const char* CopyDllIn;
@@ -50,6 +42,12 @@ private:
 	static const wchar_t* HotFolder_1Path;
 	static const wchar_t* HotFolder_2Path;
 
+	static void* GameCodeModule;// GameCodeModule is HMODULE, don't wanna include windows.h
+	static void* OldGameCodeModule;	
+	static QFAGameCodeFunctions* GameCodeAPIFunction;
+
+	static DllFile CurentDllFile;
+	static bool DllWasCompiled;
 
 	static void CompileGameCode(void (*callback)(CompileStatus));
 	
@@ -57,7 +55,6 @@ private:
 
 	// if return fals not need replacement old objects
 	static bool LoadCode();
-
 
 	/* inside usage */
 	// if return true Compile Succeed

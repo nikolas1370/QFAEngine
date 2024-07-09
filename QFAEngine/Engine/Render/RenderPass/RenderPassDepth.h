@@ -5,13 +5,10 @@ class QFAWindow;
 
 class QFAEXPORT QFAVKRenderPassDepth
 {
-
 	friend QFAWindow;
 	VkRenderPass renderPass;	
+
 public:
 	QFAVKRenderPassDepth();
 	~QFAVKRenderPassDepth();
-
-private:
-
 };

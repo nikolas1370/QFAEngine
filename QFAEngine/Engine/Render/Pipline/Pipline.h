@@ -6,23 +6,35 @@
 
 class QFAOverlord; // in QFAEditor
 class QFAVKPipeline
-{
+{    
     friend QFAOverlord;
-public:
-    static const uint32_t MaxDescriptorSetLayoutCount = 2;// if need more SetLayout
     static const uint32_t MaxDescriptorSetLayoutBinding = 4; // if need more VkDescriptorSetLayoutBinding in SetLayout
-    static const uint32_t MaxColorBlendAttachment = 2;
+    struct QFAGroupPools
+    {
+        VkDescriptorPoolSize DescriptorPoolSizes[QFAVKPipeline::MaxDescriptorSetLayoutBinding];
+        uint32_t DescriptorPoolSizeCount = 0;
+        uint32_t MaxSets = 0;
+        uint32_t CountSetInLastPool = 0;
+        VkDescriptorPoolCreateFlags descriptorPoolFlags = 0;
+    };
 
+    struct SDescriptorPool
+    {
+        std::vector< VkDescriptorPool> ListPool;
+        std::vector< VkDescriptorSet> ListSet;
+    };
+
+public:
     /*
-        if loadFromFile == true
-            SPIR-V module load from disk(ShaderData::path)
-        else 
-            SPIR-V module store in ShaderData::module
-    */
+      if loadFromFile == true
+          SPIR-V module load from disk(ShaderData::path)
+      else
+          SPIR-V module store in ShaderData::module
+  */
     struct SShaderData
-    {        
+    {
         std::u32string path;
-        std::u32string name; 
+        std::u32string name;
         const uint32_t* module = nullptr;
         size_t moduleSize;
         bool loadFromFile;
@@ -32,7 +44,7 @@ public:
         VertexStage/FragmentStage name shader file
     */
     struct QFAPipelineShaderStages
-    {  
+    {
         std::u32string VertexShaderName;
         std::u32string FragmentShaderName;
     };
@@ -127,7 +139,7 @@ public:
         QFAPushConstant PushConstant;
     };
 
-    
+
     struct QFADescriptorSetInfo
     {
         uint32_t dstBinding = 0;
@@ -135,21 +147,12 @@ public:
         VkDescriptorImageInfo* DescriptorImageInfos = nullptr;
     };
 
-private:
-    struct QFAGroupPools
-    {
-        VkDescriptorPoolSize DescriptorPoolSizes[QFAVKPipeline::MaxDescriptorSetLayoutBinding];
-        uint32_t DescriptorPoolSizeCount = 0;
-        uint32_t MaxSets = 0;
-        uint32_t CountSetInLastPool = 0;
-        VkDescriptorPoolCreateFlags descriptorPoolFlags = 0;
-    };
+public:
+    static const uint32_t MaxDescriptorSetLayoutCount = 2;// if need more SetLayout    
+    static const uint32_t MaxColorBlendAttachment = 2;
 
-    struct SDescriptorPool
-    {
-        std::vector< VkDescriptorPool> ListPool;
-        std::vector< VkDescriptorSet> ListSet;
-    };
+private:
+    static std::vector<SShaderData> ShaderData;
 
     VkPipelineLayout pipelineLayout;
     VkPipeline graphicsPipeline;
@@ -158,10 +161,17 @@ private:
     std::array<QFAGroupPools, MaxDescriptorSetLayoutCount> GroupDescriptorPools;
     std::array<SDescriptorPool, MaxDescriptorSetLayoutCount> Pools;
     
-    void CreatePool(uint32_t groupIndex);
-    
-    void SetPoolsParameter(QFAPipelineCreateInfo& PipInfo);
+    static std::vector<char> readFile(const std::string& filename);
+    /*
+        call in QFAOverlord::Init
+    */
+    static void SetShaderData(std::vector<SShaderData> shaderData);
 
+
+    VkShaderModule createShaderModule(const uint32_t* code, size_t size);
+    void CreateDescriptorSetLayouts(QFAPipelineCreateInfo& PipInfo);
+    void CreatePool(uint32_t groupIndex);    
+    void SetPoolsParameter(QFAPipelineCreateInfo& PipInfo);
 
 public:    
     QFAVKPipeline(QFAPipelineCreateInfo& PipInfo);
@@ -188,19 +198,4 @@ public:
     {
         return graphicsPipeline;
     }
-
-private:
-
-    static std::vector<char> readFile(const std::string& filename);
-
-    VkShaderModule createShaderModule(const uint32_t* code, size_t size);
-
-    void CreateDescriptorSetLayouts(QFAPipelineCreateInfo& PipInfo);
-
-
-    static std::vector<SShaderData> ShaderData;
-    /*
-        call in QFAOverlord::Init
-    */
-    static void SetShaderData(std::vector<SShaderData> shaderData);
 };

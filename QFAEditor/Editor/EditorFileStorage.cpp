@@ -6,6 +6,7 @@
 #include <unicode/unistr.h>
 #include <ModelLoader.h>
 #include <Tools/String.h>
+#include <EngineClassesInterface.h>
 
 std::vector<int> QFAEditorFileStorage::DropPath;
 void QFAEditorFileStorage::DropFiles(size_t folderId, int path_count, const char* paths[])
@@ -19,11 +20,12 @@ void QFAEditorFileStorage::DropFiles(size_t folderId, int path_count, const char
 		check if paths is folder
 
 	*/
-	QFAContentFolder cf = QFAContentManager::GetFolder(folderId);
-	if (!cf.id)
+	
+	std::u32string folderPath = QFAContentManager::GetFolderPath(folderId);
+	if (!folderPath.size())
 		return;
 	
-	std::filesystem::path curentPath(cf.path);
+	std::filesystem::path curentPath(folderPath);
 	curentPath.append("");// add "\\" in path
 
 	for (size_t i = 0; i < path_count; i++)
@@ -40,48 +42,27 @@ void QFAEditorFileStorage::DropFiles(size_t folderId, int path_count, const char
 
 		std::filesystem::path path(str);
 		std::filesystem::path ext = path.extension();
+		path.replace_extension(".qfa");
+		curentPath.replace_filename(path.filename());		
 		if (std::filesystem::is_directory(path))
 		{
 			std::cout << "DropFile not file\n";
 			continue;
 		}
 
-		bool fileExist = false;
-		QFAFileOnDisk fd;
-		QFAContentFile cf; 
-		fd.version = QFAFileOnDisk::EditorFileVersion;
 		if (ext == ".obj" || ext == ".fbx")
 		{
 			/*
 				create fun when load model and get aiScene check if valid
 				and after use aiScene like SeparateModel or solid
-			*/
-			QFAMeshData* md = QFAModelLoader::LoadModel(paths[i]);
-			if (!md)
+			*/			
+			if (QFAMeshData* md = QFAModelLoader::LoadModel(paths[i]))
+				AddFile(folderId, curentPath.u32string(), QFAFileTypes::EFTMesh, md);
+			else
 			{
 				std::cout << "DropFile not load\n";
 				continue;
 			}
-
-			fd.type = QFAFileTypes::EFTMesh;
-			path.replace_extension(".qfa");
-			curentPath.replace_filename(path.filename());
-
-			if (std::filesystem::exists(curentPath))
-				fileExist = true;
-
-			QFAFileSystem::WriteFile(curentPath.u32string(), &fd, sizeof(fd));
-
-			QFAMeshData::SMeshInfo mi = md->GetMeshInfo();
-			QFAFile writeFile;
-			QFAFileSystem::OpenFile(curentPath.u32string(), &writeFile, false);
-			QFAFileSystem::AppendFile(&writeFile, &mi, sizeof(mi));
-
-			QFAFileSystem::AppendFile(&writeFile, md->GetFrameData(), mi.AmountData);
-			QFAFileSystem::CloseFile(&writeFile);
-
-			cf.fileType = QFAFileTypes::EFTMesh;
-			cf.file = md;
 		}
 		else if (ext == ".jpg" || ext == ".png")
 		{
@@ -92,55 +73,29 @@ void QFAEditorFileStorage::DropFiles(size_t folderId, int path_count, const char
 				std::cout << "DropFile not load\n";
 				continue;
 			}
-
-			stbi_uc* pixels = stbi_load_from_memory((stbi_uc*)rawImageFile.GetData(), rawImageFile.GetFileSize(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-			if (!pixels) // check if rawImageFile is image
+			
+			if (stbi_uc* pixels = stbi_load_from_memory((stbi_uc*)rawImageFile.GetData(),
+				rawImageFile.GetFileSize(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha)) // check if rawImageFile is image
+			{
+				QFAImage::SImageCreateInfo ici;
+				ici.Width = texWidth;
+				ici.Height = texHeight;
+				ici.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+				ici.createBuffer = false;
+				
+				QFAImage* image = QFAEditorImage::CreateImage(ici);
+				((QFAEditorImage*)image)->SetImage(pixels);
+				((QFAEditorImage*)image)->File = &rawImageFile; 
+				AddFile(folderId, curentPath.u32string(), QFAFileTypes::EFTImage, image);
+				stbi_image_free(pixels);
+			}
+			else
 			{
 				std::cout << "DropFile not load\n";
 				continue;
 			}
-
-			path.replace_extension(".qfa");
-			curentPath.replace_filename(path.filename());
-
-			if (std::filesystem::exists(curentPath))
-				fileExist = true;
-
-			fd.type = QFAFileTypes::EFTImage;
-			QFAFileSystem::WriteFile(curentPath.u32string(), &fd, sizeof(fd));
-
-			QFAFile writeFile;
-			QFAFileSystem::OpenFile(curentPath.u32string(), &writeFile, false);
-			QFAFileSystem::AppendFile(&writeFile, rawImageFile.GetData(), rawImageFile.GetFileSize());
-			QFAFileSystem::CloseFile(&writeFile);
-
-			QFAImage::SImageCreateInfo ici;
-			ici.Width = texWidth;
-			ici.Height = texHeight;
-			ici.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			ici.createBuffer = false;
-			QFAImage* image = new QFAImage(ici);
-
-			image->SetImage(pixels);
-			cf.fileType = QFAFileTypes::EFTImage;
-			cf.file = image;
 		}
 		else
 			std::cout << "DropFile not support extension\n";
-
-		if (fileExist)
-		{
-			/*
-
-				if file exist need delete old file replase to new file in Folders[folderIndex].folderUnits
-				and apply change in staticMesh/QFAImage
-
-			*/
-		}
-		else
-		{
-			cf.path = curentPath.u32string();
-			AddFile(folderId , cf);
-		}
 	}
 }

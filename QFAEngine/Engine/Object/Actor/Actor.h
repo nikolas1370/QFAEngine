@@ -26,6 +26,10 @@ class QFAEXPORT QActor : public QObject
 	// actor live in this world
 	QWorld* ActorWorld;
 	QSceneComponent* RootComponent;
+
+	// pointer to this actor in QWorld::Actors
+	size_t WorldIndex;
+
 protected:
 	FVector Position = FVector(0);
 	FVector Rotation = FVector(0);
@@ -33,12 +37,16 @@ protected:
 
 	bool CanTick = false;
 	virtual void Tick(float deltaTime) {};
+
+private:
+#if QFA_EDITOR_ONLY
+	/*
+		used only for HotReload
+		replace this actor in parent world to actor
+	*/
+	void ReplaceMe(QObject* newActor) override;
+#endif 
 public:
-
-	
-	
-
-
 	QActor();
 	~QActor();
 
@@ -79,7 +87,6 @@ public:
 	*/
 	bool SetRootComponent(QSceneComponent* component, bool inseparable = false);
 
-
 	//will return null if the actor is not actually spawned in world
 	inline QWorld* GetWorld()
 	{
@@ -90,19 +97,5 @@ public:
 	{
 		CanTick = enable;
 	}
-
-private:
-	// pointer to this actor in QWorld::Actors
-	size_t WorldIndex;
-#if QFA_EDITOR_ONLY
-	/*
-		used only for HotReload
-		replace this actor in parent world to actor
-	*/
-	void ReplaceMe(QObject* newActor) override;
-#endif 
-
-	
-
 };
 

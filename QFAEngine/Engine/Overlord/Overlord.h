@@ -12,11 +12,8 @@ class QFAEXPORT QFAOverlord
 {
 	static bool Life;
 	static bool isInit;
-
-
 	static int DefaultWidth;
 	static int DefaultHeight;
-
 
 	static float FrameCount;
 	static float FrameTime; // 1000 / frameCount
@@ -27,6 +24,8 @@ class QFAEXPORT QFAOverlord
 	static std::function<void()> FrameEnded;
 
 	static std::thread::id MainThreadId;
+
+	static void MainLoop();
 public:
 	/*
 		start processing world 
@@ -59,8 +58,5 @@ public:
 	static void SetShdowFpsInConsole(bool enable);
 
 	static std::thread::id GetMainThreadId();
-private:
-
-	static void MainLoop();
 };
 

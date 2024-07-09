@@ -12,12 +12,8 @@ class QFAOverlord;
 	local position     // relative to Actore
 	world position
 */
-
-
 class QFAEXPORT QSceneComponent : public QActorComponent
 {
-
-
 	friend QActor;
 	friend QSceneComponent;
 	friend QMeshBaseComponent;
@@ -33,6 +29,32 @@ class QFAEXPORT QSceneComponent : public QActorComponent
 */
 	bool Inseparable = false;
 
+protected:
+	// in vulkan format
+	FVector WorldPosition = FVector(0);
+	// in vulkan format
+	glm::mat3 RotationMatrix = Math::DefauldMatrix3;
+	/*
+	 contain parent AccumulateScale * parent scale
+		RootComponent have in AccumulateScale QActor scale
+	*/
+	FVector AccumulateScale = FVector(1);
+
+	// relative parent
+	FVector RelativePosition = FVector(0);
+	FVector Rotation = FVector(0);
+	FVector Scale = FVector(1);
+	// before be in MeshBase
+
+	bool NeedUpdateMatrix = false;
+public:
+	/*
+		get actor who owns component
+	*/
+	static QActor* GetActor(QSceneComponent* component);
+
+private:
+
 	/*
 		if component exist higher up in tree (parend, grandparent, grandgrandparent...)
 	*/
@@ -43,35 +65,12 @@ class QFAEXPORT QSceneComponent : public QActorComponent
 
 	/**/
 	void UpdateWorldPositionScale(bool onlyPosition);
-	
-	
 
 	inline FVector GetRelativeScalePosition()
 	{
 		return RelativePosition * AccumulateScale;
 	}
 protected:
-
-
-
-	// in vulkan format
-	FVector WorldPosition = FVector(0);
-	// in vulkan format
-	glm::mat3 RotationMatrix = Math::DefauldMatrix3;
-	/*
-	 contain parent AccumulateScale * parent scale 
-		RootComponent have in AccumulateScale QActor scale
-	*/
-	FVector AccumulateScale = FVector(1);
-	
-
-
-	// relative parent
-	FVector RelativePosition = FVector(0);
-	FVector Rotation = FVector(0);
-	FVector Scale = FVector(1);
-	// before be in MeshBase
-	
 	/*
 	* call inside QSceneComponent and from some child
 	*/
@@ -80,10 +79,6 @@ protected:
 	void ChangeRelativePosition(const FVector position);
 	void ChangeRotation(const FVector rotation);	
 	void ChangeScale(const FVector scale);
-	/*----*/
-
-	bool NeedUpdateMatrix = false;
-
 
 	virtual void UpdateModelMatrix() {};
 public:
@@ -188,18 +183,6 @@ public:
 		return QSceneComponent::GetActor(this);
 	}
 
-	/*
-		get actor who owns component
-
-		можливо зроблю шоб при добавляні компонента актор давався
-	*/
-	static QActor* GetActor( QSceneComponent* component) ;
-
 	QWorld* GetWorld();
-	
-
-private:
-
-	
 };
 

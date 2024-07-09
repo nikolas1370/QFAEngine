@@ -13,16 +13,7 @@ class QFAEXPORT QFAFile
 {
 	friend QFAOverlord;
 	friend QFAFileSystem;
-	std::u32string path;
-	void* file = nullptr;
-	std::ofstream openFileOUT;
-	std::ifstream openFileIN;
-	size_t size = 0;	
-	bool AutoDeleteFileData = true;
 
-	static std::vector<void*> Datas;
-
-	static void EndLife();
 public:
 	enum Result
 	{
@@ -31,6 +22,22 @@ public:
 		CannotOpenFile,
 		FileNotOpen
 	};
+
+private:
+	static std::vector<void*> Datas;
+
+	std::u32string path;
+	void* file = nullptr;
+	std::ofstream openFileOUT;
+	std::ifstream openFileIN;
+	size_t size = 0;	
+	bool AutoDeleteFileData = true;
+	Result res;
+
+	static void EndLife();
+
+public:
+	static void ReleaseData(void* fileData);
 
 	~QFAFile()
 	{
@@ -47,8 +54,6 @@ public:
 		if the data is not need use QFAFile::ReleaseData
 	*/
 	void DisableAutoDeleteFileData();
-
-	static void ReleaseData(void* fileData);
 
 
 	inline void* GetData()
@@ -80,8 +85,6 @@ public:
 	std::string GetPathString();
 
 	inline std::wstring GetPathWString();
-private:
-	Result res;
 };
 
 

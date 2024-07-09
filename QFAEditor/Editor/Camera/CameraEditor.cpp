@@ -5,22 +5,22 @@ ACameraEditor::ACameraEditor()
 {
 	QFAInputAxis3D ax = Input.CreateAxis3D("move", [this](FVector axis)
 		{
-			this->inputAxis = axis;
+			this->InputAxis = axis;
 		});
 
 	Input.SetMouseMoveAxis([this](FVector2D axis)
 		{
-			this->mouseAxis = axis;
+			this->MouseAxis = axis;
 		});
 
 	Input.AddKeyPress(EKey::MOUSE_LEFT, "mouse", [this](EKey::Key)
 		{
-			this->mosePress = true;
+			this->MosePress = true;
 		});
 
 	Input.AddKeyRelease(EKey::MOUSE_LEFT, "mouse", [this](EKey::Key)
 		{
-			this->mosePress = false;
+			this->MosePress = false;
 		});
 
 	ax.AddKey(EKey::W, FVector(1, 0, 0), "forward");
@@ -47,11 +47,11 @@ void ACameraEditor::Tick(float delta)
 	if (!Camera.GetStatus())
 		return;
 	
-	if (mosePress)
+	if (MosePress)
 	{
 		FVector rot = GetActorRotation();
-		rot.Y += mouseAxis.Y * 0.1f * -1;
-		rot.Z += mouseAxis.X * 0.1f;
+		rot.Y += MouseAxis.Y * 0.1f * -1;
+		rot.Z += MouseAxis.X * 0.1f;
 
 		if (rot.Y > 90)
 			rot.Y = 90;
@@ -59,8 +59,8 @@ void ACameraEditor::Tick(float delta)
 			rot.Y = -90;
 
 		SetActorRotation(rot);
-		mouseAxis = FVector2D(0);
+		MouseAxis = FVector2D(0);
 	}
 
-	SetActorPosition((GetActorForwardVector() * inputAxis.X + GetActorRightVector() * inputAxis.Y + GetActorUpVector() * inputAxis.Z).Normalize() * delta * Speed + GetActorPosition());
+	SetActorPosition((GetActorForwardVector() * InputAxis.X + GetActorRightVector() * InputAxis.Y + GetActorUpVector() * InputAxis.Z).Normalize() * delta * Speed + GetActorPosition());
 }

@@ -34,9 +34,5 @@ public:
 
         return indices;
     }
-
-
-private:
-
 };
 
