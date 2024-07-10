@@ -8,7 +8,7 @@ class QSceneComponent;
 class QFAOverlord;
 class QMeshBaseComponent;
 class QFAGameCode;
-class QFAWindow;
+class QFAEngineWindow;
 class QFAEXPORT QActor : public QObject
 {
 	/*
@@ -19,7 +19,7 @@ class QFAEXPORT QActor : public QObject
 	friend QFAOverlord;
 	friend QMeshBaseComponent;
 	friend QFAGameCode;
-	friend QFAWindow;
+	friend QFAEngineWindow;
 	
 	
 	

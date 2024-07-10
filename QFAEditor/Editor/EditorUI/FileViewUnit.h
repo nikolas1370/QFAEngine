@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <Render/UI/UIParentHiddenChild.h>
+#include <UI/UIParentHiddenChild.h>
 
 class QFAText;
 class QFAEditorUIFileViewUnit : public QFAParentHiddenChild

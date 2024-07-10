@@ -2,7 +2,7 @@
 #include <Object/Actor/Camera/CameraActor.h>
 #include <Input/Input.h>
 
-class QFAWindow;
+class QFAEngineWindow;
 class ACameraEditor : public ACameraActor
 {
 
@@ -17,7 +17,7 @@ public:
 	ACameraEditor();
 	~ACameraEditor();
 
-	void SetWindowForInput(QFAWindow* window);
+	void SetWindowForInput(QFAEngineWindow* window);
 
 private:
 

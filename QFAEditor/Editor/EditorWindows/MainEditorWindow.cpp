@@ -1,19 +1,19 @@
 ﻿#include "epch.h"
 #include "MainEditorWindow.h"
-#include <Render/Window/Window.h>
+#include <EngineStuff/Window/Window.h>
 #include <EditorUI/FileExplorer.h>
-#include <Tools/VulkanSuff.h>
-#include <Render/UI/Canvas.h>
-#include <Render/UI/Text.h>
+#include <EngineStuff/VulkanSuff.h>
+#include <UI/Canvas.h>
+#include <UI/Text.h>
 
 #include <Overlord/Overlord.h>
 #include <EditorUI/ExplorerFolderUnit.h>
-#include <Render/UI/UIList.h>
+#include <UI/UIList.h>
 #include <Camera/CameraEditor.h>
 #include <EditorFileStorage.h>
 #include <Object/Actor/StaticMeshActor.h>
 #include <EditorUI/GameViewportInfo.h>
-#include <Render/Window/Viewport.h>
+#include <EngineStuff/Window/Viewport.h>
 #include <Tools/String.h>
 
 QFAEditorMainWindow* QFAEditorMainWindow::MainWindow = nullptr;
@@ -28,7 +28,7 @@ QFAEditorMainWindow::QFAEditorMainWindow()
 	QFAOverlord::SetShdowFpsInConsole(false);
 	QFAOverlord::EnableFpsLock(true);
 	QFAOverlord::SetLimitFpsCount(60);
-	Window = new QFAWindow(LoaderWidth, LoaderHeight, "QFAEditor", true, false);
+	Window = new QFAEngineWindow(LoaderWidth, LoaderHeight, "QFAEditor", true, false);
 
 	QFAText::SFont* font;
 	if (QFAText::ELoadFontResult res = QFAText::LoadFont("SomeFont/Roboto-Regular.ttf", font))
@@ -85,7 +85,7 @@ void QFAEditorMainWindow::CreateMainEdirorUI()
 	PrepareGameViewport();	
 }
 
-#include <Render/UI/TextInput.h>
+#include <UI/TextInput.h>
 void QFAEditorMainWindow::PrepareGameViewport()
 {
 	GameViewport = new QFAViewport();

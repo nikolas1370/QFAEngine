@@ -1,6 +1,6 @@
 #include "epch.h"
 #include "FileViewUnit.h"
-#include <Render/UI/Text.h>
+#include <UI/Text.h>
 
 QFAEditorUIFileViewUnit::QFAEditorUIFileViewUnit()
 {

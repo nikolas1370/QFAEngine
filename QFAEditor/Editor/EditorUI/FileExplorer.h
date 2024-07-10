@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include <Render/UI/UIParentHiddenChild.h>
+#include <UI/UIParentHiddenChild.h>
 #include <Tools/File/FileSystem.h>
 
 class QFAUIList;
@@ -69,7 +69,7 @@ class QFAUIEditorFileExplorer : public QFAParentHiddenChild
 	QFAEditorFileViewWindow* FileViewWindow = nullptr;
 
 protected:
-	QFAWindow* Window;
+	QFAEngineWindow* Window;
 
 private:
 	void CreateTop();
@@ -98,7 +98,7 @@ protected:
 	float UpdateInnerWidth() override;
 
 public:
-	QFAUIEditorFileExplorer(QFAWindow* window, std::function <void (bool isCppClass, size_t id)> dragFun);
+	QFAUIEditorFileExplorer(QFAEngineWindow* window, std::function <void (bool isCppClass, size_t id)> dragFun);
 	~QFAUIEditorFileExplorer();
 
 };

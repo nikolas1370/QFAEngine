@@ -1,5 +1,5 @@
 #pragma once
-#include <Render/Image.h>
+#include <EngineStuff/Image.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
 class QFAEditorFileStorage;
 class QFAEditorExplorerFolderUnit;

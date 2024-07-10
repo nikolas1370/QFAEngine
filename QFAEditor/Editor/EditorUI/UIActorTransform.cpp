@@ -1,8 +1,8 @@
 ﻿#include "epch.h"
 #include "UIActorTransform.h"
-#include <Render/UI/Canvas.h>
-#include <Render/UI/TextInput.h>
-#include <Render/UI/Background.h>
+#include <UI/Canvas.h>
+#include <UI/TextInput.h>
+#include <UI/Background.h>
 #include <Object/Actor/Actor.h>
 #include <Tools/String.h>
 

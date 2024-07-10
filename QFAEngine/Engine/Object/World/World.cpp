@@ -2,9 +2,9 @@
 #include "World.h"
 #include <Object/Actor/Actor.h>
 #include <Overlord/Overlord.h>
-#include <Render/Time.h>
-#include <Render/Window/Viewport.h>
-#include <Render/Window/Window.h>
+#include <Overlord/Time.h>
+#include <EngineStuff/Window/Viewport.h>
+#include <EngineStuff/Window/Window.h>
 
 QFAArray<QWorld*> QWorld::Worlds;
 
@@ -25,14 +25,14 @@ void QWorld::ProcessTicks()
 		}
 
 		bool worldProcess = false; // viewport connect to world by camera
-		for (size_t j = 0; j < QFAWindow::Windows.size(); j++)
+		for (size_t j = 0; j < QFAEngineWindow::Windows.size(); j++)
 		{
-			if (!QFAWindow::Windows[j]->ProcessTickIfWindowsMinimized && QFAWindow::Windows[j]->minimized)
+			if (!QFAEngineWindow::Windows[j]->ProcessTickIfWindowsMinimized && QFAEngineWindow::Windows[j]->minimized)
 				continue;
 
-			for (size_t k = 0; k < QFAWindow::Windows[j]->Viewports.Length(); k++)
+			for (size_t k = 0; k < QFAEngineWindow::Windows[j]->Viewports.Length(); k++)
 			{
-				if (QFAWindow::Windows[j]->Viewports[k]->GetWorld() == Worlds[i])
+				if (QFAEngineWindow::Windows[j]->Viewports[k]->GetWorld() == Worlds[i])
 				{
 					for (int o = 0; j < Worlds[i]->Actors.Length(); o++)
 					{

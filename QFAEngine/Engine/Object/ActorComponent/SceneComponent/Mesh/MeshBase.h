@@ -4,12 +4,12 @@
 
 #include <vulkan/vulkan_core.h>
 #include <array>
-#include <Render/Window/Window.h>
-#include <Render/vk/TextureSampler.h>
-#include <Render/vk/ImageView.h>
-#include <Render/Pipline/Pipline.h>
-#include <Render/Buffer/IndexBuffer.h>
-#include <Render/Buffer/VertexBuffer.h>
+#include <EngineStuff/Window/Window.h>
+#include <EngineStuff/vk/TextureSampler.h>
+#include <EngineStuff/vk/ImageView.h>
+#include <EngineStuff/Pipline/Pipline.h>
+#include <EngineStuff/Buffer/IndexBuffer.h>
+#include <EngineStuff/Buffer/VertexBuffer.h>
 struct VertexMaterial// 
 {
 	FVector Position;
@@ -189,7 +189,7 @@ public:
 
 class QFAShaderProgram;
 class QFAViewport;
-class QFAWindow;
+class QFAEngineWindow;
 class QFAVKPipeline;
 class QStaticMesh;
 class QFAOverlord;
@@ -197,7 +197,7 @@ class QFAOverlord;
 class QFAEXPORT QMeshBaseComponent : public QSceneComponent
 {
 	friend QStaticMesh;
-	friend QFAWindow;
+	friend QFAEngineWindow;
 	friend QFAViewport;
 	friend QFAOverlord;
 	friend QFAMeshData;

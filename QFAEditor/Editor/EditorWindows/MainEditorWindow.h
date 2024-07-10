@@ -1,5 +1,5 @@
 #pragma once
-#include <Render/UI/Text.h>
+#include <UI/Text.h>
 #include <EditorFileStorage.h>
 #include <GameCodeTool/GameCodeCompiler.h>
 #include <Input/Input.h>
@@ -10,7 +10,7 @@ class QEditorWorld : public QWorld
 	friend QFAEditorMainWindow;
 };
 
-class QFAWindow;
+class QFAEngineWindow;
 class QFAUIEditorFileExplorer;
 class QFAUICanvas;
 class QFAEditorOverlord;
@@ -36,7 +36,7 @@ class QFAEditorMainWindow
 	static QFAText::SFont* Icomonfont;
 	
 
-	QFAWindow* Window;
+	QFAEngineWindow* Window;
 	QFAViewport* GameViewport;
 
 	QFAUICanvas* LoadCanvas;

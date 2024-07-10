@@ -8,7 +8,7 @@
 #include <EditorFileStorage.h>
 #include <Overlord/ContentManager.h>
 
-class QFAWindow;
+class QFAEngineWindow;
 class QWorld;
 class QFAImage;
 class QWorld;
@@ -34,7 +34,7 @@ class QFAEditorFileViewWindow // this window display QFAfile
 	};
 
 	bool Closed = false;
-	QFAWindow* Window;
+	QFAEngineWindow* Window;
 	ACameraEditor Camera;
 	QWorld World;
 	QActor Actor;

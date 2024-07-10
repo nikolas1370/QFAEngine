@@ -1,12 +1,12 @@
 #pragma once
 #include <Object/World/World.h>
 #include <Object/ActorComponent/SceneComponent/Camera/Camera.h>
-#include <Render/Pipline/Pipline.h>
+#include <EngineStuff/Pipline/Pipline.h>
 #include <functional>
 #include <thread>
 class QSceneComponent;
 class QFAContentManager;
-class QFAWindow;
+class QFAEngineWindow;
 
 class QFAEXPORT QFAOverlord
 {

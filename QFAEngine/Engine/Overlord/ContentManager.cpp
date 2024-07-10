@@ -1,9 +1,9 @@
 ﻿#include "pch.h"
 #include "ContentManager.h"
-#include <Render/Image.h>
+#include <EngineStuff/Image.h>
 #include <filesystem>
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
-#include <Render/UI/UIImage.h>
+#include <UI/UIImage.h>
 #include <stb_image.h>
 #include <Tools/String.h>
 

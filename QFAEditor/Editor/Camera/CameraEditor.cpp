@@ -36,7 +36,7 @@ ACameraEditor::~ACameraEditor()
 {
 }
 
-void ACameraEditor::SetWindowForInput(QFAWindow* window)
+void ACameraEditor::SetWindowForInput(QFAEngineWindow* window)
 {
 	Input.ChangeWindow(window);
 }

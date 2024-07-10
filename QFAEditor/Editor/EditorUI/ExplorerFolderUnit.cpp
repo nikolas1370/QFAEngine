@@ -1,8 +1,8 @@
 #include "epch.h"
 #include "ExplorerFolderUnit.h"
-#include <Render/UI/Canvas.h>
-#include  <Render/UI/UIImage.h>
-#include <Render/UI/Text.h>
+#include <UI/Canvas.h>
+#include  <UI/UIImage.h>
+#include <UI/Text.h>
 #include <EngineClassesInterface.h>
 
 QFAImage* QFAEditorExplorerFolderUnit::FolderImage = nullptr;

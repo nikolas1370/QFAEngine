@@ -1,5 +1,5 @@
 #pragma once
-#include <Render/UI/UIParentHiddenChild.h>
+#include <UI/UIParentHiddenChild.h>
 
 class QFAEditorMainWindow;
 class QFAText;

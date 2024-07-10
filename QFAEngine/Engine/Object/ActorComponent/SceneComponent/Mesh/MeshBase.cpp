@@ -1,11 +1,11 @@
 ﻿#include "pch.h"
 #include "MeshBase.h"
 #include <Object/Actor/Actor.h>
-#include <Render/vk/LogicalDevice.h>
-#include <Tools/VulkanSuff.h>
-#include <Render/Buffer/VKBuffer.h>
-#include <Render/Pipline/Pipline.h>
-#include <Render/Buffer/VertexBuffer.h>
+#include <EngineStuff/vk/LogicalDevice.h>
+#include <EngineStuff/VulkanSuff.h>
+#include <EngineStuff/Buffer/VKBuffer.h>
+#include <EngineStuff/Pipline/Pipline.h>
+#include <EngineStuff/Buffer/VertexBuffer.h>
 #include <Tools/File/FileSystem.h>
 
 QMeshBaseComponent::SShaderDirLight QMeshBaseComponent::ShaderDL;
@@ -58,8 +58,8 @@ void QFAMeshData::CreateVertextIndexBuffer()
 	if (VertexBufer)
 		return;
 
-	VertexBufer = new QFAVKVertexBuffer(GetVerticesSize(), GetVerticesDate(), QFAWindow::commandPool);
-	IndexBuffer = new QFAVKIndexBuffer(GetIndexCount() * sizeof(int), GetIndexData(), QFAWindow::commandPool);
+	VertexBufer = new QFAVKVertexBuffer(GetVerticesSize(), GetVerticesDate(), QFAEngineWindow::commandPool);
+	IndexBuffer = new QFAVKIndexBuffer(GetIndexCount() * sizeof(int), GetIndexData(), QFAEngineWindow::commandPool);
 }
 
 #if QFA_EDITOR_ONLY
@@ -127,21 +127,21 @@ void* QMeshBaseComponent::GetFragmentBuffer()
 
 void* QMeshBaseComponent::GetShadowBuffer()
 {
-	return QFAWindow::ViewportStuff[QFAWindow::ViewportProcess].buffers.shadowBuffer->MapData;
+	return QFAEngineWindow::ViewportStuff[QFAEngineWindow::ViewportProcess].buffers.shadowBuffer->MapData;
 }
 
 std::array<VkDescriptorSet, 2> QMeshBaseComponent::GetNextSets()
 {
 	return std::array<VkDescriptorSet, 2>
 	{
-		Pipeline->GetSet(0, QFAWindow::CurentProcessWindow->ViewportProcess),
+		Pipeline->GetSet(0, QFAEngineWindow::CurentProcessWindow->ViewportProcess),
 			Pipeline->GetSet(1, SetsInUse++)
 	};
 }
 
 VkDescriptorSet QMeshBaseComponent::GetShadowNextSet()
 {
-	return ShadowPipline->GetSet(0, QFAWindow::CurentProcessWindow->ViewportProcess);
+	return ShadowPipline->GetSet(0, QFAEngineWindow::CurentProcessWindow->ViewportProcess);
 }
 
 void QMeshBaseComponent::EndLife()
@@ -209,7 +209,7 @@ void QMeshBaseComponent::StartFrameViewpoet(glm::mat4& viewPortProjection, glm::
 	
 	ubo.CameraR = glm::mat4(cameraRotationMatrix);
 	ubo.DirectionLightMatrix = directionLightMatrix;	
-	memcpy(QFAWindow::ViewportStuff[QFAWindow::ViewportProcess].buffers.worldProjectionBuffer->MapData, &ubo.Projection, sizeof(ubo) );
+	memcpy(QFAEngineWindow::ViewportStuff[QFAEngineWindow::ViewportProcess].buffers.worldProjectionBuffer->MapData, &ubo.Projection, sizeof(ubo) );
 }
 
 void QMeshBaseComponent::createDescriptorSet0(VkBuffer buffer, VkBuffer shadeowBuffer)
@@ -226,8 +226,8 @@ void QMeshBaseComponent::createDescriptorSet0(VkBuffer buffer, VkBuffer shadeowB
 
 	VkDescriptorImageInfo IF;// 
 	IF.imageLayout = VK_IMAGE_LAYOUT_GENERAL;// VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	IF.imageView = QFAWindow::ShadowImagesView->ImageView;
-	IF.sampler = QFAWindow::ShadowSampler->textureSampler;
+	IF.imageView = QFAEngineWindow::ShadowImagesView->ImageView;
+	IF.sampler = QFAEngineWindow::ShadowSampler->textureSampler;
 
 	SetsInfo[1].dstBinding = 1;
 	SetsInfo[1].DescriptorImageInfos = &IF;

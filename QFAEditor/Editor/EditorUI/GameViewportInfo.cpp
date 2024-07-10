@@ -1,14 +1,14 @@
 ﻿#include "epch.h"
 #include "GameViewportInfo.h"
-#include <Render/UI/UIList.h>
-#include <Render/UI/Scroll.h>
+#include <UI/UIList.h>
+#include <UI/Scroll.h>
 
 #include <Object/Actor/Actor.h>
-#include <Render/UI/Canvas.h>
+#include <UI/Canvas.h>
 
 #include <EditorUI/UIActorTransform.h>
-#include <Render/UI/SelectUnit.h>
-#include <Render/UI/Text.h>
+#include <UI/SelectUnit.h>
+#include <UI/Text.h>
 #include <filesystem>
 #include <Tools/String.h>
 

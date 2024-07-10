@@ -1,10 +1,10 @@
 #include "pch.h"
 #include "Input.h"
 #include <iostream>
-#include <Tools/VulkanSuff.h>
-#include <Render/Window/Window.h>
+#include <EngineStuff/VulkanSuff.h>
+#include <EngineStuff/Window/Window.h>
 #include <GLFW/glfw3.h>
-std::vector<QFAWindow*> QFAInput::WindowList;
+std::vector<QFAEngineWindow*> QFAInput::WindowList;
 
 QFAArray<QFAInput::Sinput> QFAInput::Inputs;
 FVector2D QFAInput::LastMousePosition;
@@ -12,13 +12,13 @@ FVector2D QFAInput::LastMousePosition;
 QFAInput::QFAInput()
 {
 	if (WindowList.size() == 0)
-		stopExecute("QFAWindow not init or all window deleted");
+		stopExecute("QFAEngineWindow not init or all window deleted");
 
 	this->Window = WindowList[0]->glfWindow;
 	QFAInput::Inputs.Add({ WindowList[0], this});
 }
 
-QFAInput::QFAInput(QFAWindow* window)
+QFAInput::QFAInput(QFAEngineWindow* window)
 {
 	for (size_t i = 0; i < WindowList.size(); i++)
 	{
@@ -46,7 +46,7 @@ QFAInput::~QFAInput()
 	}
 }
 
-void QFAInput::ChangeWindow(QFAWindow* window)
+void QFAInput::ChangeWindow(QFAEngineWindow* window)
 {
 	Window = window->glfWindow;
 	for (size_t i = 0; i < QFAInput::Inputs.Length(); i++)
@@ -151,7 +151,7 @@ void QFAInput::MouseMove_callback(GLFWwindow* window, float xoffset, float yoffs
 	LastMousePosition = FVector2D((float)x, (float)y);		
 }
 
-void QFAInput::WindowCreated(QFAWindow* window)
+void QFAInput::WindowCreated(QFAEngineWindow* window)
 {	
 	WindowList.push_back(window );
 	glfwSetKeyCallback(window->glfWindow, [](GLFWwindow* _window, int key, int scancode, int action, int mods)
@@ -176,7 +176,7 @@ void QFAInput::WindowCreated(QFAWindow* window)
 
 }
 
-void QFAInput::WindowClosed(QFAWindow* window)
+void QFAInput::WindowClosed(QFAEngineWindow* window)
 {
 	for (size_t i = 0; i < WindowList.size(); i++)
 	{

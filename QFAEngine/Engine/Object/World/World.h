@@ -6,7 +6,7 @@ class QActor;
 class QFAOverlord;
 class QFAViewport;
 class QSceneComponent;
-class QFAWindow;
+class QFAEngineWindow;
 class QFALevel;
 class QFAEXPORT QWorld : public QObject
 {
@@ -18,7 +18,7 @@ class QFAEXPORT QWorld : public QObject
 	friend QFAOverlord;
 	friend QActor;
 	friend QFAViewport;
-	friend QFAWindow;
+	friend QFAEngineWindow;
 	friend QFALevel;
 
 protected:

@@ -1,9 +1,9 @@
 #include "epch.h"
 #include "EditorOverlord.h"
 
-#include <Render/Time.h>
+#include <Overlord/Time.h>
 #include <Overlord/Overlord.h>
-#include <Render/UI/Text.h>
+#include <UI/Text.h>
 #include <EditorWindows/MainEditorWindow.h>
 #include <EditorFileStorage.h>
 #include <GameCodeTool/GameCodeCompiler.h>

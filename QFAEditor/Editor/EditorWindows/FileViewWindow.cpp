@@ -1,21 +1,21 @@
 ﻿#include "epch.h"
 #include "FileViewWindow.h"
-#include <Render/Window/Window.h>
+#include <EngineStuff/Window/Window.h>
 #include <Object/World/World.h>
-#include <Render/UI/UIImage.h>
-#include <Render/UI/Canvas.h>	
-#include <Render/UI/UIList.h>	
-#include "Render/UI/Scroll.h"	 
+#include <UI/UIImage.h>
+#include <UI/Canvas.h>	
+#include <UI/UIList.h>	
+#include "UI/Scroll.h"	 
 #include <EditorUI/FileViewUnit.h>
 #include <Tools/File/FileSystem.h>
-#include <Render/Image.h>
-#include <Render/Window/Viewport.h>
+#include <EngineStuff/Image.h>
+#include <EngineStuff/Window/Viewport.h>
 #include <filesystem>
 
 
 QFAEditorFileViewWindow::QFAEditorFileViewWindow()
 {
-	Window = new QFAWindow(600, 600, "File View", true , true, [this]()
+	Window = new QFAEngineWindow(600, 600, "File View", true , true, [this]()
 		{
 			Closed = true;
 		});

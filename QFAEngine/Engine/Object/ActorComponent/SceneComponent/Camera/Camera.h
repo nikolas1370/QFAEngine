@@ -1,13 +1,13 @@
 #pragma once
 #include <Object/ActorComponent/SceneComponent/SceneComponent.h>
-class QFAWindow;
+class QFAEngineWindow;
 class QFAOverlord;
 class QFAViewport;
 class QWorld;
 class ACameraEditor;
 class QFAEXPORT QCameraComponent : public QSceneComponent
 {
-	friend QFAWindow;
+	friend QFAEngineWindow;
 	friend QFAOverlord;
 	friend QFAViewport;
 	// Field of view 

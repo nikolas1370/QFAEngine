@@ -150,13 +150,13 @@ struct GLFWwindow;
 class QFAInputAxis1D;
 class QFAInputAxis2D;
 class QFAInputAxis3D;
-class QFAWindow;
+class QFAEngineWindow;
 /*
 	Event process before Tick
 */
 class QFAEXPORT QFAInput
 {
-	friend QFAWindow; 
+	friend QFAEngineWindow; 
 	friend QFAOverlord;
 	friend QFAInputAxis1D;
 	friend QFAInputAxis2D;
@@ -245,7 +245,7 @@ class QFAEXPORT QFAInput
 
 	struct Sinput
 	{
-		QFAWindow* Window;
+		QFAEngineWindow* Window;
 		QFAInput* Input;
 		QFAInput* operator->() const
 		{
@@ -253,7 +253,7 @@ class QFAEXPORT QFAInput
 		}
 	};
 
-	static std::vector<QFAWindow*> WindowList;
+	static std::vector<QFAEngineWindow*> WindowList;
 	static QFAArray<Sinput> Inputs;
 	static FVector2D LastMousePosition;
 
@@ -293,13 +293,13 @@ class QFAEXPORT QFAInput
 	static void MouseMove_callback(GLFWwindow* window, float xoffset, float yoffset);
 	static void ProcessKey(GLFWwindow* _window, int key, int scancode, int action, int mods);
 	/*
-		call when QFAWindow was created
+		call when QFAEngineWindow was created
 	*/
-	static void WindowCreated(QFAWindow* window);
+	static void WindowCreated(QFAEngineWindow* window);
 	/*
-		call when QFAWindow was closed
+		call when QFAEngineWindow was closed
 	*/
-	static void WindowClosed(QFAWindow* window);
+	static void WindowClosed(QFAEngineWindow* window);
 	
 	/*
 	fun be call every frame even when button not push
@@ -327,10 +327,10 @@ public:
 	/*
 		input attach to *window
 	*/
-	QFAInput(QFAWindow* window);
+	QFAInput(QFAEngineWindow* window);
 	~QFAInput();
 
-	void ChangeWindow(QFAWindow* window);
+	void ChangeWindow(QFAEngineWindow* window);
 
 	void ActiveInput(bool activate)
 	{

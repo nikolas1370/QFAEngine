@@ -4,12 +4,12 @@
 
 class QFAShaderProgram;
 class QFAViewport;
-class QFAWindow;
+class QFAEngineWindow;
 
 class QFAEXPORT QDirectionLight : public QObject
 {
 	friend QFAViewport;
-	friend QFAWindow;
+	friend QFAEngineWindow;
 
 	unsigned int depthMapFBO;
 	//const unsigned int SHADOW_WIDTH = 1000, SHADOW_HEIGHT = 1000;
