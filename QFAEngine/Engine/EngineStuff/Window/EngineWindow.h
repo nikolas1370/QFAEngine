@@ -35,7 +35,7 @@ class QFAInput;
 class QFAMeshData;
 class QFAVKSwapChain;
 class QFAUIEvent;
-class QFAViewport;
+class QFAEngineViewport;
 class QFAPresentImage;
 class QFAViewportRoot;
 class QFAVKTextRenderPass;
@@ -45,6 +45,7 @@ class QFAVKTextureSampler;
 class QFAVKBuffer;
 class QFAVKRenderPassDepth;
 class QFAVKInstance;
+class QFAViewport;
 class QFAEXPORT QFAEngineWindow
 {
 	friend QFAText;; 
@@ -56,7 +57,8 @@ class QFAEXPORT QFAEngineWindow
 	friend QFAImage;
 	friend QWorld;
 	friend QFAMeshData;
-
+	friend QFAViewport;
+	friend QFAEngineViewport;
 
 	struct SViewportSemi
 	{
@@ -104,8 +106,7 @@ class QFAEXPORT QFAEngineWindow
 	static VkSemaphore* NextWaitSemi;
 	static QFAImage* ShadowImage;
 	static VkCommandPool commandPool;
-
-
+	
 	GLFWwindow* glfWindow;
 	int Width;
 	int Height;
@@ -115,7 +116,7 @@ class QFAEXPORT QFAEngineWindow
 	VkSurfaceKHR surface;
 	QFAVKSwapChain* SwapChain;
 
-	QFAArray<QFAViewport*> Viewports;
+	
 	
 	VkSemaphore FinisSemaphore;
 	VkSemaphore FinisSemiOtherWindow;
@@ -149,45 +150,72 @@ class QFAEXPORT QFAEngineWindow
 	QFAVKBuffer* PickBuffer;
 	std::function<void(QMeshBaseComponent*)> GetMeshCallback;
 
+protected:
+	QFAArray<QFAEngineViewport*> Viewports;
+	bool RegularWindow = true;
+private:
 	static void QueueSubmitPresent(std::vector<VkSemaphore>& listSemi);
 	// call after QFAEngineWindow::CheckIfNeedResizeWindows
 	static void ProcessGetMeshId();
 	static void PresentWindows();
 	// call Overloed
 	static void ProcessUIEvent();
-	// use after all render and present done
+	// use after all render and present done, every frame
 	static void CheckIfNeedResizeWindows();
 	// call Overlord
 	static void RenderWindows();
 
-public:
-	static QFAEngineWindow* GetMainWindow();
+protected:
+	static QFAEngineWindow* CreateEngineWindow(int width, int height, std::string name, bool inCenter = false, bool decorated = true, std::function<void()> closedFun = nullptr)
+	{
+		return new QFAEngineWindow(width, height, name, inCenter, decorated, closedFun);
+	}
 
 private:
 	void StartFrame();
 	void RenderWindow(bool lastWindow);
+	void RenderViewport(QFAEngineViewport* viewport, size_t i, bool& clear);
 	void BeginCommandBuffer();
 	void EndCommandBufferAndQueueSubmit();
-	void ShadowRender(QFAViewport* viewport);
+	void ShadowRender(QFAEngineViewport* viewport);
 	void CreateViewPortStuff();
 	void createCommandPool();
 	void recreateSwapChain();
-	void DrawActors(QFAViewport* viewport, bool clear, int viewportIndex);
+	void DrawActors(QFAEngineViewport* viewport, bool clear);
 	unsigned int ProcessMeshComponent(QSceneComponent* component, bool shadow);
-	void DrawUI(QFAViewport* viewport, int viewportIndex, bool clear);
+	void DrawUI(QFAEngineViewport* viewport, bool clear);
 	void DrawOffscreenBuffer();
 	void recordCommandBufferTestImege();
 	void createSyncObject();
 	void createCommandBuffer();
 	void PresentFrame(VkSemaphore finishSemi);
-	void StartUIRenderViewPort(int viewportIndex);
+	//void StartUIRenderViewPort(int viewportIndex);
+	void StartUIRenderViewPort(QFAEngineViewport* viewport);
 	void CreateShadow();
 	void SortUIs(QFAViewportRoot* root);
 	void AddUnit(QFAUIUnit* unit);	
+	
 
+
+	QFAEngineWindow(int width, int height, std::string name, bool inCenter = false, bool decorated = true, std::function<void()> closedFun = nullptr);
+protected:
+	QFAEngineWindow();
+	
+	virtual ~QFAEngineWindow();
+
+	inline void SetDropFun(std::function<void(int path_count, const char* paths[])> fun)
+	{
+		DropFunction = fun;
+	}
+	bool ShouldClose();
+
+	inline void SetProcessTickIfWindowsMinimized(bool processTickIfWindowsMinimized)
+	{
+		ProcessTickIfWindowsMinimized = processTickIfWindowsMinimized;
+	}
+	
 public:
-	QFAEngineWindow(int width, int height, std::string name, bool inCenter = false, bool decorated = true, std::function<void ()> closedFun = nullptr);
-	~QFAEngineWindow();
+
 	void AddViewport(QFAViewport* viewport);
 	void RemoveViewport(QFAViewport* viewport);
 	QFAViewport* GetViewport(size_t index);
@@ -195,7 +223,7 @@ public:
 	{
 		return Viewports.Length();
 	}
-	bool ShouldClose();
+
 
 	inline void Close()
 	{
@@ -212,19 +240,14 @@ public:
 	*/
 	bool GetMousePosition(double& x, double& y);
 
-	inline void SetProcessTickIfWindowsMinimized(bool processTickIfWindowsMinimized)
-	{
-		ProcessTickIfWindowsMinimized = processTickIfWindowsMinimized;
-	}
-
-	inline void SetDropFun(std::function<void (int path_count, const char* paths[])> fun)
-	{
-		DropFunction = fun;
-	}
-
 	void GetFocus();
 	void EnabelDecorated(bool enabel);
 	void SetSize(int w, int h);		
 	void MoveToCenter();
+	/*
+		
+		need test in game window
+	
+	*/
 	void GetMeshUnderCursore(std::function<void(QMeshBaseComponent*)> callback);
 };

@@ -2,14 +2,14 @@
 #include <Object/ActorComponent/SceneComponent/SceneComponent.h>
 class QFAEngineWindow;
 class QFAOverlord;
-class QFAViewport;
+class QFAEngineViewport;
 class QWorld;
 class ACameraEditor;
 class QFAEXPORT QCameraComponent : public QSceneComponent
 {
 	friend QFAEngineWindow;
 	friend QFAOverlord;
-	friend QFAViewport;
+	friend QFAEngineViewport;
 	// Field of view 
 	float Fov = 45;
 	float ViewDistance = 100000;
@@ -19,7 +19,7 @@ class QFAEXPORT QCameraComponent : public QSceneComponent
 	FVector FinallyRotation;
 	
 	
-	QFAViewport* Viewport = nullptr;
+	QFAEngineViewport* Viewport = nullptr;
 
 	bool IsActive = true;
 public:

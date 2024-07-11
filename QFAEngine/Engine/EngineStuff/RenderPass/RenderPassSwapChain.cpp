@@ -2,7 +2,7 @@
 #include "RenderPassSwapChain.h"
 #include <EngineStuff/VulkanSuff.h>
 #include <EngineStuff/vk/LogicalDevice.h>
-#include <EngineStuff/Window/Window.h>
+#include <EngineStuff/Window/EngineWindow.h>
 QFAVKRenderPassSwapChain::QFAVKRenderPassSwapChain(VkFormat imageFormat, bool present)
 {
     // VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL

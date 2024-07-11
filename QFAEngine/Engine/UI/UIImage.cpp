@@ -8,7 +8,7 @@
 #include <EngineStuff/vk/ImageView.h>
 #include <EngineStuff/vk/TextureSampler.h>
 #include <EngineStuff/Pipline/Pipline.h>
-#include <EngineStuff/Window/Window.h>
+#include <EngineStuff/Window/EngineWindow.h>
 
 VkDescriptorImageInfo QFAUIImage::imageInfo;
 QFAVKPipeline* QFAUIImage::Pipeline;

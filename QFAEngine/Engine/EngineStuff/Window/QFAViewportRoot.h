@@ -1,13 +1,13 @@
 #pragma once
 #include <UI/UIParentMultipleUnit.h>
 
-class QFAViewport;
+class QFAEngineViewport;
 class QFAEngineWindow;
 class QFAEXPORT QFAViewportRoot : public QFAUIParentMultipleUnit
 {
-	friend QFAViewport;
+	friend QFAEngineViewport;
 	friend QFAEngineWindow;
-	QFAViewport* Viewport;
+	QFAEngineViewport* Viewport;
 
 	void ChangeSize(unsigned int w, unsigned int h) final;
 	void ChangePosition(int x, int y) final;
@@ -20,7 +20,7 @@ public:
 	QFAViewportRoot();
 	~QFAViewportRoot();
 
-	inline QFAViewport* GetViewport()
+	inline QFAEngineViewport* GetViewport()
 	{
 		return Viewport;
 	}

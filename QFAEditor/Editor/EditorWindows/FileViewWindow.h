@@ -7,6 +7,7 @@
 #include <Camera/CameraEditor.h>
 #include <EditorFileStorage.h>
 #include <Overlord/ContentManager.h>
+#include <EngineClassesInterface.h>
 
 class QFAEngineWindow;
 class QWorld;

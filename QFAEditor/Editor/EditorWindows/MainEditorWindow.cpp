@@ -1,6 +1,6 @@
 ﻿#include "epch.h"
 #include "MainEditorWindow.h"
-#include <EngineStuff/Window/Window.h>
+#include <EngineStuff/Window/EngineWindow.h>
 #include <EditorUI/FileExplorer.h>
 #include <EngineStuff/VulkanSuff.h>
 #include <UI/Canvas.h>
@@ -13,8 +13,9 @@
 #include <EditorFileStorage.h>
 #include <Object/Actor/StaticMeshActor.h>
 #include <EditorUI/GameViewportInfo.h>
-#include <EngineStuff/Window/Viewport.h>
+#include <EngineStuff/Window/ViewportHolder.h>
 #include <Tools/String.h>
+#include <UI/TextInput.h>
 
 QFAEditorMainWindow* QFAEditorMainWindow::MainWindow = nullptr;
 QFAText::SFont* QFAEditorMainWindow::Icomonfont;
@@ -28,7 +29,8 @@ QFAEditorMainWindow::QFAEditorMainWindow()
 	QFAOverlord::SetShdowFpsInConsole(false);
 	QFAOverlord::EnableFpsLock(true);
 	QFAOverlord::SetLimitFpsCount(60);
-	Window = new QFAEngineWindow(LoaderWidth, LoaderHeight, "QFAEditor", true, false);
+	
+	Window = QFAEditorWindow::CreateEngineWindow(LoaderWidth, LoaderHeight, "QFAEditor", true, false);
 
 	QFAText::SFont* font;
 	if (QFAText::ELoadFontResult res = QFAText::LoadFont("SomeFont/Roboto-Regular.ttf", font))
@@ -56,7 +58,7 @@ QFAEditorMainWindow::~QFAEditorMainWindow()
 void QFAEditorMainWindow::CreateMainEdirorUI()
 {	
 	CreateInput();
-	QFAViewport* mainViewPort = Window->GetViewport(0);
+	QFAEngineViewport* mainViewPort = Window->GetViewport(0);
 	mainViewPort->GetRoot()->removeAllUnit();
 
 	WindowCanvas = new QFAUICanvas;	
@@ -83,12 +85,14 @@ void QFAEditorMainWindow::CreateMainEdirorUI()
 	Window->MoveToCenter();
 	Window->EnabelDecorated(true);	
 	PrepareGameViewport();	
+	// swith viewports, game viewport be under editor ui
+	((QFAEditorWindow*)Window)->Viewports[1] = ((QFAEditorWindow*)Window)->Viewports[0]; // ui viewport
+	((QFAEditorWindow*)Window)->Viewports[0] = GameViewport;
 }
 
-#include <UI/TextInput.h>
 void QFAEditorMainWindow::PrepareGameViewport()
 {
-	GameViewport = new QFAViewport();
+	GameViewport = (QFAEditorViewportHolder*)new QFAViewportHolder();
 	Window->AddViewport(GameViewport);
 	GameViewport->SetParameters(0.0f, 0.0f, 0.7f, 0.7f);
 
@@ -98,7 +102,7 @@ void QFAEditorMainWindow::PrepareGameViewport()
 	EditorCamera->SetTick(false);
 	EditorCamera->SetActorPosition(FVector(-200, 0, 0));
 	EditorCamera->SetActorRotation(0);
-	EditorCamera->ActivateCamera(GameViewport);
+	EditorCamera->ActivateCamera(((QFAEditorWindow*)&GameViewport->HoldedWindow)->Viewports[0]);
 
 	((QEditorWorld*)&Worlds[0])->SetEditorActor(EditorCamera);
 }
@@ -123,6 +127,7 @@ void QFAEditorMainWindow::PrepareCallback()
 
 void QFAEditorMainWindow::AddActorToWorlds(QActor* actor, std::u32string actorName, size_t id, bool isCppClass)
 {
+	std::cout << "QFAEditorMainWindow::AddActorToWorlds\n";
 	Worlds[0].AddActor(actor);
 	GameViewportInfo->AddActor(actor, actorName, id, isCppClass);
 }
@@ -135,7 +140,8 @@ void QFAEditorMainWindow::GameCompileCallback(QFAGameCode::CompileStatus status)
 
 void QFAEditorMainWindow::CreateInput()
 {
-	Window->SetDropFun([this](int path_count, const char* paths[])
+	
+	((QFAEditorWindow*)Window)->SetDropFun([this](int path_count, const char* paths[])
 		{
 			if (WindowCanvas)
 				FileExplorer->DropFiles(path_count, paths);
@@ -223,7 +229,6 @@ void QFAEditorMainWindow::EndDragAndDrop(EKey::Key key)
 		
 		size_t id = MainWindow->CurentDragId;
 		MainWindow->CurentDragId = 0;
-
 		double x, y;
 		MainWindow->Window->GetMousePosition(x, y);
 		if (x >= viewportX && y >= viewportY &&
@@ -241,8 +246,7 @@ void QFAEditorMainWindow::EndDragAndDrop(EKey::Key key)
 					newActor->SetActorPosition(0);
 					MainWindow->AddActorToWorlds(newActor,
 						QFAString::CharsTo32Chars(newObjectClass->GetName()),
-						newObjectClass->GetId(), true);
-					
+						newObjectClass->GetId(), true);					
 				}
 				else
 					std::cout << "Class not based on Actor\n";
@@ -276,7 +280,7 @@ void QFAEditorMainWindow::PickMesh(EKey::Key key)
 
 void QFAEditorMainWindow::CreateLoadUI()
 {
-	QFAViewport* mainViewPort = Window->GetViewport(0);
+	QFAEngineViewport* mainViewPort = Window->GetViewport(0);
 	QFAUISlot::SCanvasSlot slot;
 	LoadCanvas = new QFAUICanvas;
 	TextList = new QFAUIList;

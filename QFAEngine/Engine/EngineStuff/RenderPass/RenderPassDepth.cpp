@@ -2,7 +2,7 @@
 #include "RenderPassDepth.h"
 #include <EngineStuff/VulkanSuff.h>
 #include <EngineStuff/vk/LogicalDevice.h>
-#include <EngineStuff/Window/Window.h>
+#include <EngineStuff/Window/EngineWindow.h>
 QFAVKRenderPassDepth::QFAVKRenderPassDepth()
 {
     VkAttachmentDescription depthAttachment{};

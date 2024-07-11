@@ -4,7 +4,7 @@
 
 #include <vulkan/vulkan_core.h>
 #include <array>
-#include <EngineStuff/Window/Window.h>
+#include <EngineStuff/Window/EngineWindow.h>
 #include <EngineStuff/vk/TextureSampler.h>
 #include <EngineStuff/vk/ImageView.h>
 #include <EngineStuff/Pipline/Pipline.h>
@@ -188,7 +188,7 @@ public:
 };
 
 class QFAShaderProgram;
-class QFAViewport;
+class QFAEngineViewport;
 class QFAEngineWindow;
 class QFAVKPipeline;
 class QStaticMesh;
@@ -198,7 +198,7 @@ class QFAEXPORT QMeshBaseComponent : public QSceneComponent
 {
 	friend QStaticMesh;
 	friend QFAEngineWindow;
-	friend QFAViewport;
+	friend QFAEngineViewport;
 	friend QFAOverlord;
 	friend QFAMeshData;
 private:
@@ -292,7 +292,7 @@ private:
 	static void CreateShadowPipline();
 
 protected:
-	static void StartFrameViewpoet(glm::mat4& viewPortProjection, glm::mat3& cameraRotationMatrix, glm::mat4& directionLightMatrix, int viewportIndex);
+	static void StartFrameViewpoet(glm::mat4& viewPortProjection, glm::mat3& cameraRotationMatrix, glm::mat4& directionLightMatrix);
 
 private:
 	void UpdateModelMatrix() override;

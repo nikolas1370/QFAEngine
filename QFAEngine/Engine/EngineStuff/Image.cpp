@@ -4,7 +4,7 @@
 #include <EngineStuff/vk/PhysicalDevice.h>
 #include <EngineStuff/vk/LogicalDevice.h>
 #include <Tools/File/FileSystem.h>
-#include <EngineStuff/Window/Window.h>
+#include <EngineStuff/Window/EngineWindow.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 

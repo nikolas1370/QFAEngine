@@ -201,7 +201,7 @@ void QMeshBaseComponent::Render(VkCommandBuffer commandBuffer, bool shadow, FVec
 
 
 
-void QMeshBaseComponent::StartFrameViewpoet(glm::mat4& viewPortProjection, glm::mat3& cameraRotationMatrix, glm::mat4& directionLightMatrix, int viewportIndex)
+void QMeshBaseComponent::StartFrameViewpoet(glm::mat4& viewPortProjection, glm::mat3& cameraRotationMatrix, glm::mat4& directionLightMatrix)
 {
 	QMeshBaseComponent::UBOVertex ubo{};
 

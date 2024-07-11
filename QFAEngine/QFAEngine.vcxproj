@@ -192,6 +192,7 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\EngineStuff\Window\ViewportHolder.cpp" />
     <ClCompile Include="Engine\Math\Math.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -252,8 +253,8 @@
     <ClCompile Include="Engine\EngineStuff\vk\VKInstance.cpp" />
     <ClCompile Include="Engine\EngineStuff\Window\QFAViewportRoot.cpp" />
     <ClCompile Include="Engine\EngineStuff\Window\UIEvent.cpp" />
-    <ClCompile Include="Engine\EngineStuff\Window\Viewport.cpp" />
-    <ClCompile Include="Engine\EngineStuff\Window\Window.cpp" />
+    <ClCompile Include="Engine\EngineStuff\Window\EngineViewport.cpp" />
+    <ClCompile Include="Engine\EngineStuff\Window\EngineWindow.cpp" />
     <ClCompile Include="Engine\Tools\File\FileSystem.cpp" />
     <ClCompile Include="Engine\Tools\Stuff.cpp" />
     <ClCompile Include="Engine\EngineStuff\VulkanStuff.cpp">
@@ -265,8 +266,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Engine\Window\Viewport.cpp" />
+    <ClCompile Include="Engine\Window\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\EngineStuff\Window\ViewportHolder.h" />
     <ClInclude Include="Engine\Object\ActorComponent\ActorComponent.h" />
     <ClInclude Include="Engine\Object\Actor\Camera\CameraActor.h" />
     <ClInclude Include="Engine\Object\Actor\StaticMeshActor.h" />
@@ -320,8 +324,8 @@
     <ClInclude Include="Engine\EngineStuff\vk\VKStruct.h" />
     <ClInclude Include="Engine\EngineStuff\Window\QFAViewportRoot.h" />
     <ClInclude Include="Engine\EngineStuff\Window\UIEvent.h" />
-    <ClInclude Include="Engine\EngineStuff\Window\Viewport.h" />
-    <ClInclude Include="Engine\EngineStuff\Window\Window.h" />
+    <ClInclude Include="Engine\EngineStuff\Window\EngineViewport.h" />
+    <ClInclude Include="Engine\EngineStuff\Window\EngineWindow.h" />
     <ClInclude Include="Engine\Tools\Array.h" />
     <ClInclude Include="Engine\Tools\Color.h" />
     <ClInclude Include="Engine\Tools\File\FileSystem.h" />
@@ -335,6 +339,8 @@
     <ClInclude Include="Engine\Tools\Debug\OpenGlStuff.h" />
     <ClInclude Include="Engine\Object\Actor\Actor.h" />
     <ClInclude Include="Engine\pch.h" />
+    <ClInclude Include="Engine\Window\Viewport.h" />
+    <ClInclude Include="Engine\Window\Window.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\DirectionLightShadow\Fragment.shader" />

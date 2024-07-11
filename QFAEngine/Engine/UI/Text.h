@@ -3,7 +3,7 @@
 #include <Math/Vector.h>
 #include <EngineStuff/Buffer/VKBuffer.h>
 #include <UI/RenderUnit.h>
-#include <EngineStuff/Window/Window.h>
+#include <EngineStuff/Window/EngineWindow.h>
 #include <Tools/Array.h>
 #include <Tools/Color.h>
 #include "UIParentHiddenChild.h"
@@ -16,7 +16,7 @@ typedef struct FT_LibraryRec_* FT_Library;
 typedef struct FT_FaceRec_* FT_Face;
 /* ------ */
 
-class QFAViewport;
+class QFAEngineViewport;
 class QFAOverlord;
 
 class QFAVKVertexBuffer;
@@ -31,7 +31,7 @@ class QFAUIScroll;
 
 class QFAEXPORT QFAText : public QFAUIRenderUnit
 {
-    friend QFAViewport;
+    friend QFAEngineViewport;
     friend QFAOverlord;
     friend QFAEngineWindow;
     friend QFAVKPipeline;

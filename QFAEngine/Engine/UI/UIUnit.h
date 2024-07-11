@@ -85,7 +85,7 @@ namespace QFAUISlot
 	};
 }
 
-class QFAViewport;
+class QFAEngineViewport;
 class QFAEngineWindow;
 class QFAUIParentMultipleUnit;
 class QFAUICanvas;
@@ -101,7 +101,7 @@ class QFAParentHiddenChild;
 class QFAUIBackground;
 class QFAEXPORT QFAUIUnit
 {
-	friend QFAViewport;
+	friend QFAEngineViewport;
 	friend QFAEngineWindow;
 	friend QFAUIParentMultipleUnit;
 	friend QFAUICanvas;
@@ -250,11 +250,11 @@ protected:
 
 
 	/*
-	* call if one of parent was enable or QFAViewport camera enable.
+	* call if one of parent was enable or QFAEngineViewport camera enable.
 	* and call if parent can be rendered
 	*/
 	inline virtual void ParentEnable() {}
-	// call if one of parent was disable or QFAViewport camera disable.
+	// call if one of parent was disable or QFAEngineViewport camera disable.
 	inline virtual void ParentDisable() {}
 
 	/*
@@ -372,7 +372,7 @@ public:
 		Opacity = opacity;
 	}
 	
-	// min max valude is QFAViewport::MinMaxZIndexUI
+	// min max valude is QFAEngineViewport::MinMaxZIndexUI
 	inline void SetZIndex(int zIndex)
 	{
 		ZIndex = zIndex;

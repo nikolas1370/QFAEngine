@@ -1,7 +1,7 @@
 #pragma once
 #include <UI/UIParent.h>
 #include <Tools/Array.h>
-class QFAViewport;
+class QFAEngineViewport;
 class QFAEngineWindow;
 class QFAUIUnit;
 class QFAUIEvent;
@@ -9,7 +9,7 @@ class QFAUISelectUnit;
 class QFAEXPORT QFAUIParentMultipleUnit : public QFAUIParent
 {
 	friend QFAUIUnit;
-	friend QFAViewport;
+	friend QFAEngineViewport;
 	friend QFAEngineWindow;	
 	friend QFAUIEvent;
 	friend QFAUISelectUnit;

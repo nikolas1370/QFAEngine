@@ -3,6 +3,7 @@
 #include <Object/World/World.h>
 #include <Tools/Array.h>
 #include <EngineStuff/Window/QFAViewportRoot.h>
+#include <Window/Window.h>
 class QCameraComponent;
 class QFAEngineWindow;
 
@@ -13,13 +14,16 @@ class QMeshBaseComponent;
 class QFAUIUnit;
 class QFAUIParentMultipleUnit;
 class QFAEditorMainWindow;
-class QFAEXPORT QFAViewport
+class QFAViewportHolder;
+class QFAWindow;
+class QFAEXPORT QFAEngineViewport
 {
 	friend QFAEngineWindow;
 	friend QFAUIParentMultipleUnit;
 	friend QFAUIUnit;
 	friend QFAEditorMainWindow;
-
+	friend QFAViewportHolder;
+	friend QFAWindow;
 public:
 	static const float MinMaxZIndexUI;
 
@@ -29,14 +33,15 @@ protected:
 		use for render mesh
 	*/
 	static std::vector<QFAVKBuffer*> MeshVertexBuffers;
-
+#if QFA_EDITOR_ONLY
+	static bool InGame;
+#endif
 private:
-	QFAEngineWindow* Window;
+
 	glm::mat4 MatrixPerspective;
 	QCameraComponent* CurentCamera = nullptr;
-	int X, Y;
-	int Width = 1;
-	int Height = 1;
+	
+
 	int WindowWidth = 1, WindowHeight = 1;
 	float XP = 0, YP = 0;
 	float WidthP = 1;
@@ -47,16 +52,31 @@ private:
 	bool IsActive = true;
 	QFAViewportRoot Root;
 
-private:
-	void Settup(int windowWidth, int windowHeight);
-
 protected:
-	void WindowAddMe(QFAEngineWindow* window);
-	void WindowRemoveMe();
+	int Width = 1;
+	int Height = 1;
+	int X, Y;// not use directly call GetPosition
+	QFAWindow* Window;
+#if QFA_EDITOR_ONLY
+	bool RegularViewport = true;
+#endif
 
 public:
-	QFAViewport();
-	~QFAViewport();
+	virtual FVector2D GetPosition() = 0;
+
+protected:
+	void WindowAddMe(QFAWindow* window);
+	void WindowRemoveMe();
+	void SettupInside(int windowWidth, int windowHeight);
+	// need in QFAEngineWindow, 
+	virtual void Settup(int windowWidth, int windowHeight)
+	{
+		SettupInside(windowWidth, windowHeight);
+	}
+	QFAEngineViewport();
+	~QFAEngineViewport();
+public:
+
 
 	void ActivateCamera();
 	void DeactivateCamera();
@@ -90,7 +110,7 @@ public:
 		Root.removeUnit(unit);
 	}
 
-	inline QFAEngineWindow* GetWindow()
+	inline QFAWindow* GetWindow()
 	{
 		return Window;
 	}
@@ -105,10 +125,5 @@ public:
 	inline FVector2D GetSize()
 	{
 		return FVector2D(Width, Height);
-	}
-
-	inline FVector2D GetPosition()
-	{
-		return FVector2D(X, Y);
 	}
 };

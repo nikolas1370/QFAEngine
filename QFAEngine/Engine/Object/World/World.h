@@ -4,7 +4,7 @@
 #include <Tools/Array.h>
 class QActor;
 class QFAOverlord;
-class QFAViewport;
+class QFAEngineViewport;
 class QSceneComponent;
 class QFAEngineWindow;
 class QFALevel;
@@ -17,7 +17,7 @@ class QFAEXPORT QWorld : public QObject
 	
 	friend QFAOverlord;
 	friend QActor;
-	friend QFAViewport;
+	friend QFAEngineViewport;
 	friend QFAEngineWindow;
 	friend QFALevel;
 

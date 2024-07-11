@@ -2,7 +2,7 @@
 #include "Input.h"
 #include <iostream>
 #include <EngineStuff/VulkanSuff.h>
-#include <EngineStuff/Window/Window.h>
+#include <EngineStuff/Window/EngineWindow.h>
 #include <GLFW/glfw3.h>
 std::vector<QFAEngineWindow*> QFAInput::WindowList;
 

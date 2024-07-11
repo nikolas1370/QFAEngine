@@ -2,7 +2,7 @@
 #include "TextRenderPass.h"
 #include <EngineStuff/VulkanSuff.h>
 #include <EngineStuff/vk/LogicalDevice.h>
-#include <EngineStuff/Window/Window.h>
+#include <EngineStuff/Window/EngineWindow.h>
 QFAVKTextRenderPass::QFAVKTextRenderPass(VkFormat imageFormat, bool clear)
 {
 

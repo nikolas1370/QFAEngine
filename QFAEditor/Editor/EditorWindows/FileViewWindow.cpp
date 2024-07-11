@@ -1,6 +1,6 @@
 ﻿#include "epch.h"
 #include "FileViewWindow.h"
-#include <EngineStuff/Window/Window.h>
+#include <EngineStuff/Window/EngineWindow.h>
 #include <Object/World/World.h>
 #include <UI/UIImage.h>
 #include <UI/Canvas.h>	
@@ -9,13 +9,14 @@
 #include <EditorUI/FileViewUnit.h>
 #include <Tools/File/FileSystem.h>
 #include <EngineStuff/Image.h>
-#include <EngineStuff/Window/Viewport.h>
+#include <EngineStuff/Window/EngineViewport.h>
 #include <filesystem>
-
+#include <EngineClassesInterface.h>
 
 QFAEditorFileViewWindow::QFAEditorFileViewWindow()
 {
-	Window = new QFAEngineWindow(600, 600, "File View", true , true, [this]()
+	
+	Window = QFAEditorWindow::CreateEngineWindow(600, 600, "File View", true, true, [this]()
 		{
 			Closed = true;
 		});
@@ -50,7 +51,7 @@ QFAEditorFileViewWindow::QFAEditorFileViewWindow()
 	Slot.Height = 0.95f;
 	DisplayImage->SetSlot(&Slot);
 
-	QFAViewport* mainViewport = Window->GetViewport(0);
+	QFAEngineViewport* mainViewport = Window->GetViewport(0);
 	
 	mainViewport->AddUnit(TopListCanvas);
 	mainViewport->AddUnit(Canvas);
@@ -85,8 +86,8 @@ bool QFAEditorFileViewWindow::IsClosed()
 {
 	if (Closed)
 		return true;
-
-	Closed = Window->ShouldClose();
+	
+	Closed = ((QFAEditorWindow*)Window)->ShouldClose();
 	return Closed; 
 }
 

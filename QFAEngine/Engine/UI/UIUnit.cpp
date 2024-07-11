@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "UIUnit.h"
 #include <UI/UIParentMultipleUnit.h>
-#include <EngineStuff/Window/Viewport.h>
+#include <EngineStuff/Window/EngineViewport.h>
 #include <EngineStuff/Window/UIEvent.h>
 
 void QFAUIUnit::SetPosition(unsigned int x, unsigned int y)
@@ -82,7 +82,7 @@ QFAEngineWindow* QFAUIUnit::GetWindow()
     if (!vr)
         return nullptr;
     
-    QFAViewport* viewport = vr->GetViewport();
+    QFAEngineViewport* viewport = vr->GetViewport();
     if (!viewport)
         return nullptr;
 

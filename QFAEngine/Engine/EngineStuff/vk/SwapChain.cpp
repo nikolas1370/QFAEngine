@@ -5,7 +5,7 @@
 #include <EngineStuff/vk/LogicalDevice.h>
 #include <EngineStuff/Image.h>
 #include <EngineStuff/Buffer/VKBuffer.h>
-#include <EngineStuff/Window/Window.h>
+#include <EngineStuff/Window/EngineWindow.h>
 #include <GLFW/glfw3.h>
 
 QFAVKSwapChain::QFAVKSwapChain(GLFWwindow* window, VkSurfaceKHR surface, VkCommandPool _commandPool)

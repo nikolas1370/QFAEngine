@@ -3,7 +3,7 @@
 #include <Overlord/Time.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
 #include <Object/World/DirectionLight/DirectionLight.h>
-#include <EngineStuff/Window/Viewport.h>
+#include <EngineStuff/Window/ViewportHolder.h>
 #include <Object/Actor/Actor.h>
 #include <UI/UIImage.h>
 #include <UI/Text.h>
@@ -14,7 +14,7 @@
 #include <UI/UIParentOneUnit.h>
 #include <UI/UIParentHiddenChild.h>
 #include <EngineStuff/Window/UIEvent.h>
-#include <EngineStuff/Window/Viewport.h>
+#include <EngineStuff/Window/EngineViewport.h>
 #include <UI/UIUnit.h>
 #include <EngineStuff/vk/PresentImage.h>
 #include <EngineStuff/RenderPass/TextRenderPass.h>
@@ -28,6 +28,7 @@
 #include <EngineStuff/vk/LogicalDevice.h>
 #include <EngineStuff/vk/VKInstance.h>
 #include <GLFW/glfw3.h>
+#include <Window/Viewport.h>
 
 VkCommandPool QFAEngineWindow::commandPool;
 
@@ -176,8 +177,6 @@ QFAEngineWindow::QFAEngineWindow(int width, int height, std::string name, bool i
 
 		createCommandBuffer();
 	}
-	
-
 
 	SwapChain->createFramebuffers(RenderPassSwapChain->renderPass);	
 	frameBuffer = new QFAVKMeshFrameBuffer(commandPool, width, height, imageFormat);
@@ -195,6 +194,12 @@ QFAEngineWindow::QFAEngineWindow(int width, int height, std::string name, bool i
 
 	
 	PickBuffer = new QFAVKBuffer(4, nullptr, true, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+}
+
+
+QFAEngineWindow::QFAEngineWindow()
+{
+
 }
 
 QFAEngineWindow::~QFAEngineWindow()
@@ -226,7 +231,7 @@ void QFAEngineWindow::createCommandBuffer()
 	FinisCommandBuffer = comb[comb.size() - 1];	
 }
 
-void QFAEngineWindow::DrawUI(QFAViewport* viewport, int viewportIndex, bool clear)
+void QFAEngineWindow::DrawUI(QFAEngineViewport* viewport, bool clear)
 {
 	CurentComandBuffer = ViewportStuff[ViewportProcess].comandBuffer;
 	VkRenderPassBeginInfo renderPassInfo{};
@@ -251,8 +256,9 @@ void QFAEngineWindow::DrawUI(QFAViewport* viewport, int viewportIndex, bool clea
 
 
 	VkViewport vkViewport{};
-	vkViewport.x = (float)viewport->X;
-	vkViewport.y = (float)viewport->Y;
+	FVector2D viewPos = viewport->GetPosition();
+	vkViewport.x = viewPos.X;
+	vkViewport.y = viewPos.Y;
 	vkViewport.width = (float)viewport->Width;
 	vkViewport.height = (float)viewport->Height;
 	vkViewport.minDepth = 0.0f;
@@ -264,10 +270,19 @@ void QFAEngineWindow::DrawUI(QFAViewport* viewport, int viewportIndex, bool clea
 	scissor.extent = SwapChain->swapChainExtent;
 	vkCmdSetScissor(CurentComandBuffer, 0, 1, &scissor);
 
-	StartUIRenderViewPort(viewportIndex);
+	StartUIRenderViewPort(viewport);
 
 	SortUIs(&viewport->Root); // parent should add before children
-	for (size_t i = 0; i < SortUIUnits.Length(); i++)
+#if QFA_EDITOR_ONLY
+	size_t len = 0;
+	if (viewport->Window->RegularWindow || QFAViewport::InGame) // ui be rendered if viewport is RegularWindow or game started
+		len = SortUIUnits.Length();
+#else
+	size_t len = SortUIUnits.Length();
+#endif
+
+	for (size_t i = 0; i < len; i++)
+
 	{
 		if (SortUIUnits[i]->CanRender)
 		{
@@ -365,14 +380,13 @@ void QFAEngineWindow::GetMeshUnderCursore(std::function<void(QMeshBaseComponent*
 	GetMeshCallback = callback;
 }
 
-
-void QFAEngineWindow::StartUIRenderViewPort( int viewportIndex )
+void QFAEngineWindow::StartUIRenderViewPort(QFAEngineViewport* viewport)
 {	
 	QFAText::CurentDescriptorSetProject = QFAText::Pipeline->GetSet(0, QFAEngineWindow::ViewportProcess);
 	QFAUIImage::CurentDescriptorSetProject = QFAUIImage::Pipeline->GetSet(0, QFAEngineWindow::ViewportProcess);
 	
 	UniformBufferObject ubo{};
-	ubo.projection = Viewports[viewportIndex]->UIProjection;
+	ubo.projection = viewport->UIProjection;
 	memcpy(ViewportStuff[QFAEngineWindow::ViewportProcess].buffers.uiProjectionBuffer->MapData, &ubo, sizeof(ubo.projection));
 }
 
@@ -488,7 +502,7 @@ void QFAEngineWindow::AddViewport(QFAViewport* viewport)
 {
 	Viewports.Add(viewport);
 	viewport->Settup(Width, Height);
-	viewport->WindowAddMe(this);
+	viewport->WindowAddMe((QFAWindow*)this);
 
 	int activeViewportCount = 0;
 	for (size_t i = 0; i < Windows.size(); i++)
@@ -509,29 +523,54 @@ QFAViewport* QFAEngineWindow::GetViewport(size_t index)
 	if (index < 0 || index >= Viewports.Length())
 		return nullptr;
 	else
-		return Viewports[index];		
+		return (QFAViewport*)Viewports[index];
 }
 
 bool QFAEngineWindow::GetMousePosition(double& x, double& y)
 {
-	if (CursorOnWindow)
+#if QFA_EDITOR_ONLY
+	if (RegularWindow)
 	{
-		glfwGetCursorPos(glfWindow, &x, &y);
-		if (x < 0 || y < 0)
+#endif
+		if (CursorOnWindow)
 		{
-			x = 0; 
-			y = 0;
-		}
-		else if(x >= Width  || y >= Height)
-		{
-			x = Width - 1;
-			y = Height - 1;
-		}
+			glfwGetCursorPos(glfWindow, &x, &y);
+			if (x < 0 || y < 0)
+			{
+				x = 0;
+				y = 0;
+			}
+			else if (x >= Width || y >= Height)
+			{
+				x = Width - 1;
+				y = Height - 1;
+			}
 
-		return true;
+			return true;
+		}
+		else
+			return false;
+#if QFA_EDITOR_ONLY
 	}
 	else
-		return false;
+	{
+		QFAWindow* win = (QFAWindow*)this;
+		double _x;
+		double _y;
+		if (!win->Holder->Window->GetMousePosition(_x, _y))
+			return false;
+
+		if (win->Holder->X <= _x && win->Holder->X + win->Holder->Width >= _x &&
+			win->Holder->Y <= _y && win->Holder->Y + win->Holder->Height >= _y)
+		{
+			x = win->Holder->X - _x;
+			y = win->Holder->Y - _y;
+			return true;
+		}
+		else
+			return false;
+	}
+#endif
 }
 
 void QFAEngineWindow::createCommandPool()
@@ -584,7 +623,7 @@ void QFAEngineWindow::EndCommandBufferAndQueueSubmit()
 		stopExecute("failed to submit draw command buffer!");
 }
 
-void QFAEngineWindow::ShadowRender(QFAViewport* _viewport)
+void QFAEngineWindow::ShadowRender(QFAEngineViewport* _viewport)
 {
 	CurentComandBuffer = ViewportStuff[ViewportProcess].comandBuffer;
 
@@ -693,8 +732,6 @@ void QFAEngineWindow::RenderWindows()
 		Windows[i]->RenderWindow(lastWindows);		
 	}
 
-	
-
 	PresentWindows();
 }
 
@@ -703,20 +740,36 @@ void QFAEngineWindow::RenderWindow(bool lastWindow)
 	bool clear = true;
 	StartFrame();	
 	for (size_t i = 0; i < Viewports.Length(); i++)
-	{	
-		BeginCommandBuffer();
-		if (Viewports[i]->GetWorld())
-		{
-			clear = false;
-			ShadowRender(Viewports[i]);
-			DrawActors(Viewports[i], i == 0, i);
+	{			
+#if QFA_EDITOR_ONLY		
+		if (Viewports[i]->RegularViewport)
+			RenderViewport(Viewports[i], i, clear);
+		else
+		{			
+			QFAViewportHolder* viewHold = (QFAViewportHolder*)Viewports[i];
+			for (size_t j = 0; j < viewHold->HoldedWindow.Viewports.Length(); j++)
+				RenderViewport(viewHold->HoldedWindow.Viewports[j], i + j, clear);
 		}
-
-		DrawUI(Viewports[i], i, clear);
-		clear = false;
-		EndCommandBufferAndQueueSubmit();
-		ViewportProcess++;
+#else
+		RenderViewport(Viewports[i], i, clear);
+#endif
 	}
+}
+
+void QFAEngineWindow::RenderViewport(QFAEngineViewport* viewport, size_t i, bool& clear)
+{
+	BeginCommandBuffer();
+	if (viewport->GetWorld())
+	{
+		clear = false;
+		ShadowRender(viewport);
+		DrawActors(viewport, i == 0);
+	}
+
+	DrawUI(viewport, clear);
+	clear = false;
+	EndCommandBufferAndQueueSubmit();
+	ViewportProcess++;
 }
 
 void QFAEngineWindow::PresentWindows()
@@ -775,9 +828,10 @@ void QFAEngineWindow::ProcessUIEvent()
 		// don't replase int because in "i" can be minus value 
 		for (int j = (int)Windows[i]->Viewports.Length() - 1; j >= 0; j--)
 		{
-			float xEnd = (float)(Windows[i]->Viewports[j]->X + Windows[i]->Viewports[j]->Width);
-			float yEnd = (float)(Windows[i]->Viewports[j]->Y + Windows[i]->Viewports[j]->Height);
-			if (x >= Windows[i]->Viewports[j]->X && y >= Windows[i]->Viewports[j]->Y &&
+			FVector2D viewPos = Windows[i]->Viewports[j]->GetPosition();
+			float xEnd = (float)(viewPos.X + Windows[i]->Viewports[j]->Width);
+			float yEnd = (float)(viewPos.Y + Windows[i]->Viewports[j]->Height);
+			if (x >= viewPos.X && y >= viewPos.Y &&
 				x <= xEnd && y <= yEnd)
 			{
 				Windows[i]->UIEvent->NewFrame(&Windows[i]->Viewports[j]->Root, (float)x, (float)y, QTime::GetDeltaTime());
@@ -802,10 +856,8 @@ void QFAEngineWindow::CheckIfNeedResizeWindows()
 			for (int j = 0; j < Windows[i]->Viewports.Length(); j++)
 				Windows[i]->Viewports[j]->Settup(Windows[i]->Width, Windows[i]->Height);
 		}
-	}
-	
+	}	
 }
-
 
 void QFAEngineWindow::StartFrame()
 {
@@ -857,7 +909,7 @@ void QFAEngineWindow::CreateShadow()
 
 
 
-void QFAEngineWindow::DrawActors(QFAViewport* _viewport, bool clear, int viewportIndex)
+void QFAEngineWindow::DrawActors(QFAEngineViewport* _viewport, bool clear)
 {
 	CurentComandBuffer = ViewportStuff[ViewportProcess].comandBuffer;
 	VkRenderPassBeginInfo renderPassInfo{};
@@ -881,8 +933,9 @@ void QFAEngineWindow::DrawActors(QFAViewport* _viewport, bool clear, int viewpor
 	vkCmdBindPipeline(CurentComandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, QMeshBaseComponent::Pipeline->GetPipeline());
 
 	VkViewport viewport{};
-	viewport.x = (float)_viewport->X;
-	viewport.y = (float)_viewport->Y;
+	FVector2D viewPos = _viewport->GetPosition();
+	viewport.x = viewPos.X;
+	viewport.y = viewPos.Y;
 	viewport.width = (float)_viewport->Width;
 	viewport.height = (float)_viewport->Height;
 	viewport.minDepth = 0.0f;
@@ -900,7 +953,7 @@ void QFAEngineWindow::DrawActors(QFAViewport* _viewport, bool clear, int viewpor
 	glm::mat4 lightMat = world->GetDirectionDight()->GetLightMatrix();
 	QMeshBaseComponent::StartFrameViewpoet(_viewport->MatrixPerspective,
 		_viewport->CurentCamera->cameraRotationMatrex,
-		lightMat, viewportIndex);
+		lightMat);
 	unsigned int countComponentForRender = 0; 
 	
 	for (size_t i = 0; i < world->Actors.Length(); i++)
@@ -936,7 +989,7 @@ void QFAEngineWindow::CreateViewPortStuff()
 	VkSemaphoreCreateInfo semaphoreInfo{};
 	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 	SViewportStuff vs;
-
+		
 	if (vkCreateSemaphore(QFAVKLogicalDevice::GetDevice(), &semaphoreInfo, nullptr, &vs.semaphore.Actor) != VK_SUCCESS ||
 		vkCreateSemaphore(QFAVKLogicalDevice::GetDevice(), &semaphoreInfo, nullptr, &vs.semaphore.ActorShadow) != VK_SUCCESS ||
 		vkCreateSemaphore(QFAVKLogicalDevice::GetDevice(), &semaphoreInfo, nullptr, &vs.semaphore.Ui) != VK_SUCCESS)
@@ -967,35 +1020,40 @@ void QFAEngineWindow::CreateViewPortStuff()
 
 void QFAEngineWindow::GetFocus()
 {
-	glfwFocusWindow(glfWindow);
+	if (RegularWindow)
+		glfwFocusWindow(glfWindow);
 }
 
 bool QFAEngineWindow::ShouldClose()
 {
-	return glfwWindowShouldClose(glfWindow) || NeedClose;
-}
-
-QFAEngineWindow* QFAEngineWindow::GetMainWindow()
-{
-	return Windows[0];
+	if (RegularWindow)
+		return glfwWindowShouldClose(glfWindow) || NeedClose;
+	else
+		return false;
 }
 
 void QFAEngineWindow::EnabelDecorated(bool enabel)
 {
-	glfwSetWindowAttrib(glfWindow, GLFW_DECORATED, enabel);
+	if (RegularWindow)
+		glfwSetWindowAttrib(glfWindow, GLFW_DECORATED, enabel);
 }
 
 void QFAEngineWindow::SetSize(int w, int h)
 {
-	glfwSetWindowSize(glfWindow, w, h);
+	if(RegularWindow)
+		glfwSetWindowSize(glfWindow, w, h);	
+
 	Width = w;
 	Height = h;
 }
 
 void QFAEngineWindow::MoveToCenter()
 {
-	GLFWmonitor* pm = glfwGetPrimaryMonitor();
-	int x, y, w, h;
-	glfwGetMonitorWorkarea(pm, &x, &y, &w, &h);
-	glfwSetWindowPos(glfWindow, w / 2 - Width / 2 + x, h / 2 - Height / 2 + y);
+	if(RegularWindow)
+	{
+		GLFWmonitor* pm = glfwGetPrimaryMonitor();
+		int x, y, w, h;
+		glfwGetMonitorWorkarea(pm, &x, &y, &w, &h);
+		glfwSetWindowPos(glfWindow, w / 2 - Width / 2 + x, h / 2 - Height / 2 + y);
+	}
 }

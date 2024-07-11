@@ -4,6 +4,7 @@
 #include <GameCodeTool/GameCodeCompiler.h>
 #include <Input/Input.h>
 #include <Object/World/World.h>
+#include <EngineClassesInterface.h>
 
 class QEditorWorld : public QWorld
 {
@@ -17,6 +18,7 @@ class QFAEditorOverlord;
 class QFAUIList;
 class ACameraEditor;
 class QFAEditorGameViewportInfo;
+class QFAViewportHolder;
 class QFAEditorMainWindow
 {
 	friend QFAEditorOverlord;
@@ -37,7 +39,7 @@ class QFAEditorMainWindow
 	
 
 	QFAEngineWindow* Window;
-	QFAViewport* GameViewport;
+	QFAEditorViewportHolder* GameViewport;
 
 	QFAUICanvas* LoadCanvas;
 	QFAUIList* TextList;

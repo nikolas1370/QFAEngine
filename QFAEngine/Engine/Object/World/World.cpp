@@ -3,8 +3,8 @@
 #include <Object/Actor/Actor.h>
 #include <Overlord/Overlord.h>
 #include <Overlord/Time.h>
-#include <EngineStuff/Window/Viewport.h>
-#include <EngineStuff/Window/Window.h>
+#include <EngineStuff/Window/EngineViewport.h>
+#include <EngineStuff/Window/EngineWindow.h>
 
 QFAArray<QWorld*> QWorld::Worlds;
 

@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "CameraActor.h"
-#include <EngineStuff/Window/Viewport.h>
+#include <EngineStuff/Window/EngineViewport.h>
 ACameraActor::ACameraActor()
 {
 	CanTick = true;
@@ -12,7 +12,7 @@ ACameraActor::~ACameraActor()
 
 }
 
-void ACameraActor::ActivateCamera(QFAViewport* viewport)
+void ACameraActor::ActivateCamera(QFAEngineViewport* viewport)
 {
 
 	Camera.Activate();	

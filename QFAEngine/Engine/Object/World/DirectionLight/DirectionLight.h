@@ -3,12 +3,12 @@
 #include <Math/Vector.h>
 
 class QFAShaderProgram;
-class QFAViewport;
+class QFAEngineViewport;
 class QFAEngineWindow;
 
 class QFAEXPORT QDirectionLight : public QObject
 {
-	friend QFAViewport;
+	friend QFAEngineViewport;
 	friend QFAEngineWindow;
 
 	unsigned int depthMapFBO;

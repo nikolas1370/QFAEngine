@@ -17,7 +17,7 @@ typedef struct FT_FaceRec_*  FT_Face;
 /* ------ */
 
 
-class QFAViewport;
+class QFAEngineViewport;
 class QFAOverlord;
 class QFAEngineWindow;
 class QFAVKVertexBuffer;

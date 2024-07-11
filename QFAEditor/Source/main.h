@@ -21,7 +21,7 @@ public:
         
     }
 };
-/*
+
 #include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
 class QTest_ActorMinusOne : public QActor
 {
@@ -40,7 +40,9 @@ public:
         
 
         в картінку тоже нада файл передавать і удалять його якшо він є
-        * /
+        */
+
+        
 
         mesh = new QStaticMesh(QFAContentManager::GetMesh(U"Content\\Arrow.qfa"));        
         //mesh = new QStaticMesh(QFAContentManager::GetMesh(U"Content\\untitled.qfa"));
@@ -63,11 +65,12 @@ public:
     }
 
 };
-*/
 
-#include <Render/Window/Window.h>
-#include <Render/Window/Viewport.h>
-#include <Render/UI/UIImage.h>
+
+/*
+#include <EngineStuff/Window/EngineWindow.h>
+#include <Window/Viewport.h>
+#include <UI/UIImage.h>
 class QTest_ActorMinusOne : public QActor
 {
     QFAClassIn(QTest_ActorMinusOne);
@@ -82,13 +85,13 @@ private:
     bool SetImage1 = true;
 public:
     QTest_ActorMinusOne()
-    {
-        QFAViewport* viewport = QFAWindow::GetMainWindow()->GetViewport(0);
+    {        
+        QFAViewport* viewport = QFAWindow::GetWindow()->GetViewport(0);
 
         /*
             зробить шоб неможна було це зробить в едіторі тіки коли ігра запущина
 
-        */
+        * /
 
         UIImage = new QFAUIImage(Image1 = QFAContentManager::GetImage(U"Content\\Jopa.qfa"));
         viewport->AddUnit(UIImage);
@@ -104,7 +107,7 @@ public:
 
 
 };
-
+*/
 
 class QTest_Actor : public QActor
 {
