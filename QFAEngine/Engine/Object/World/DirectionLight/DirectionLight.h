@@ -8,6 +8,7 @@ class QFAEngineWindow;
 
 class QFAEXPORT QDirectionLight : public QObject
 {
+	QFAEngineClassIn();
 	friend QFAEngineViewport;
 	friend QFAEngineWindow;
 

@@ -1,8 +1,7 @@
 #include "pch.h"
 #include "DirectionLight.h"
 #include <EngineStuff/VulkanSuff.h>
-
-
+QFAEngineClassOut(QDirectionLight, QFAClass::ObjectClasses::DirectionLight);
 QDirectionLight::QDirectionLight()
 {
 

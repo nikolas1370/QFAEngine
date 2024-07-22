@@ -49,9 +49,8 @@ const wchar_t* QFAGameCode::PdbHot_1Path = L"Source/x64/release/HotReload_1/Game
 const wchar_t* QFAGameCode::PdbHot_2Path = L"Source/x64/release/HotReload_2/GameCode.pdb";
 #endif
 
-void* QFAGameCode::GameCodeModule = NULL; // HMODULE
-void* QFAGameCode::OldGameCodeModule = NULL;
-QFAGameCodeFunctions* QFAGameCode::GameCodeAPIFunction = nullptr;
+void* QFAGameCode::GameCodeModule = nullptr; // HMODULE
+void* QFAGameCode::OldGameCodeModule = nullptr;
 
 bool QFAGameCode::Compile()
 {
@@ -107,8 +106,8 @@ void QFAGameCode::ReplacementOldDllObject()
         {
             QFAGameCodeFunctions* oldApi = (QFAGameCodeFunctions*)Functions();
 
-            std::vector<QFAClass*>& oldClasses = oldApi->GetGameClassList();
-            for (size_t i = 0; i < oldClasses.size(); i++) 
+            std::vector<QFAClass*>& oldClasses = oldApi->GetClassList(); 
+            for (size_t i = 0; i < oldClasses.size(); i++)
             {
                 if (QFAClass* newClasses = FindInNewClass(oldClasses[i]->GetName())) 
                 {// write check if old and current class have one parent tree if not du some
@@ -116,7 +115,7 @@ void QFAGameCode::ReplacementOldDllObject()
                     {
                         std::vector<QObject*>& OldActorList = oldApi->GetGameObjectList(oldClasses[i]->GetId());
                         for (size_t j = 0; j < OldActorList.size(); j++)
-                            OldActorList[j]->ReplaceMe(GameCodeAPIFunction->CreateObject(newClasses->GetId()));
+                            OldActorList[j]->ReplaceMe(GetAPI()->CreateObject(newClasses->GetId()));
                     }
                     else if(oldClasses[i]->GetBaseOn() == QFAClass::Actor && newClasses->GetBaseOn() != QFAClass::Actor)
                         stopExecute("Restart editor")
@@ -127,18 +126,16 @@ void QFAGameCode::ReplacementOldDllObject()
                     {
                         std::vector<QObject*>& OldActorList = oldApi->GetGameObjectList(oldClasses[i]->GetId());
                         for (size_t j = 0; j < OldActorList.size(); j++)
-                            OldActorList[j]->ReplaceMe(new QActor);
+                            OldActorList[j]->ReplaceMe(NewObject<QActor>());
                     }                    
                 }
             }
 
-            for (size_t i = 0; i < oldClasses.size(); i++) // 
-            {
-                std::vector<QObject*>& OldObjectList = oldApi->GetGameObjectList(oldClasses[i]->GetId());
-                for (size_t j = 0; j < OldObjectList.size(); j++)
-                    delete OldObjectList[j];
-            }
-
+            FARPROC freeFun = (FARPROC)GetProcAddress((HMODULE)OldGameCodeModule, "___QFAGAMECODEEXPORTFUNCTIONFreeClasses___");
+            if (freeFun)
+                freeFun();
+            else
+                stopExecute("");
 
             FreeLibrary((HMODULE)OldGameCodeModule);
             OldGameCodeModule = nullptr;
@@ -192,7 +189,7 @@ bool QFAGameCode::CopyDll(DllFile f)
 
 QFAClass* QFAGameCode::FindInNewClass(const char* className)
 {
-    std::vector<QFAClass*>& newClasses = GameCodeAPIFunction->GetGameClassList();
+    std::vector<QFAClass*>& newClasses = GetAPI()->GetClassList();
     for (size_t i = 0; i < newClasses.size(); i++)
         if (std::strcmp(className, newClasses[i]->GetName()) == 0)
             return newClasses[i];
@@ -290,7 +287,7 @@ bool QFAGameCode::LoadCode()
     {
         FARPROC Functions = (FARPROC)GetProcAddress(mod, "___QFAGAMECODEEXPORTFUNCTIONGETFUNCTIONS___");
         if (Functions)
-            GameCodeAPIFunction = (QFAGameCodeFunctions*)Functions();
+            SetAPI((QFAGameCodeFunctions*)Functions());
         else
         {
             FreeLibrary(mod);

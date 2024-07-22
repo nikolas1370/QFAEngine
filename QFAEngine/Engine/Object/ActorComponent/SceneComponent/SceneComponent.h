@@ -14,13 +14,14 @@ class QFAOverlord;
 */
 class QFAEXPORT QSceneComponent : public QActorComponent
 {
+	QFAEngineClassIn();
 	friend QActor;
 	friend QSceneComponent;
 	friend QMeshBaseComponent;
 	friend QFAOverlord;
 
-	QActor* ParentActor;
-	QSceneComponent* ParentActorComponent;
+	QActor* ParentActor = nullptr;
+	QSceneComponent* ParentActorComponent = nullptr;
 	bool IRootComponent = false;
 
 	/*

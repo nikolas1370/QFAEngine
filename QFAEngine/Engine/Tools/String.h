@@ -35,6 +35,16 @@ public:
 		return outStr;
 	}
 
+	static std::string U32stringToString(std::u32string& str)
+	{
+		std::string outStr;
+		outStr.resize(str.size());
+		for (size_t i = 0; i < str.size(); i++)
+			outStr[i] = (char)str[i];
+
+		return outStr;
+	}
+
 	static std::u32string NumToU32string(size_t num)
 	{
 		std::string str = std::to_string(num);

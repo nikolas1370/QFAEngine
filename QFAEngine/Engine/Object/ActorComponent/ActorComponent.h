@@ -8,6 +8,7 @@ class QActor;
 */
 class QFAEXPORT QActorComponent : public QObject
 {
+	QFAEngineClassIn(QFAClass::ObjectClasses::ActorComponent);
 	friend QWorld;
 	friend QActor;
 

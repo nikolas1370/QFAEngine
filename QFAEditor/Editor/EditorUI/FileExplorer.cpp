@@ -234,12 +234,13 @@ void QFAUIEditorFileExplorer::UpdateFolderItemList()
 
 void QFAUIEditorFileExplorer::UpdateCppItemList()
 {
-	if (!QFAGameCode::GameCodeAPIFunction)
+	if (!QFAGameCode::GetAPI())
 		return;
 
-	std::vector<QFAClass*>& classList = QFAGameCode::GameCodeAPIFunction->GetGameClassList();
+	std::vector<QFAClass*>& classList = QFAGameCode::GetAPI()->GetGameClassList();
 	CppItemList->RemoveAllUnit();
 	CppUnitInUse = 0;
+	
 	for (size_t i = 0; i < classList.size(); i++)
 	{
 		if (CppUnitInUse == CppUnitList.size())
@@ -384,7 +385,7 @@ void QFAUIEditorFileExplorer::NotifyMainEditorWindowDrag(QFAEditorExplorerFolder
 	} 
 	else
 	{
-		std::vector<QFAClass*>& classList = QFAGameCode::GameCodeAPIFunction->GetGameClassList();
+		std::vector<QFAClass*>& classList = QFAGameCode::GetAPI()->GetGameClassList();
 		for (size_t i = 0; i < CppUnitInUse; i++)
 			if (CppUnitList[i] == unit)
 				return DragFun(true, classList[i]->GetId());

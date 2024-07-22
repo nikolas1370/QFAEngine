@@ -2,6 +2,7 @@
 #include "ShaderCompiler/ShaderCompiler.h"
 #include <thread>
 #include <EditorFileStorage.h>
+
 class QFAEditorMainWindow;
 class QFAEditorOverlord
 {
@@ -11,11 +12,7 @@ class QFAEditorOverlord
 	static QFAEditorFileStorage Storage;
 
 	static bool InitializationDon;
-	static bool NewLoadText;
 	static std::u32string LoadText;
-	static std::u32string LoadText_2;
-
-	static std::thread* LoadThread;
 
 	static void Init();
 	// call from not main thread
@@ -27,3 +24,6 @@ class QFAEditorOverlord
 public:
 	static void StartLife();
 };
+
+
+

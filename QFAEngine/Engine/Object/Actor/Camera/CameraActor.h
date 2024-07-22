@@ -6,9 +6,10 @@
 
 class QFAEXPORT ACameraActor : public QActor
 {
-	
+	QFAEngineClassIn();
 protected:
 	QCameraComponent Camera = QCameraComponent(45.0f, 100000.0f);
+
 public:
 	ACameraActor();
 	~ACameraActor();

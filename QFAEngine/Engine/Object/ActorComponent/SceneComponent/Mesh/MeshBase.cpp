@@ -7,13 +7,12 @@
 #include <EngineStuff/Pipline/Pipline.h>
 #include <EngineStuff/Buffer/VertexBuffer.h>
 #include <Tools/File/FileSystem.h>
-
 QMeshBaseComponent::SShaderDirLight QMeshBaseComponent::ShaderDL;
 
 glm::mat4 QMeshBaseComponent::LightMatrix;
 
-QFAVKPipeline* QMeshBaseComponent::Pipeline;
-QFAVKPipeline* QMeshBaseComponent::ShadowPipline;
+QFAVKPipeline* QMeshBaseComponent::Pipeline = nullptr;
+QFAVKPipeline* QMeshBaseComponent::ShadowPipline = nullptr;
 
 VkCommandPool QMeshBaseComponent::CommandPool;
 VkRenderPass QMeshBaseComponent::RenderPass;
@@ -33,6 +32,7 @@ std::vector<VkDescriptorSet> QMeshBaseComponent::ShadowDescriptorSets;
 std::vector<QMeshBaseComponent*> QMeshBaseComponent::MeshIdList;
 unsigned int QMeshBaseComponent::MaxMeshId;
 
+QFAEngineClassOut(QMeshBaseComponent, QFAClass::ObjectClasses::MeshBase);
 
 QFAMeshData::QFAMeshData(int vertexCount, int indexCount, int materialCount, int notNed)
 {	

@@ -7,6 +7,7 @@ class QWorld;
 class ACameraEditor;
 class QFAEXPORT QCameraComponent : public QSceneComponent
 {
+	QFAEngineClassIn();
 	friend QFAEngineWindow;
 	friend QFAOverlord;
 	friend QFAEngineViewport;

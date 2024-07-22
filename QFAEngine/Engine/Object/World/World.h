@@ -10,7 +10,7 @@ class QFAEngineWindow;
 class QFALevel;
 class QFAEXPORT QWorld : public QObject
 {
-
+	QFAEngineClassIn();
 #if QFA_EDITOR_ONLY
 	friend QActor;// for QActor::ReplaceMe
 #endif 
@@ -38,6 +38,7 @@ protected:
 	static void ProcessSceneComponentTick(QSceneComponent* component);
 #if QFA_EDITOR_ONLY
 	void SetEditorActor(QActor* actor);
+	
 #endif 
 	
 public:
@@ -62,4 +63,11 @@ public:
 	{
 		Enable = enable;
 	}
+
+	inline size_t GetActorSize()
+	{
+		return Actors.Length();
+	}
+
+	void DestroyWorld(bool deleteAllActor = true);
 };

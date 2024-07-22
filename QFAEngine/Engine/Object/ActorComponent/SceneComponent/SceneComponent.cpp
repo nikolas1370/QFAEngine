@@ -2,7 +2,7 @@
 #include "SceneComponent.h"
 #include <Object/Actor/Actor.h>
 #include <Object/World/World.h>
-
+QFAEngineClassOut(QSceneComponent, QFAClass::ObjectClasses::SceneComponent);
 
 QSceneComponent::QSceneComponent()
 {

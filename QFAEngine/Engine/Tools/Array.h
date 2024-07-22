@@ -90,5 +90,10 @@ public:
     {
         return vector.data();
     }
+
+    inline void Reserve(size_t size)
+    {
+        vector.reserve(size);
+    }
 };
 

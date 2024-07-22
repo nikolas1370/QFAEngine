@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "StaticMesh.h"
 #include <EngineStuff/VulkanSuff.h>
-
+QFAEngineClassOut(QStaticMesh, QFAClass::ObjectClasses::StaticMesh);
 QStaticMesh::QStaticMesh(QFAMeshData* meshData)
 {
 	SetMesh(meshData);

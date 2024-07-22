@@ -1,8 +1,11 @@
 #include "pch.h"
 #include "CameraActor.h"
 #include <EngineStuff/Window/EngineViewport.h>
+QFAEngineClassOut(ACameraActor, QFAClass::ObjectClasses::CameraActor);
+
 ACameraActor::ACameraActor()
 {
+
 	CanTick = true;
 	SetRootComponent(&Camera, true);
 }

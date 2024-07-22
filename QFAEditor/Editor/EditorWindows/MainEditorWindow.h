@@ -39,23 +39,23 @@ class QFAEditorMainWindow
 	
 
 	QFAEngineWindow* Window;
-	QFAEditorViewportHolder* GameViewport;
+	QFAEditorViewportHolder* GameViewport = nullptr;
 
-	QFAUICanvas* LoadCanvas;
-	QFAUIList* TextList;
-	QFAText* Text;
-	QFAText* LoadText;
-	QFAText* LoadText_2;
+	QFAUICanvas* LoadCanvas = nullptr;
+	QFAUIList* TextList = nullptr;
+	QFAText* Text = nullptr;
+	QFAText* LoadText = nullptr;
+	QFAText* LoadText_2 = nullptr;
 
 	QFAUICanvas* WindowCanvas = nullptr;
 	QFAUIEditorFileExplorer* FileExplorer;
 
 	QFAEditorGameViewportInfo* GameViewportInfo;
 
-	QFAInput* Input;
+	QFAInput* Input = nullptr;
 	EFocus Focus = EFocus::FNone;
 	bool IsCppClass; // if false it's file(QFAEditorFileTypes) 
-	size_t CurentDragId = 0;// file or cpp class
+	int CurentDragId = 0;// file or cpp class
 	FVector2D PickObjectLastCursorPos;
 
 	bool LeftCTRLPress = false;
@@ -64,8 +64,10 @@ class QFAEditorMainWindow
 		Worlds[0] == EditorWorld
 		Worlds[1] == GameWorld
 	*/
-	QWorld* Worlds = nullptr; // allocated with new[]
+	std::array<QWorld*, 2> Worlds;
 	ACameraEditor* EditorCamera = nullptr;
+
+	QFAEditorLevel* Level = nullptr;
 
 	static void StartDragAndDrop(bool isCppClass, size_t id);
 	static void EndDragAndDrop(EKey::Key key);

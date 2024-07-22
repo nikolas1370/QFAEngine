@@ -16,9 +16,10 @@
 #include <EngineStuff/Window/ViewportHolder.h>
 #include <Tools/String.h>
 #include <UI/TextInput.h>
+#include <EngineClassesInterface.h>
 
 QFAEditorMainWindow* QFAEditorMainWindow::MainWindow = nullptr;
-QFAText::SFont* QFAEditorMainWindow::Icomonfont;
+QFAText::SFont* QFAEditorMainWindow::Icomonfont = nullptr;
 QFAEditorMainWindow::QFAEditorMainWindow()
 {
 	if (MainWindow)
@@ -51,7 +52,8 @@ QFAEditorMainWindow::~QFAEditorMainWindow()
 	{
 		delete WindowCanvas;
 		delete FileExplorer;
-		delete[]Worlds;
+		Worlds[0]->Destroy();
+		Worlds[1]->Destroy();
 	}
 }
 
@@ -85,9 +87,6 @@ void QFAEditorMainWindow::CreateMainEdirorUI()
 	Window->MoveToCenter();
 	Window->EnabelDecorated(true);	
 	PrepareGameViewport();	
-	// swith viewports, game viewport be under editor ui
-	((QFAEditorWindow*)Window)->Viewports[1] = ((QFAEditorWindow*)Window)->Viewports[0]; // ui viewport
-	((QFAEditorWindow*)Window)->Viewports[0] = GameViewport;
 }
 
 void QFAEditorMainWindow::PrepareGameViewport()
@@ -96,15 +95,16 @@ void QFAEditorMainWindow::PrepareGameViewport()
 	Window->AddViewport(GameViewport);
 	GameViewport->SetParameters(0.0f, 0.0f, 0.7f, 0.7f);
 
-	Worlds = new QWorld[2];
-	Worlds[0].SetEnable(false);
-	EditorCamera = new ACameraEditor;
+	Worlds[0] = NewObject<QWorld>();
+	Worlds[1] = NewObject<QWorld>();
+	Worlds[0]->SetEnable(false);
+	EditorCamera = NewObject<ACameraEditor>();
 	EditorCamera->SetTick(false);
 	EditorCamera->SetActorPosition(FVector(-200, 0, 0));
 	EditorCamera->SetActorRotation(0);
 	EditorCamera->ActivateCamera(((QFAEditorWindow*)&GameViewport->HoldedWindow)->Viewports[0]);
 
-	((QEditorWorld*)&Worlds[0])->SetEditorActor(EditorCamera);
+	((QEditorWorld*)Worlds[0])->SetEditorActor(EditorCamera);
 }
 
 void QFAEditorMainWindow::PrepareCallback()
@@ -127,14 +127,12 @@ void QFAEditorMainWindow::PrepareCallback()
 
 void QFAEditorMainWindow::AddActorToWorlds(QActor* actor, std::u32string actorName, size_t id, bool isCppClass)
 {
-	std::cout << "QFAEditorMainWindow::AddActorToWorlds\n";
-	Worlds[0].AddActor(actor);
+	Worlds[0]->AddActor(actor);
 	GameViewportInfo->AddActor(actor, actorName, id, isCppClass);
 }
 
 void QFAEditorMainWindow::GameCompileCallback(QFAGameCode::CompileStatus status)
-{
-	std::cout << "QFAEditorMainWindow::GameCompileCallback\n";	
+{	
 	MainWindow->CompileStarted = false;
 }
 
@@ -209,6 +207,35 @@ void QFAEditorMainWindow::CreateInput()
 			GameViewportInfo->PressedDelete();
 		});
 
+	Input->AddKeyRelease(EKey::S, "s_release", [this](EKey::Key key)
+		{
+			std::cout << "before LeftCTRLPress\n";
+			if (LeftCTRLPress)
+			{
+				if (!Level)
+					Level = new QFAEditorLevel(U"Content/Level.qfa");			
+
+				Level->SaveLevel(Worlds[0]);
+
+				/*--- next code for test ---*/
+				for (size_t i = 0; i < ((QEditorWorld*)Worlds[0])->Actors.Length(); i++)
+				{					
+					((QFAEditorActor*)((QEditorWorld*)Worlds[0])->Actors[i])->ActorWorld = nullptr;
+					QFAEngineGameCode::GetAPI()->DeleteObject(((QEditorWorld*)Worlds[0])->Actors[i]);
+				}
+
+				/*
+				
+				not forget change actor list when load level
+				
+				*/
+
+				Worlds[0]->DestroyWorld(false);					
+				Worlds[0] = Level->GetWorld();  
+				((QEditorWorld*)Worlds[0])->SetEditorActor(EditorCamera);
+			}
+		});
+
 	PrepareCallback();
 }
 
@@ -227,7 +254,7 @@ void QFAEditorMainWindow::EndDragAndDrop(EKey::Key key)
 		double viewportWidth = MainWindow->GameViewport->Width;
 		double viewportHeight = MainWindow->GameViewport->Height;
 		
-		size_t id = MainWindow->CurentDragId;
+		int id = MainWindow->CurentDragId;
 		MainWindow->CurentDragId = 0;
 		double x, y;
 		MainWindow->Window->GetMousePosition(x, y);
@@ -236,13 +263,15 @@ void QFAEditorMainWindow::EndDragAndDrop(EKey::Key key)
 		{
 			if (MainWindow->IsCppClass)
 			{
-				if (!QFAGameCode::GameCodeAPIFunction)
+				if (!QFAGameCode::GetAPI())
 					return;
-			
-				QFAClass* newObjectClass = (QFAGameCode::GameCodeAPIFunction->GetGameClassList()[id - 1]);
-				if (newObjectClass->GetBaseOn() == QFAClass::EBaseOn::Actor)
+
+				QFAClass* newObjectClass = (QFAGameCode::GetAPI()->GetClassList()[id]);
+				if (newObjectClass->GetBaseOn() == QFAClass::ObjectClasses::Actor || 
+					newObjectClass->GetBaseOn() == QFAClass::ObjectClasses::StaticMeshActor || 
+					newObjectClass->GetBaseOn() == QFAClass::ObjectClasses::CameraActor)
 				{
-					QActor* newActor = (QActor*)QFAGameCode::GameCodeAPIFunction->CreateObject(newObjectClass->GetId());
+					QActor* newActor = (QActor*)QFAGameCode::GetAPI()->CreateObject(newObjectClass->GetId());
 					newActor->SetActorPosition(0);
 					MainWindow->AddActorToWorlds(newActor,
 						QFAString::CharsTo32Chars(newObjectClass->GetName()),
@@ -257,8 +286,13 @@ void QFAEditorMainWindow::EndDragAndDrop(EKey::Key key)
 				if (ef.Id == 0)
 					return;
 				else if (ef.fileType == QFAEditorFileStorage::QFAFileTypes::EFTMesh)
-				{
-					AStaticMeshActor* staticActor = new AStaticMeshActor;
+				{					 
+					AStaticMeshActor* staticActor = (AStaticMeshActor*)(QFAGameCode::GetAPI()->CreateObject(QFAClass::ObjectClasses::StaticMeshActor));
+
+					staticActor->GetClass()->GetId();
+
+
+
 					staticActor->SetActorPosition(0);
 					staticActor->SetMesh((QFAMeshData*)ef.file);
 					MainWindow->AddActorToWorlds(staticActor, 
@@ -280,7 +314,7 @@ void QFAEditorMainWindow::PickMesh(EKey::Key key)
 
 void QFAEditorMainWindow::CreateLoadUI()
 {
-	QFAEngineViewport* mainViewPort = Window->GetViewport(0);
+	QFAEngineViewport* mainViewPort = ((QFAEditorWindow*)Window)->Viewports[0];
 	QFAUISlot::SCanvasSlot slot;
 	LoadCanvas = new QFAUICanvas;
 	TextList = new QFAUIList;
@@ -309,6 +343,7 @@ void QFAEditorMainWindow::CreateLoadUI()
 	slot.y = 30.0f;
 	TextList->SetSlot(&slot);
 
+	//std::cout << mainViewPort << "\n";
 	mainViewPort->AddUnit(LoadCanvas);
 }
 

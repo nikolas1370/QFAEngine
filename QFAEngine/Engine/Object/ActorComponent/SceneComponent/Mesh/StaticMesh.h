@@ -4,6 +4,7 @@
 
 class QFAEXPORT QStaticMesh : public QMeshBaseComponent
 {
+    QFAEngineClassIn();
 public:
 
     QStaticMesh(){}

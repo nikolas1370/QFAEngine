@@ -35,11 +35,13 @@ class QStaticMesh;
 class QMeshBaseComponent;
 class QFAContentManager;
 class QFAFile;
+class QFALevel;
 class QFAEXPORT QFAMeshData
 {	
 	friend QStaticMesh;
 	friend QMeshBaseComponent;
 	friend QFAContentManager;
+	friend QFALevel;
 	struct SMeshInfo
 	{
 		size_t FrameSize;
@@ -61,6 +63,8 @@ class QFAEXPORT QFAMeshData
 	*/
 	char* FramesData;
 	QFAFile* QFile = nullptr; // if QFile == null free(FramesData) else delete QFile
+
+	int FIleid = -1;
 
 	SMeshInfo Mi;
 	QFAVKVertexBuffer* VertexBufer = nullptr;
@@ -196,11 +200,13 @@ class QFAOverlord;
 
 class QFAEXPORT QMeshBaseComponent : public QSceneComponent
 {
+	QFAEngineClassIn();
 	friend QStaticMesh;
 	friend QFAEngineWindow;
 	friend QFAEngineViewport;
 	friend QFAOverlord;
 	friend QFAMeshData;
+	friend QFALevel;
 private:
 	struct SBufferVertex
 	{
@@ -269,13 +275,14 @@ private:
 protected:
 	static glm::mat4 LightMatrix;
 
+
 private:
 	SPushConstantPickId PickId;
 	bool CastShadow = true;
 	// if Materials == nulptr use Default Material
 	Material* Materials = nullptr;
 	glm::mat4 ModelMatrix = Math::DefauldMatrix4;
-	QFAMeshData* Mf;
+	QFAMeshData* Mf = nullptr;
 
 public:
 	virtual int GetIndexCount() = 0;
@@ -369,4 +376,12 @@ public:
 	std::array<VkDescriptorSet, 2> GetNextSets();
 
 	VkDescriptorSet GetShadowNextSet();
+
+	int GetMeshDataFileId()
+	{
+		if (Mf)
+			return Mf->FIleid;
+
+		return 0;
+	}
 };

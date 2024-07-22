@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "StaticMeshActor.h"
-
+QFAEngineClassOut(AStaticMeshActor, QFAClass::ObjectClasses::StaticMeshActor);
 AStaticMeshActor::AStaticMeshActor()
 {
 	SetRootComponent(&Mesh, true);

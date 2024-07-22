@@ -2,6 +2,7 @@
 #include "Actor.h"
 #include <Object/World/World.h>
 #include <Object/ActorComponent/SceneComponent/SceneComponent.h>
+QFAEngineClassOut(QActor, QFAClass::ObjectClasses::Actor);
 QActor::QActor()
 {
 
@@ -118,7 +119,10 @@ bool QActor::SetRootComponent(QSceneComponent* component, bool inseparable)
 	return true;
 }
 
+
+
 #if QFA_EDITOR_ONLY
+
 void QActor::ReplaceMe(QObject* newActor)
 {
 	if(ActorWorld)

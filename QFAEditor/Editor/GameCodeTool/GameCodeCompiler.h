@@ -1,13 +1,13 @@
 #pragma once
 #include <filesystem>
 #include <Object/Class.h>
-
+#include <Overlord/GameCode.h>
 
 class QFAEditorMainWindow;
 class QFAEditorOverlord;
 class QFAGameCodeFunctions;
 class QFAUIEditorFileExplorer;
-class QFAGameCode
+class QFAGameCode : public QFAEngineGameCode
 {
 	friend QFAEditorMainWindow;
 	friend QFAEditorOverlord;
@@ -44,7 +44,7 @@ class QFAGameCode
 
 	static void* GameCodeModule;// GameCodeModule is HMODULE, don't wanna include windows.h
 	static void* OldGameCodeModule;	
-	static QFAGameCodeFunctions* GameCodeAPIFunction;
+
 
 	static DllFile CurentDllFile;
 	static bool DllWasCompiled;

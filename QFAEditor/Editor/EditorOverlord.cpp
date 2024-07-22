@@ -1,5 +1,6 @@
-#include "epch.h"
+﻿#include "epch.h"
 #include "EditorOverlord.h"
+#include <Object/Class.cpp> // see reason in Object/Class.h
 
 #include <Overlord/Time.h>
 #include <Overlord/Overlord.h>
@@ -9,25 +10,25 @@
 #include <GameCodeTool/GameCodeCompiler.h>
 
 QFAShaderCompiler QFAEditorOverlord::compiler;
-std::thread* QFAEditorOverlord::LoadThread;
+
 
 bool QFAEditorOverlord::InitializationDon = false;
-bool QFAEditorOverlord::NewLoadText = false;
 std::u32string QFAEditorOverlord::LoadText;
-std::u32string QFAEditorOverlord::LoadText_2;
 QFAEditorMainWindow* QFAEditorOverlord::MainWindow;
 bool QFAEditorOverlord::IsInit = false;
 QFAEditorFileStorage QFAEditorOverlord::Storage;
 
+
 void QFAEditorOverlord::StartLife()
-{
+{  
     if (IsInit)
         return;
     else
         IsInit = true;
 
     Init();
-    LoadThread = new std::thread(QFAEditorOverlord::PrepareToWork);
+    std::jthread LoadThread(QFAEditorOverlord::PrepareToWork);
+    QFAEgitorClass::InitClasses();
     QFAOverlord::StartLife();
 
     delete MainWindow;
@@ -51,11 +52,23 @@ void QFAEditorOverlord::Init()
 
 void QFAEditorOverlord::PrepareToWork()
 {
-    NewLoadText = true;
+
+    /*
+    
+    std::lock_guard
+    
+    отут
+    
+    
+    */
+
     LoadText = U"Load Game code";
-    QFAGameCode::LoadCode();
+    QFAGameCode::LoadCode();  
     LoadText = U"Load file : ";
-    QFAEditorFileStorage::LoadContent(U"Content", LoadText_2, NewLoadText);
+    QFAEditorFileStorage::LoadContent(U"Content", [](std::u32string string)
+    {
+        MainWindow->ChangeLoadInfo(LoadText, string);
+    });
     InitializationDon = true;
 }
 
@@ -65,12 +78,6 @@ void QFAEditorOverlord::StartFrame()
     {
         InitializationDon = false;
         MainWindow->CreateMainEdirorUI();
-    }
-    else if(NewLoadText)
-    {
-        
-        NewLoadText = false;
-        MainWindow->ChangeLoadInfo(LoadText, LoadText_2);        
     }
 }
 

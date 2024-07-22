@@ -6,16 +6,17 @@
 #include <UI/UIImage.h>
 #include <stb_image.h>
 #include <Tools/String.h>
+#include <Object/World/Level.h>
 
-const unsigned short MeshFileVersion = 1;
-const unsigned short ImageFileVersion = 1;
 std::vector<void*> QFAContentManager::Stbi_image; // <stbi_uc*>
 std::vector<QFAContentManager::QFAContentFile> QFAContentManager::Files;
 std::vector<QFAContentManager::QFAContentFolder> QFAContentManager::Folders;
 std::vector<QFAFileSystem::FolderUnit> QFAContentManager::FolderContents; 
+std::function<void(std::u32string)> QFAContentManager::ChangeTextFun;
 
-void QFAContentManager::LoadContent(std::u32string contentFolderPath, std::u32string& textForDisplay, bool& ifTextChange)
+void QFAContentManager::LoadContent(std::u32string contentFolderPath, std::function<void(std::u32string)> changeText)
 {
+	ChangeTextFun = changeText;
 	if (Folders.size() > 0)
 		stopExecute("");
 
@@ -31,10 +32,10 @@ void QFAContentManager::LoadContent(std::u32string contentFolderPath, std::u32st
 	Folders.push_back(mainFolder);
 
 	for (size_t i = 0; i < Folders.size(); i++)
-		LoadFilesInfolder(i, textForDisplay, ifTextChange);
+		LoadFilesInfolder(i);
 }
 
-void QFAContentManager::LoadFilesInfolder(size_t folderIndex, std::u32string& textForDisplay, bool& ifTextChange)
+void QFAContentManager::LoadFilesInfolder(size_t folderIndex)
 {
 	FolderContents.clear();
 	QFAFileSystem::GetFolderContents(Folders[folderIndex].path, FolderContents);
@@ -51,11 +52,13 @@ void QFAContentManager::LoadFilesInfolder(size_t folderIndex, std::u32string& te
 		else if (std::filesystem::path(FolderContents[i].name).extension() == U".qfa")
 		{
 			QFAContentFile sfile;
-			ifTextChange = true;
-			textForDisplay = FolderContents[i].path;			
+			ChangeTextFun(FolderContents[i].path);
 			if (LoadFile(FolderContents[i].path, sfile))
 			{
 				sfile.Id = Files.size();
+				if (sfile.fileType == QFAFileTypes::EFTMesh)
+					((QFAMeshData*)sfile.file)->FIleid = sfile.Id;
+
 				Files.push_back(sfile);
 				Folders[folderIndex].folderUnits.push_back(EditorFolderUnit{ sfile.Id , false});
 			}
@@ -102,59 +105,85 @@ QFAContentManager::QFAContentFile QFAContentManager::WriteImage(std::u32string f
 	return cf;
 }
 
+QFAContentManager::QFAContentFile QFAContentManager::WriteLevel(std::u32string filePath, QFALevel* level)
+{// file write on disk in QFALevel
+	QFAContentFile cf;
+	cf.fileType = QFAFileTypes::EFTLevel;
+	cf.file = level;
+	cf.path = filePath;
+	return cf;
+}
+
 bool QFAContentManager::LoadFile(std::u32string qfaFilePAth, QFAContentFile& sfile)
 {
 	sfile.path = qfaFilePAth;
 	QFAFile* file = new QFAFile;
 	if (QFAFileSystem::LoadFile(qfaFilePAth, file))
 		return false;
-	
+
 	QFAFileOnDisk* eFile = (QFAFileOnDisk*)file->GetData();
-	if (eFile->type == QFAFileTypes::EFTImage)
+	switch (eFile->type)
 	{
-		int texWidth, texHeight, texChannels;
-		stbi_uc* pixels = stbi_load_from_memory(((const unsigned char*)eFile + sizeof(*eFile)), (int)file->GetDataSize() - sizeof(*eFile), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-		if (!pixels)
-			return false;
-
-		QFAImage::SImageCreateInfo ici;
-		ici.Width = texWidth;
-		ici.Height = texHeight;
-		ici.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		ici.createBuffer = false;
-		QFAImage* image = new QFAImage(ici);
-
-		image->SetImage(pixels);
-		Stbi_image.push_back(pixels);
-
-		sfile.fileType = QFAFileTypes::EFTImage;
-		sfile.file = image;
-		delete file;
+		case QFAFileTypes::EFTImage: return LoadFileImage(file, sfile);
+		case QFAFileTypes::EFTMesh:  return LoadFileMesh(file, sfile);
+		case QFAFileTypes::EFTLevel: return LoadFileLevel(file, sfile);
+		default:					 return false;
 	}
-	else if (eFile->type == QFAFileTypes::EFTMesh)
-	{ // mesh data not need delete here, in ~QFAMeshData delete file
-		QFAMeshData* meshData = new QFAMeshData(
-			(QFAMeshData::SMeshInfo*)((char*)eFile + sizeof(*eFile)),
-			((char*)eFile + sizeof(*eFile) + sizeof(QFAMeshData::SMeshInfo)), file);
+}
 
-		sfile.fileType = QFAFileTypes::EFTMesh;
-		sfile.file = meshData;
-	}
-	else
+bool QFAContentManager::LoadFileImage(QFAFile* file, QFAContentFile& sfile)
+{
+	QFAFileOnDisk* eFile = (QFAFileOnDisk*)file->GetData();
+	int texWidth, texHeight, texChannels;
+	stbi_uc* pixels = stbi_load_from_memory(((const unsigned char*)eFile + sizeof(*eFile)), (int)file->GetDataSize() - sizeof(*eFile), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+	if (!pixels)
 		return false;
 
+	QFAImage::SImageCreateInfo ici;
+	ici.Width = texWidth;
+	ici.Height = texHeight;
+	ici.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	ici.createBuffer = false;
+	QFAImage* image = new QFAImage(ici);
+
+	image->SetImage(pixels);
+	Stbi_image.push_back(pixels);
+
+	sfile.fileType = QFAFileTypes::EFTImage;
+	sfile.file = image;
+	delete file;
 	return true;
 }
 
-QFAContentManager::QFAContentFile& QFAContentManager::GetFile(size_t fileId) 
+bool QFAContentManager::LoadFileMesh(QFAFile* file, QFAContentFile& sfile)
 {
-	if(fileId < Files.size())
-		return Files[fileId];
-		
-	stopExecute("");
-	QFAContentFile ef;
-	ef.Id = 0;
-	return ef;
+	QFAFileOnDisk* eFile = (QFAFileOnDisk*)file->GetData();
+	QFAMeshData* meshData = new QFAMeshData(
+		(QFAMeshData::SMeshInfo*)((char*)eFile + sizeof(*eFile)),
+		((char*)eFile + sizeof(*eFile) + sizeof(QFAMeshData::SMeshInfo)), file);
+
+	sfile.fileType = QFAFileTypes::EFTMesh;
+	sfile.file = meshData;
+	return true;
+}
+
+bool QFAContentManager::LoadFileLevel(QFAFile* file, QFAContentFile& sfile)
+{	
+	sfile.fileType = QFAFileTypes::EFTLevel;
+	sfile.file = new QFALevel(sfile.path); // level load data if call QFALevel::GetWorld
+	file->Delete();
+	return true;
+}
+
+
+QFAContentManager::QFAContentFile NotFoundContentFile;
+QFAContentManager::QFAContentFile& QFAContentManager::GetFile(int fileId) 
+{
+	if(fileId >= 0 && fileId < Files.size())
+		return Files[fileId];	
+
+	NotFoundContentFile.Id = -1;
+	return NotFoundContentFile;
 }
 
 std::u32string QFAContentManager::GetFolderPath(size_t folderId)
@@ -190,6 +219,13 @@ void QFAContentManager::GetFolderContents(size_t folderId, std::vector<QFAFileSy
 	}
 }
 
+QFAContentManager::QFAContentFolder& QFAContentManager::GetFolder(std::u32string path)
+{
+	for (size_t i = 0; i < Folders.size(); i++)
+		if (Folders[i].path == path)
+			return Folders[i];
+}
+
 void QFAContentManager::AddFile(size_t folderId, std::u32string filePath, QFAFileTypes fyleType, void* file)
 {
 	QFAContentFile contentFile;
@@ -197,28 +233,41 @@ void QFAContentManager::AddFile(size_t folderId, std::u32string filePath, QFAFil
 		contentFile = WriteImage(filePath, (QFAImage*)file);
 	else if (fyleType == QFAFileTypes::EFTMesh)
 		contentFile = WriteMesh(filePath, (QFAMeshData*)file);
+	else if (fyleType == QFAFileTypes::EFTLevel)
+		contentFile = WriteLevel(filePath, (QFALevel*)file);
 
 	for (size_t i = 0; i < Folders[folderId].folderUnits.size(); i++)
 	{		
 		if (Files[Folders[folderId].folderUnits[i].Id].path == filePath)
 		{
 			QFAContentFile& confile = Files[Folders[folderId].folderUnits[i].Id];
-			if (fyleType == QFAFileTypes::EFTImage)
+			switch (fyleType)
 			{
-				((QFAImage*)confile.file)->UpdateImage((QFAImage*)file);
-				confile.file = file;
-			}
-			else if (fyleType == QFAFileTypes::EFTMesh)
-			{
-				((QFAMeshData*)confile.file)->UpdateMeshData((QFAMeshData*)file);
-				confile.file = file;
-			}
+				case QFAContentManager::EFTUndefined:
+					break;
+				case QFAContentManager::EFTMesh:
+					((QFAMeshData*)confile.file)->UpdateMeshData((QFAMeshData*)file);
+					((QFAMeshData*)confile.file)->FIleid = confile.Id;
+					confile.file = file;
+					break;
+				case QFAContentManager::EFTImage:
+					((QFAImage*)confile.file)->UpdateImage((QFAImage*)file);
+					confile.file = file;
+					break;
+				case QFAContentManager::EFTLevel: // for level confile.file not change
+					break;
+				default:
+					break;
+			}			
 
 			return;
 		}
 	}
 
-	contentFile.Id = Files.size();
+	contentFile.Id = Files.size(); // FIleid
+	if (fyleType == QFAFileTypes::EFTMesh)
+		((QFAMeshData*)contentFile.file)->FIleid = contentFile.Id;
+
 	Files.push_back(contentFile);
 	Folders[folderId].folderUnits.push_back(EditorFolderUnit{ contentFile.Id, false });
 }

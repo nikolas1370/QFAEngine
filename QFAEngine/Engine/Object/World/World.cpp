@@ -5,9 +5,8 @@
 #include <Overlord/Time.h>
 #include <EngineStuff/Window/EngineViewport.h>
 #include <EngineStuff/Window/EngineWindow.h>
-
 QFAArray<QWorld*> QWorld::Worlds;
-
+QFAEngineClassOut(QWorld, QFAClass::ObjectClasses::World);
 void QWorld::ProcessTicks()
 {	
 	float delta = (float)QTime::GetDeltaTime();
@@ -122,4 +121,14 @@ void QWorld::RemoveActor(QActor* actor)
 		EditorActor = actor;
 	}
 
+
 #endif
+
+void QWorld::DestroyWorld(bool deleteAllActor)
+{
+	if (deleteAllActor)
+		for (size_t i = 0; i < Actors.Length(); i++)
+			Actors[i]->Destroy();
+
+	Destroy();
+}

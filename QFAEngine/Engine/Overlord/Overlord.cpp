@@ -46,6 +46,7 @@ bool QFAOverlord::StartLife()
     
 	Life = true;
     std::cout << "Engine load time " << (QTime::GetTime() / 10000) << '\n';
+    QFAClass::InitClasses();
 	QFAOverlord::MainLoop();
 	return true;
 }
@@ -136,21 +137,25 @@ void QFAOverlord::MainLoop()
                 QFAEngineWindow::Windows.erase(QFAEngineWindow::Windows.begin() + i);
             }
         }
-
+   
         auto t = QTime::GetSystemTime();
         QTime::CalcDeltaTime();
         glfwPollEvents();
+        
+
+
         QFAInput::NewFrame((float)QTime::GetDeltaTime());
         QFAEngineWindow::ProcessUIEvent();
         QWorld::ProcessTicks();        
 
+
         vkQueueWaitIdle(QFAVKLogicalDevice::GetGraphicsQueue());
         QFAVKBuffer::ProcessTaskFromOtherThread();
         QFAVKBuffer::DeleteNotNeedBuffer(); 
-
+        
         QFAEngineWindow::CheckIfNeedResizeWindows();
         QFAEngineWindow::ProcessGetMeshId();
-
+        
         QFAEngineWindow::RenderWindows();
         
         count++;

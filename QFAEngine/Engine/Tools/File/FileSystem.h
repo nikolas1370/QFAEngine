@@ -66,14 +66,14 @@ public:
 		return size;
 	}
 
-	inline QFAFile::Result GetStatus()
-	{
-		return res;
-	}
-
 	inline size_t GetFileSize()
 	{
 		return size;
+	}
+
+	inline QFAFile::Result GetStatus()
+	{
+		return res;
 	}
 
 	inline std::u32string GetPath()

@@ -113,7 +113,7 @@
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>QFA_EDITOR_ONLY;_DEBUG;;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <EnableModules>false</EnableModules>
       <BuildStlModules>false</BuildStlModules>
@@ -216,6 +216,7 @@
     <ClCompile Include="Engine\Object\World\World.cpp" />
     <ClCompile Include="Engine\Input\Input.cpp" />
     <ClCompile Include="Engine\Overlord\ContentManager.cpp" />
+    <ClCompile Include="Engine\Overlord\GameCode.cpp" />
     <ClCompile Include="Engine\Overlord\Overlord.cpp" />
     <ClCompile Include="Engine\EngineStuff\Framebuffer\MeshFrameBuffer.cpp" />
     <ClCompile Include="Engine\EngineStuff\Framebuffer\ShadowFrameBuffer.cpp" />
@@ -285,6 +286,7 @@
     <ClInclude Include="Engine\Object\World\World.h" />
     <ClInclude Include="Engine\Input\Input.h" />
     <ClInclude Include="Engine\Overlord\ContentManager.h" />
+    <ClInclude Include="Engine\Overlord\GameCode.h" />
     <ClInclude Include="Engine\Overlord\Overlord.h" />
     <ClInclude Include="Engine\EngineStuff\Framebuffer\MeshFrameBuffer.h" />
     <ClInclude Include="Engine\EngineStuff\Framebuffer\ShadowFrameBuffer.h" />

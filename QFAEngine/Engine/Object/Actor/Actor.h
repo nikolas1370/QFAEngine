@@ -9,8 +9,10 @@ class QFAOverlord;
 class QMeshBaseComponent;
 class QFAGameCode;
 class QFAEngineWindow;
+class QFALevel;
 class QFAEXPORT QActor : public QObject
 {
+	QFAEngineClassIn();
 	/*
 	for write on position rotation scale
 	*/
@@ -20,25 +22,27 @@ class QFAEXPORT QActor : public QObject
 	friend QMeshBaseComponent;
 	friend QFAGameCode;
 	friend QFAEngineWindow;
-	
-	
-	
-	// actor live in this world
-	QWorld* ActorWorld;
-	QSceneComponent* RootComponent;
+	friend QFALevel;
+
+
+	QSceneComponent* RootComponent = nullptr;
 
 	// pointer to this actor in QWorld::Actors
 	size_t WorldIndex;
-
+#if QFA_EDITOR_ONLY
+	bool NameRedacted = false; // QFALevel::SaveLevel
+#endif 
 protected:
 	FVector Position = FVector(0);
 	FVector Rotation = FVector(0);
 	FVector Scale = FVector(1);
 
 	bool CanTick = false;
-	virtual void Tick(float deltaTime) {};
+	// actor live in this world
+	QWorld* ActorWorld = nullptr;
 
 private:
+
 #if QFA_EDITOR_ONLY
 	/*
 		used only for HotReload
@@ -46,6 +50,9 @@ private:
 	*/
 	void ReplaceMe(QObject* newActor) override;
 #endif 
+protected:
+	virtual void Tick(float deltaTime) {};
+
 public:
 	QActor();
 	~QActor();

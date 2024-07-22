@@ -5,6 +5,7 @@
 #include <Overlord/ContentManager.h>
 ;
 
+
 class Test : public QObject
 {
     QFAClassIn(Test)    
@@ -27,11 +28,14 @@ class QTest_ActorMinusOne : public QActor
 {
     QFAClassIn(QTest_ActorMinusOne);
     static bool Red;
+
 private:
-    QStaticMesh* mesh;
+    QStaticMesh* mesh = nullptr;
 public:
     QTest_ActorMinusOne()
     {
+
+        NewObject< Test>();
         /*
         
         якшо якшо запучтить редактор добать Arrow.qfa 
@@ -43,8 +47,9 @@ public:
         */
 
         
-
-        mesh = new QStaticMesh(QFAContentManager::GetMesh(U"Content\\Arrow.qfa"));        
+        
+        QStaticMesh* mesh = NewObject<QStaticMesh>();
+        mesh->SetMesh(QFAContentManager::GetMesh(U"Content\\Arrow.qfa"));
         //mesh = new QStaticMesh(QFAContentManager::GetMesh(U"Content\\untitled.qfa"));
         if(!mesh)
             stopExecute("")
@@ -56,12 +61,12 @@ public:
         SetRootComponent(mesh);
 
         Red = !Red;
+
     }
 
     ~QTest_ActorMinusOne()
     {
-        std::cout << "delete\n";
-        delete mesh;
+        mesh->Destroy();
     }
 
 };

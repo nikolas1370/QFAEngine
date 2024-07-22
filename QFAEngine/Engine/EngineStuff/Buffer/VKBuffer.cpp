@@ -40,13 +40,7 @@ QFAVKBuffer::QFAVKBuffer(VkDeviceSize size, const void* data, bool inHost, VkBuf
     CreateBufferInside(size, usage);    
     if (data == nullptr || !inHost)
         return;
-    
-
-
-
-
-    
-
+ 
     memcpy(MapData, data, static_cast<size_t>(size));
 }
 

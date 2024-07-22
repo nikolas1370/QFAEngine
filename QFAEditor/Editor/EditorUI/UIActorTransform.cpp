@@ -122,7 +122,6 @@ void QFAUIActorTransform::InputOut(QFAUITextInput* input)
 					tem = actor->GetActorPosition();
 					tem.Y = QFAString::ToFloat(ActorTransform->Inputs[1]->GetValue());
 					actor->SetActorPosition(tem);
-					std::cout << "lopopid\n";
 					break;
 				case 2: 
 					tem = actor->GetActorPosition();
