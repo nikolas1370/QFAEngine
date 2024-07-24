@@ -24,6 +24,29 @@ class QFAEXPORT QFAEngineViewport
 	friend QFAEditorMainWindow;
 	friend QFAViewportHolder;
 	friend QFAWindow;
+
+	enum StrValueType 
+	{
+		Percent,
+		Pixel
+	};
+
+	enum ValueAction
+	{
+		None = 0, // AnalyzeResult is value
+		Add,
+		Minus,
+		Multiply,
+		Division
+	};
+
+	struct AnalyzeResult
+	{
+		ValueAction Action;
+		StrValueType Type;		
+		float Value;
+	};
+
 public:
 	static const float MinMaxZIndexUI;
 
@@ -43,9 +66,12 @@ private:
 	
 
 	int WindowWidth = 1, WindowHeight = 1;
-	float XP = 0, YP = 0;
-	float WidthP = 1;
-	float HeightP = 1;
+
+	const char* TopChars = nullptr;
+	const char* LeftChars = nullptr;
+	const char* HeightChars = nullptr;
+	const char* WidthtChars = nullptr;
+
 	uint64_t StartFrameTime;
 	QWorld* CurentFrameWorld;
 	glm::mat4 UIProjection;
@@ -53,16 +79,22 @@ private:
 	QFAViewportRoot Root;
 
 protected:
-	int Width = 1;
-	int Height = 1;
+	int Width = 1, Height = 1; // not use directly call GetPosition
 	int X, Y;// not use directly call GetPosition
+
 	QFAWindow* Window;
 #if QFA_EDITOR_ONLY
 	bool RegularViewport = true;
 #endif
 
-public:
-	virtual FVector2D GetPosition() = 0;
+private:
+	void UpdateX();
+	void UpdateY();
+	void UpdateHeight();
+	void UpdateWidth();
+	
+	std::vector<AnalyzeResult>& AnalyzeString(const char* str);
+	float GetValue(const char* str, int percentValue, bool is_Size);
 
 protected:
 	void WindowAddMe(QFAWindow* window);
@@ -89,16 +121,15 @@ public:
 	
 	void ChangeCamera(QCameraComponent* camera);
 
-	/*
-		p = percent
-		range 0 - 1
+	// "17.1% - 5.1 + 2" corect input	
+	void SetTop(const char* top);
+	void SetLeft(const char* left);
+	void SetHeight(const char* height);
+	void SetWidth(const char* width);
 
-		start left bottom corner(like in opengl)
+	FVector2D GetPosition();
 
-		xP offset from left side in persent window width
-		widthP width viewport in persent window width
-	*/
-	void SetParameters(float xP, float  yP, float widthP, float heightP);
+
 
 	inline void AddUnit(QFAUIUnit* unit)
 	{
@@ -121,7 +152,7 @@ public:
 	{
 		return &Root;
 	}
-
+	
 	inline FVector2D GetSize()
 	{
 		return FVector2D(Width, Height);

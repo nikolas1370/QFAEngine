@@ -3,11 +3,11 @@
 
 
 class QFAViewportHolder;
-class QFAViewport;
+class QFAEngineViewport;
 class QFAEXPORT QFAWindow : public QFAEngineWindow
 {
 	friend QFAViewportHolder;
-	friend QFAViewport;
+	friend QFAEngineViewport;
 	friend QFAEngineWindow;
 protected:
 #if QFA_EDITOR_ONLY

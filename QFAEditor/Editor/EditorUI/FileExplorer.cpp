@@ -126,6 +126,16 @@ void QFAUIEditorFileExplorer::CreateMiddle()
 					}
 					else
 					{
+						QFAEditorFileStorage::QFAContentFile& cf = QFAEditorFileStorage::GetFile(folderContents[i].id);
+						if (cf.Id < 0)
+							stopExecute("");
+
+						if (cf.fileType == QFAContentManager::QFAFileTypes::EFTLevel)
+						{
+							std::cout << "Level load\n";
+							return; // write load level
+						}
+
 						if (FileViewWindow)
 						{
 							if (FileViewWindow->IsClosed())

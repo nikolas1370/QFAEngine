@@ -93,8 +93,11 @@ void QFAEditorMainWindow::PrepareGameViewport()
 {
 	GameViewport = (QFAEditorViewportHolder*)new QFAViewportHolder();
 	Window->AddViewport(GameViewport);
-	GameViewport->SetParameters(0.0f, 0.0f, 0.7f, 0.7f);
-
+	GameViewport->SetTop("30");
+	GameViewport->SetLeft("0");
+	GameViewport->SetHeight("70% - 30");
+	GameViewport->SetWidth("70%");
+	
 	Worlds[0] = NewObject<QWorld>();
 	Worlds[1] = NewObject<QWorld>();
 	Worlds[0]->SetEnable(false);
@@ -290,9 +293,6 @@ void QFAEditorMainWindow::EndDragAndDrop(EKey::Key key)
 					AStaticMeshActor* staticActor = (AStaticMeshActor*)(QFAGameCode::GetAPI()->CreateObject(QFAClass::ObjectClasses::StaticMeshActor));
 
 					staticActor->GetClass()->GetId();
-
-
-
 					staticActor->SetActorPosition(0);
 					staticActor->SetMesh((QFAMeshData*)ef.file);
 					MainWindow->AddActorToWorlds(staticActor, 
@@ -343,7 +343,6 @@ void QFAEditorMainWindow::CreateLoadUI()
 	slot.y = 30.0f;
 	TextList->SetSlot(&slot);
 
-	//std::cout << mainViewPort << "\n";
 	mainViewPort->AddUnit(LoadCanvas);
 }
 

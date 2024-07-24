@@ -48,7 +48,10 @@ int QFAUIGrid::GetSizeUnitAuto(int& columnCount)
 	int widthWithoutOffset = Width - ColumnOffset * offsetCount;
 	unsigned int unitWidth = GetSizeUnit(widthWithoutOffset, MinUnitSize);
 	columnCount = offsetCount + 1;
-	return widthWithoutOffset / columnCount;
+	if (columnCount)
+		return widthWithoutOffset / columnCount;
+	else
+		return 0;	
 }
 
 int QFAUIGrid::GetSizeUnitCount()
