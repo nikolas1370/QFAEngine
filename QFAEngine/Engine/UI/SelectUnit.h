@@ -51,19 +51,20 @@ protected:
 	void SetScrollChild(QFAUIParentMultipleUnit* child);
 
 	void MySlotChange(QFAUIUnit* unit) final {}
-	void ChangeSize(unsigned int w, unsigned int h) final;
-
-	void ChangePosition(int x, int y) final;
 
 	float UpdateInnerHeight() final;
 	float UpdateInnerWidth() final;
+
+	void WidthChanged(int oldValue = 0) override;
+	void HeightChanged(int oldValue = 0) override;
+	void TopChanged(int oldValue = 0) override;
+	void LeftChanged(int oldValue = 0) override;
 
 public:
 
 	QFAUISelectUnit();
 
 	~QFAUISelectUnit();
-	
 
 	inline void AddUnit(QFAUIParent* unit)
 	{
@@ -179,10 +180,6 @@ public:
 		List.SetUnitWidth(w);
 	}
 
-	inline void SetStretchLastUnit(bool enable)
-	{
-		List.SetStretchLastUnit(enable);
-	}
 private:
 
 };

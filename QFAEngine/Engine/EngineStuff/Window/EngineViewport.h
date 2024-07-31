@@ -25,28 +25,6 @@ class QFAEXPORT QFAEngineViewport
 	friend QFAViewportHolder;
 	friend QFAWindow;
 
-	enum StrValueType 
-	{
-		Percent,
-		Pixel
-	};
-
-	enum ValueAction
-	{
-		None = 0, // AnalyzeResult is value
-		Add,
-		Minus,
-		Multiply,
-		Division
-	};
-
-	struct AnalyzeResult
-	{
-		ValueAction Action;
-		StrValueType Type;		
-		float Value;
-	};
-
 public:
 	static const float MinMaxZIndexUI;
 
@@ -60,10 +38,8 @@ protected:
 	static bool InGame;
 #endif
 private:
-
 	glm::mat4 MatrixPerspective;
 	QCameraComponent* CurentCamera = nullptr;
-	
 
 	int WindowWidth = 1, WindowHeight = 1;
 
@@ -93,9 +69,6 @@ private:
 	void UpdateHeight();
 	void UpdateWidth();
 	
-	std::vector<AnalyzeResult>& AnalyzeString(const char* str);
-	float GetValue(const char* str, int percentValue, bool is_Size);
-
 protected:
 	void WindowAddMe(QFAWindow* window);
 	void WindowRemoveMe();
@@ -107,9 +80,8 @@ protected:
 	}
 	QFAEngineViewport();
 	~QFAEngineViewport();
+
 public:
-
-
 	void ActivateCamera();
 	void DeactivateCamera();
 
@@ -118,18 +90,16 @@ public:
 	// rewrite to QCameraComponent::Parameter
 	void CameraChangeParameter(int param);
 
-	
 	void ChangeCamera(QCameraComponent* camera);
 
 	// "17.1% - 5.1 + 2" corect input	
+	void SetHeight(const char* height);
+	void SetWidth(const char* width);	
 	void SetTop(const char* top);
 	void SetLeft(const char* left);
-	void SetHeight(const char* height);
-	void SetWidth(const char* width);
+
 
 	FVector2D GetPosition();
-
-
 
 	inline void AddUnit(QFAUIUnit* unit)
 	{

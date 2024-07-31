@@ -222,6 +222,7 @@
     <ClCompile Include="Engine\EngineStuff\Framebuffer\ShadowFrameBuffer.cpp" />
     <ClCompile Include="Engine\EngineStuff\Pipline\Pipline.cpp" />
     <ClCompile Include="Engine\EngineStuff\RenderPass\RenderPassSwapChain.cpp" />
+    <ClCompile Include="Engine\Tools\String.cpp" />
     <ClCompile Include="Engine\UI\Background.cpp" />
     <ClCompile Include="Engine\UI\Canvas.cpp" />
     <ClCompile Include="Engine\UI\Grid.cpp" />

@@ -1,6 +1,8 @@
 #include "epch.h"
 #include "FileViewUnit.h"
 #include <UI/Text.h>
+#include <Tools/String.h>
+#include <EngineClassesInterface.h>
 
 QFAEditorUIFileViewUnit::QFAEditorUIFileViewUnit()
 {
@@ -32,18 +34,28 @@ void QFAEditorUIFileViewUnit::SetText(std::u32string text)
 	Text->SetText(text);
 }
 
-void QFAEditorUIFileViewUnit::ChangeSize(unsigned int w, unsigned int h)
+void QFAEditorUIFileViewUnit::WidthChanged(int oldValue)
 {
-	Width = w;
-	Height = h;
-	SetChildSize(Text, w, h);
+	((QFAEditorText*)Text)->ParentSetWidth = Width;
+	Text->SetWidth(((QFAEditorText*)Text)->StrWidth, ((QFAEditorText*)Text)->ParentSetWidthMinus);
 }
 
-void QFAEditorUIFileViewUnit::ChangePosition(int x, int y)
+void QFAEditorUIFileViewUnit::HeightChanged(int oldValue)
 {
-	Position_x = x;
-	Position_y = y;
-	SetChildPosition(Text, x, y);
+	((QFAEditorText*)Text)->ParentSetHeight = Height;
+	Text->SetHeight(((QFAEditorText*)Text)->StrHeight, ((QFAEditorText*)Text)->ParentSetHeightMinus);
+}
+
+void QFAEditorUIFileViewUnit::TopChanged(int oldValue)
+{
+	((QFAEditorText*)Text)->ParentSetPosition_y = Position_y;
+	Text->SetTop(((QFAEditorText*)Text)->StrTop);
+}
+
+void QFAEditorUIFileViewUnit::LeftChanged(int oldValue)
+{
+	((QFAEditorText*)Text)->ParentSetPosition_x = Position_x;
+	Text->SetLeft(((QFAEditorText*)Text)->StrLeft);
 }
 
 float QFAEditorUIFileViewUnit::UpdateInnerHeight()
@@ -55,3 +67,4 @@ float QFAEditorUIFileViewUnit::UpdateInnerWidth()
 {
 	return Width;
 }
+

@@ -28,7 +28,7 @@ class QFAVKImageView;
 class QFAVKTextureSampler;
 class QFAUITextInput;
 class QFAUIScroll;
-
+class QFATextBackground;
 class QFAEXPORT QFAText : public QFAUIRenderUnit
 {
     friend QFAEngineViewport;
@@ -37,7 +37,7 @@ class QFAEXPORT QFAText : public QFAUIRenderUnit
     friend QFAVKPipeline;
     friend QFAUITextInput;
     friend QFAUIScroll;
-
+    friend QFATextBackground;
     struct SGlyphAtlasListRow
     {
         unsigned int x = 0;// when start new Glyph in pixel
@@ -364,9 +364,10 @@ public:
     static size_t GetFontCount();
 
 private:
-
+    /*
     void SetSizeParent(unsigned int w, unsigned int h) override;
     void SetPositionParent(int x, int y) override;
+    */
     void updateUniformBuffer();
     void PrepareSymbolsToGpu();
     void ProcessText();
@@ -383,6 +384,10 @@ protected:
     // set pointer to input text
     void SetInputText(char32_t* pText, size_t pTextSize, size_t maxSize);
 
+    void WidthChanged(int oldValue = 0) override;
+    void HeightChanged(int oldValue = 0) override;
+    void TopChanged(int oldValue = 0) override;
+    void LeftChanged(int oldValue = 0) override;
 public:
     QFAText();
     ~QFAText();
@@ -420,8 +425,6 @@ public:
         return Color;
     }
 
-    /*----*/
-
     void Destroy();
     void SetOverflowWrap(EOverflowWrap wrap);
     void SetTextAlign(ETextAlign aligh);
@@ -429,25 +432,15 @@ public:
 };
 
 
-class QFATextBackground : public QFAParentHiddenChild
+class QFAEXPORT QFATextBackground : public QFAParentHiddenChild
 {
     QFAText Text;
 
-
 protected:
-    void ChangeSize(unsigned int w, unsigned int h)
-    {
-        Width = w;
-        Height = h;
-        SetChildSize(&Text, w, h);
-    }
-
-    virtual void ChangePosition(int x, int y)
-    {
-        Position_x = x;
-        Position_y = y;
-        SetChildPosition(&Text, x, y);
-    }
+    void WidthChanged(int oldValue = 0) override;
+    void HeightChanged(int oldValue = 0) override;
+    void TopChanged(int oldValue = 0) override;
+    void LeftChanged(int oldValue = 0) override;
 
     virtual float UpdateInnerHeight()
     {
@@ -511,11 +504,8 @@ public:
         Text.SetTextAlign(aligh);
     }
 
-    inline bool SetFont(QFAText::SFont* font)
+    inline void SetFont(QFAText::SFont* font)
     {
         Text.SetFont(font);
     }
-
-private:
-
 };

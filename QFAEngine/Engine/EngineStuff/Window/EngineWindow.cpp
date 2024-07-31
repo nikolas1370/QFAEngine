@@ -500,6 +500,7 @@ void QFAEngineWindow::recreateSwapChain()
 
 void QFAEngineWindow::AddViewport(QFAViewport* viewport)
 {
+	viewport->Window = (QFAWindow*)this;
 	Viewports.Add(viewport);
 	viewport->Settup(Width, Height);
 	viewport->WindowAddMe((QFAWindow*)this);

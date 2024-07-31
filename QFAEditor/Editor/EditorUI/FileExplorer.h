@@ -92,13 +92,17 @@ private:
 
 protected:
 	void MySlotChange(QFAUIUnit* unit) override {} ;
-	void ChangeSize(unsigned int w, unsigned int h) override;
-	void ChangePosition(int x, int y) override;
 	float UpdateInnerHeight() override;
 	float UpdateInnerWidth() override;
+
+	void WidthChanged(int oldValue = 0) override;
+	void HeightChanged(int oldValue = 0) override;
+	void TopChanged(int oldValue = 0) override;
+	void LeftChanged(int oldValue = 0) override;
 
 public:
 	QFAUIEditorFileExplorer(QFAEngineWindow* window, std::function <void (bool isCppClass, size_t id)> dragFun);
 	~QFAUIEditorFileExplorer();
+
 
 };

@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "UIList.h"
 
+
 QFAUIList::QFAUIList()
 {
 	Type = QFAUIType::List;	
@@ -11,54 +12,57 @@ QFAUIList::~QFAUIList()
 
 }
 
+void QFAUIList::WidthChanged(int oldValue)
+{
+	CalculateChildren(ChildCalculateType::EWidth);
+}
+
+void QFAUIList::HeightChanged(int oldValue)
+{
+	CalculateChildren(ChildCalculateType::EHeight);
+}
+
+void QFAUIList::TopChanged(int oldValue)
+{
+	CalculateChildren(ChildCalculateType::ETop);
+}
+
+void QFAUIList::LeftChanged(int oldValue)
+{
+	CalculateChildren(ChildCalculateType::ELeft);
+}
+
 void QFAUIList::SetListType(EListType listType)
 { 
 	ListType = listType;
-	CalculateChildren();
+	CalculateChildren(ChildCalculateType::EAll);
 }
 
 void QFAUIList::NewUnit(QFAUIUnit* unit)
 {
-	CalculateChildren();
+	CalculateChildren(ChildCalculateType::EAll);
 }
 
 void QFAUIList::MySlotChange(QFAUIUnit* unit)
 {
-	CalculateChildren();
+	CalculateChildren(ChildCalculateType::EAll);
 }
-
-
-void QFAUIList::ChangeSize(unsigned int w, unsigned int h)
-{
-	Width = w;
-	Height = h;
-	CalculateChildren();
-}
-
-void QFAUIList::ChangePosition(int x, int y)
-{
-	Position_x = x;
-	Position_y = y;
-	CalculateChildren();
-}
-
-
 
 void QFAUIList::SetUnitHeight(unsigned int h)
 {
 	UnitHeight = h;
 	if (ListType == LTVertical)
-		CalculateChildren();
+		CalculateChildren(ChildCalculateType::EAll);
 }
 
 void QFAUIList::SetUnitWidth(unsigned int w)
 {
 	UnitWidth = w;
 	if (ListType == LTHorizon)
-		CalculateChildren();
+		CalculateChildren(ChildCalculateType::EAll);
 }
 
-void QFAUIList::CalculateChildren()
+void QFAUIList::CalculateChildren(ChildCalculateType cct)
 {	
 	if (ListType == LTVertical || ListType == LTVerticalInner)
 	{
@@ -75,24 +79,32 @@ void QFAUIList::CalculateChildren()
 				}
 				else
 					unitHeight = ListType == LTVertical ? UnitHeight : Children[i]->InnerHeight;
+								
+				if (cct == ChildCalculateType::ETop || cct == ChildCalculateType::EAll)
+				{
+					Children[i]->ParentSetPosition_y = Position_y + y ;
+					Children[i]->SetTop(Children[i]->StrTop);
+				}
+
+				if (cct == ChildCalculateType::ELeft || cct == ChildCalculateType::EAll)
+				{
+					Children[i]->ParentSetPosition_x = Position_x;
+					Children[i]->SetLeft(Children[i]->StrLeft);
+				}
+
+				if (cct == ChildCalculateType::EWidth || cct == ChildCalculateType::EAll)
+				{
+					Children[i]->ParentSetWidth = Width;
+					Children[i]->SetWidth(Children[i]->StrWidth, Children[i]->ParentSetWidthMinus);
+				}
+
+				if (cct == ChildCalculateType::EHeight || cct == ChildCalculateType::EAll)
+				{
+					Children[i]->ParentSetHeight = unitHeight;
+					Children[i]->SetHeight(Children[i]->StrHeight, Children[i]->ParentSetHeightMinus);
+				}
 				
-				QFAUISlot::SListSlot* listSlot = (QFAUISlot::SListSlot*)&Children[i]->Slot;
-				Children[i]->SetPositionParent(Position_x + listSlot->marginLeft, Position_y + y + listSlot->marginTop);
-				if (i == Children.Length() - 1 && StretchLastUnit)
-				{
-					if (Height > y + listSlot->marginTop)
-					{
-						Children[i]->SetSizeParent(Width - listSlot->marginLeft, Height - (y + listSlot->marginTop));
-						y += Height - (y + listSlot->marginTop);
-					}
-					else
-						Children[i]->SetSizeParent(Width - listSlot->marginLeft, 0);
-				}
-				else
-				{
-					Children[i]->SetSizeParent(Width, unitHeight);
-					y += unitHeight + listSlot->marginTop;
-				}
+				y += unitHeight;
 			}
 		}
 
@@ -108,30 +120,35 @@ void QFAUIList::CalculateChildren()
 			{
 				unsigned int unitWidth;
 				if (Children[i]->CanBeParent)
-				{
-					QFAUIParent* child = (QFAUIParent*)Children[i];
-					unitWidth = ListType == LTHorizon ? UnitWidth : child->UpdateInnerWidth();
-				}
+					unitWidth = ListType == LTHorizon ? UnitWidth : ((QFAUIParent*)Children[i])->UpdateInnerWidth();
 				else
-					unitWidth = ListType == LTHorizon ? UnitWidth : Children[i]->InnerWidth;
-				
-				QFAUISlot::SListSlot* listSlot = (QFAUISlot::SListSlot*)&Children[i]->Slot;
-				Children[i]->SetPositionParent(Position_x + x + listSlot->marginLeft, Position_y + listSlot->marginTop);
-				if (i == Children.Length() - 1 && StretchLastUnit)
+					unitWidth = ListType == LTHorizon ? UnitWidth : Children[i]->InnerWidth;			
+
+				if (cct == ChildCalculateType::ETop || cct == ChildCalculateType::EAll)
 				{
-					if (Width > x + listSlot->marginLeft)
-					{
-						Children[i]->SetSizeParent(Width - (listSlot->marginLeft + x), Height - listSlot->marginTop);
-						x += Width - (listSlot->marginLeft + x);
-					}
-					else
-						Children[i]->SetSizeParent(0, Height - listSlot->marginTop);
+					Children[i]->ParentSetPosition_y = Position_y;
+					Children[i]->SetTop(Children[i]->StrTop);
 				}
-				else
+
+				if (cct == ChildCalculateType::ELeft || cct == ChildCalculateType::EAll)
 				{
-					Children[i]->SetSizeParent(unitWidth, Height);
-					x += unitWidth + listSlot->marginLeft;
-				}			
+					Children[i]->ParentSetPosition_x = Position_x + x;
+					Children[i]->SetLeft(Children[i]->StrLeft);
+				}
+
+				if (cct == ChildCalculateType::EWidth || cct == ChildCalculateType::EAll)
+				{
+					Children[i]->ParentSetWidth = unitWidth;
+					Children[i]->SetWidth(Children[i]->StrWidth, Children[i]->ParentSetWidthMinus);
+				}
+
+				if (cct == ChildCalculateType::EHeight || cct == ChildCalculateType::EAll)
+				{
+					Children[i]->ParentSetHeight = Height;
+					Children[i]->SetHeight(Children[i]->StrHeight, Children[i]->ParentSetHeightMinus);
+				}
+
+				x += unitWidth;
 			}
 		}
 		
@@ -144,12 +161,12 @@ void QFAUIList::ChildInnerChange(QFAUIUnit* child)
 {
 	if (ListType == LTHorizonInner || ListType == LTVerticalInner)
 		if (child->Type == QFAUIType::Text || child->Type == QFAUIType::TextInput)
-			CalculateChildren();
+			CalculateChildren(ChildCalculateType::EAll);
 }
 
 void QFAUIList::UnitWasRemoved()
 {
-	CalculateChildren();
+	CalculateChildren(ChildCalculateType::EAll);
 }
 
 float QFAUIList::UpdateInnerHeight()

@@ -10,6 +10,7 @@
 #include <UI/Text.h>
 #include <UI/UIParentMultipleUnit.h>
 #include <EngineStuff/Window/ViewportHolder.h>
+#include <Tools/String.h>
 
 const float QFAEngineViewport::MinMaxZIndexUI = 1000.0f;
 bool QFAEngineViewport::InGame = false;
@@ -38,7 +39,6 @@ FVector2D QFAEngineViewport::GetPosition()
 }
 
 
-
 void QFAEngineViewport::WindowAddMe(QFAWindow* window)
 {
 	Window = window;	
@@ -52,13 +52,9 @@ void QFAEngineViewport::WindowRemoveMe()
 	Root.ParentDisable();
 }
 
-
-
-
-
 QFAEngineViewport::QFAEngineViewport()
 {
-	Root.Viewport = this;
+	Root.Viewport = this;	
 }
 
 QFAEngineViewport::~QFAEngineViewport()
@@ -96,157 +92,19 @@ void QFAEngineViewport::ChangeCamera(QCameraComponent* camera)
 	}
 }
 
-std::vector<QFAEngineViewport::AnalyzeResult>& QFAEngineViewport::AnalyzeString(const char* str)
+void QFAEngineViewport::UpdateWidth()
 {
-	static std::vector<AnalyzeResult> ars;
-	ars.clear();
-	int offset = 0;
-
-	while(true) 
+	if (!WidthtChars)
 	{
-		if (str[offset] == 0)
-			break;
-
-		try
-		{
-			AnalyzeResult as;
-			as.Value = std::stof(std::string((char*)&str[offset]));;
-			as.Action = ValueAction::None;
-			while (true)
-			{
-				offset++;
-				if (str[offset] == 0)
-				{
-					if (str[offset - 1] == '%')
-						as.Type = StrValueType::Percent;
-					else
-						as.Type = StrValueType::Pixel;
-
-					break;
-				}
-
-				if (str[offset] == ' ')
-				{
-					if (str[offset - 1] == '%')
-						as.Type = StrValueType::Percent;
-					else
-						as.Type = StrValueType::Pixel;
-
-					offset++;
-					break;
-				}
-			}
-
-			ars.push_back(as);
-		}
-		catch (const std::exception&) 
-		{
-			AnalyzeResult as;
-			as.Action = ValueAction::None;
-			while (true)
-			{
-				if (str[offset] == 0)
-					break;
-
-				switch (str[offset])
-				{
-					case '+':	as.Action = ValueAction::Add; break;
-					case '-':	as.Action = ValueAction::Minus; break;
-					case '*':	as.Action = ValueAction::Multiply; break;
-					case '/':	as.Action = ValueAction::Division;  break;
-				}
-				
-				if (as.Action != ValueAction::None)
-				{
-					offset += 2;
-					ars.push_back(as);
-					break;
-				}
-				else
-					offset++;
-			}
-		}
-	}
-
-	return ars;
-}
-
-float QFAEngineViewport::GetValue(const char* str, int percentValue, bool is_Size)
-{
-	std::vector<QFAEngineViewport::AnalyzeResult>& ars = AnalyzeString(str);
-	if (!ars.size())
-	{
-		if (is_Size)
-			return 1;
-
-		return 0;
-	}
-
-	bool b = true;
-	for (int i = 0; i < ars.size() - 1; i++) // check if string have valide data
-	{
-		std::cout << i << " " <<  ars[i].Action << " " << ars[i + 1].Value << "\n";
-		if (b)// i is value i+1 is Action
-		{
-			if (!(ars[i].Action == ValueAction::None && ars[i + 1].Action > ValueAction::None))
-				stopExecute("")
-		}
-		else// i is Action i+1 is value
-		{
-			if (!(ars[i].Action > ValueAction::None && ars[i + 1].Action == ValueAction::None))
-				stopExecute("")
-		}
-
-		b = !b;
-	}
-
-	int offset = 0;
-	float value = ars[0].Value;
-	if (ars[0].Type == StrValueType::Percent)
-		value = (value / 100) * (float)percentValue;
-
-	for (int i = 1; i < ars.size() - 1; i += 2)
-	{
-		AnalyzeResult& res = ars[i];
-		AnalyzeResult& resV = ars[i + 1];
-		if (resV.Type == StrValueType::Percent)
-			resV.Value = (resV.Value / 100) * (float)percentValue;
-
-		switch (res.Action)
-		{
-			case QFAEngineViewport::Add:		value += resV.Value; break;
-			case QFAEngineViewport::Minus:		value -= resV.Value; break;
-			case QFAEngineViewport::Multiply:	value *= resV.Value; break;
-			case QFAEngineViewport::Division:	if (abs(resV.Value) > 0.00001)
-													value /= resV.Value;
-
-												break;
-		}
-	}
-
-	return value;
-}
-
-void QFAEngineViewport::UpdateX()
-{
-	if (!LeftChars)
-	{
-		X = 0;
-		return;
-	}
-	
-	X = (int)GetValue(LeftChars, WindowWidth, false);
-}
-
-void QFAEngineViewport::UpdateY()
-{
-	if (!TopChars)
-	{
-		Y = 0;
+		Width = WindowWidth;
+		Root.ParentSetWidth = Width;
+		Root.SetWidth(Root.StrWidth, false);
 		return;
 	}
 
-	Y = (int)GetValue(TopChars, WindowHeight, false);
+	Width = (int)QFAString::GetValue(WidthtChars, WindowWidth, true);
+	Root.ParentSetWidth = Width;
+	Root.SetWidth(Root.StrWidth, false);
 }
 
 void QFAEngineViewport::UpdateHeight()
@@ -254,26 +112,63 @@ void QFAEngineViewport::UpdateHeight()
 	if (!HeightChars)
 	{
 		Height = WindowHeight;
+		Root.ParentSetHeight = Height;
+		Root.SetHeight(Root.StrHeight, false);
 		return;
 	}
 
-	Height = (int)GetValue(HeightChars, WindowHeight, true);
+	Height = (int)QFAString::GetValue(HeightChars, WindowHeight, true);
+	Root.ParentSetHeight = Height;
+	Root.SetHeight(Root.StrHeight, false);
 }
 
-void QFAEngineViewport::UpdateWidth()
+
+void QFAEngineViewport::UpdateX()
 {
-	if (!WidthtChars)
+	if (!LeftChars)
 	{
-		Width = WindowWidth;
+		X = 0;
+		Root.ParentSetPosition_x = X;
+		Root.SetLeft(nullptr);
 		return;
 	}
 
-	Width = (int)GetValue(WidthtChars, WindowWidth, true);
+
+	X = (int)QFAString::GetValue(LeftChars, WindowWidth, false);
+	Root.ParentSetPosition_x = X;
+	Root.SetLeft(nullptr);
+}
+
+void QFAEngineViewport::UpdateY()
+{
+	if (!TopChars)
+	{
+		Y = 0;
+		Root.ParentSetPosition_y = Y;
+		Root.SetTop(nullptr);
+		return;
+	}
+
+	Y = (int)QFAString::GetValue(TopChars, WindowHeight, false);
+	Root.ParentSetPosition_y = Y;
+	Root.SetTop(nullptr);
+}
+
+void QFAEngineViewport::SetWidth(const char* width)
+{
+	WidthtChars = width;
+	UpdateWidth();
+}
+
+void QFAEngineViewport::SetHeight(const char* height)
+{
+	HeightChars = height;
+	UpdateHeight();
 }
 
 void QFAEngineViewport::SetTop(const char* top)
 {
-	TopChars = top;
+	TopChars = top;	
 	UpdateY();
 }
 
@@ -283,32 +178,26 @@ void QFAEngineViewport::SetLeft(const char* left)
 	UpdateX();
 }
 
-void QFAEngineViewport::SetHeight(const char* height)
-{
-	HeightChars = height;
-	UpdateHeight();
-}
 
-void QFAEngineViewport::SetWidth(const char* width)
-{
-	WidthtChars = width;
-	UpdateWidth();
-}
 
 void QFAEngineViewport::SettupInside(int windowWidth, int windowHeight)
 {
 	WindowWidth = windowWidth;
 	WindowHeight = windowHeight;
 
+	UpdateWidth();
+	UpdateHeight();	
 	UpdateX();
 	UpdateY();
-	UpdateHeight();
-	UpdateWidth();
 	if (Height == 0)
 		Height = 1;
 
-	UIProjection = glm::orthoLH_ZO(0.0f, (float)Width, 0.0f, (float)Height, QFAEngineViewport::MinMaxZIndexUI * -1, QFAEngineViewport::MinMaxZIndexUI);
-	Root.SetSizeParent(Width, Height);
+	UIProjection = glm::orthoLH_ZO(0.0f, (float)Width, 0.0f, (float)Height, QFAEngineViewport::MinMaxZIndexUI * -1, QFAEngineViewport::MinMaxZIndexUI);	
+	Root.ParentSetWidth = Width;
+	Root.ParentSetHeight = Height;
+	Root.SetWidth(Root.StrWidth, Root.ParentSetWidthMinus);
+	Root.SetHeight(Root.StrHeight, Root.ParentSetHeightMinus);
+
 	if (CurentCamera)
 		MatrixPerspective = glm::perspectiveLH_ZO(glm::radians(CurentCamera->Fov), (float)Width / (float)Height, 0.1f, CurentCamera->ViewDistance); // (near) not Less than 0.1f	
 }

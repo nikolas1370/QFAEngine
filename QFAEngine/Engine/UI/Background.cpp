@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "Background.h"
+#include <Tools/String.h>
 
 QFAUIBackground::QFAUIBackground()
 {	
@@ -14,18 +15,40 @@ void QFAUIBackground::MySlotChange(QFAUIUnit* unit)
 {
 }
 
-void QFAUIBackground::ChangeSize(unsigned int w, unsigned int h)
-{	
-	Height = h;
-	Width = w;
-	SetChildSize(Child, w, h);
+void QFAUIBackground::WidthChanged(int oldValue)
+{
+	if (Child)
+	{
+		Child->ParentSetWidth = Width;
+		Child->SetWidth(Child->StrWidth, Child->ParentSetWidthMinus);
+	}
 }
 
-void QFAUIBackground::ChangePosition(int x, int y)
+void QFAUIBackground::HeightChanged(int oldValue)
 {
-	Position_x = x;
-	Position_y = y;
-	SetChildPosition(Child, x, y);
+	if (Child)
+	{
+		Child->ParentSetHeight = Height;
+		Child->SetHeight(Child->StrHeight, Child->ParentSetHeightMinus);
+	}
+}
+
+void QFAUIBackground::TopChanged(int oldValue)
+{
+	if (Child)
+	{
+		Child->ParentSetPosition_y = Position_y;
+		Child->SetTop(Child->StrTop);
+	}
+}
+
+void QFAUIBackground::LeftChanged(int oldValue)
+{
+	if (Child)
+	{
+		Child->ParentSetPosition_x = Position_x;
+		Child->SetLeft(Child->StrLeft);
+	}
 }
 
 float QFAUIBackground::UpdateInnerHeight()
@@ -40,7 +63,6 @@ float QFAUIBackground::UpdateInnerHeight()
 	}
 	else
 		return Child->InnerHeight;
-	
 }
 
 float QFAUIBackground::UpdateInnerWidth()
@@ -54,11 +76,15 @@ float QFAUIBackground::UpdateInnerWidth()
 		return parent->UpdateInnerWidth();
 	}
 	else
-		return Child->InnerWidth;	
+		return Child->InnerWidth;
 }
 
+
 void QFAUIBackground::ChangedUnit(QFAUIUnit* unit)
-{
-	SetChildSize(unit, Width, Height);
-	SetChildPosition(unit, Position_x, Position_y);
+{	
+	unit->SetTop(unit->StrTop);
+	unit->SetLeft(unit->StrLeft);
+	unit->SetWidth(unit->StrWidth, unit->ParentSetWidthMinus);
+	unit->SetHeight(unit->StrHeight , unit->ParentSetHeightMinus);
 }
+

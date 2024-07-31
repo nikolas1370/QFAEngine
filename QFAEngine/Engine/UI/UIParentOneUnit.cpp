@@ -35,8 +35,15 @@ void QFAUIParentOneUnit::SetUnit(QFAUIUnit* unit)
 
 		Child->Parent = this;
 		Child->ParentAttach();
-		Child->SetSizeParent(Width, Height);
-		Child->SetPositionParent(Position_x, Position_y);
+
+		Child->ParentSetPosition_x = Position_x;
+		Child->ParentSetPosition_y = Position_y;
+		Child->ParentSetWidth = Width;
+		Child->ParentSetHeight = Height;
+		Child->SetWidth(Child->StrWidth, Child->ParentSetWidthMinus);
+		Child->SetHeight(Child->StrHeight, Child->ParentSetHeightMinus);
+		Child->SetTop(Child->StrTop);
+		Child->SetLeft(Child->StrLeft);
 		if(Child->CanRender)
 			((QFAUIRenderUnit*)Child)->UnitScroll = 0;
 	}

@@ -29,27 +29,18 @@ QFAEditorFileViewWindow::QFAEditorFileViewWindow()
 	TopList = new QFAUIList;	
 	TopListScroll->SetUnit(TopList);
 
-	TopList->SetPosition(0, 0);
 	TopList->SetListType(QFAUIList::EListType::LTHorizon);
 	TopList->SetUnitWidth(100);
-
 	
-
-	QFAUISlot::SCanvasSlot Slot;
-	Slot.Height = 25;
-	Slot.HeightInPixel = true;
-	Slot.Width = 1.0f;
-	TopListScroll->SetSlot(&Slot);
+	TopListScroll->SetWidth("100%");
+	TopListScroll->SetHeight("25");
 	
 	TopListScroll->SetOverflow(QFAUIParent::Hidden);
 
 	Canvas->AddUnit(DisplayImage);
-	Slot.y = 25;
-	Slot.yInPixel = true;
-	Slot.HeightInPixel = false;
-	Slot.Width = 1.0f;
-	Slot.Height = 0.95f;
-	DisplayImage->SetSlot(&Slot);
+	DisplayImage->SetWidth("100%");
+	DisplayImage->SetHeight("95%");
+	DisplayImage->SetTop("25");
 
 	QFAEngineViewport* mainViewport = Window->GetViewport(0);
 	
@@ -165,13 +156,10 @@ void QFAEditorFileViewWindow::InFocus(SFile* file)
 void QFAEditorFileViewWindow::UpdateList()
 {
 	TopList->removeAllUnit();
-	QFAUISlot::SListSlot listSlot;
-	listSlot.marginLeft = 10;
 	for (size_t i = 0; i < CurentEnableFolderCount; i++)
 	{		
 		Files[i].viewUnit->SetText(std::filesystem::path(QFAEditorFileStorage::GetFile(Files[i].FileId).path).filename().u32string());
 		TopList->AddUnit(Files[i].viewUnit);
-		Files[i].viewUnit->SetSlot(&listSlot);
 	}
 }
 

@@ -26,7 +26,7 @@ void QFAUIParentMultipleUnit::AddUnit(QFAUIUnit* unit)
 
 	if (unit->Parent)
 		unit->Parent->RemoveUnitWithoutNotify(unit);
-	
+
 	Children.Add(unit);
 	unit->Parent = this;
 	unit->ParentAttach();

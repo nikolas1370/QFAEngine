@@ -9,6 +9,7 @@
 #include <EngineStuff/vk/TextureSampler.h>
 #include <EngineStuff/Pipline/Pipline.h>
 #include <EngineStuff/Window/EngineWindow.h>
+#include <Tools/String.h>
 
 VkDescriptorImageInfo QFAUIImage::imageInfo;
 QFAVKPipeline* QFAUIImage::Pipeline;
@@ -114,6 +115,27 @@ QFAUIImage::~QFAUIImage()
     delete vertexBufer;
 }
 
+void QFAUIImage::WidthChanged(int oldValue)
+{
+    InnerWidth = Width;
+    if (oldValue != Width)
+        ChangeQuad();
+}
+
+void QFAUIImage::HeightChanged(int oldValue)
+{
+    InnerHeight = Height;
+    if (oldValue != Height)
+        ChangeQuad();
+}
+
+void QFAUIImage::TopChanged(int oldValue)
+{
+}
+
+void QFAUIImage::LeftChanged(int oldValue)
+{
+}
 
 void QFAUIImage::SetCanStretch(bool can)
 {
@@ -140,6 +162,7 @@ void QFAUIImage::CreateProjectionSet(VkBuffer buffer)
 
     Pipeline->CreateSet(0, descriptorSetInfo.data());    
 }
+
 
 void QFAUIImage::ChangeQuad()
 {//     
@@ -245,31 +268,10 @@ void QFAUIImage::ChangeQuad()
     vertexBufer->UpdateData(sizeof(quad), &quad);
     UpdateUniforms();
 }
+
 QFAVKPipeline* QFAUIImage::GetPipeline()
 {
     return Pipeline;
-}
-
-
-void QFAUIImage::SetSizeParent(unsigned int w, unsigned int h)
-{
-    bool changeQuad = false;
-    if (w != Width || h != Height)
-        changeQuad = true;
-
-    Width = w;
-    Height = h;
-    InnerHeight = Height;
-    InnerWidth = Width;
-
-    if(changeQuad)
-        ChangeQuad();
-}
-
-void QFAUIImage::SetPositionParent(int x, int y)
-{
-    Position_x = x;
-    Position_y = y;
 }
 
 void QFAUIImage::SetImage(QFAImage* image)
@@ -429,6 +431,7 @@ void QFAUIImage::DisableImage()
     if (Index < ImageIndexs.size() && ImageIndexs[Index].image == this)
         ImageIndexs[Index].image = nullptr;
 }
+
 
 
 void QFAUIImage::CreatePipeline()

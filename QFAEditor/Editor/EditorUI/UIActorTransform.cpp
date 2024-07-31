@@ -5,6 +5,7 @@
 #include <UI/Background.h>
 #include <Object/Actor/Actor.h>
 #include <Tools/String.h>
+#include <EngineClassesInterface.h>
 
 QFAUIActorTransform* QFAUIActorTransform::ActorTransform;
 
@@ -14,47 +15,37 @@ QFAUIActorTransform::QFAUIActorTransform()
 	
 	struct SSlot
 	{
-		float x = 0.0f;
-		float y = 0.0f;
+		const char* x = "0.0";
+		const char* y = "0.0";
 	};
 	std::array<SSlot, 9> SSlots;
-	SSlots[0] = { 0.015f , 0.0f};
-	SSlots[1] = { 0.345f, 0.0f};
-	SSlots[2] = { 0.675f, 0.0f};
-	SSlots[3] = { 0.015f , (float)InputHeight + 5 };
-	SSlots[4] = { 0.345f, (float)InputHeight + 5 };
-	SSlots[5] = { 0.675f, (float)InputHeight + 5 };
-	SSlots[6] = { 0.015f , 60.0f};
-	SSlots[7] = { 0.345f, 60.0f};
-	SSlots[8] = { 0.675f, 60.0f};
-
-	QFAUISlot::SCanvasSlot slot;
-	slot.Width = 0.315f;
-	slot.Height = (float)InputHeight;
-	slot.HeightInPixel = true;
-	slot.yInPixel = true;
-
+	SSlots[0] = { "1.5%",   "0"};
+	SSlots[1] = { "34.5%",  "0" };
+	SSlots[2] = { "67.5%",  "0" };
+	SSlots[3] = { "01.5%",  "30" }; // InputHeightChar + 5
+	SSlots[4] = { "34.5%",  "30" }; // InputHeightChar + 5
+	SSlots[5] = { "67.5%",  "30" }; // InputHeightChar + 5
+	SSlots[6] = { "01.5%",  "60"};
+	SSlots[7] = { "34.5%",  "60"};
+	SSlots[8] = { "67.5%",  "60"};
 
 	AddHiddenChild(Canvas);
 	QFAUITextInput* input;
-	QFAUIBackground* inputBackground;
 	for (size_t i = 0; i < Inputs.size(); i++)
 	{
-		inputBackground = new QFAUIBackground;
 		input = new QFAUITextInput(QFAUITextInput::ENumberType::Float);
 		input->SetTextSize(20);
 		input->SetTextColor(255);
 		input->SetOutFocusFun(QFAUIActorTransform::InputOut);
-		inputBackground->SetUnit(input);
-		Canvas->AddUnit(inputBackground);
+		Canvas->AddUnit(input);
 		
 		Inputs[i] = input;
-		InputBackgrounds[i] = inputBackground;
-		InputBackgrounds[i]->SetBackgroundColor(QFAColor(20, 20, 20));
+		Inputs[i]->SetBackgroundColor(QFAColor(20, 20, 20));
 
-		slot.x = SSlots[i].x;
-		slot.y = SSlots[i].y;
-		inputBackground->SetSlot(&slot);
+		input->SetWidth("31.5%");
+		input->SetHeight(InputHeightChar);
+		input->SetTop(SSlots[i].y);
+		input->SetLeft(SSlots[i].x);
 	}
 
 	ActorTransform = this;
@@ -63,10 +54,7 @@ QFAUIActorTransform::QFAUIActorTransform()
 QFAUIActorTransform::~QFAUIActorTransform()
 {
 	for (size_t i = 0; i < Inputs.size(); i++)
-	{
 		delete Inputs[i];
-		delete InputBackgrounds[i];
-	}
 
 	delete Canvas;
 }
@@ -76,18 +64,29 @@ void QFAUIActorTransform::MySlotChange(QFAUIUnit* unit)
 
 }
 
-void QFAUIActorTransform::ChangeSize(unsigned int w, unsigned int h)
+
+void QFAUIActorTransform::WidthChanged(int oldValue)
 {
-	Width = w;
-	Height = h;
-	SetChildSize(Canvas, w, h);
+	((QFAEditorCanvas*)Canvas)->ParentSetWidth = Width;
+	Canvas->SetWidth(((QFAEditorCanvas*)Canvas)->StrWidth, ((QFAEditorCanvas*)Canvas)->ParentSetWidthMinus);
 }
 
-void QFAUIActorTransform::ChangePosition(int x, int y)
+void QFAUIActorTransform::HeightChanged(int oldValue)
 {
-	Position_x = x;
-	Position_y = y;
-	SetChildPosition(Canvas, x, y);
+	((QFAEditorCanvas*)Canvas)->ParentSetHeight = Height;
+	Canvas->SetHeight(((QFAEditorCanvas*)Canvas)->StrHeight, ((QFAEditorCanvas*)Canvas)->ParentSetHeightMinus);
+}
+
+void QFAUIActorTransform::TopChanged(int oldValue)
+{
+	((QFAEditorCanvas*)Canvas)->ParentSetPosition_y = Position_y;
+	Canvas->SetTop(((QFAEditorCanvas*)Canvas)->StrTop);
+}
+
+void QFAUIActorTransform::LeftChanged(int oldValue)
+{
+	((QFAEditorCanvas*)Canvas)->ParentSetPosition_x = Position_x;
+	Canvas->SetLeft(((QFAEditorCanvas*)Canvas)->StrLeft);
 }
 
 float QFAUIActorTransform::UpdateInnerHeight()

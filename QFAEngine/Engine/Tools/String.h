@@ -1,9 +1,33 @@
 #pragma once
 #include <string>
+#include <vector>
+#include <Tools/Stuff.h>
 
-class QFAString
+class QFAEXPORT QFAString
 {
 public:
+	enum StrValueType
+	{
+		Percent,
+		Pixel
+	};
+
+	enum ValueAction
+	{
+		None = 0, // AnalyzeResult is value
+		Add,
+		Minus,
+		Multiply,
+		Division
+	};
+
+	struct AnalyzeResult
+	{
+		ValueAction Action;
+		StrValueType Type;
+		float Value;
+	};
+
 	static float ToFloat(std::u32string string)
 	{
 		std::string str;
@@ -55,5 +79,12 @@ public:
 
 		return bigString;
 	}
+	/*------------ for engine ------------*/
+private:
+	static std::vector<AnalyzeResult>& AnalyzeString(const char* str);
+public:
+	// "17.1% - 5.1 + 2" corect input
+	static float GetValue(const char* str, int percentValue, bool is_Size);
+
 };
 

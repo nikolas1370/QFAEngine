@@ -1,13 +1,14 @@
 ﻿#include "pch.h"
 #include "TextInput.h"
 #include "EngineStuff/Buffer/VertexBuffer.h"
+#include <Tools/String.h>
 
 char QFAUITextInput::convertStr[21];
 
 QFAUITextInput::QFAUITextInput(ENumberType numberT)
 {
 	Type = QFAUIType::TextInput;
-	Text = new QFAText;
+	Text = new QFAText;	
 
 	Text->Parent = this;
 	Text->Text.pen = 0;
@@ -22,14 +23,14 @@ QFAUITextInput::QFAUITextInput(ENumberType numberT)
 	if (NumberType == ENumberType::Float)
 		SetValue(0.0f);
 	else if (NumberType == ENumberType::Int)
-		SetValue(0);
-	
+		SetValue(0);	
 }
 
 QFAUITextInput::~QFAUITextInput()
 {
 	Text->Parent = nullptr;
 }
+
 
 std::u32string QFAUITextInput::GetValue()
 {
@@ -83,18 +84,28 @@ void QFAUITextInput::SetOutFocusFun(std::function<void(QFAUITextInput*)> fun)
 	OutFocusFun = fun;
 }
 
-void QFAUITextInput::ChangeSize(unsigned int w, unsigned int h)
+void QFAUITextInput::WidthChanged(int oldValue)
 {
-	Width = w;
-	Height = h;
-	Text->SetSizeParent(w, h);
+	Text->ParentSetWidth = Width;
+	Text->SetWidth("100%");
 }
 
-void QFAUITextInput::ChangePosition(int x, int y)
+void QFAUITextInput::HeightChanged(int oldValue)
 {
-	Position_x = x;
-	Position_y = y;	
-	Text->SetPositionParent(x, y);
+	Text->ParentSetHeight = Height;
+	Text->SetHeight("100%");
+}
+
+void QFAUITextInput::TopChanged(int oldValue)
+{
+	Text->ParentSetPosition_y = Position_y;
+	Text->SetTop(nullptr);
+}
+
+void QFAUITextInput::LeftChanged(int oldValue)
+{
+	Text->ParentSetPosition_x = Position_x;
+	Text->SetLeft(nullptr);
 }
 
 float QFAUITextInput::UpdateInnerHeight()

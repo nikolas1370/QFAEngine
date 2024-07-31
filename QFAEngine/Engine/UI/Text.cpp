@@ -7,6 +7,7 @@
 #include <EngineStuff/Pipline/Pipline.h>
 #include "UIParent.h"
 #include <EngineStuff/vk/TextureSampler.h>
+#include <Tools/String.h>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H  
@@ -72,6 +73,7 @@ QFAText::~QFAText()
 {
     delete vertexBufer;
 }
+
 
 void QFAText::AddGlyph(FT_ULong symbol, SFont* font)
 {
@@ -719,20 +721,24 @@ bool QFAText::SetFont(SFont* font)
     return false;
 }
 
-void QFAText::SetSizeParent(unsigned int w, unsigned int h)
+void QFAText::WidthChanged(int oldValue)
 {
-    if (Text.size() > 0 && w != Width) // in curent time text only horizon
+    if (Text.size() > 0 && oldValue != Width) // in curent time text only horizon
         TextChange = true;
-
-    Width = w;
-    Height = h;
 }
 
-void QFAText::SetPositionParent(int x, int y)
+void QFAText::HeightChanged(int oldValue)
 {
-    Position_x = x;
-    Position_y = y;
 }
+
+void QFAText::TopChanged(int oldValue)
+{
+}
+
+void QFAText::LeftChanged(int oldValue)
+{
+}
+
 
 void QFAText::updateUniformBuffer()
 {    
@@ -746,8 +752,9 @@ void QFAText::updateUniformBuffer()
     TextUniformParam.overflow.leftTopY = 0;
     TextUniformParam.overflow.rightBottomX = 1000000;
     TextUniformParam.overflow.rightBottomY = 1000000;
-    
+
     ProcessParentOverflow(TextUniformParam.overflow, Parent);
+
     TextUniformParam.pen = 0;
     memcpy(textParamBuffers[NumberTextInFrame]->GetData(), &TextUniformParam, sizeof(UniformBufferTextParam));
     
@@ -1092,4 +1099,28 @@ bool QFAText::SFont::SetStyleName(std::u32string newStyleName)
 
     styleName = newStyleName;
     return true;
+}
+
+void QFATextBackground::WidthChanged(int oldValue)
+{
+    Text.ParentSetWidth = Width;
+    Text.SetWidth("100%", Text.ParentSetWidthMinus);
+}
+
+void QFATextBackground::HeightChanged(int oldValue)
+{
+    Text.ParentSetHeight = Height;
+    Text.SetHeight("100%", Text.ParentSetHeightMinus);
+}
+
+void QFATextBackground::TopChanged(int oldValue)
+{
+    Text.ParentSetPosition_y = Position_y;
+    Text.SetTop(nullptr);
+}
+
+void QFATextBackground::LeftChanged(int oldValue)
+{
+    Text.ParentSetPosition_x = Position_x;
+    Text.SetLeft(nullptr);
 }

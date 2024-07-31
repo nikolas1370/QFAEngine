@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <cstring>
 #include <Math/Vector2D.h>
@@ -34,57 +34,6 @@ namespace QFAEditorUIType
 	};
 }
 
-namespace QFAUISlot
-{
-	struct SSlotBaseInfo
-	{
-		QFAUIType::Type typeParent;
-		unsigned short structSize;
-	};
-
-	// use for parent slot
-	struct SParentSlot
-	{
-		SSlotBaseInfo BaseInfo{ QFAUIType::NONE, sizeof(QFAUISlot::SParentSlot) };
-		char ParentSloot[20];
-	};
-
-	struct SCanvasSlot
-	{
-		SSlotBaseInfo BaseInfo{ QFAUIType::Canvas, sizeof(QFAUISlot::SCanvasSlot) };
-		float Width = 0.0f;
-		float Height = 0.0f;
-		float x = 0.0f;
-		float y = 0.0f;
-		bool HeightInPixel = false; // if true Height be in pixel
-		bool WidthInPixel = false;
-		bool xInPixel = false;
-		bool yInPixel = false;
-	};
-
-	struct SViewportRootSlot
-	{
-		SSlotBaseInfo BaseInfo{ QFAUIType::ViewportRoot, sizeof(QFAUISlot::SViewportRootSlot) };
-	};
-
-	struct SGridSlot
-	{
-		SSlotBaseInfo BaseInfo{ QFAUIType::Grid, sizeof(QFAUISlot::SViewportRootSlot) };
-	};
-
-	struct SScrollSlot
-	{
-		SSlotBaseInfo BaseInfo{ QFAUIType::Scroll, sizeof(QFAUISlot::SScrollSlot) };
-	};
-
-	struct SListSlot
-	{
-		SSlotBaseInfo BaseInfo{ QFAUIType::List, sizeof(QFAUISlot::SListSlot) };
-		int marginLeft = 0;
-		int marginTop = 0;
-	};
-}
-
 class QFAEngineViewport;
 class QFAEngineWindow;
 class QFAUIParentMultipleUnit;
@@ -99,6 +48,7 @@ class QFAViewportRoot;
 class QFAUIList;
 class QFAParentHiddenChild;
 class QFAUIBackground;
+class QFAUISelectUnit;
 class QFAEXPORT QFAUIUnit
 {
 	friend QFAEngineViewport;
@@ -114,6 +64,7 @@ class QFAEXPORT QFAUIUnit
 	friend QFAParentHiddenChild;
 	friend QFAUIParent;
 	friend QFAUIBackground;
+	friend QFAUISelectUnit;
 
 protected:
 	struct UniformOverflow
@@ -198,35 +149,41 @@ public:
 	};
 
 private:
-	QFAUISlot::SCanvasSlot l;
 	//IsRoot == true only for QFAViewportRoot
 	bool IsRoot = false;
 
 protected:
+	const char* StrTop = nullptr;
+	const char* StrLeft = nullptr;
+	const char* StrWidth = nullptr;
+	const char* StrHeight = nullptr;
+
 	bool IsEnable = true;
-	bool CanBeParent = false;
+	bool CanBeParent = false; // set it if unit parent class
 	QFAUIType::Type Type = QFAUIType::NONE;
 	QFAEditorUIType::Type EditorType = QFAEditorUIType::Type::NONE;
 
 	bool CanRender = false;
 
-	/*
-	* if true QFAViewportRoot call SetSizeParent or SetPositionParent
-			when QFAViewportRoot resize or move
-			need if Unit::CanBeParent = true
-	*/
-	bool SelfResizable = false;
-
 	int Width = 300;
 	int Height = 120;
 	int Position_x = 0;
 	int Position_y = 0;	
+
+	/*
+		parent want child have this size or position
+		but child can ignot it if user say other paremeter
+	*/	
+	int ParentSetWidth = 0, ParentSetHeight = 0, 
+		ParentSetPosition_x = 0, ParentSetPosition_y = 0;
+	
+
 	QFAUIParent* Parent = nullptr;
 
 	float Opacity = 1;
 	int ZIndex = 0;
 	bool UnitValid = true;
-	QFAUISlot::SParentSlot Slot;
+	bool ParentSetWidthMinus, ParentSetHeightMinus; // set in SetWidth SetHeight
 
 	/*
 		need for Scroll
@@ -240,14 +197,17 @@ public:
 	std::string UnitName;
 	EventFunctions Events;
 
-
 protected:
 
-	// parent set size
-	virtual void SetSizeParent(unsigned int w, unsigned int h) = 0;
-	// parent set position
-	virtual void SetPositionParent(int x, int y) = 0;
-
+	// *Changed() use for change size or position in child (childUnit->SetWidth) after use set*() in parent unit
+	// call in SetWidth
+	virtual void WidthChanged(int oldValue = 0) = 0;
+	// call in SetHeight
+	virtual void HeightChanged(int oldValue = 0) = 0;
+	// call in SetTop
+	virtual void TopChanged(int oldValue = 0) = 0;
+	// call in SetLeft
+	virtual void LeftChanged(int oldValue = 0) = 0;
 
 	/*
 	* call if one of parent was enable or QFAEngineViewport camera enable.
@@ -273,10 +233,13 @@ protected:
 	float ProcessParentOpacity(float childOpacity, QFAUIParent* parent);
 
 
+
+
+protected:
 	/*
-		Notify this unit and all parents of infocus event
-			call FunInFocus
-	*/
+						Notify this unit and all parents of infocus event
+							call FunInFocus
+					*/
 	void NotifyInFocus();
 	/*
 		Notify this unit and all parents of outfocus event
@@ -299,21 +262,26 @@ protected:
 	void NotifyRightMouseDownUp();
 
 public:
+	/* width == "10 + 7%" or null
+	if parentSetWidthMinus == true , parentSetWidth - width::value
+	if parentSetWidthMinus == false, Width be width::value
+*/
+	virtual void SetWidth(const char* width, bool parentSetWidthMinus = false) final;
+	/*
+		if parentSetHeightMinus == true , parentSetHeight - height::value
+		if parentSetHeightMinus == false, Height be height::value
+	*/
+	virtual void SetHeight(const char* height, bool parentSetHeightMinus = false) final;
+
+	// set offset from ParentSetPosition_y
+	virtual void SetTop(const char* top) final;
+	// set offset from ParentSetPosition_x
+	virtual void SetLeft(const char* left) final;
+
 	bool IsValid()
 	{
 		return this && UnitValid;
 	}
-
-	/*
-		Position be change if parent is RootUnit
-		in other case use Slot
-	*/
-	virtual void SetPosition(unsigned int x, unsigned int y);
-	/*
-		Size be change if parent is RootUnit
-		in other case use Slot
-	*/
-	virtual void SetSize(unsigned int w, unsigned int h);
 
 	virtual ~QFAUIUnit();
 
@@ -325,10 +293,6 @@ public:
 	{
 		return FVector2D((float)Width, (float)Height);
 	}
-	/*
-		all posible slot searsh in namespace QFAUISlot
-	*/
-	void SetSlot(void* slot);
 
 	bool IsMyParent(QFAUIParent* parent);
 	QFAEngineWindow* GetWindow();
@@ -336,11 +300,6 @@ public:
 	inline QFAUIParent* GetParent()
 	{
 		return Parent;
-	}
-
-	inline void* GetSlot()
-	{
-		return &Slot;
 	}
 
 	inline bool GetIsRoot()
@@ -400,3 +359,13 @@ public:
 		return EditorType;
 	}
 };
+
+
+/*
+
+QFAUIImage don
+
+
+коли парент ставить дить мінять розмір його
+
+*/

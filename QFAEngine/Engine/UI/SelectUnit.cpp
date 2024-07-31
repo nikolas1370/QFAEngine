@@ -1,25 +1,13 @@
 ﻿#include "pch.h"
 #include "SelectUnit.h"
 #include <Overlord/Time.h>
+#include <Tools/String.h>
 
 std::vector<QFAUISelectUnit*> QFAUISelectUnit::SelectUnitList;
 
-void QFAUISelectUnit::ChangeSize(unsigned int w, unsigned int h)
-{
-	Width = w;
-	Height = h;
-	SetChildSize(&Scroll, w, h);
-}
-
-void QFAUISelectUnit::ChangePosition(int x, int y)
-{
-	Position_x = x;
-	Position_y = y;
-	SetChildPosition(&Scroll, x, y);
-}
-
 float QFAUISelectUnit::UpdateInnerHeight()
 {
+	std::cout << "UpdateInnerHeight\n";
 	return Height;
 }
 
@@ -27,6 +15,7 @@ float QFAUISelectUnit::UpdateInnerWidth()
 {
 	return Width;
 }
+
 
 QFAUISelectUnit::QFAUISelectUnit()
 {
@@ -38,6 +27,30 @@ QFAUISelectUnit::~QFAUISelectUnit()
 	for (size_t i = 0; i < SelectUnitList.size(); i++)
 		if (SelectUnitList[i] == this)
 			SelectUnitList.erase(SelectUnitList.begin() + i);
+}
+
+void QFAUISelectUnit::WidthChanged(int oldValue)
+{
+	Scroll.ParentSetWidth = Width;
+	Scroll.SetWidth("100%");
+}
+
+void QFAUISelectUnit::HeightChanged(int oldValue)
+{
+	Scroll.ParentSetHeight = Height;
+	Scroll.SetHeight("100%");
+}
+
+void QFAUISelectUnit::TopChanged(int oldValue)
+{
+	Scroll.ParentSetPosition_y = Position_y;
+	Scroll.SetTop(nullptr);
+}
+
+void QFAUISelectUnit::LeftChanged(int oldValue)
+{
+	Scroll.ParentSetPosition_x = Position_x;
+	Scroll.SetLeft(nullptr);
 }
 
 void QFAUISelectUnit::SetSelectUnit(QFAUIParent* unit)
@@ -68,7 +81,7 @@ void QFAUISelectUnit::SetSelectUnit(QFAUIParent* unit)
 }
 
 void QFAUISelectUnit::SetScrollChild(QFAUIParentMultipleUnit* child)
-{
+{	
 	SelectUnitChild = child;
 	AddHiddenChild(&Scroll);
 	Scroll.SetUnit(child);

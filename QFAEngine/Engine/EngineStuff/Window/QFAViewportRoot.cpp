@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "QFAViewportRoot.h"
+#include <Tools/String.h>
+#include <EngineStuff/Window/EngineViewport.h>
 
 QFAViewportRoot::QFAViewportRoot()
 {
@@ -11,6 +13,7 @@ QFAViewportRoot::~QFAViewportRoot()
 {
 }
 
+
 float QFAViewportRoot::UpdateInnerHeight()
 {
 	return (float)Height;
@@ -21,35 +24,73 @@ float QFAViewportRoot::UpdateInnerWidth()
 	return (float)Width;
 }
 
-
-void QFAViewportRoot::ChangeSize(unsigned int w, unsigned int h)
+void QFAViewportRoot::WidthChanged(int oldValue)
 {
-	Width = w;
-	Height = h;
+	if (!Viewport)
+		return;
+
+	Width = Viewport->GetSize().X;
 	for (size_t i = 0; i < Children.Length(); i++)
-		if(Children[i]->SelfResizable)
-			Children[i]->SetSizeParent(w, h);
+	{
+		Children[i]->ParentSetWidth = Width;
+		Children[i]->SetWidth(Children[i]->StrWidth, Children[i]->ParentSetWidthMinus);
+	}
 }
 
-void QFAViewportRoot::ChangePosition(int x, int y)
+void QFAViewportRoot::HeightChanged(int oldValue)
 {
-	Position_x = x;
-	Position_y = y;
+	if (!Viewport)
+		return;
+
+	Height = Viewport->GetSize().Y;
 	for (size_t i = 0; i < Children.Length(); i++)
-		if (Children[i]->SelfResizable)
-			Children[i]->SetPositionParent(x, y);	
+	{
+		Children[i]->ParentSetHeight = Height;
+		Children[i]->SetHeight(Children[i]->StrHeight, Children[i]->ParentSetHeightMinus);
+	}
+}
+
+void QFAViewportRoot::TopChanged(int oldValue)
+{
+	if (!Viewport)
+		return;
+
+	Position_y = Viewport->GetPosition().Y;
+	for (size_t i = 0; i < Children.Length(); i++)
+	{
+		Children[i]->ParentSetPosition_y = Position_y;
+		Children[i]->SetTop(Children[i]->StrTop);
+	}
+}
+
+void QFAViewportRoot::LeftChanged(int oldValue)
+{
+	if (!Viewport)
+		return;
+
+	Position_x = Viewport->GetPosition().X;
+	for (size_t i = 0; i < Children.Length(); i++)
+	{
+		Children[i]->ParentSetPosition_x = Position_x;
+		Children[i]->SetLeft(Children[i]->StrLeft);
+	}
 }
 
 void QFAViewportRoot::NewUnit(QFAUIUnit* unit)
 {	
-	unit->SetPositionParent(Position_x, Position_y);
-	unit->SetSizeParent(Width, Height);
+	unit->ParentSetWidth = Width;
+	unit->ParentSetHeight = Height;
+	unit->ParentSetPosition_x = Position_x;
+	unit->ParentSetPosition_y = Position_y;
+	unit->SetWidth(unit->StrWidth, unit->ParentSetWidthMinus);
+	unit->SetHeight(unit->StrHeight, unit->ParentSetHeightMinus);
+	unit->SetTop(unit->StrTop);
+	unit->SetLeft(unit->StrLeft);
 }
 
 void QFAViewportRoot::MySlotChange(QFAUIUnit* unit)
 {
-	unit->SetPositionParent(Position_x, Position_y);
-	unit->SetSizeParent(Width, Height);
+	
 }
 
 

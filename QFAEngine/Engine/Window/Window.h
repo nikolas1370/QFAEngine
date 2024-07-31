@@ -15,10 +15,7 @@ protected:
 	static QFAWindow* GameWindow;
 	QFAWindow();
 
-
 #endif
 public:
 	static QFAWindow* GetWindow();
-
-
 };

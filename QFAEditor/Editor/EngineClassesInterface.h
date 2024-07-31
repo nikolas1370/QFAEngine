@@ -5,6 +5,10 @@
 #include <EngineStuff/Window/ViewportHolder.h>
 #include <Object/World/Level.h>
 #include <Object/Actor/Actor.h>
+#include <UI/Text.h>
+#include <UI/Canvas.h>
+#include <UI/UIList.h>
+#include <UI/UIImage.h>
 
 class QFAEditorFileStorage;
 class QFAEditorExplorerFolderUnit;
@@ -54,4 +58,31 @@ class QFAEgitorClass : public QFAClass
 class QFAEditorActor : public QActor
 {
 	friend QFAEditorMainWindow;
+};
+class QFAEditorUIFileViewUnit;
+
+class QFAEditorText : public QFAText
+{
+	friend QFAEditorUIFileViewUnit;
+};
+
+class QFAUIActorTransform;
+class QFAUIEditorFileExplorer;
+class QFAEditorGameViewportInfo;
+class QFAEditorCanvas : public QFAUICanvas
+{
+	friend QFAUIActorTransform;
+	friend QFAUIEditorFileExplorer;
+	friend QFAEditorExplorerFolderUnit;
+	friend QFAEditorGameViewportInfo;
+};
+
+class QFAEditorList : public QFAUIList
+{
+	friend QFAUIEditorFileExplorer;
+};
+
+class QFAEditorUIImage : public QFAUIImage
+{
+	friend QFAUIEditorFileExplorer;
 };

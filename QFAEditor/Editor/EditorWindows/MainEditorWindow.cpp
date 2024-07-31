@@ -63,39 +63,37 @@ void QFAEditorMainWindow::CreateMainEdirorUI()
 	QFAEngineViewport* mainViewPort = Window->GetViewport(0);
 	mainViewPort->GetRoot()->removeAllUnit();
 
-	WindowCanvas = new QFAUICanvas;	
-	QFAUISlot::SCanvasSlot slot;
-	slot.Width = 1.0f;
-	slot.Height = 0.3f;
-	slot.x = 0.0f;
-	slot.y = 0.7f;
-	FileExplorer = new QFAUIEditorFileExplorer(Window, QFAEditorMainWindow::StartDragAndDrop);
-	FileExplorer->SetSlot(&slot);
-	WindowCanvas->AddUnit(FileExplorer);
+	WindowCanvas = new QFAUICanvas;
+	WindowCanvas->SetWidth("100%");
+	WindowCanvas->SetHeight("100%");
 	mainViewPort->AddUnit(WindowCanvas);
-		
-	slot.Width = 0.3f;
-	slot.Height = 0.7f;
-	slot.x = 0.7f;
-	slot.y = 0.0f;
-	GameViewportInfo = new QFAEditorGameViewportInfo;	
-	GameViewportInfo->SetSlot(&slot);
-	WindowCanvas->AddUnit(GameViewportInfo);
-	GameViewportInfo->SetBackgroundColor(QFAColor(36, 36, 36));
+
+	FileExplorer = new QFAUIEditorFileExplorer(Window, QFAEditorMainWindow::StartDragAndDrop);	
+	FileExplorer->SetWidth("100%");
+	FileExplorer->SetHeight("30%");	
+	FileExplorer->SetTop("70%");
+	WindowCanvas->AddUnit(FileExplorer);
 	
+	GameViewportInfo = new QFAEditorGameViewportInfo;	
+	GameViewportInfo->SetWidth("30%");
+	GameViewportInfo->SetHeight("70%");
+	GameViewportInfo->SetLeft("70%");
+	WindowCanvas->AddUnit(GameViewportInfo);
+	GameViewportInfo->SetBackgroundColor(QFAColor(36, 36, 36));	
+
 	Window->SetSize(WorkWidth, WorkHeight);
 	Window->MoveToCenter();
 	Window->EnabelDecorated(true);	
-	PrepareGameViewport();	
+	PrepareGameViewport();
 }
 
 void QFAEditorMainWindow::PrepareGameViewport()
 {
 	GameViewport = (QFAEditorViewportHolder*)new QFAViewportHolder();
 	Window->AddViewport(GameViewport);
-	GameViewport->SetTop("30");
+	GameViewport->SetTop("0");
 	GameViewport->SetLeft("0");
-	GameViewport->SetHeight("70% - 30");
+	GameViewport->SetHeight("70%");
 	GameViewport->SetWidth("70%");
 	
 	Worlds[0] = NewObject<QWorld>();
@@ -315,7 +313,6 @@ void QFAEditorMainWindow::PickMesh(EKey::Key key)
 void QFAEditorMainWindow::CreateLoadUI()
 {
 	QFAEngineViewport* mainViewPort = ((QFAEditorWindow*)Window)->Viewports[0];
-	QFAUISlot::SCanvasSlot slot;
 	LoadCanvas = new QFAUICanvas;
 	TextList = new QFAUIList;
 	TextList->SetListType(QFAUIList::LTHorizonInner);
@@ -335,13 +332,7 @@ void QFAEditorMainWindow::CreateLoadUI()
 	LoadText_2->SetOverflowWrap(QFAText::OWNone);
 
 	Text->SetText(U"QFAEditor");
-
-	slot.xInPixel = true;
-	slot.yInPixel = true;
-	Text->SetSlot(&slot);
-
-	slot.y = 30.0f;
-	TextList->SetSlot(&slot);
+	TextList->SetTop("30");
 
 	mainViewPort->AddUnit(LoadCanvas);
 }

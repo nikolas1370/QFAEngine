@@ -103,8 +103,6 @@ private:
     static void EndLife();
     static void CreateProjectionSet(VkBuffer buffer);
 
-    void SetSizeParent(unsigned int w, unsigned int h) override;
-    void SetPositionParent(int x, int y) override;
     void Render(VkCommandBuffer comandebuffer) override;
     void UpdateUniforms();
     void ChangeQuad();
@@ -120,9 +118,15 @@ protected:
     void PrepareSet();
     void DisableImage();
 
+    void WidthChanged(int oldValue = 0) override;
+    void HeightChanged(int oldValue = 0) override;
+    void TopChanged(int oldValue = 0) override;
+    void LeftChanged(int oldValue = 0) override;
+
 public:
     QFAUIImage(QFAImage* image, bool iBackground = false);
     ~QFAUIImage();
+
 
     /*
         if Image == nullptr

@@ -152,6 +152,7 @@ class QFAEXPORT QFAEngineWindow
 
 protected:
 	QFAArray<QFAEngineViewport*> Viewports;
+	// if window inside viewportHolder valude be false
 	bool RegularWindow = true;
 private:
 	static void QueueSubmitPresent(std::vector<VkSemaphore>& listSemi);

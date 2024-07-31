@@ -1,20 +1,39 @@
 #include "pch.h"
 #include "Grid.h"
-
+#include <Tools/String.h>
 QFAUIGrid::QFAUIGrid()
 {
 	Type = QFAUIType::Grid;
-	SelfResizable = true;
+}
+
+void QFAUIGrid::WidthChanged(int oldValue)
+{
+	ProcessChildPosition(ChildProcessType::EWidth);
+}
+
+void QFAUIGrid::HeightChanged(int oldValue)
+{
+	ProcessChildPosition(ChildProcessType::EHeight);
+}
+
+void QFAUIGrid::TopChanged(int oldValue)
+{
+	ProcessChildPosition(ChildProcessType::ETop);
+}
+
+void QFAUIGrid::LeftChanged(int oldValue)
+{
+	ProcessChildPosition(ChildProcessType::ELeft);
 }
 
 void QFAUIGrid::NewUnit(QFAUIUnit* unit) 
 {	
-	ProcessChildPosition();
+	ProcessChildPosition(ChildProcessType::EAll);
 }
 
 void QFAUIGrid::UnitWasRemoved()
 {
-	ProcessChildPosition();
+	ProcessChildPosition(ChildProcessType::EAll);
 }
 
 float QFAUIGrid::UpdateInnerHeight()
@@ -33,8 +52,6 @@ float QFAUIGrid::UpdateInnerWidth()
 {
 	return (float)Width;
 }
-
-
 
 #define GetCountUnit(Width, MinUnitSize) floor((float)(Width) / (float)(MinUnitSize))
 #define GetSizeUnit(Width, MinUnitSize) ((float)(Width) / GetCountUnit(Width, MinUnitSize))
@@ -60,7 +77,7 @@ int QFAUIGrid::GetSizeUnitCount()
 	return widthWithoutOffset / ColumnCount + 1;
 }
 
-void QFAUIGrid::ProcessChildPosition()
+void QFAUIGrid::ProcessChildPosition(ChildProcessType type)
 {
 	unitWidth = 0;
 	int maxColumnCount = ColumnCount;
@@ -82,10 +99,29 @@ void QFAUIGrid::ProcessChildPosition()
 		if (columnCount == 0)
 			roowCount++;
 
-		Children[i]->SetSizeParent((unsigned int)unitWidth, (unsigned int)((float)unitWidth * Ratio));
-		Children[i]->SetPositionParent(
-			Position_x + columnCount * (unitWidth + (int)ColumnOffset),
-			Position_y + (int)((float)(roowCount - 1) * ((float)unitWidth * Ratio + (float)RowOffset)));
+		if (type == QFAUIGrid::ETop || type == QFAUIGrid::EAll)
+		{
+			Children[i]->ParentSetPosition_y = Position_y + (int)((float)(roowCount - 1) * ((float)unitWidth * Ratio + (float)RowOffset));
+			Children[i]->SetTop(Children[i]->StrTop);
+		}
+
+		if (type == QFAUIGrid::ELeft || type == QFAUIGrid::EAll)
+		{
+			Children[i]->ParentSetPosition_x = Position_x + columnCount * (unitWidth + (int)ColumnOffset);
+			Children[i]->SetLeft(Children[i]->StrLeft);
+		}
+
+		if (type == QFAUIGrid::EWidth || type == QFAUIGrid::EAll)
+		{
+			Children[i]->ParentSetWidth = unitWidth;
+			Children[i]->SetWidth(Children[i]->StrWidth, Children[i]->ParentSetWidthMinus);
+		}
+
+		if (type == QFAUIGrid::EHeight || type == QFAUIGrid::EAll)
+		{
+			Children[i]->ParentSetHeight = (int)((float)unitWidth * Ratio);
+			Children[i]->SetHeight(Children[i]->StrHeight, Children[i]->ParentSetHeightMinus);
+		}
 
 		columnCount++;
 		if (columnCount == maxColumnCount)
@@ -93,53 +129,39 @@ void QFAUIGrid::ProcessChildPosition()
 	}
 }
 
-void QFAUIGrid::ChangeSize(unsigned int w, unsigned int h)
-{
-	Width = w;
-	Height = h;
-	ProcessChildPosition();
-}
-
-void QFAUIGrid::ChangePosition(int x, int y)
-{
-	Position_x = x;
-	Position_y = y;
-	ProcessChildPosition();
-}
-
 void QFAUIGrid::SetColumnCount(unsigned int columnCount)
 {
 	ColumnCount = columnCount;
-	ProcessChildPosition();
+	ProcessChildPosition(QFAUIGrid::EAll);
 }
 
 void QFAUIGrid::SetOffsets(unsigned int columnOffset, unsigned int rowOffset)
 {
 	ColumnOffset = columnOffset;
 	RowOffset = rowOffset;
-	ProcessChildPosition();
+	ProcessChildPosition(QFAUIGrid::EAll);
 }
 
 void QFAUIGrid::SetUnitWidth(unsigned int unitWidth)
 {
 	UnitSize = unitWidth;
-	ProcessChildPosition();
+	ProcessChildPosition(QFAUIGrid::EAll);
 }
 
 void QFAUIGrid::SetMin(unsigned int min)
 {
 	MinUnitSize = min;
-	ProcessChildPosition();
+	ProcessChildPosition(QFAUIGrid::EAll);
 }
 
 void QFAUIGrid::SetRation(float ratio)
 {
 	Ratio = ratio;
-	ProcessChildPosition();
+	ProcessChildPosition(QFAUIGrid::EAll);
 }
 
 void QFAUIGrid::SetPositionType(UnitPositionType type)
 {
 	PositionTypeType = type;
-	ProcessChildPosition();
+	ProcessChildPosition(QFAUIGrid::EAll);
 }

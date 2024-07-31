@@ -3,18 +3,7 @@
 #include <UI/UIParentMultipleUnit.h>
 #include <EngineStuff/Window/EngineViewport.h>
 #include <EngineStuff/Window/UIEvent.h>
-
-void QFAUIUnit::SetPosition(unsigned int x, unsigned int y)
-{
-	if (!Parent || Parent->GetIsRoot())
-		SetPositionParent(x, y);
-}
-
-void QFAUIUnit::SetSize(unsigned int w, unsigned int h)
-{
-	if (!Parent || Parent->GetIsRoot())
-		SetSizeParent(w, h);
-}
+#include <Tools/String.h>
 
 QFAUIUnit::~QFAUIUnit()
 {
@@ -24,16 +13,6 @@ QFAUIUnit::~QFAUIUnit()
 
     UnitValid = false;
     QFAUIEvent::UnitUnderDelete(this);
-}
-
-void QFAUIUnit::SetSlot(void* slot)
-{
-	if (!slot)
-		return;
-
-	memcpy(&Slot, slot, ((QFAUISlot::SParentSlot*)slot)->BaseInfo.structSize);
-	if(Parent)
-		Parent->MySlotChange(this);
 }
 
 bool QFAUIUnit::IsMyParent(QFAUIParent* parent)
@@ -53,8 +32,6 @@ bool QFAUIUnit::IsMyParent(QFAUIParent* parent)
 
     return false;
 }
-
-
 
 QFAViewportRoot* QFAUIUnit::GetViewportRoot(unsigned int& countUnit)
 {
@@ -302,6 +279,156 @@ void QFAUIUnit::NotifyRightMouseDownUp()
 
         parent = parent->Parent;
     }
+}
+
+void QFAUIUnit::SetWidth(const char* width, bool parentSetWidthMinus)
+{
+    StrWidth = width;
+    ParentSetWidthMinus = parentSetWidthMinus;
+    int parentW;
+    if (GetIsRoot())
+    {
+        QFAViewportRoot* root = (QFAViewportRoot*)this;
+        if (!root->GetViewport())
+            return;
+
+        parentW = root->GetViewport()->GetSize().X;
+    }
+    else
+    {
+        if (!Parent)
+            return;
+
+        parentW = Parent->GetSize().X;
+    }   
+
+    int old = Width;
+    if (!StrWidth)
+    {        
+        Width = ParentSetWidth;
+        if (CanBeParent)
+            ((QFAUIParent*)this)->RecalculateBackgroundSize();
+
+        WidthChanged(old);
+        return;
+    }
+
+    if (parentSetWidthMinus)
+        Width = ParentSetWidth - QFAString::GetValue(StrWidth, parentW, false);
+    else
+        Width = QFAString::GetValue(StrWidth, parentW, false);
+
+    if (CanBeParent)
+        ((QFAUIParent*)this)->RecalculateBackgroundSize();
+
+    WidthChanged(old);
+}
+
+void QFAUIUnit::SetHeight(const char* height, bool parentSetHeightMinus)
+{
+    StrHeight = height;
+    ParentSetHeightMinus = parentSetHeightMinus;
+    int parentH;
+    if (GetIsRoot())
+    {
+        QFAViewportRoot* root = (QFAViewportRoot*)this;
+        if (!root->GetViewport())
+            return;
+
+        parentH = root->GetViewport()->GetSize().Y;
+    }
+    else
+    {
+        if (!Parent)
+            return;
+
+        parentH = Parent->GetSize().Y;
+    }
+
+    int old = Height;
+    if (!StrHeight)
+    {
+        Height = ParentSetHeight;
+        if (CanBeParent)
+            ((QFAUIParent*)this)->RecalculateBackgroundSize();
+
+        HeightChanged(old);
+        return;
+    }
+
+    if (parentSetHeightMinus)
+        Height = ParentSetHeight - QFAString::GetValue(StrHeight, parentH, false);
+    else
+        Height = QFAString::GetValue(StrHeight, parentH, false);
+
+    if (CanBeParent)
+        ((QFAUIParent*)this)->RecalculateBackgroundSize();
+
+    HeightChanged(old);
+}
+
+void QFAUIUnit::SetTop(const char* top)
+{
+    StrTop = top;
+    int parentT;
+    if (GetIsRoot())
+    {
+        QFAViewportRoot* root = (QFAViewportRoot*)this;
+        if (!root->GetViewport())
+            return;
+
+        parentT = root->GetViewport()->GetSize().Y;
+    }
+    else
+    {
+        if (!Parent)
+            return;
+
+        parentT = Parent->GetSize().Y;
+    }
+
+    int old = Position_y;
+    if (StrTop)
+        Position_y = ParentSetPosition_y + QFAString::GetValue(StrTop, parentT, false);
+    else
+        Position_y = ParentSetPosition_y;
+
+    if (CanBeParent)
+        ((QFAUIParent*)this)->RecalculateBackgroundPosition();
+
+    TopChanged(old);
+}
+
+void QFAUIUnit::SetLeft(const char* left)
+{
+    StrLeft = left;
+    int parentL;
+    if (GetIsRoot())
+    {
+        QFAViewportRoot* root = (QFAViewportRoot*)this;
+        if (!root->GetViewport())
+            return;
+
+        parentL = root->GetViewport()->GetSize().X;
+    }
+    else
+    {
+        if (!Parent)
+            return;
+
+        parentL = Parent->GetSize().X;
+    }
+
+    int old = Position_x;
+    if (StrLeft)
+        Position_x = ParentSetPosition_x + QFAString::GetValue(StrLeft, parentL, false);
+    else
+        Position_x = ParentSetPosition_x;
+
+    if (CanBeParent)
+        ((QFAUIParent*)this)->RecalculateBackgroundPosition();
+
+    LeftChanged(old);
 }
 
 

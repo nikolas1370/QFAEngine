@@ -11,18 +11,13 @@
 #include <UI/Text.h>
 #include <filesystem>
 #include <Tools/String.h>
+#include <EngineClassesInterface.h>
 
 QFAEditorGameViewportInfo::QFAEditorGameViewportInfo()
 {	
 	Canvas = new QFAUICanvas;
 	AddHiddenChild(Canvas);
 
-	QFAUISlot::SCanvasSlot slot;
-
-	slot.x = 0.0f;
-	slot.y = 0.0f;
-	slot.Width = 1.0f;
-	slot.Height = 0.5f;
 	ActorList = new QFAUISelectList;
 	ActorList->SetListType(QFAUIList::LTVertical);
 	ActorList->SetUnitHeight(25);
@@ -47,7 +42,10 @@ QFAEditorGameViewportInfo::QFAEditorGameViewportInfo()
 			} 
 		};
 
-	ActorList->SetSlot(&slot);
+	ActorList->SetWidth("100%");
+	ActorList->SetHeight("50%");
+	ActorList->SetTop("0");
+	ActorList->SetLeft("0");	
 	Canvas->AddUnit(ActorList);
 
 	ActorInfoList = new QFAUIList;
@@ -55,8 +53,11 @@ QFAEditorGameViewportInfo::QFAEditorGameViewportInfo()
 	ActorTransform = new QFAUIActorTransform;
 	ActorInfoList->AddUnit(ActorTransform);
 	ActorInfoList->SetEnable(false);
-	slot.y = 0.5f;
-	ActorInfoList->SetSlot(&slot);
+	
+	ActorInfoList->SetWidth("100%");
+	ActorInfoList->SetHeight("50%");
+	ActorInfoList->SetTop("50%");
+	ActorInfoList->SetLeft("0");
 	Canvas->AddUnit(ActorInfoList);
 }
 
@@ -140,22 +141,34 @@ void QFAEditorGameViewportInfo::PressedDelete()
 	}
 }
 
+
+
 void QFAEditorGameViewportInfo::MySlotChange(QFAUIUnit* unit)
 {
 }
 
-void QFAEditorGameViewportInfo::ChangeSize(unsigned int w, unsigned int h)
+void QFAEditorGameViewportInfo::WidthChanged(int oldValue)
 {
-	Width = w;
-	Height = h;
-	SetChildSize(Canvas, w, h);
+	((QFAEditorCanvas*)Canvas)->ParentSetWidth = Width;
+	Canvas->SetWidth("100%", false);
 }
 
-void QFAEditorGameViewportInfo::ChangePosition(int x, int y)
+void QFAEditorGameViewportInfo::HeightChanged(int oldValue)
 {
-	Position_x = x;
-	Position_y = y;
-	SetChildPosition(Canvas, Position_x, Position_y);
+	((QFAEditorCanvas*)Canvas)->ParentSetHeight = Height;
+	Canvas->SetHeight("100%", false);
+}
+
+void QFAEditorGameViewportInfo::TopChanged(int oldValue)
+{
+	((QFAEditorCanvas*)Canvas)->ParentSetPosition_y = Position_y;
+	Canvas->SetTop("0");
+}
+
+void QFAEditorGameViewportInfo::LeftChanged(int oldValue)
+{
+	((QFAEditorCanvas*)Canvas)->ParentSetPosition_x = Position_x;
+	Canvas->SetLeft("0");
 }
 
 float QFAEditorGameViewportInfo::UpdateInnerHeight()

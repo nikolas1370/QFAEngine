@@ -4,6 +4,7 @@
 #include  <UI/UIImage.h>
 #include <UI/Text.h>
 #include <EngineClassesInterface.h>
+#include <Tools/String.h>
 
 QFAImage* QFAEditorExplorerFolderUnit::FolderImage = nullptr;
 QFAImage* QFAEditorExplorerFolderUnit::FileImage = nullptr;
@@ -30,23 +31,19 @@ QFAEditorExplorerFolderUnit::QFAEditorExplorerFolderUnit()
 	Canvas->AddUnit(Icon);
 	Canvas->AddUnit(UnitText);
 	
-	QFAUISlot::SCanvasSlot slot;
-	slot.Height = 0.5f;
-	slot.Width = 1.0f;
-	slot.x = 0.0f;
-	slot.y = 0.0f;
-	Icon->SetSlot(&slot);
-
-	slot.Height = 0.5f;
-	slot.Width = 1.0f;
-	slot.x = 0.0f;
-	slot.y = 0.5f;
-	UnitText->SetSlot(&slot);	
+	Icon->SetWidth("100%");
+	Icon->SetHeight("50%");
+	
+	UnitText->SetWidth("100%");
+	UnitText->SetHeight("50%");
+	UnitText->SetTop("50%");
 }
 
 QFAEditorExplorerFolderUnit::~QFAEditorExplorerFolderUnit()
 {
 }
+
+
 
 void QFAEditorExplorerFolderUnit::MySlotChange(QFAUIUnit* unit)
 {
@@ -72,13 +69,26 @@ void QFAEditorExplorerFolderUnit::ChangeText(std::u32string text)
 	UnitText->SetText(text);
 }
 
-void QFAEditorExplorerFolderUnit::ChangeSize(unsigned int w, unsigned int h)
+void QFAEditorExplorerFolderUnit::WidthChanged(int oldValue)
 {
-	SetChildSize(Canvas, w, h);	
+	((QFAEditorCanvas*)Canvas)->ParentSetWidth = Width;
+	Canvas->SetWidth("100%", false);
 }
 
-
-void QFAEditorExplorerFolderUnit::ChangePosition(int x, int y)
+void QFAEditorExplorerFolderUnit::HeightChanged(int oldValue)
 {
-	SetChildPosition(Canvas, x, y);
+	((QFAEditorCanvas*)Canvas)->ParentSetHeight = Height;
+	Canvas->SetHeight("100%", false);
+}
+
+void QFAEditorExplorerFolderUnit::TopChanged(int oldValue)
+{
+	((QFAEditorCanvas*)Canvas)->ParentSetPosition_y = Position_y;
+	Canvas->SetTop(nullptr);
+}
+
+void QFAEditorExplorerFolderUnit::LeftChanged(int oldValue)
+{
+	((QFAEditorCanvas*)Canvas)->ParentSetPosition_x = Position_x;
+	Canvas->SetLeft(nullptr);
 }

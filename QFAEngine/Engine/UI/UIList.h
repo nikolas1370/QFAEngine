@@ -3,6 +3,15 @@
 
 class QFAEXPORT QFAUIList : public QFAUIParentMultipleUnit
 {
+	enum ChildCalculateType
+	{
+		EAll,
+		ETop,
+		ELeft,
+		EWidth,
+		EHeight
+	};
+
 public:
 	enum EListType
 	{
@@ -18,11 +27,8 @@ private:
 	unsigned int UnitHeight = 50;
 	unsigned int UnitWidth = 150;
 
-protected:
-	bool StretchLastUnit = false;
-
 private:
-	void CalculateChildren();
+	void CalculateChildren(ChildCalculateType cct);
 	void ChildInnerChange(QFAUIUnit* child) override;
 	void UnitWasRemoved() override;
 
@@ -30,8 +36,6 @@ protected:
 	void NewUnit(QFAUIUnit* unit) override;
 	void MySlotChange(QFAUIUnit* unit) override;
 
-	void ChangeSize(unsigned int w, unsigned int h) override;
-	void ChangePosition(int x, int y) override;
 
 	float UpdateInnerHeight() override;
 	float UpdateInnerWidth() override;
@@ -41,6 +45,12 @@ protected:
 public:
 	QFAUIList();
 	~QFAUIList();
+
+	void WidthChanged(int oldValue = 0) override;
+	void HeightChanged(int oldValue = 0) override;
+
+	void TopChanged(int oldValue = 0) override;
+	void LeftChanged(int oldValue = 0) override;
 
 	void SetListType(EListType listType);
 	inline EListType GetListType()
@@ -54,8 +64,4 @@ public:
 	void SetUnitWidth(unsigned int w);
 
 	inline void SetOverflow(EOverflow over) override {};
-	inline void SetStretchLastUnit(bool enable)
-	{
-		StretchLastUnit = enable;
-	}
 };

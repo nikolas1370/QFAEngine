@@ -3,6 +3,14 @@
 
 class  QFAEXPORT QFAUIGrid : public QFAUIParentMultipleUnit
 {
+	enum ChildProcessType
+	{
+		EAll,
+		ETop,
+		ELeft,
+		EWidth,
+		EHeight
+	};
 public:
 	/*
 		UPTAuto 
@@ -37,10 +45,8 @@ private:
 	int GetSizeUnitAuto(int& columnCount);
 	int GetSizeUnitCount();
 
-	void ProcessChildPosition();
-
-	void ChangeSize(unsigned int w, unsigned int h) override;
-	void ChangePosition(int x, int y) override;
+	// positionX == true child positionX be change
+	void ProcessChildPosition(ChildProcessType type);
 
 	void NewUnit(QFAUIUnit* unit) override;
 	void UnitWasRemoved() override;
@@ -50,11 +56,17 @@ private:
 	float UpdateInnerHeight() override;
 	// grid always return own Width
 	float UpdateInnerWidth() override;
+protected:
+	void WidthChanged(int oldValue = 0) override;
+	void HeightChanged(int oldValue = 0) override;
+	void TopChanged(int oldValue = 0) override;
+	void LeftChanged(int oldValue = 0) override;
 
 public:
 
 	 QFAUIGrid();
 	 ~QFAUIGrid() {};
+
 
 	void SetColumnCount(unsigned int columnCount);
 	void SetOffsets(unsigned int columnOffset, unsigned int rowOffset);

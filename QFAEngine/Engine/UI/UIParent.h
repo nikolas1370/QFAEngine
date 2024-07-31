@@ -53,7 +53,7 @@ public:
 
 protected:
 	EBackgroundType BackgroundType = EBackgroundType::BTNONE;
-	QFAUIImage BackgroundImage = QFAUIImage(nullptr, true);
+	//QFAUIImage BackgroundImage = QFAUIImage(nullptr, true);
 	QFAImage* Image = nullptr;;
 	QFAColorF BackgroundColor;
 
@@ -72,29 +72,24 @@ protected:
 	virtual void RemoveUnitWithoutNotify(QFAUIUnit* unit) = 0;
 	// child call if his slot change
 	virtual void MySlotChange(QFAUIUnit* unit) = 0;
-	/*
-		call in SetSizeParent
-	*/
-	virtual void ChangeSize(unsigned int w, unsigned int h) = 0;
-	/*
-		call in SetPositionParent
-	*/
-	virtual void ChangePosition(int x, int y) = 0;
+
 
 	/*
-		parent call if need heve new InnerHeight
-		write new valude in this->InnerHeight and return it
+		parent call if need heve new InnerHeight. 
+		write new valude in this->InnerHeight and return it 		
 	*/
 	virtual float UpdateInnerHeight() = 0;
 	virtual float UpdateInnerWidth() = 0;
+
+	// child class call if change size
+	void RecalculateBackgroundSize();	
+	void RecalculateBackgroundPosition();
 
 	/*
 		child call if inner Height/Width change
 	*/
 	virtual void ChildInnerChange(QFAUIUnit* child) {};
 
-	void SetSizeParent(unsigned int w, unsigned int h) final;
-	void SetPositionParent(int x, int y) final;
 
 	void RenderBackground(VkCommandBuffer comandebuffer);
 
@@ -103,14 +98,21 @@ protected:
 		return BackgroundImage.GetPipeline();
 	}
 
+	/*
+	* 
+	* use setwidth and etc
+	* 
 	// use only in child class with unit type QFAUIType::CustomUnit
 	void SetChildPosition(QFAUIUnit* childUnit, int x, int y);
 	// use only at child class with unit type QFAUIType::CustomUnit
 	void SetChildSize(QFAUIUnit* childUnit, int w, int h);
-
+	*/
 public:
 	QFAUIParent();
 	~QFAUIParent();
+
+	// reemove in priv
+	QFAUIImage BackgroundImage = QFAUIImage(nullptr, true);
 
 	inline EOverflow GetOverflow()
 	{

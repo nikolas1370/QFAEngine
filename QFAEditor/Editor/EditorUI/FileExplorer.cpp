@@ -16,6 +16,7 @@
 #include "../GameCodeTool/GameCodeCompiler.h"
 #include <Tools/String.h>
 #include <UI/SelectUnit.h>
+#include <EngineClassesInterface.h>
 
 QFAUIEditorFileExplorer::QFAUIEditorFileExplorer(QFAEngineWindow *window, std::function <void(bool isCppClass, size_t fileId)> dragFun)
 {
@@ -49,7 +50,8 @@ QFAUIEditorFileExplorer::~QFAUIEditorFileExplorer()
 void QFAUIEditorFileExplorer::CreateTop()
 {
 	FileExplorerTop = new QFAUIList;
-	FileExplorerTop->SetStretchLastUnit(true);
+	FileExplorerTop->SetWidth("100%");
+	FileExplorerTop->SetHeight("25");
 	FileExplorerTop->SetListType(QFAUIList::LTHorizon);
 	FileExplorerTop->SetUnitWidth(25); 
 
@@ -69,12 +71,11 @@ void QFAUIEditorFileExplorer::CreateTop()
 	ForwardButton->Events.SetLeftMouseDown(&QFAUIEditorFileExplorer::NextFolderButton, this);
 	BackButton->Events.SetLeftMouseDown(&QFAUIEditorFileExplorer::PreviousFolderButton, this);
 
-	QFAUISlot::SListSlot ListSlot;
-	ListSlot.marginLeft = 10;
-	PathTextScroll = new QFAUIScroll;
+	PathTextScroll = new QFAUIScroll; 
+	PathTextScroll->SetWidth("100% - 50"); // 50 == FileExplorerTop->SetUnitWidth for SetUnitWidth + ForwardButton
+	PathTextScroll->SetHeight("100%");
 	PathTextScroll->SetScrollType(QFAUIScroll::STHorizon);
-	PathTextScroll->SetSlot(&ListSlot);
-	
+
 	PathText = new QFAText;
 	PathTextScroll->SetUnit(PathText);
 	PathText->SetTextSize(18);	
@@ -82,13 +83,17 @@ void QFAUIEditorFileExplorer::CreateTop()
 	
 	FileExplorerTop->AddUnit(BackButton);
 	FileExplorerTop->AddUnit(ForwardButton);
-	FileExplorerTop->AddUnit(PathTextScroll);
+	FileExplorerTop->AddUnit(PathTextScroll);	
 	AddHiddenChild(FileExplorerTop);
 }
 
 void QFAUIEditorFileExplorer::CreateMiddle()
 {
 	FileExplorerMiddle = new QFAUICanvas;
+	FileExplorerMiddle->SetWidth("100%");
+	FileExplorerMiddle->SetHeight("100% - 30 - 30");// (30 top) - (30 bottom)
+	FileExplorerMiddle->SetTop("30");
+
 	SelectGrid = new QFAUISelectGrid;
 
 	SelectGrid->SetScrollType(QFAUIScroll::STVertical);
@@ -100,12 +105,8 @@ void QFAUIEditorFileExplorer::CreateMiddle()
 	SelectGrid->SelectColor = SelectUnit;
 	SelectGrid->SelectLostFocusColor = SelectUnitNotFocus;
 
-	QFAUISlot::SCanvasSlot slot;
-	slot.Height = 1.0f;
-	slot.Width = 1.0f;
-	slot.x = 0.0f;
-	slot.y = 0.0f;
-	SelectGrid->SetSlot(&slot);
+	SelectGrid->SetWidth("100%");
+	SelectGrid->SetHeight("100%");
 	FileExplorerMiddle->AddUnit(SelectGrid);
 
 	SelectGrid->SelectEvent.LeftMouseDown = ([this](QFAUIParent* unit)
@@ -164,11 +165,17 @@ void QFAUIEditorFileExplorer::CreateMiddle()
 void QFAUIEditorFileExplorer::CreateBottom()
 {
 	FileExplorerBottom = new QFAUIList;
+	FileExplorerBottom->SetWidth("100%");
+	FileExplorerBottom->SetHeight("30");
+	FileExplorerBottom->SetTop("100% - 30");
+
 	FileExplorerBottom->SetListType(QFAUIList::LTHorizon);
 	FileExplorerBottom->SetUnitWidth(25);
 
-	ExplorerButton = new QFAText;
+	ExplorerButton = new QFAText;	
 	CppButton = new QFAText;
+	CppButton->SetLeft("20");
+	ExplorerButton->SetLeft("10");
 	ExplorerButton->SetFont(QFAEditorMainWindow::GetIcomonFont());
 	CppButton->SetFont(QFAEditorMainWindow::GetIcomonFont());
 	CppButton->SetText(std::u32string(&CppFileButtonIconCode, 1));
@@ -184,11 +191,6 @@ void QFAUIEditorFileExplorer::CreateBottom()
 	ExplorerButton->Events.SetLeftMouseDown(&QFAUIEditorFileExplorer::ExplorerButtonE, this);
 	FileExplorerBottom->AddUnit(ExplorerButton);
 	FileExplorerBottom->AddUnit(CppButton);
-
-	QFAUISlot::SListSlot slot;
-	slot.marginLeft = 10;
-	ExplorerButton->SetSlot(&slot);	
-	CppButton->SetSlot(&slot);
 	
 	AddHiddenChild(FileExplorerBottom);
 }
@@ -196,6 +198,8 @@ void QFAUIEditorFileExplorer::CreateBottom()
 void QFAUIEditorFileExplorer::CreateCppTop()
 {
 	CppCanvas = new QFAUICanvas;
+	CppCanvas->SetWidth("100%");
+	CppCanvas->SetHeight("100% - 30"); // 30 FileExplorerBottom.height
 	CppItemList = new QFAUISelectGrid;
 
 	CppItemList->SetScrollType(QFAUIScroll::STVertical);
@@ -207,12 +211,8 @@ void QFAUIEditorFileExplorer::CreateCppTop()
 	CppItemList->SelectColor = SelectUnit;
 	CppItemList->SelectLostFocusColor = SelectUnitNotFocus;
 
-	QFAUISlot::SCanvasSlot slot;
-	slot.Height = 1.0f;
-	slot.Width = 1.0f;
-	slot.x = 0.0f;
-	slot.y = 0.0f;
-	CppItemList->SetSlot(&slot);
+	CppItemList->SetWidth("100%");
+	CppItemList->SetHeight("100%");
 	CppCanvas->AddUnit(CppItemList);
 
 	CppCanvas->SetEnable(false);
@@ -330,8 +330,10 @@ void QFAUIEditorFileExplorer::ExplorerButtonE(QFAUIUnit* unit, void* _this)
 		thisUnit->ExplorerButton->SetTextColor(thisUnit->ButoonOnColor);
 		thisUnit->CppButton->SetTextColor(thisUnit->ButoonOffColor);
 
-		thisUnit->ChangeSize((unsigned int)thisUnit->Width, (unsigned int)thisUnit->Height);
-		thisUnit->ChangePosition((int)thisUnit->Position_x, (int)thisUnit->Position_y);
+		thisUnit->SetWidth(thisUnit->StrWidth, thisUnit->ParentSetWidthMinus);
+		thisUnit->SetHeight(thisUnit->StrHeight, thisUnit->ParentSetHeightMinus);
+		thisUnit->SetTop(thisUnit->StrTop);
+		thisUnit->SetLeft(thisUnit->StrLeft);
 	}
 }
 
@@ -349,8 +351,10 @@ void QFAUIEditorFileExplorer::CppButtonE(QFAUIUnit* unit, void* _this)
 		thisUnit->ExplorerButton->SetTextColor(thisUnit->ButoonOffColor);
 		thisUnit->CppButton->SetTextColor(thisUnit->ButoonOnColor);
 
-		thisUnit->ChangeSize((unsigned int)thisUnit->Width, (unsigned int)thisUnit->Height);
-		thisUnit->ChangePosition((int)thisUnit->Position_x, (int)thisUnit->Position_y);				
+		thisUnit->SetWidth(thisUnit->StrWidth, thisUnit->ParentSetWidthMinus);
+		thisUnit->SetHeight(thisUnit->StrHeight, thisUnit->ParentSetHeightMinus);
+		thisUnit->SetTop(thisUnit->StrTop);
+		thisUnit->SetLeft(thisUnit->StrLeft);
 	}	
 }
 
@@ -408,24 +412,45 @@ void QFAUIEditorFileExplorer::PathChanged()
 	UpdateFolderItemList();
 }
 
-void QFAUIEditorFileExplorer::ChangeSize(unsigned int w, unsigned int h)
-{	
-	Width = w;
-	Height = h;
-	SetChildSize(CppCanvas, w, h - FileExplorerBottomHeight);
-	SetChildSize(FileExplorerTop, w, h);
-	SetChildSize(FileExplorerMiddle, w, h >= FileExplorerTopHeight ? (h - FileExplorerTopHeight - FileExplorerBottomHeight) : 0);
-	SetChildSize(FileExplorerBottom, w, FileExplorerBottomHeight);
+void QFAUIEditorFileExplorer::WidthChanged(int oldValue)
+{
+	CppCanvas->SetWidth(((QFAEditorCanvas*)CppCanvas)->StrWidth, ((QFAEditorCanvas*)CppCanvas)->ParentSetWidthMinus);
+	FileExplorerTop->SetWidth(((QFAEditorList*)FileExplorerTop)->StrWidth, ((QFAEditorList*)FileExplorerTop)->ParentSetWidthMinus);
+	FileExplorerMiddle->SetWidth(((QFAEditorCanvas*)FileExplorerMiddle)->StrWidth, ((QFAEditorCanvas*)FileExplorerMiddle)->ParentSetWidthMinus);
 }
 
-void QFAUIEditorFileExplorer::ChangePosition(int x, int y)
+void QFAUIEditorFileExplorer::HeightChanged(int oldValue)
 {
-	Position_x = x;
-	Position_y = y;
-	SetChildPosition(CppCanvas, x, y);
-	SetChildPosition(FileExplorerTop, x, y );
-	SetChildPosition(FileExplorerMiddle, x, y + FileExplorerTopHeight);
-	SetChildPosition(FileExplorerBottom, x, y + FileExplorerTopHeight + FileExplorerMiddle->GetSize().Y);	
+	CppCanvas->SetHeight(((QFAEditorCanvas*)CppCanvas)->StrHeight, ((QFAEditorCanvas*)CppCanvas)->ParentSetHeightMinus);
+	FileExplorerTop->SetHeight(((QFAEditorList*)FileExplorerTop)->StrHeight, ((QFAEditorList*)FileExplorerTop)->ParentSetHeightMinus);
+	FileExplorerMiddle->SetHeight(((QFAEditorCanvas*)FileExplorerMiddle)->StrHeight, ((QFAEditorCanvas*)FileExplorerMiddle)->ParentSetHeightMinus);
+	FileExplorerBottom->SetHeight(((QFAEditorList*)FileExplorerBottom)->StrHeight, ((QFAEditorList*)FileExplorerBottom)->ParentSetHeightMinus);
+}
+
+void QFAUIEditorFileExplorer::TopChanged(int oldValue)
+{	
+	((QFAEditorCanvas*)CppCanvas)->ParentSetPosition_y = Position_y;
+	((QFAEditorList*)FileExplorerTop)->ParentSetPosition_y = Position_y;
+	((QFAEditorCanvas*)FileExplorerMiddle)->ParentSetPosition_y = Position_y;
+	((QFAEditorList*)FileExplorerBottom)->ParentSetPosition_y = Position_y;
+
+	CppCanvas->SetTop(((QFAEditorCanvas*)CppCanvas)->StrTop);
+	FileExplorerTop->SetTop(((QFAEditorList*)FileExplorerTop)->StrTop);
+	FileExplorerMiddle->SetTop(((QFAEditorCanvas*)FileExplorerMiddle)->StrTop);
+	FileExplorerBottom->SetTop(((QFAEditorList*)FileExplorerBottom)->StrTop);
+}
+
+void QFAUIEditorFileExplorer::LeftChanged(int oldValue)
+{
+	((QFAEditorCanvas*)CppCanvas)->ParentSetPosition_x = Position_x;
+	((QFAEditorList*)FileExplorerTop)->ParentSetPosition_x = Position_x;
+	((QFAEditorCanvas*)FileExplorerMiddle)->ParentSetPosition_x = Position_x;
+	((QFAEditorList*)FileExplorerBottom)->ParentSetPosition_x = Position_x;
+
+	CppCanvas->SetLeft(((QFAEditorCanvas*)CppCanvas)->StrLeft);
+	FileExplorerTop->SetLeft(((QFAEditorList*)FileExplorerTop)->StrLeft);
+	FileExplorerMiddle->SetLeft(((QFAEditorCanvas*)FileExplorerMiddle)->StrLeft);
+	FileExplorerBottom->SetLeft(((QFAEditorList*)FileExplorerBottom)->StrLeft);
 }
 
 float QFAUIEditorFileExplorer::UpdateInnerHeight()
@@ -437,3 +462,4 @@ float QFAUIEditorFileExplorer::UpdateInnerWidth()
 {
 	return Width;
 }
+

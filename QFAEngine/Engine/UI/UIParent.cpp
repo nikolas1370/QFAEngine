@@ -1,19 +1,6 @@
 #include "pch.h"
 #include "UIParent.h"
 
-void QFAUIParent::SetSizeParent(unsigned int w, unsigned int h)
-{
-	BackgroundImage.SetSizeParent(w, h);
-	// background
-	ChangeSize(w, h);
-}
-
-void QFAUIParent::SetPositionParent(int x, int y)
-{
-	BackgroundImage.SetPositionParent(x, y);
-	ChangePosition(x, y);
-}
-
 QFAUIParent::QFAUIParent()
 {
 	CanBeParent = true;
@@ -29,13 +16,36 @@ void QFAUIParent::SetBackgroundImage(QFAImage* image)
 {
 	Image = image;
 	BackgroundImage.SetImage(image);
+	RecalculateBackgroundSize();
+	RecalculateBackgroundPosition();
+}
+
+void QFAUIParent::RecalculateBackgroundSize()
+{
+	BackgroundImage.ParentSetHeight = Height;
+	BackgroundImage.ParentSetWidth = Width;
+	BackgroundImage.SetWidth("100%", false);
+	BackgroundImage.SetHeight("100%", false);
+}
+
+void QFAUIParent::RecalculateBackgroundPosition()
+{
+	BackgroundImage.ParentSetPosition_y = Position_y;
+	BackgroundImage.ParentSetPosition_x = Position_x;
+	BackgroundImage.SetTop(nullptr);
+	BackgroundImage.SetLeft(nullptr);
 }
 
 void QFAUIParent::RenderBackground(VkCommandBuffer comandebuffer)
 {
 	if (Parent->Type == QFAUIType::Scroll)
 		if (Parent->Position_x != BackgroundImage.Position_x || Parent->Position_y != BackgroundImage.Position_y)
-			BackgroundImage.SetPositionParent(Parent->Position_x, Parent->Position_y);
+		{
+			BackgroundImage.ParentSetPosition_x = Position_x;
+			BackgroundImage.ParentSetPosition_y = Position_y;
+			BackgroundImage.SetTop(BackgroundImage.StrTop);
+			BackgroundImage.SetLeft(BackgroundImage.StrLeft);
+		}
 
 	BackgroundImage.SetZIndex(ZIndex);
 	BackgroundImage.Render(comandebuffer);
@@ -62,14 +72,3 @@ void QFAUIParent::SetBackgroundType(EBackgroundType type)
 	}
 }
 
-void QFAUIParent::SetChildPosition(QFAUIUnit* childUnit, int x, int y)
-{
-	if(childUnit->IsValid() && childUnit->Parent == this)
-		childUnit->SetPositionParent(x, y);
-}
-
-void QFAUIParent::SetChildSize(QFAUIUnit* childUnit, int w, int h)
-{
-	if (childUnit->IsValid() && childUnit->Parent == this)
-		childUnit->SetSizeParent(w, h);
-}
