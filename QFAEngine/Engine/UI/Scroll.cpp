@@ -69,12 +69,10 @@ void QFAUIScroll::ProcessScrollVerticalInside(double delta, float addValue)
 	unsigned int childHeight;
 	if (Child->CanBeParent)
 	{
-		if (NotEqualToZero(addValue)) // remove 
-			std::cout << addValue << " ProcessScrollHorizonInside" << "\n";
+		
 
 		QFAUIParent* child = (QFAUIParent*)Child;
 		childHeight = (unsigned int)child->UpdateInnerHeight();
-
 		if (Child->Type == QFAUIType::TextInput)
 		{
 			QFAUITextInput* input = (QFAUITextInput*)Child;
@@ -101,6 +99,7 @@ void QFAUIScroll::ProcessScrollVerticalInside(double delta, float addValue)
 		return;
 	else if (EqualToZero(ScrollValueVertical))
 		return;
+
 
 	if (delta > ScrollTimeToEndVertical)
 	{
@@ -130,6 +129,7 @@ void QFAUIScroll::ProcessScrollVerticalInside(double delta, float addValue)
 		ScrollValueToEndVertical = 0;		
 		return;
 	}
+
 
 	if (EqualToZero(pixels))
 		return;
@@ -231,10 +231,8 @@ void QFAUIScroll::ChangeScrollValueVerticalInside(float value)
 		}
 		else
 		{
-			Child->ParentSetPosition_x = Position_x;
-			Child->ParentSetPosition_y = Position_y;
+			Child->ParentSetPosition_y = Position_y + ScrollValueFinalVertical;
 			Child->SetTop(Child->StrTop);
-			Child->SetLeft(Child->StrLeft);
 		}
 	}
 	else
@@ -264,13 +262,10 @@ void QFAUIScroll::ChangeScrollValueHorizonInside(float value)
 		}
 		else
 		{
-			Child->ParentSetPosition_x = Position_x;
-			Child->ParentSetPosition_y = Position_y;
-			Child->SetTop(Child->StrTop);
+			Child->ParentSetPosition_x = Position_x + ScrollValueFinalHorizon;
 			Child->SetLeft(Child->StrLeft);
 		}
-	}
-		
+	}		
 	else
 		((QFAUIRenderUnit*)Child)->UnitOffsetX = ScrollValueFinalHorizon;
 }
@@ -372,9 +367,5 @@ void QFAUIScroll::LeftChanged(int oldValue)
 			Child->ParentSetPosition_x = Position_x;
 
 		Child->SetLeft(Child->StrLeft);
-
-		
-		if (Child->Type == QFAUIType::Grid)
-			std::cout << Child->InnerHeight <<  " lox in fish\n";
 	}
 }
