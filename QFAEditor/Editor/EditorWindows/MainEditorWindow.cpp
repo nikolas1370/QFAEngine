@@ -68,6 +68,17 @@ void QFAEditorMainWindow::CreateMainEdirorUI()
 	WindowCanvas->SetHeight("100%");
 	mainViewPort->AddUnit(WindowCanvas);
 
+	TopInWindowCanvas = new QFAUICanvas;	
+	WindowCanvas->AddUnit(TopInWindowCanvas);
+	TopInWindowCanvas->SetWidth("100%");
+	TopInWindowCanvas->SetHeight("30");
+	TopInWindowCanvas->SetBackgroundColor(QFAColor(36, 36, 36));
+	RunButton = new QFAText;
+	TopInWindowCanvas->AddUnit(RunButton);
+	RunButton->SetTextSize(25);
+	RunButton->SetFont(QFAEditorMainWindow::GetIcomonFont());
+	RunButton->SetText(PlaySymbol);
+
 	FileExplorer = new QFAUIEditorFileExplorer(Window, QFAEditorMainWindow::StartDragAndDrop);	
 	FileExplorer->SetWidth("100%");
 	FileExplorer->SetHeight("30%");	
@@ -78,6 +89,7 @@ void QFAEditorMainWindow::CreateMainEdirorUI()
 	GameViewportInfo->SetWidth("30%");
 	GameViewportInfo->SetHeight("70%");
 	GameViewportInfo->SetLeft("70%");
+	GameViewportInfo->SetTop("30");
 	WindowCanvas->AddUnit(GameViewportInfo);
 	GameViewportInfo->SetBackgroundColor(QFAColor(36, 36, 36));	
 
@@ -91,9 +103,9 @@ void QFAEditorMainWindow::PrepareGameViewport()
 {
 	GameViewport = (QFAEditorViewportHolder*)new QFAViewportHolder();
 	Window->AddViewport(GameViewport);
-	GameViewport->SetTop("0");
+	GameViewport->SetTop("30");
 	GameViewport->SetLeft("0");
-	GameViewport->SetHeight("70%");
+	GameViewport->SetHeight("70% - 30");
 	GameViewport->SetWidth("70%");
 	
 	Worlds[0] = NewObject<QWorld>();

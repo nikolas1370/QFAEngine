@@ -82,10 +82,10 @@ private:
 
 	void PathChanged();
 	void NextFolder(QFAFileSystem::FolderUnit nextFolder);
-	static void NextFolderButton(QFAUIUnit* unit, void* _this);
-	static void PreviousFolderButton(QFAUIUnit* unit, void* _this);
-	static void ExplorerButtonE(QFAUIUnit* unit, void* _this);
-	static void CppButtonE(QFAUIUnit* unit, void* _this);
+	void SetNextFolderButton();
+	void SetPreviousFolderButton();
+	void SetExplorerButtonE();
+	void SetCppButtonE();
 
 	void DropFiles(int path_count, const char* paths[]);
 	void NotifyMainEditorWindowDrag(QFAEditorExplorerFolderUnit* unit);

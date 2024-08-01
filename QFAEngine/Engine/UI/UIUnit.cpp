@@ -13,6 +13,9 @@ QFAUIUnit::~QFAUIUnit()
 
     UnitValid = false;
     QFAUIEvent::UnitUnderDelete(this);
+
+    if (Events.Funs)
+        delete Events.Funs;
 }
 
 bool QFAUIUnit::IsMyParent(QFAUIParent* parent)
@@ -131,9 +134,8 @@ void QFAUIUnit::NotifyInFocus()
         if (!parent)
             return;
 
-   
-        if (parent->Events.InFocus.fun)
-            parent->Events.InFocus.fun(this, parent->Events.InFocus.userData);
+        if (parent->Events.Funs && parent->Events.Funs->InFocus)
+            parent->Events.Funs->InFocus(this);
 
         parent = parent->Parent;
     }
@@ -143,8 +145,8 @@ void QFAUIUnit::NotifyOutFocus(bool onlyOneUnit)
 {
     if (onlyOneUnit)
     {
-        if (this->Events.OutFocus.fun)
-            this->Events.OutFocus.fun(this->Events.OutFocus.userData);
+        if (this->Events.Funs &&  this->Events.Funs->OutFocus)
+            this->Events.Funs->OutFocus();
         return;
     }
 
@@ -154,8 +156,8 @@ void QFAUIUnit::NotifyOutFocus(bool onlyOneUnit)
         if (!parent)
             return;
 
-        if (parent->Events.OutFocus.fun)
-            parent->Events.OutFocus.fun(parent->Events.OutFocus.userData);
+        if (parent->Events.Funs && parent->Events.Funs->OutFocus)
+            parent->Events.Funs->OutFocus();
 
         parent = parent->Parent;
     }
@@ -169,8 +171,8 @@ void QFAUIUnit::NotifyLeftMouseDown()
         if (!parent)
             return;
 
-        if (parent->Events.LeftMouseDown.fun)
-            parent->Events.LeftMouseDown.fun(this, parent->Events.LeftMouseDown.userData);
+        if (parent->Events.Funs && parent->Events.Funs->LeftMouseDown)
+            parent->Events.Funs->LeftMouseDown(this);
 
         parent = parent->Parent;
     }
@@ -184,8 +186,8 @@ void QFAUIUnit::NotifyLeftMouseUp()
         if (!parent)
             return;
 
-        if (parent->Events.LeftMouseUp.fun)
-            parent->Events.LeftMouseUp.fun(this, parent->Events.LeftMouseUp.userData);
+        if (parent->Events.Funs && parent->Events.Funs->LeftMouseUp)
+            parent->Events.Funs->LeftMouseUp(this);
 
         parent = parent->Parent;
     }
@@ -199,8 +201,8 @@ void QFAUIUnit::NotifyRightMouseDown()
         if (!parent)
             return;
 
-        if (parent->Events.RightMouseDown.fun)
-            parent->Events.RightMouseDown.fun(this, parent->Events.RightMouseDown.userData);
+        if (parent->Events.Funs && parent->Events.Funs->RightMouseDown)
+            parent->Events.Funs->RightMouseDown(this);
 
         parent = parent->Parent;
     }
@@ -214,8 +216,8 @@ void QFAUIUnit::NotifyRightMouseUp()
         if (!parent)
             return;
 
-        if (parent->Events.RightMouseUp.fun)
-            parent->Events.RightMouseUp.fun(this, parent->Events.RightMouseUp.userData);
+        if (parent->Events.Funs && parent->Events.Funs->RightMouseUp)
+            parent->Events.Funs->RightMouseUp(this);
 
         parent = parent->Parent;
     }
@@ -229,8 +231,8 @@ void QFAUIUnit::NotifyForwardMouseDown()
         if (!parent)
             return;
 
-        if (parent->Events.ForwardMouseDown.fun)
-            parent->Events.ForwardMouseDown.fun(this, parent->Events.ForwardMouseDown.userData);
+        if (parent->Events.Funs && parent->Events.Funs->ForwardMouseDown)
+            parent->Events.Funs->ForwardMouseDown(this);
 
         parent = parent->Parent;
     }
@@ -244,8 +246,8 @@ void QFAUIUnit::NotifyBackwardMouseDown()
         if (!parent)
             return;
 
-        if (parent->Events.BackwardMouseDown.fun)
-            parent->Events.BackwardMouseDown.fun(this, parent->Events.BackwardMouseDown.userData);
+        if (parent->Events.Funs &&  parent->Events.Funs->BackwardMouseDown)
+            parent->Events.Funs->BackwardMouseDown(this);
 
         parent = parent->Parent;
     }
@@ -259,8 +261,8 @@ void QFAUIUnit::NotifyLeftMouseDownUp()
         if (!parent)
             return;
 
-        if (parent->Events.LeftMouseDownUp.fun)
-            parent->Events.LeftMouseDownUp.fun(this, parent->Events.LeftMouseDownUp.userData);
+        if (parent->Events.Funs &&  parent->Events.Funs->LeftMouseDownUp)
+            parent->Events.Funs->LeftMouseDownUp(this);
 
         parent = parent->Parent;
     }
@@ -274,8 +276,8 @@ void QFAUIUnit::NotifyRightMouseDownUp()
         if (!parent)
             return;
 
-        if (parent->Events.RightMouseDownUp.fun)
-            parent->Events.RightMouseDownUp.fun(this, parent->Events.RightMouseDownUp.userData);
+        if (parent->Events.Funs &&  parent->Events.Funs->RightMouseDownUp)
+            parent->Events.Funs->RightMouseDownUp(this);
 
         parent = parent->Parent;
     }
@@ -433,63 +435,82 @@ void QFAUIUnit::SetLeft(const char* left)
 
 
 /*-------- EventFunctions --------*/
-void QFAUIUnit::EventFunctions::SetInFocus(void (*fun)(QFAUIUnit*, void* ), void* userData)
+void QFAUIUnit::UnitEvents::SetInFocus(std::function<void(QFAUIUnit* unit)> fun)
 {
-    InFocus.fun = fun;
-    InFocus.userData = userData;
- //   InFocus = fun;
+    if (!Funs)
+        Funs = new EventFunctions;
+
+    Funs->InFocus = fun;
 }
 
-void QFAUIUnit::EventFunctions::SetOutFocus(void (*fun)(void*), void* userData)
+void QFAUIUnit::UnitEvents::SetOutFocus(std::function<void()> fun)
 {
-    OutFocus.fun = fun;
-    OutFocus.userData = userData;
+    if (!Funs)
+        Funs = new EventFunctions;
+
+    Funs->OutFocus = fun;
 }
 
-void QFAUIUnit::EventFunctions::SetLeftMouseDown(void (*fun)(QFAUIUnit*, void*), void* userData)
+void QFAUIUnit::UnitEvents::SetLeftMouseDown(std::function<void(QFAUIUnit* unit)> fun)
 {
-    LeftMouseDown.fun = fun;
-    LeftMouseDown.userData = userData;
+    if (!Funs)
+        Funs = new EventFunctions;
+
+    Funs->LeftMouseDown = fun;
 }
 
-void QFAUIUnit::EventFunctions::SetLeftMouseUp(void (*fun)(QFAUIUnit*, void*), void* userData)
+void QFAUIUnit::UnitEvents::SetLeftMouseUp(std::function<void(QFAUIUnit* unit)> fun)
 {
-    LeftMouseUp.fun = fun;
-    LeftMouseUp.userData = userData;
+    if (!Funs)
+        Funs = new EventFunctions;
+
+    Funs->LeftMouseUp = fun;
 }
 
-void QFAUIUnit::EventFunctions::SetRightMouseDown(void (*fun)(QFAUIUnit*, void*), void* userData)
+void QFAUIUnit::UnitEvents::SetRightMouseDown(std::function<void(QFAUIUnit* unit)> fun)
 {
-    RightMouseDown.fun = fun;
-    RightMouseDown.userData = userData;
+    if (!Funs)
+        Funs = new EventFunctions;
+
+    Funs->RightMouseDown = fun;
 }
 
-void QFAUIUnit::EventFunctions::SetRightMouseUp(void (*fun)(QFAUIUnit*, void*), void* userData)
+void QFAUIUnit::UnitEvents::SetRightMouseUp(std::function<void(QFAUIUnit* unit)> fun)
 {
-    RightMouseUp.fun = fun;
-    RightMouseUp.userData = userData;
+    if (!Funs)
+        Funs = new EventFunctions;
+
+    Funs->RightMouseUp = fun;
 }
 
-void QFAUIUnit::EventFunctions::SetForwardMouseDown(void(*fun)(QFAUIUnit*, void*), void* userData)
+void QFAUIUnit::UnitEvents::SetForwardMouseDown(std::function<void(QFAUIUnit* unit)> fun)
 {
-    ForwardMouseDown.fun = fun;
-    ForwardMouseDown.userData = userData;
+    if (!Funs)
+        Funs = new EventFunctions;
+
+    Funs->ForwardMouseDown = fun;
 }
 
-void QFAUIUnit::EventFunctions::SetBackwardMouseDown(void(*fun)(QFAUIUnit*, void*), void* userData)
+void QFAUIUnit::UnitEvents::SetBackwardMouseDown(std::function<void(QFAUIUnit* unit)> fun)
 {
-    BackwardMouseDown.fun = fun;
-    BackwardMouseDown.userData = userData;
+    if (!Funs)
+        Funs = new EventFunctions;
+
+    Funs->BackwardMouseDown = fun;
 }
 
-void QFAUIUnit::EventFunctions::SetLeftMouseDownUp(void (*fun)(QFAUIUnit*, void*), void* userData)
+void QFAUIUnit::UnitEvents::SetLeftMouseDownUp(std::function<void(QFAUIUnit* unit)> fun)
 {
-    LeftMouseDownUp.fun = fun;
-    LeftMouseDownUp.userData = userData;
+    if (!Funs)
+        Funs = new EventFunctions;
+
+    Funs->LeftMouseDownUp = fun;
 }
 
-void QFAUIUnit::EventFunctions::SetRightMouseDownUp(void (*fun)(QFAUIUnit*, void*), void* userData)
+void QFAUIUnit::UnitEvents::SetRightMouseDownUp(std::function<void(QFAUIUnit* unit)> fun)
 {
-    RightMouseDownUp.fun = fun;
-    RightMouseDownUp.userData = userData;
+    if (!Funs)
+        Funs = new EventFunctions;
+
+    Funs->RightMouseDownUp = fun;
 }

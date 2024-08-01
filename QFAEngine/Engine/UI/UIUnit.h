@@ -66,6 +66,21 @@ class QFAEXPORT QFAUIUnit
 	friend QFAUIBackground;
 	friend QFAUISelectUnit;
 
+	struct EventFunctions
+	{		
+		std::function<void(QFAUIUnit* unit)> LeftMouseDown;
+		std::function<void(QFAUIUnit* unit)> InFocus;
+		std::function<void()> OutFocus;
+		std::function<void(QFAUIUnit* unit)> LeftMouseUp;
+		std::function<void(QFAUIUnit* unit)> RightMouseDown;
+		std::function<void(QFAUIUnit* unit)> RightMouseUp;
+		std::function<void(QFAUIUnit* unit)> LeftMouseDownUp;
+		std::function<void(QFAUIUnit* unit)> RightMouseDownUp;
+		std::function<void(QFAUIUnit* unit)> ForwardMouseDown;
+		std::function<void(QFAUIUnit* unit)> BackwardMouseDown;
+		bool InUse = false; // not need right now
+	};
+
 protected:
 	struct UniformOverflow
 	{		
@@ -75,8 +90,8 @@ protected:
 		float rightBottomX;
 		float rightBottomY;
 	};
-public:
-	class QFAEXPORT EventFunctions
+public: 
+	class QFAEXPORT UnitEvents
 	{
 		struct Callback
 		{
@@ -91,32 +106,18 @@ public:
 		};// 
 
 		friend QFAUIUnit;
-		CallbackWithUnit InFocus;
-		Callback OutFocus;
 
-		CallbackWithUnit LeftMouseDown;
-		CallbackWithUnit LeftMouseUp;
-		CallbackWithUnit RightMouseDown;
-		CallbackWithUnit RightMouseUp;
+		// creatre EventFunctions pools
+		// if event not set this be null
+		EventFunctions* Funs = nullptr;
 
-		CallbackWithUnit LeftMouseDownUp;
-		CallbackWithUnit RightMouseDownUp;
-
-		CallbackWithUnit ForwardMouseDown;
-		CallbackWithUnit BackwardMouseDown;
-
-		EventFunctions() {};
+		UnitEvents() {};
 	public:
-		/*
-			QFAUIUnit* unit,
-			void* userData
-		*/
-
 		/*
 			if child have focus parents also have focus
 			QFAUIUnit* unit in focus
 		*/
-		void SetInFocus(void (*fun)(QFAUIUnit*, void*), void* userData);
+		void SetInFocus(std::function<void(QFAUIUnit* unit)> fun);
 		/*
 			if child have outfocus parents
 			also have outfocus only if parent
@@ -124,46 +125,35 @@ public:
 			if parents have new child focus
 			parents get event InFocus with new focus unit.
 		*/
-		void SetOutFocus(void (*fun)(void*), void* userData);
+		void SetOutFocus(std::function<void()> fun);
 
 		/*
 			parents also notified
 		*/
-		void SetLeftMouseDown(void (*fun)(QFAUIUnit*, void*), void* userData);
-		void SetLeftMouseUp(void (*fun)(QFAUIUnit*, void*), void* userData);
-		void SetRightMouseDown(void (*fun)(QFAUIUnit*, void*), void* userData);
-		void SetRightMouseUp(void (*fun)(QFAUIUnit*, void*), void* userData);
-		void SetForwardMouseDown(void (*fun)(QFAUIUnit*, void*), void* userData);
-		void SetBackwardMouseDown(void (*fun)(QFAUIUnit*, void*), void* userData);
+		void SetLeftMouseDown(std::function<void(QFAUIUnit* unit)> fun);
+		void SetLeftMouseUp(std::function<void(QFAUIUnit* unit)> fun);
+		void SetRightMouseDown(std::function<void(QFAUIUnit* unit)> fun);
+		void SetRightMouseUp(std::function<void(QFAUIUnit* unit)> fun);
+		void SetForwardMouseDown(std::function<void(QFAUIUnit* unit)> fun);
+		void SetBackwardMouseDown(std::function<void(QFAUIUnit* unit)> fun);
 
 		/*
 			call if Left Mouse button press and release at same unit
 			parents also notified
 		*/
-		void SetLeftMouseDownUp(void (*fun)(QFAUIUnit*, void*), void* userData);
+		void SetLeftMouseDownUp(std::function<void(QFAUIUnit* unit)> fun);
 		/*
 			call if Right Mouse button press and release at same unit
 			parents also notified
 		*/
-		void SetRightMouseDownUp(void (*fun)(QFAUIUnit*, void*), void* userData);
+		void SetRightMouseDownUp(std::function<void(QFAUIUnit* unit)> fun);
 	};
-
-private:
-	//IsRoot == true only for QFAViewportRoot
-	bool IsRoot = false;
 
 protected:
 	const char* StrTop = nullptr;
 	const char* StrLeft = nullptr;
 	const char* StrWidth = nullptr;
 	const char* StrHeight = nullptr;
-
-	bool IsEnable = true;
-	bool CanBeParent = false; // set it if unit parent class
-	QFAUIType::Type Type = QFAUIType::NONE;
-	QFAEditorUIType::Type EditorType = QFAEditorUIType::Type::NONE;
-
-	bool CanRender = false;
 
 	int Width = 300;
 	int Height = 120;
@@ -177,13 +167,10 @@ protected:
 	int ParentSetWidth = 0, ParentSetHeight = 0, 
 		ParentSetPosition_x = 0, ParentSetPosition_y = 0;
 	
-
 	QFAUIParent* Parent = nullptr;
 
 	float Opacity = 1;
 	int ZIndex = 0;
-	bool UnitValid = true;
-	bool ParentSetWidthMinus, ParentSetHeightMinus; // set in SetWidth SetHeight
 
 	/*
 		need for Scroll
@@ -192,10 +179,19 @@ protected:
 	*/
 	unsigned int InnerHeight = 0;
 	unsigned int InnerWidth = 0;
+	QFAUIType::Type Type = QFAUIType::NONE;
+	QFAEditorUIType::Type EditorType = QFAEditorUIType::Type::NONE;
+	//IsRoot == true only for QFAViewportRoot
+	bool IsRoot = false;
+	bool IsEnable = true;
+	bool CanBeParent = false; // set it if unit parent class
+	bool UnitValid = true;
+	bool ParentSetWidthMinus, ParentSetHeightMinus; // set in SetWidth SetHeight	
+	bool CanRender = false;
 
 public:
 	std::string UnitName;
-	EventFunctions Events;
+	UnitEvents Events;
 
 protected:
 

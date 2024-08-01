@@ -54,11 +54,13 @@ class QFAEditorFileViewWindow // this window display QFAfile
 
 	ECurentType CurentActiveType = ECurentType::CTNone;
 
-	static void LeftMouse(QFAUIUnit* unit, void* _this);
-	static void RightMouse(QFAUIUnit* unit, void* _this);
+	void SetLeftMouse();
+	void SetRightMouse();
 
 	void InFocus(SFile* file);
 	void UpdateList();
+
+
 public:
 	QFAEditorFileViewWindow();
 	~QFAEditorFileViewWindow();

@@ -47,16 +47,24 @@ class QFAEditorMainWindow
 	QFAText* LoadText = nullptr;
 	QFAText* LoadText_2 = nullptr;
 
+	QFAUICanvas* TopInWindowCanvas = nullptr;
+	QFAText* RunButton = nullptr;
+
 	QFAUICanvas* WindowCanvas = nullptr;
 	QFAUIEditorFileExplorer* FileExplorer;
 
 	QFAEditorGameViewportInfo* GameViewportInfo;
+
+	static const char32_t StopSymbol = 59648;
+	static const char32_t PlaySymbol = 59649;
 
 	QFAInput* Input = nullptr;
 	EFocus Focus = EFocus::FNone;
 	bool IsCppClass; // if false it's file(QFAEditorFileTypes) 
 	int CurentDragId = 0;// file or cpp class
 	FVector2D PickObjectLastCursorPos;
+
+	bool GameRun = false;
 
 	bool LeftCTRLPress = false;
 	bool CompileStarted = false;

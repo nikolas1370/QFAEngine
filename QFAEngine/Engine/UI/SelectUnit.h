@@ -41,9 +41,9 @@ public:
 private:
 	// call in QFAUIEvent need for track focus
 	static void WindowLeftMouseDown(QFAEngineWindow* window, QFAUIUnit* unitUnderFocus);
-	static void InFocus(QFAUIUnit* unit, void* _this);
-	static void OutFocus(void* _this);
-	static void LeftMouseDown(QFAUIUnit* unit, void* _this);
+	void SetInFocus();
+	void SetOutFocus();
+	void SetLeftMouseDown();
 
 
 protected:

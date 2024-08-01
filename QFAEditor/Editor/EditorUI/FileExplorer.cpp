@@ -26,9 +26,6 @@ QFAUIEditorFileExplorer::QFAUIEditorFileExplorer(QFAEngineWindow *window, std::f
 	EditorType = QFAEditorUIType::FileExplorer;
 	SetBackgroundColor(FileExplorerBackgroundColor);
 
-	Events.SetForwardMouseDown(&QFAUIEditorFileExplorer::NextFolderButton, this);
-	Events.SetBackwardMouseDown(&QFAUIEditorFileExplorer::PreviousFolderButton, this);
-
 	CreateTop();
 	CreateMiddle();
 	CreateBottom();		
@@ -59,8 +56,8 @@ void QFAUIEditorFileExplorer::CreateTop()
 	ForwardButton = new QFAText;
 	BackButton->SetFont(QFAEditorMainWindow::GetIcomonFont());
 	ForwardButton->SetFont(QFAEditorMainWindow::GetIcomonFont());
-	ForwardButton->SetText(std::u32string(&ForwardButtonIconCode, 1));
-	BackButton->SetText(std::u32string(&BackButtonIconCode, 1));
+	ForwardButton->SetText(ForwardButtonIconCode);
+	BackButton->SetText(BackButtonIconCode);
 	BackButton->SetTextSize(20);
 	ForwardButton->SetTextSize(20);
 	BackButton->SetTextAlign(QFAText::TACenter);
@@ -68,8 +65,6 @@ void QFAUIEditorFileExplorer::CreateTop()
 	BackButton->SetTextColor(ButoonOffColor);
 	ForwardButton->SetTextColor(ButoonOffColor);
 	
-	ForwardButton->Events.SetLeftMouseDown(&QFAUIEditorFileExplorer::NextFolderButton, this);
-	BackButton->Events.SetLeftMouseDown(&QFAUIEditorFileExplorer::PreviousFolderButton, this);
 
 	PathTextScroll = new QFAUIScroll; 
 	PathTextScroll->SetWidth("100% - 50"); // 50 == FileExplorerTop->SetUnitWidth for SetUnitWidth + ForwardButton
@@ -85,6 +80,9 @@ void QFAUIEditorFileExplorer::CreateTop()
 	FileExplorerTop->AddUnit(ForwardButton);
 	FileExplorerTop->AddUnit(PathTextScroll);	
 	AddHiddenChild(FileExplorerTop);
+
+	SetNextFolderButton();	
+	SetPreviousFolderButton();
 }
 
 void QFAUIEditorFileExplorer::CreateMiddle()
@@ -178,8 +176,8 @@ void QFAUIEditorFileExplorer::CreateBottom()
 	ExplorerButton->SetLeft("10");
 	ExplorerButton->SetFont(QFAEditorMainWindow::GetIcomonFont());
 	CppButton->SetFont(QFAEditorMainWindow::GetIcomonFont());
-	CppButton->SetText(std::u32string(&CppFileButtonIconCode, 1));
-	ExplorerButton->SetText(std::u32string(&FolderButtonIconCode, 1));
+	CppButton->SetText(CppFileButtonIconCode);
+	ExplorerButton->SetText(FolderButtonIconCode);
 	ExplorerButton->SetTextSize(30);
 	CppButton->SetTextSize(30);
 	ExplorerButton->SetTextAlign(QFAText::TACenter);
@@ -187,8 +185,10 @@ void QFAUIEditorFileExplorer::CreateBottom()
 	ExplorerButton->SetTextColor(ButoonOnColor); // Explorer show first
 	CppButton->SetTextColor(ButoonOffColor);
 
-	CppButton->Events.SetLeftMouseDown(&QFAUIEditorFileExplorer::CppButtonE, this);
-	ExplorerButton->Events.SetLeftMouseDown(&QFAUIEditorFileExplorer::ExplorerButtonE, this);
+	SetCppButtonE();
+	SetExplorerButtonE();
+
+
 	FileExplorerBottom->AddUnit(ExplorerButton);
 	FileExplorerBottom->AddUnit(CppButton);
 	
@@ -292,92 +292,105 @@ void QFAUIEditorFileExplorer::NextFolder(QFAFileSystem::FolderUnit nextFolder)
 	PathChanged();
 }
 
-void QFAUIEditorFileExplorer::NextFolderButton(QFAUIUnit* unit, void* _this)
+void QFAUIEditorFileExplorer::SetNextFolderButton()
 {	
-	QFAUIEditorFileExplorer* thisUnit = (QFAUIEditorFileExplorer*)_this;
-
-	if (thisUnit->CurentPathHistoryIndex + 1 >= thisUnit->PathHistory.size() || !thisUnit->FileExplorerSelected)
-		return;
-
-	thisUnit->CurentPathHistoryIndex++;
-	thisUnit->CurentFolder = thisUnit->PathHistory[thisUnit->CurentPathHistoryIndex];
-	thisUnit->BackButton->SetTextColor(thisUnit->ButoonOnColor);
-	if (thisUnit->CurentPathHistoryIndex + 1 >= thisUnit->PathHistory.size())
-		thisUnit->ForwardButton->SetTextColor(thisUnit->ButoonOffColor);
-	else
-		thisUnit->ForwardButton->SetTextColor(thisUnit->ButoonOnColor);
-
-	thisUnit->PathChanged();
-	if(thisUnit->FolderItemListSelectUnit->IsValid())
+	auto fun = [this](QFAUIUnit* unit)
 	{
-		thisUnit->FolderItemListSelectUnit->SetBackgroundColor(thisUnit->OutFocusUnitColor);
-		thisUnit->FolderItemListSelectUnit = nullptr;
-	}
+		if (CurentPathHistoryIndex + 1 >= PathHistory.size() || !FileExplorerSelected)
+			return;
+
+		CurentPathHistoryIndex++;
+		CurentFolder = PathHistory[CurentPathHistoryIndex];
+		BackButton->SetTextColor(ButoonOnColor);
+		if (CurentPathHistoryIndex + 1 >= PathHistory.size())
+			ForwardButton->SetTextColor(ButoonOffColor);
+		else
+			ForwardButton->SetTextColor(ButoonOnColor);
+
+		PathChanged();
+		if (FolderItemListSelectUnit->IsValid())
+		{
+			FolderItemListSelectUnit->SetBackgroundColor(OutFocusUnitColor);
+			FolderItemListSelectUnit = nullptr;
+		}
+	};
+
+	Events.SetForwardMouseDown(fun);
+	ForwardButton->Events.SetLeftMouseDown(fun);
 }
 
-void QFAUIEditorFileExplorer::ExplorerButtonE(QFAUIUnit* unit, void* _this)
+void QFAUIEditorFileExplorer::SetExplorerButtonE()
 {
-	QFAUIEditorFileExplorer* thisUnit = (QFAUIEditorFileExplorer*)_this;
-	if (!thisUnit->FileExplorerSelected)
+	ExplorerButton->Events.SetLeftMouseDown([this](QFAUIUnit* unit)
 	{
-		thisUnit->FileExplorerSelected = true;
-		thisUnit->CppCanvas->SetEnable(false);
-		thisUnit->FileExplorerMiddle->SetEnable(true);
-		thisUnit->FileExplorerTop->SetEnable(true);
-		thisUnit->UpdateFolderItemList();
-		thisUnit->PathChanged();
+		if (!FileExplorerSelected)
+		{
+			FileExplorerSelected = true;
+			CppCanvas->SetEnable(false);
+			FileExplorerMiddle->SetEnable(true);
+			FileExplorerTop->SetEnable(true);
+			UpdateFolderItemList();
+			PathChanged();
 
-		thisUnit->ExplorerButton->SetTextColor(thisUnit->ButoonOnColor);
-		thisUnit->CppButton->SetTextColor(thisUnit->ButoonOffColor);
+			ExplorerButton->SetTextColor(ButoonOnColor);
+			CppButton->SetTextColor(ButoonOffColor);
 
-		thisUnit->SetWidth(thisUnit->StrWidth, thisUnit->ParentSetWidthMinus);
-		thisUnit->SetHeight(thisUnit->StrHeight, thisUnit->ParentSetHeightMinus);
-		thisUnit->SetTop(thisUnit->StrTop);
-		thisUnit->SetLeft(thisUnit->StrLeft);
-	}
+			SetWidth(StrWidth, ParentSetWidthMinus);
+			SetHeight(StrHeight, ParentSetHeightMinus);
+			SetTop(StrTop);
+			SetLeft(StrLeft);
+		}
+	});
 }
 
-void QFAUIEditorFileExplorer::CppButtonE(QFAUIUnit* unit, void* _this)
+void QFAUIEditorFileExplorer::SetCppButtonE()
 {
-	QFAUIEditorFileExplorer* thisUnit = (QFAUIEditorFileExplorer*)_this;
-	if (thisUnit->FileExplorerSelected)
+	CppButton->Events.SetLeftMouseDown([this](QFAUIUnit* unit)
 	{
-		thisUnit->FileExplorerSelected = false;
-		thisUnit->CppCanvas->SetEnable(true);
-		thisUnit->FileExplorerMiddle->SetEnable(false);
-		thisUnit->FileExplorerTop->SetEnable(false);
-		thisUnit->UpdateCppItemList();
+		if (FileExplorerSelected)
+		{
+			FileExplorerSelected = false;
+			CppCanvas->SetEnable(true);
+			FileExplorerMiddle->SetEnable(false);
+			FileExplorerTop->SetEnable(false);
+			UpdateCppItemList();
 
-		thisUnit->ExplorerButton->SetTextColor(thisUnit->ButoonOffColor);
-		thisUnit->CppButton->SetTextColor(thisUnit->ButoonOnColor);
+			ExplorerButton->SetTextColor(ButoonOffColor);
+			CppButton->SetTextColor(ButoonOnColor);
 
-		thisUnit->SetWidth(thisUnit->StrWidth, thisUnit->ParentSetWidthMinus);
-		thisUnit->SetHeight(thisUnit->StrHeight, thisUnit->ParentSetHeightMinus);
-		thisUnit->SetTop(thisUnit->StrTop);
-		thisUnit->SetLeft(thisUnit->StrLeft);
-	}	
+			SetWidth(StrWidth, ParentSetWidthMinus);
+			SetHeight(StrHeight, ParentSetHeightMinus);
+			SetTop(StrTop);
+			SetLeft(StrLeft);
+		}
+	});	
 }
 
-void QFAUIEditorFileExplorer::PreviousFolderButton(QFAUIUnit* unit, void* _this)
+void QFAUIEditorFileExplorer::SetPreviousFolderButton()
 {
-	QFAUIEditorFileExplorer* thisUnit = (QFAUIEditorFileExplorer*)_this;	
-	if (thisUnit->CurentPathHistoryIndex == 0 || !thisUnit->FileExplorerSelected)
-		return;
-
-	thisUnit->CurentPathHistoryIndex--;
-	thisUnit->CurentFolder = thisUnit->PathHistory[thisUnit->CurentPathHistoryIndex];
-	thisUnit->ForwardButton->SetTextColor(thisUnit->ButoonOnColor);
-	if(thisUnit->CurentPathHistoryIndex == 0)
-		thisUnit->BackButton->SetTextColor(thisUnit->ButoonOffColor);
-	else
-		thisUnit->BackButton->SetTextColor(thisUnit->ButoonOnColor);
-
-	thisUnit->PathChanged();
-	if (thisUnit->FolderItemListSelectUnit->IsValid())
+	auto fun = [this](QFAUIUnit* unit)
 	{
-		thisUnit->FolderItemListSelectUnit->SetBackgroundColor(thisUnit->OutFocusUnitColor);
-		thisUnit->FolderItemListSelectUnit = nullptr;
-	}
+		if(CurentPathHistoryIndex == 0 || !FileExplorerSelected)
+			return;
+
+		CurentPathHistoryIndex--;
+		CurentFolder = PathHistory[CurentPathHistoryIndex];
+		ForwardButton->SetTextColor(ButoonOnColor);
+		if (CurentPathHistoryIndex == 0)
+			BackButton->SetTextColor(ButoonOffColor);
+		else
+			BackButton->SetTextColor(ButoonOnColor);
+
+		PathChanged();
+		if (FolderItemListSelectUnit->IsValid())
+		{
+			FolderItemListSelectUnit->SetBackgroundColor(OutFocusUnitColor);
+			FolderItemListSelectUnit = nullptr;
+		}
+	};
+
+	Events.SetBackwardMouseDown(fun);
+	BackButton->Events.SetLeftMouseDown(fun);
 }
 
 void QFAUIEditorFileExplorer::DropFiles(int path_count, const char* paths[])

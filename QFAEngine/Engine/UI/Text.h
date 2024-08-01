@@ -388,11 +388,12 @@ protected:
     void HeightChanged(int oldValue = 0) override;
     void TopChanged(int oldValue = 0) override;
     void LeftChanged(int oldValue = 0) override;
-public:
+public:// std::u32string(&CppFileButtonIconCode, 1)
     QFAText();
     ~QFAText();
 
     void SetText(std::u32string  text);
+    void SetText(char32_t symbol);
 
     void SetTextSize(unsigned int height);
     

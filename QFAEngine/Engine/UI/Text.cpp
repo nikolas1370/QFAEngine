@@ -531,6 +531,11 @@ void QFAText::SetText(std::u32string  text)
         SetTextSize(defaultTextSize);
 }
 
+void QFAText::SetText(char32_t symbol)
+{
+    SetText(std::u32string(&symbol, 1));
+}
+
 void QFAText::SetInputText(char32_t* pText, size_t pTextSize, size_t maxSize)
 {
     if (maxSize > CountGlyphInBuffer)

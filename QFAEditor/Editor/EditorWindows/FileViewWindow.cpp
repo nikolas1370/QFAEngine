@@ -53,9 +53,9 @@ QFAEditorFileViewWindow::QFAEditorFileViewWindow()
 	Camera.ActivateCamera(Window->GetViewport(0));
 	Camera.SetWindowForInput(Window);
 	Actor.SetRootComponent(&Mesh);
-
-	TopList->Events.SetLeftMouseDown(&QFAEditorFileViewWindow::LeftMouse, this);
-	TopList->Events.SetRightMouseDown(&QFAEditorFileViewWindow::RightMouse, this);
+	
+	SetLeftMouse();
+	SetRightMouse();
 }
 
 QFAEditorFileViewWindow::~QFAEditorFileViewWindow()
@@ -120,7 +120,6 @@ void QFAEditorFileViewWindow::AddFile(size_t fileId)
 	CurentViewUnit->Enable(true);
 }
 
-
 void QFAEditorFileViewWindow::InFocus(SFile* file)
 {
 	QFAContentManager::QFAContentFile& cf = QFAEditorFileStorage::GetFile(file->FileId);
@@ -163,82 +162,84 @@ void QFAEditorFileViewWindow::UpdateList()
 	}
 }
 
-void QFAEditorFileViewWindow::LeftMouse(QFAUIUnit* unit, void* _this)
+void QFAEditorFileViewWindow::SetLeftMouse()
 {
-	QFAEditorFileViewWindow* efvw = (QFAEditorFileViewWindow*)_this;
-	QFAUIUnit* parent = unit;
-	while (true)
+	TopList->Events.SetLeftMouseDown([this](QFAUIUnit* unit)
 	{
-		if (!parent->IsValid())
-			return;
-
-		if (parent->GetEditoUnitType() == QFAEditorUIType::FileViewUnit)
+		QFAUIUnit* parent = unit;
+		while (true)
 		{
-			if (efvw->CurentViewUnit == parent)
+			if (!parent->IsValid())
 				return;
 
-			if (efvw->CurentViewUnit)
-				efvw->CurentViewUnit->Enable(false);
-
-			efvw->CurentViewUnit = (QFAEditorUIFileViewUnit*)parent;
-			efvw->CurentViewUnit->Enable(true);
-
-			for (size_t i = 0; i < efvw->CurentEnableFolderCount; i++)
+			if (parent->GetEditoUnitType() == QFAEditorUIType::FileViewUnit)
 			{
-				if (efvw->Files[i].viewUnit == parent)
-				{
-					efvw->InFocus(&efvw->Files[i]);
+				if (CurentViewUnit == parent)
 					return;
+
+				if (CurentViewUnit)
+					CurentViewUnit->Enable(false);
+
+				CurentViewUnit = (QFAEditorUIFileViewUnit*)parent;
+				CurentViewUnit->Enable(true);
+
+				for (size_t i = 0; i < CurentEnableFolderCount; i++)
+				{
+					if (Files[i].viewUnit == parent)
+					{
+						InFocus(&Files[i]);
+						return;
+					}
 				}
+
+				return;
 			}
 
-			return;
+			parent = parent->GetParent();
 		}
-
-		parent = parent->GetParent();
-	}
+	});	
 }
 
-void QFAEditorFileViewWindow::RightMouse(QFAUIUnit* unit, void* _this)
+void QFAEditorFileViewWindow::SetRightMouse()
 {
-	QFAEditorFileViewWindow* efvw = (QFAEditorFileViewWindow*)_this;
-	QFAUIUnit* parent = unit;
-	while (true)
+	TopList->Events.SetRightMouseDown([this](QFAUIUnit* unit)
 	{
-		if (!parent->IsValid())
-			return;
-
-		if (parent->GetEditoUnitType() == QFAEditorUIType::FileViewUnit)
+		QFAUIUnit* parent = unit;
+		while (true)
 		{
-			for (size_t i = 0; i < efvw->CurentEnableFolderCount; i++)
-			{
-				if (efvw->Files[i].viewUnit == parent)
-				{
-					efvw->Files.erase(efvw->Files.begin() + i);
-					efvw->CurentEnableFolderCount--;
-					if (efvw->CurentEnableFolderCount == 0)
-						efvw->Window->Close();
-					else
-					{
-						if (efvw->CurentViewUnit == parent)
-						{
-							efvw->CurentViewUnit = efvw->Files[0].viewUnit;
-							efvw->InFocus(&efvw->Files[0]);
-							efvw->CurentViewUnit->Enable(true);
-						}
-						
-						efvw->UpdateList();
-					}
+			if (!parent->IsValid())
+				return;
 
-					return;
+			if (parent->GetEditoUnitType() == QFAEditorUIType::FileViewUnit)
+			{
+				for (size_t i = 0; i < CurentEnableFolderCount; i++)
+				{
+					if (Files[i].viewUnit == parent)
+					{
+						Files.erase(Files.begin() + i);
+						CurentEnableFolderCount--;
+						if (CurentEnableFolderCount == 0)
+							Window->Close();
+						else
+						{
+							if (CurentViewUnit == parent)
+							{
+								CurentViewUnit = Files[0].viewUnit;
+								InFocus(&Files[0]);
+								CurentViewUnit->Enable(true);
+							}
+
+							UpdateList();
+						}
+
+						return;
+					}
 				}
+
+				return;
 			}
 
-
-
-			return;
+			parent = parent->GetParent();
 		}
-
-		parent = parent->GetParent();
-	}
+	});	
 }
