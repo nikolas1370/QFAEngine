@@ -64,10 +64,7 @@ class QFAEditorMainWindow
 	int CurentDragId = 0;// file or cpp class
 	FVector2D PickObjectLastCursorPos;
 
-	bool GameRun = false;
-
 	bool LeftCTRLPress = false;
-	bool CompileStarted = false;
 	/*
 		Worlds[0] == EditorWorld
 		Worlds[1] == GameWorld
@@ -79,8 +76,10 @@ class QFAEditorMainWindow
 
 	static void StartDragAndDrop(bool isCppClass, size_t id);
 	static void EndDragAndDrop(EKey::Key key);
-	static void GameCompileCallback(QFAGameCode::CompileStatus status);
 
+	void SetRunButton();
+	void StartGame();
+	void EndGame();
 public:
 	inline static QFAText::SFont* GetIcomonFont()
 	{

@@ -40,10 +40,13 @@ void QSceneComponent::ChangeWorldPosition(const FVector position)
 			if (ListComponents[i]->IsValid())
 				ListComponents[i]->UpdateWorldPositionScale(true);
 	}
+
+	LocalPosition = WorldPosition.ConvertFromVulkanCoordinate() - GetActor()->GetActorPosition();
 }
 
 void QSceneComponent::ChangeLocalPosition(const FVector position)
 {
+	LocalPosition = position;
 	if (IRootComponent || !ParentActorComponent->IsValid())
 		return;
 
@@ -69,16 +72,14 @@ void QSceneComponent::ChangeRelativePosition(const FVector position)
 		return;
 	else
 		UpdateWorldPositionScale(true);
+
+	LocalPosition = WorldPosition.ConvertFromVulkanCoordinate() - GetActor()->GetActorPosition();
 }
 
 
 FVector QSceneComponent::GetLocalPosition()
 {	
-	QActor* temA = GetActor();
-	if (!temA->IsValid())
-		return FVector(0);
-
-	return GetWorldPosition() - temA->GetActorPosition();	
+	return LocalPosition;
 }
 
 
@@ -235,6 +236,9 @@ void QSceneComponent::AttachComponent(QSceneComponent* component, bool inseparab
 	component->ParentActorComponent = this;
 	component->Inseparable = inseparable;
 	ListComponents.Add(component);	
+	component->ChangeLocalPosition(component->GetLocalPosition());
+	component->ChangeRotation(component->GetRotation()); 
+	component->ChangeScale(component->GetScale());
 
 	component->UpdateWorldPositionScale(false);
 	component->ChangedParentRotation();

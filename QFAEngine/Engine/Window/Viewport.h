@@ -4,7 +4,9 @@
 
 class QFAEXPORT QFAViewport : public QFAEngineViewport
 {
+
 public:
+
 	QFAViewport();
 	~QFAViewport();
 

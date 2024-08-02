@@ -35,7 +35,10 @@ protected:
 	*/
 	static std::vector<QFAVKBuffer*> MeshVertexBuffers;
 #if QFA_EDITOR_ONLY
+	// set it if start game in editor
 	static bool InGame;
+	static void SetInGame(bool ingame);
+	static bool GetInGame();
 #endif
 private:
 	glm::mat4 MatrixPerspective;

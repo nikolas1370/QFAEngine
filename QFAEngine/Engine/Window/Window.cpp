@@ -3,7 +3,7 @@
 #include <Window/Viewport.h>
 
 #if QFA_EDITOR_ONLY
-QFAWindow* QFAWindow::GameWindow;
+QFAWindow* QFAWindow::GameWindow = nullptr;
 #endif
 
 QFAWindow::QFAWindow()

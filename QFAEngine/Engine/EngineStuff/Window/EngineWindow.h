@@ -85,6 +85,8 @@ class QFAEXPORT QFAEngineWindow
 	const float shadowResolution = 2000;
 
 	static std::vector<QFAEngineWindow*> Windows;
+
+
 	static QFAEngineWindow* CurentProcessWindow;
 	static QFAVKInstance* Instance;
 	static QFAVKRenderPassSwapChain* RenderPassSwapChain;

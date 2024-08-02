@@ -52,8 +52,14 @@ const wchar_t* QFAGameCode::PdbHot_2Path = L"Source/x64/release/HotReload_2/Game
 void* QFAGameCode::GameCodeModule = nullptr; // HMODULE
 void* QFAGameCode::OldGameCodeModule = nullptr;
 
+bool QFAGameCode::CompileInWork = false;
+
 bool QFAGameCode::Compile()
 {
+    if (CompileInWork)
+        return false;
+
+    CompileInWork = true;
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
 
@@ -94,6 +100,7 @@ bool QFAGameCode::Compile()
     if (succeed)
         DllWasCompiled = true;
 
+    CompileInWork = false;
     return succeed;
 }
 
@@ -202,6 +209,9 @@ QFAClass* QFAGameCode::FindInNewClass(const char* className)
 void (*QFAGameCode::CompileCallback)(QFAGameCode::CompileStatus);
 void QFAGameCode::CompileGameCode(void (*callback)(CompileStatus))
 {
+    if (CompileInWork)
+        return callback(CompileStatus::CompilationStillWork);
+
     CompileCallback = callback;
     if (Compile())
     {

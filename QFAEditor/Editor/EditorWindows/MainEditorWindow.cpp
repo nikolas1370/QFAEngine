@@ -73,11 +73,15 @@ void QFAEditorMainWindow::CreateMainEdirorUI()
 	TopInWindowCanvas->SetWidth("100%");
 	TopInWindowCanvas->SetHeight("30");
 	TopInWindowCanvas->SetBackgroundColor(QFAColor(36, 36, 36));
+
 	RunButton = new QFAText;
 	TopInWindowCanvas->AddUnit(RunButton);
 	RunButton->SetTextSize(25);
 	RunButton->SetFont(QFAEditorMainWindow::GetIcomonFont());
 	RunButton->SetText(PlaySymbol);
+	RunButton->SetWidth("25");
+	RunButton->SetHeight("25");
+	SetRunButton();
 
 	FileExplorer = new QFAUIEditorFileExplorer(Window, QFAEditorMainWindow::StartDragAndDrop);	
 	FileExplorer->SetWidth("100%");
@@ -144,9 +148,45 @@ void QFAEditorMainWindow::AddActorToWorlds(QActor* actor, std::u32string actorNa
 	GameViewportInfo->AddActor(actor, actorName, id, isCppClass);
 }
 
-void QFAEditorMainWindow::GameCompileCallback(QFAGameCode::CompileStatus status)
-{	
-	MainWindow->CompileStarted = false;
+void QFAEditorMainWindow::SetRunButton()
+{
+	RunButton->Events.SetLeftMouseDownUp([this](QFAUIUnit* unit)
+	{		
+		if (QFAGameCode::CompileInWork)
+			return;
+		
+		if (QFAEngineViewport::GetInGame())
+			EndGame(); 
+		else
+			StartGame();
+
+		QFAEngineViewport::SetInGame(!QFAEngineViewport::GetInGame());
+	});
+}
+
+void QFAEditorMainWindow::StartGame()
+{
+	RunButton->SetText(StopSymbol);
+	((QFAEditorWindow*)&GameViewport->HoldedWindow)->Viewports[0]->ChangeCamera(nullptr);
+	GameViewport->ChangeWindow();
+	for (size_t i = 0; i < ((QEditorWorld*)Worlds[0])->Actors.Length(); i++)
+	{		
+		QObject* object = QFAGameCode::GetAPI()->CreateObject(
+			((QEditorWorld*)Worlds[0])->Actors[i]->GetClass()->GetId());
+
+		if (object)
+			Worlds[1]->AddActor((QActor*)object);
+	}	
+}
+
+void QFAEditorMainWindow::EndGame()
+{
+	RunButton->SetText(PlaySymbol);
+	((QEditorWorld*)Worlds[1])->DestroyWorld(true);
+
+	Worlds[1] = NewObject<QWorld>();
+	GameViewport->ChangeWindow();
+	EditorCamera->ActivateCamera(((QFAEditorWindow*)&GameViewport->HoldedWindow)->Viewports[0]);
 }
 
 void QFAEditorMainWindow::CreateInput()
@@ -208,11 +248,8 @@ void QFAEditorMainWindow::CreateInput()
 
 	Input->AddKeyPress(EKey::B, "LEFT_CONTROL", [this](EKey::Key key)
 		{
-			if (LeftCTRLPress && !CompileStarted)
-			{
-				CompileStarted = true;
-				QFAGameCode::CompileGameCode(QFAEditorMainWindow::GameCompileCallback);
-			}
+			if (!QFAEngineViewport::GetInGame() && LeftCTRLPress && !QFAGameCode::CompileInWork)
+				QFAGameCode::CompileGameCode([](QFAGameCode::CompileStatus status) {});
 		});
 
 	Input->AddKeyRelease(EKey::DELETE_KEY, "delete_release", [this](EKey::Key key)
@@ -222,7 +259,6 @@ void QFAEditorMainWindow::CreateInput()
 
 	Input->AddKeyRelease(EKey::S, "s_release", [this](EKey::Key key)
 		{
-			std::cout << "before LeftCTRLPress\n";
 			if (LeftCTRLPress)
 			{
 				if (!Level)
@@ -254,13 +290,16 @@ void QFAEditorMainWindow::CreateInput()
 
 void QFAEditorMainWindow::StartDragAndDrop(bool isCppClass, size_t id)
 {
+	if (QFAEngineViewport::GetInGame())
+		return;
+
 	MainWindow->CurentDragId = id;
 	MainWindow->IsCppClass = isCppClass;
 }
 
 void QFAEditorMainWindow::EndDragAndDrop(EKey::Key key)
 {
-	if (MainWindow->CurentDragId)
+	if (!QFAEngineViewport::GetInGame() && MainWindow->CurentDragId)
 	{
 		double viewportX = MainWindow->GameViewport->X;
 		double viewportY = MainWindow->GameViewport->Y;
@@ -317,9 +356,9 @@ void QFAEditorMainWindow::EndDragAndDrop(EKey::Key key)
 void QFAEditorMainWindow::PickMesh(EKey::Key key)
 {
 	Window->GetMeshUnderCursore([this](QMeshBaseComponent* mesh)
-		{
-			GameViewportInfo->SelectActor(mesh->GetActor());
-		});
+	{
+		GameViewportInfo->SelectActor(mesh->GetActor());
+	});
 }
 
 void QFAEditorMainWindow::CreateLoadUI()

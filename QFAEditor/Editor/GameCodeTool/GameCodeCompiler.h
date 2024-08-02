@@ -24,7 +24,8 @@ class QFAGameCode : public QFAEngineGameCode
 	enum CompileStatus
 	{
 		OK,
-		Error
+		Error,
+		CompilationStillWork
 	};
 
 	const char SourceFolder[7] = "Source";
@@ -44,11 +45,12 @@ class QFAGameCode : public QFAEngineGameCode
 
 	static void* GameCodeModule;// GameCodeModule is HMODULE, don't wanna include windows.h
 	static void* OldGameCodeModule;	
-
+	static bool CompileInWork;
 
 	static DllFile CurentDllFile;
 	static bool DllWasCompiled;
 
+	// not compile in game time
 	static void CompileGameCode(void (*callback)(CompileStatus));
 	
 	static void (*CompileCallback)(QFAGameCode::CompileStatus);

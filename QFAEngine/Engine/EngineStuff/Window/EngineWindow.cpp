@@ -51,6 +51,7 @@ QFAVKTextRenderPass* QFAEngineWindow::TextRenderPassClear;
 VkFormat QFAEngineWindow::depthFormat =  VK_FORMAT_D32_SFLOAT;
 std::vector<QFAEngineWindow*> QFAEngineWindow::Windows;
 
+
 QFAVKInstance* QFAEngineWindow::Instance = nullptr;
 QFAImage* QFAEngineWindow::ShadowImage = nullptr;
 
@@ -130,6 +131,11 @@ QFAEngineWindow::QFAEngineWindow(int width, int height, std::string name, bool i
 
 	glfwSetDropCallback(glfWindow, [](GLFWwindow* window, int path_count, const char* paths[])
 		{
+#if QFA_EDITOR_ONLY
+			if (QFAEngineViewport::GetInGame())
+				return;
+#endif
+
 			for (size_t i = 0; i < QFAEngineWindow::Windows.size(); i++)
 			{
 				if (QFAEngineWindow::Windows[i]->glfWindow == window)
@@ -199,7 +205,7 @@ QFAEngineWindow::QFAEngineWindow(int width, int height, std::string name, bool i
 
 QFAEngineWindow::QFAEngineWindow()
 {
-
+	Windows.push_back(this);
 }
 
 QFAEngineWindow::~QFAEngineWindow()
@@ -716,7 +722,7 @@ void QFAEngineWindow::RenderWindows()
 
 	for (size_t i = 0; i < Windows.size(); i++)
 	{
-		if (Windows[i]->minimized)
+		if (Windows[i]->minimized || !Windows[i]->RegularWindow)
 			continue;
 
 		CurentProcessWindow = Windows[i];
@@ -748,8 +754,8 @@ void QFAEngineWindow::RenderWindow(bool lastWindow)
 		else
 		{			
 			QFAViewportHolder* viewHold = (QFAViewportHolder*)Viewports[i];
-			for (size_t j = 0; j < viewHold->HoldedWindow.Viewports.Length(); j++)
-				RenderViewport(viewHold->HoldedWindow.Viewports[j], i + j, clear);
+			for (size_t j = 0; j < viewHold->CurentHoldedWindow->Viewports.Length(); j++)
+				RenderViewport(viewHold->CurentHoldedWindow->Viewports[j], i + j, clear);
 		}
 #else
 		RenderViewport(Viewports[i], i, clear);
@@ -787,7 +793,7 @@ void QFAEngineWindow::PresentWindows()
 	
 	for (size_t i = 0; i < Windows.size(); i++)
 	{
-		if (Windows[i]->minimized)
+		if (Windows[i]->minimized || !Windows[i]->RegularWindow)
 			continue;
 
 		Windows[i]->DrawOffscreenBuffer();// draw offscreen buffer to swapchain buffer
@@ -798,10 +804,10 @@ void QFAEngineWindow::PresentWindows()
 	
 	for (size_t i = 0; i < Windows.size(); i++)
 	{
-		if (Windows[i]->minimized)
+		if (Windows[i]->minimized || !Windows[i]->RegularWindow)
 			continue;
 
-		Windows[i]->PresentFrame(finishSmiList[i]); 
+		Windows[i]->PresentFrame(finishSmiList[i]);
 	}
 }
 
@@ -810,10 +816,13 @@ void QFAEngineWindow::ProcessUIEvent()
 {	
 	for (size_t i = 0; i < Windows.size(); i++)
 	{
+		if (!Windows[i]->RegularWindow)
+			continue;
+
 		double x;
 		double y;
 		if (!Windows[i]->GetMousePosition(x, y))
-		{
+		{			
 			if (Windows[i]->UIEvent->FocusUnit)
 			{
 				Windows[i]->UIEvent->FocusUnit->NotifyOutFocus(false);
@@ -825,6 +834,12 @@ void QFAEngineWindow::ProcessUIEvent()
 	
 		if (Windows[i]->minimized)
 			continue;
+
+		bool regularWindow;
+		if ((Windows[i]->UIEvent->FocusUnit && Windows[i]->UIEvent->FocusUnit->GetWindow() == Windows[i]) || !Windows[i]->UIEvent->FocusUnit) 
+			regularWindow = true;
+		else
+			regularWindow = false; // if window in FocusUnit not regular
 
 		// don't replase int because in "i" can be minus value 
 		for (int j = (int)Windows[i]->Viewports.Length() - 1; j >= 0; j--)

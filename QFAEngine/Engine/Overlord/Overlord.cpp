@@ -186,7 +186,8 @@ void QFAOverlord::EndLife()
     Life = false;
 
     for (size_t i = 0; i < QFAEngineWindow::Windows.size(); i++)
-        delete QFAEngineWindow::Windows[i];
+        if (QFAEngineWindow::Windows[i]->RegularWindow)
+            delete QFAEngineWindow::Windows[i];
 
     QFAFile::EndLife();
     QFAText::EndLife();

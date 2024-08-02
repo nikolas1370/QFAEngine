@@ -13,8 +13,9 @@
 #include <Tools/String.h>
 
 const float QFAEngineViewport::MinMaxZIndexUI = 1000.0f;
+#if QFA_EDITOR_ONLY
 bool QFAEngineViewport::InGame = false;
-
+#endif
 
 std::vector<QFAVKBuffer*> QFAEngineViewport::MeshVertexBuffers;
 
@@ -122,6 +123,18 @@ void QFAEngineViewport::UpdateHeight()
 	Root.SetHeight(Root.StrHeight, false);
 }
 
+#if QFA_EDITOR_ONLY
+	void QFAEngineViewport::SetInGame(bool ingame)
+	{
+	
+		InGame = ingame;
+	}
+
+	bool QFAEngineViewport::GetInGame()
+	{
+		return InGame;
+	}
+#endif
 
 void QFAEngineViewport::UpdateX()
 {

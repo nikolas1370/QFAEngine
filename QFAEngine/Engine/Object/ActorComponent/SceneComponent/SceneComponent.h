@@ -33,6 +33,9 @@ class QFAEXPORT QSceneComponent : public QActorComponent
 protected:
 	// in vulkan format
 	FVector WorldPosition = FVector(0);
+	// normal format. relative to actor
+	FVector LocalPosition = FVector(0);
+
 	// in vulkan format
 	glm::mat3 RotationMatrix = Math::DefauldMatrix3;
 	/*

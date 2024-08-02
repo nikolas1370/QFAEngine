@@ -14,8 +14,14 @@ class QFAEXPORT QFAViewportHolder : public QFAViewport
 	friend QFAEngineWindow;
 	friend QFAViewport;
 protected:
+	int windowWidth;
+	int windowHeight;
 	QFAWindow HoldedWindow;
+	QFAWindow HoldedWindowGame;
+	QFAWindow* CurentHoldedWindow = nullptr;
 	void Settup(int windowWidth, int windowHeight) final;
+
+	void ChangeWindow();;
 public:
 	QFAViewportHolder();
 	~QFAViewportHolder();

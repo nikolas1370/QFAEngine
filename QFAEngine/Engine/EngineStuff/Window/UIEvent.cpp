@@ -102,11 +102,6 @@ QFAUIEvent::QFAUIEvent(QFAEngineWindow* window, GLFWwindow* _glfWindow)
 		{
 			RightShiftDown = false;
 		});
-
-
-
-	
-	
 }
 
 QFAUIEvent::~QFAUIEvent()

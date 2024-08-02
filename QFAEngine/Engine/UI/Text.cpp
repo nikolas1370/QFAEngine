@@ -545,8 +545,6 @@ void QFAText::SetInputText(char32_t* pText, size_t pTextSize, size_t maxSize)
         QFAText::GlyphInfoData = (GlyphShader*)malloc(sizeof(GlyphShader) * QFAText::CountGlyphInBuffer);
     }
 
-
-
     if(pTextSize > 0)
         TextChange = true;
 
