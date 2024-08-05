@@ -34,7 +34,11 @@ QCameraComponent::QCameraComponent(float fov, float viewDistance)
 	NeedUpdateMatrix = true;
 }
 
-
+QCameraComponent::~QCameraComponent()
+{
+	if (Viewport)
+		Viewport->ChangeCamera(nullptr);
+}
 
 void QCameraComponent::UpdateModelMatrix()
 {

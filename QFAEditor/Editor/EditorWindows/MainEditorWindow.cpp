@@ -187,6 +187,18 @@ void QFAEditorMainWindow::StartGame()
 			((QActor*)object)->SetActorScale(actor->GetActorScale());
 		}
 	}	
+
+	if (!((QFAEditorWindow*)&GameViewport->HoldedWindowGame)->Viewports[0]->CurentCamera)
+	{
+		ACameraEditor* ce = NewObject<ACameraEditor>();		
+		Worlds[1]->AddActor(ce);
+		ce->SetWindowForInput(Window);
+		ce->SetActorPosition(EditorCamera->GetActorPosition());
+		ce->SetActorRotation(EditorCamera->GetActorRotation());
+		ce->SetFov(EditorCamera->GetFov());
+		ce->SetViewDistance(EditorCamera->GetViewDistance());
+		ce->ActivateCamera(((QFAEditorWindow*)&GameViewport->HoldedWindowGame)->Viewports[0]);
+	}
 }
 
 void QFAEditorMainWindow::EndGame()

@@ -6,9 +6,9 @@ class QFAEngineWindow;
 class ACameraEditor : public ACameraActor
 {
 
-	FVector InputAxis;
-	FVector2D MouseAxis;
-	bool MosePress;
+	FVector InputAxis = 0.0f;
+	FVector2D MouseAxis = 0.0f;
+	bool MosePress = false;
 	QFAInput Input;
 	float Speed = 1000;
 protected:
@@ -18,7 +18,14 @@ public:
 	~ACameraEditor();
 
 	void SetWindowForInput(QFAEngineWindow* window);
-
+	inline float GetSpeed()
+	{
+		return Speed;
+	}
+	inline void SetSpeed(float speed)
+	{
+		Speed = speed;
+	}
 private:
 
 };

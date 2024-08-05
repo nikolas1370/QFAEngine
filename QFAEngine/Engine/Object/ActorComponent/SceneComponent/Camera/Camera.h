@@ -33,6 +33,8 @@ public:
 	}
 	QCameraComponent(float fov, float viewDistance);
 
+	~QCameraComponent();
+
 	void UpdateModelMatrix() override;
 	
 	/* 
@@ -47,6 +49,15 @@ public:
 
 	void SetFov(float fov);
 	void SetViewDistance(float viewDistance);
+	inline float GetFov()
+	{
+		return Fov;
+	}
+	inline float GetViewDistance()
+	{
+		return ViewDistance;
+	}
+
 
 	inline bool GetStatus()
 	{

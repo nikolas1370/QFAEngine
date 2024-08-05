@@ -220,6 +220,7 @@ protected:
 public:
 
 	void AddViewport(QFAViewport* viewport);
+	// can't delete last viewport
 	void RemoveViewport(QFAViewport* viewport);
 	QFAViewport* GetViewport(size_t index);
 	inline size_t GetViewportCount()

@@ -516,6 +516,9 @@ void QFAEngineWindow::AddViewport(QFAViewport* viewport)
 
 void QFAEngineWindow::RemoveViewport(QFAViewport* viewport)
 {
+	if (Viewports.Length() == 1)
+		return;
+
 	if (Viewports.Remove(viewport))
 		viewport->WindowRemoveMe();
 }

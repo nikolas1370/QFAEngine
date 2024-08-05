@@ -30,6 +30,8 @@ ACameraEditor::ACameraEditor()
 	ax.AddKey(EKey::SPACE, FVector(0, 0, 1), "up");
 	ax.AddKey(EKey::LEFT_CONTROL, FVector(0, 0, -1), "down");
 	Camera.Activate();
+	Camera.SetLocalPosition(0);
+	Camera.SetRotation(0);
 }
 
 ACameraEditor::~ACameraEditor()
@@ -46,7 +48,7 @@ void ACameraEditor::Tick(float delta)
 {	
 	if (!Camera.GetStatus())
 		return;
-	
+
 	if (MosePress)
 	{
 		FVector rot = GetActorRotation();
