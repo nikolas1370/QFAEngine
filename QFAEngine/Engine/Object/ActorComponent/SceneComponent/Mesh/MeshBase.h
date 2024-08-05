@@ -331,6 +331,11 @@ public:
 		CastShadow = castShadow;
 	}
 
+	inline QFAMeshData* GetMeshData()
+	{
+		return Mf;
+	}
+
 	inline bool GetCastShadow()
 	{
 		return CastShadow;
@@ -353,6 +358,9 @@ public:
 
 	inline bool SetMaterial(Material mat, size_t index)
 	{
+		if (!Mf)
+			return false;
+
 		if (index >= Mf->GetMaterialCount())
 			return false;
 

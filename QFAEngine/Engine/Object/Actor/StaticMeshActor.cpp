@@ -13,4 +13,5 @@ AStaticMeshActor::~AStaticMeshActor()
 void AStaticMeshActor::SetMesh(QFAMeshData* md)
 {
 	Mesh.SetMesh(md);
+	Mesh.SetWorldPosition(Position);
 }

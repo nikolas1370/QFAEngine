@@ -8,7 +8,7 @@ class QFAEXPORT AStaticMeshActor : public QActor
 	QFAEngineClassIn();
 	friend QFALevel;
 	friend QFAClass;
-
+protected:
 	QStaticMesh Mesh;
 
 public:

@@ -44,7 +44,8 @@ class QFAEXPORT QObject
     friend QFAGameCode;
 	// index in QFAClassInfo::ObjectListInside
 	size_t CompileIndex;	
-
+	// true if object be creatre with api in editor
+	bool CreateInApi = false;
 #endif // QFAEDITORONLY
 protected:
 

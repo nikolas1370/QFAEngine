@@ -9,6 +9,7 @@
 #include <UI/Canvas.h>
 #include <UI/UIList.h>
 #include <UI/UIImage.h>
+#include <Object/Actor/StaticMeshActor.h>
 
 class QFAEditorFileStorage;
 class QFAEditorExplorerFolderUnit;
@@ -19,13 +20,14 @@ class QFAEditorImage : public QFAImage
 	friend QFAEditorFileStorage;
 };
 
+class QFAEditorMainWindow;
 class QFAModelLoader;
 class QFAEditorMeshData : public QFAMeshData
 {
+	friend QFAEditorMainWindow;
 	friend QFAModelLoader;
 };
 
-class QFAEditorMainWindow;
 class QFAEditorFileViewWindow;
 class QFAEditorWindow : public QFAWindow
 {
@@ -85,4 +87,14 @@ class QFAEditorList : public QFAUIList
 class QFAEditorUIImage : public QFAUIImage
 {
 	friend QFAUIEditorFileExplorer;
+};
+
+class AEditorStaticMeshActor : public AStaticMeshActor
+{
+	friend QFAEditorMainWindow;
+};
+
+class QEditorStaticMesh : public QStaticMesh
+{
+	friend QFAEditorMainWindow;
 };

@@ -163,11 +163,7 @@ QFAEngineWindow::QFAEngineWindow(int width, int height, std::string name, bool i
 	}
 	
 	SwapChain = new QFAVKSwapChain(glfWindow, surface, commandPool);
-
 	VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB;
-	
-		
-
 	if (Windows.size() == 1)
 	{
 		RenderPassOffScreen = new QFAVKRenderPassDepth();
@@ -197,7 +193,6 @@ QFAEngineWindow::QFAEngineWindow(int width, int height, std::string name, bool i
 	QFAViewport* vp = new QFAViewport;	
 	AddViewport(vp);
 	vp->Settup(width, height);
-
 	
 	PickBuffer = new QFAVKBuffer(4, nullptr, true, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 }

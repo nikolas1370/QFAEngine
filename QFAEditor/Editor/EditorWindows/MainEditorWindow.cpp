@@ -155,12 +155,12 @@ void QFAEditorMainWindow::SetRunButton()
 		if (QFAGameCode::CompileInWork)
 			return;
 		
-		if (QFAEngineViewport::GetInGame())
+		bool inGame = QFAEngineViewport::GetInGame();
+		QFAEngineViewport::SetInGame(!QFAEngineViewport::GetInGame());
+		if (inGame)
 			EndGame(); 
 		else
-			StartGame();
-
-		QFAEngineViewport::SetInGame(!QFAEngineViewport::GetInGame());
+			StartGame();		
 	});
 }
 
@@ -170,12 +170,22 @@ void QFAEditorMainWindow::StartGame()
 	((QFAEditorWindow*)&GameViewport->HoldedWindow)->Viewports[0]->ChangeCamera(nullptr);
 	GameViewport->ChangeWindow();
 	for (size_t i = 0; i < ((QEditorWorld*)Worlds[0])->Actors.Length(); i++)
-	{		
+	{	
+		QActor* actor = ((QEditorWorld*)Worlds[0])->Actors[i];
 		QObject* object = QFAGameCode::GetAPI()->CreateObject(
-			((QEditorWorld*)Worlds[0])->Actors[i]->GetClass()->GetId());
-
+			actor->GetClass()->GetId());
+		
 		if (object)
+		{
+			if (object->GetClass()->GetId() == QFAClass::ObjectClasses::StaticMeshActor)
+				if (QFAMeshData* md = ((AEditorStaticMeshActor*)actor)->Mesh.GetMeshData())
+					((AStaticMeshActor*)object)->SetMesh(md);
+			
 			Worlds[1]->AddActor((QActor*)object);
+			((QActor*)object)->SetActorPosition(actor->GetActorPosition());
+			((QActor*)object)->SetActorRotation(actor->GetActorRotation());
+			((QActor*)object)->SetActorScale(actor->GetActorScale());
+		}
 	}	
 }
 
@@ -190,8 +200,7 @@ void QFAEditorMainWindow::EndGame()
 }
 
 void QFAEditorMainWindow::CreateInput()
-{
-	
+{	
 	((QFAEditorWindow*)Window)->SetDropFun([this](int path_count, const char* paths[])
 		{
 			if (WindowCanvas)

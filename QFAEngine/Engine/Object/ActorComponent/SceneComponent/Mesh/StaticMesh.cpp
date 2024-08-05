@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "StaticMesh.h"
 #include <EngineStuff/VulkanSuff.h>
+#include <Window/Viewport.h>
 QFAEngineClassOut(QStaticMesh, QFAClass::ObjectClasses::StaticMesh);
 QStaticMesh::QStaticMesh(QFAMeshData* meshData)
 {
@@ -15,9 +16,12 @@ void QStaticMesh::SetMesh(QFAMeshData* meshData)
 		return;
 	}
 #if QFA_EDITOR_ONLY
-	meshData->Meshs.push_back(this);
-	if (Mf)
-		Mf->DeleteMeFromList(this);
+	if(!QFAEngineViewport::GetInGame())
+	{
+		meshData->Meshs.push_back(this);
+		if (Mf)
+			Mf->DeleteMeFromList(this);
+	}
 #endif
 	Mf = meshData;
 	ResetMaterials();

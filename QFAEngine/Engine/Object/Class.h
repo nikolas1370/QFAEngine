@@ -50,7 +50,7 @@ class QFAClass
     friend QFAOverlord;
 public:
     enum ObjectClasses : int // if create new engine object class not forget add in ObjectClasses and QFAClass::InitClasses
-    {
+    { // id is index in QCI
         Undefined = -1,
         Object,
         Actor,
@@ -183,7 +183,12 @@ private:
         
         new (object) T();
         SetCompileIndex(object, ObjectList.size());
-        ObjectList.push_back(object);        
+        ObjectList.push_back(object);   
+
+#if QFA_EDITOR_ONLY
+        object->CreateInApi = true;
+#endif
+
         return object;
     }
 
@@ -227,7 +232,7 @@ struct QFAEXPORT QFAGameCodeFunctions
 {
     QObject* (*CreateObject)(size_t classId);
     QObject* (*CreateObjectByName)(const char* className);
-    void (*DeleteObject)(QObject* object);
+    void (*DeleteObject)(QObject* object); // can use QObject::Destroy() instead it
     /*
         return list of all Game and engine class based on QObject
     */

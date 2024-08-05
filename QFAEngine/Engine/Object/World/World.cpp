@@ -92,6 +92,9 @@ void QWorld::AddActor(QActor* actor)
 	actor->ActorWorld = this;
 	actor->WorldIndex = Actors.Length();
 	Actors.Add(actor);
+	actor->SetActorPosition(actor->Position);
+	actor->SetActorRotation(actor->Rotation);
+	actor->SetActorScale(actor->Scale);
 }
 
 void QWorld::RemoveActor(QActor* actor)

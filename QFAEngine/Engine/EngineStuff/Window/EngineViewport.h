@@ -16,6 +16,7 @@ class QFAUIParentMultipleUnit;
 class QFAEditorMainWindow;
 class QFAViewportHolder;
 class QFAWindow;
+class QStaticMesh;
 class QFAEXPORT QFAEngineViewport
 {
 	friend QFAEngineWindow;
@@ -24,6 +25,7 @@ class QFAEXPORT QFAEngineViewport
 	friend QFAEditorMainWindow;
 	friend QFAViewportHolder;
 	friend QFAWindow;
+	friend QStaticMesh;
 
 public:
 	static const float MinMaxZIndexUI;
