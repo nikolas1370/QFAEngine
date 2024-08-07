@@ -12,7 +12,7 @@ class QFAEngineWindow;
 class QFALevel;
 class QFAEXPORT QActor : public QObject
 {
-	QFAEngineClassIn();
+	QFAEngineClassIn(QActor);
 	/*
 	for write on position rotation scale
 	*/
@@ -25,7 +25,7 @@ class QFAEXPORT QActor : public QObject
 	friend QFALevel;
 
 
-	QSceneComponent* RootComponent = nullptr;
+
 
 	// pointer to this actor in QWorld::Actors
 	size_t WorldIndex;
@@ -40,7 +40,7 @@ protected:
 	bool CanTick = false;
 	// actor live in this world
 	QWorld* ActorWorld = nullptr;
-
+	QSceneComponent* RootComponent = nullptr;
 private:
 
 #if QFA_EDITOR_ONLY
@@ -52,7 +52,8 @@ private:
 #endif 
 protected:
 	virtual void Tick(float deltaTime) {};
-
+	// set RootComponent->Inseparable = false
+	void SeparateRootComponent();
 public:
 	QActor();
 	~QActor();

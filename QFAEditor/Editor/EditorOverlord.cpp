@@ -1,6 +1,5 @@
 ﻿#include "epch.h"
 #include "EditorOverlord.h"
-#include <Object/Class.cpp> // see reason in Object/Class.h
 
 #include <Overlord/Time.h>
 #include <Overlord/Overlord.h>
@@ -28,7 +27,6 @@ void QFAEditorOverlord::StartLife()
 
     Init();
     std::jthread LoadThread(QFAEditorOverlord::PrepareToWork);
-    QFAEgitorClass::InitClasses();
     QFAOverlord::StartLife();
 
     delete MainWindow;

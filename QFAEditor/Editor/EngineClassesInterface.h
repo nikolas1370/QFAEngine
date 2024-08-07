@@ -98,3 +98,8 @@ class QEditorStaticMesh : public QStaticMesh
 {
 	friend QFAEditorMainWindow;
 };
+
+class QEditorWorld : public QWorld
+{
+	friend QFAEditorMainWindow;
+};

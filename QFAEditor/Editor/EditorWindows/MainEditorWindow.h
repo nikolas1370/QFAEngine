@@ -6,11 +6,6 @@
 #include <Object/World/World.h>
 #include <EngineClassesInterface.h>
 
-class QEditorWorld : public QWorld
-{
-	friend QFAEditorMainWindow;
-};
-
 class QFAEngineWindow;
 class QFAUIEditorFileExplorer;
 class QFAUICanvas;
@@ -70,6 +65,7 @@ class QFAEditorMainWindow
 		Worlds[1] == GameWorld
 	*/
 	std::array<QWorld*, 2> Worlds;
+	QWorld* CurentWorld = nullptr;
 	ACameraEditor* EditorCamera = nullptr;
 
 	QFAEditorLevel* Level = nullptr;
@@ -95,7 +91,6 @@ private:
 
 	void PickMesh(EKey::Key key);
 	void PrepareGameViewport();
-	void PrepareCallback();
 
 	void AddActorToWorlds(QActor* actor, std::u32string actorName, size_t id, bool isCppClass);
 

@@ -6,8 +6,7 @@
 
 template<typename T>
 T* NewObject()
-{	
-	
+{		
 	static_assert(std::is_base_of<QObject, T>::value, "class T must inherited from base QObject");	
 	T* t = (T*)malloc(sizeof(T));	
 	if (!t)
@@ -16,6 +15,7 @@ T* NewObject()
 	return new (t) T();
 }
 
+QFAEXPORT QObject* NewObject(int classId);
 
 class QFAEditorGameViewportInfo;
 class QFAClass;
@@ -38,7 +38,7 @@ class QFAEXPORT QObject
 	static void* operator new[](size_t) = delete;
 	static void  operator delete  (void*) = delete;
 	static void  operator delete[](void*) = delete;
-	
+	static QFAClass* _QFAClassInfo; 
 
 #if QFA_EDITOR_ONLY
     friend QFAGameCode;
@@ -67,7 +67,7 @@ private:
 
 #endif // QFAEDITORONLY
 
-	virtual QFAClass::ObjectClasses GetEngineClassId();
+	
 
 protected:
 	QObject();
@@ -81,13 +81,10 @@ protected:
 	virtual ~QObject();
 public:
 
-	virtual QFAClass* GetClass()
-	{
-		return QFAClass::GetClass(GetEngineClassId());
-	}
+	virtual QFAClass* GetClass();
 	
 
-
+	
 
 	inline bool IsValid()
 	{
@@ -95,7 +92,9 @@ public:
 	}
 
 	/*
-		analogue to "delete someQObject;"
+		Every class that inherits from QObject must delete self from parent.
+		QActor delete self from QWorld
+		QSceneComponent delete from QSceneComponent and QActor
 	*/
 	virtual void Destroy() final;
 	

@@ -2,7 +2,7 @@
 #include "StaticMesh.h"
 #include <EngineStuff/VulkanSuff.h>
 #include <Window/Viewport.h>
-QFAEngineClassOut(QStaticMesh, QFAClass::ObjectClasses::StaticMesh);
+QFAEngineClassOut(QStaticMesh);
 QStaticMesh::QStaticMesh(QFAMeshData* meshData)
 {
 	SetMesh(meshData);

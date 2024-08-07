@@ -4,7 +4,7 @@
 #include <EngineStuff/Window/EngineViewport.h>
 #include <Object/World/World.h>
 #include <Object/Actor/Actor.h>
-QFAEngineClassOut(QCameraComponent, QFAClass::ObjectClasses::CameraComponent);
+QFAEngineClassOut(QCameraComponent);
 void QCameraComponent::Activate()
 {
 	if (!IsValid())

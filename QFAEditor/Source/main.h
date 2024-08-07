@@ -3,8 +3,9 @@
 #include "../../QFAEngine/Engine/Object/Object.h"
 #include "../../QFAEngine/Engine/Object/Actor/Actor.h"
 #include <Overlord/ContentManager.h>
-;
+#include <UI/TextInput.h>
 
+#define InGameModule
 
 class Test : public QObject
 {
@@ -79,6 +80,7 @@ private:
     bool SetImage1 = true;
     QCameraComponent Camera = QCameraComponent(45.0f, 1000);
     QStaticMesh* mesh = nullptr;
+    QFAUITextInput* Input;
 public:
     QTest_ActorMinusOne()
     {        
@@ -89,9 +91,15 @@ public:
 
         UIImage = new QFAUIImage(Image1 = QFAContentManager::GetImage(U"Content\\Jopa.qfa"));
         //viewport->AddUnit(UIImage);
+         
+        Input = new QFAUITextInput;
+        Input->SetValue(U"some input text");
+        viewport->AddUnit(Input);
+        Input->SetTop("0");
+        Input->SetLeft("0");
+        Input->SetBackgroundColor(QFAColor(255,0,0));
 
-
-        SetTick(true);
+        SetTick(false);
         Camera.SetRotation(0);
 
         
@@ -121,6 +129,7 @@ public:
     ~QTest_ActorMinusOne()
     {
         delete UIImage;
+        std::cout << "~QTest_ActorMinusOne "<< "\n";
     }
 
 

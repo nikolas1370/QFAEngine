@@ -7,7 +7,7 @@
 #include <EngineStuff/Window/EngineWindow.h>
 #include <Tools/String.h>
 QFAArray<QWorld*> QWorld::Worlds;
-QFAEngineClassOut(QWorld, QFAClass::ObjectClasses::World);
+QFAEngineClassOut(QWorld);
 void QWorld::ProcessTicks()
 {	
 	//std::cout << "Start\n";
@@ -31,7 +31,7 @@ void QWorld::ProcessTicks()
 			if (!QFAEngineWindow::Windows[j]->ProcessTickIfWindowsMinimized && QFAEngineWindow::Windows[j]->minimized)
 				continue;
 
-			for (size_t k = 0; k < QFAEngineWindow::Windows[j]->Viewports.Length(); k++)
+			for (size_t k = 0; k < QFAEngineWindow::Windows[j]->Viewports.size(); k++)
 			{
 				if (QFAEngineWindow::Windows[j]->Viewports[k]->GetWorld() == Worlds[i])
 				{
@@ -106,6 +106,7 @@ void QWorld::RemoveActor(QActor* actor)
 	Actors.RemoveAt(actor->WorldIndex);
 	Actors[actor->WorldIndex]->WorldIndex = actor->WorldIndex;
 }
+
 #if QFA_EDITOR_ONLY
 
 	void QWorld::SetEditorActor(QActor* actor)

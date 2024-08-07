@@ -209,7 +209,7 @@ class QFAEXPORT QFAInput
 	{	
 		std::string Id;
 		std::function<void(float)> Fun;
-		QFAArray<SKeyAxis1D> Keys;
+		std::vector<SKeyAxis1D> Keys;
 	};
 
 	struct SKeyAxis2D
@@ -224,7 +224,7 @@ class QFAEXPORT QFAInput
 	{
 		std::string Id;
 		std::function<void(FVector2D)> Fun;
-		QFAArray<SKeyAxis2D> Keys;
+		std::vector<SKeyAxis2D> Keys;
 	};
 
 	struct SKeyAxis3D
@@ -240,7 +240,7 @@ class QFAEXPORT QFAInput
 	{
 		std::string Id;
 		std::function<void(FVector)> Fun;
-		QFAArray<SKeyAxis3D> Keys;
+		std::vector<SKeyAxis3D> Keys;
 	};
 
 	struct Sinput
@@ -254,7 +254,7 @@ class QFAEXPORT QFAInput
 	};
 
 	static std::vector<QFAEngineWindow*> WindowList;
-	static QFAArray<Sinput> Inputs;
+	static std::vector<Sinput> Inputs;
 	static FVector2D LastMousePosition;
 
 	GLFWwindow* Window;
@@ -262,12 +262,12 @@ class QFAEXPORT QFAInput
 	
 	bool InputValid = true;
 
-	QFAArray<SKeyFunction> KeyPressList;
-	QFAArray<SKeyFunction> KeyReleaseList;
-	QFAArray<SKeyHold> KeyHoldList;
-	QFAArray<SAxis1D> AxisList;
-	QFAArray<SAxis2D> Axis2DList;
-	QFAArray<SAxis3D> Axis3DList;
+	std::vector<SKeyFunction> KeyPressList;
+	std::vector<SKeyFunction> KeyReleaseList;
+	std::vector<SKeyHold> KeyHoldList;
+	std::vector<SAxis1D> AxisList;
+	std::vector<SAxis2D> Axis2DList;
+	std::vector<SAxis3D> Axis3DList;
 	bool BlockInput = false;
 
 	SPressedAnyKey Any;

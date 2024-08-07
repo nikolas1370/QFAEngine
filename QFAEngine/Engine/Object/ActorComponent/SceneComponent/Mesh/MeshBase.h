@@ -200,7 +200,7 @@ class QFAOverlord;
 
 class QFAEXPORT QMeshBaseComponent : public QSceneComponent
 {
-	QFAEngineClassIn();
+	QFAEngineClassIn(QMeshBaseComponent);
 	friend QStaticMesh;
 	friend QFAEngineWindow;
 	friend QFAEngineViewport;

@@ -153,7 +153,7 @@ class QFAEXPORT QFAEngineWindow
 	std::function<void(QMeshBaseComponent*)> GetMeshCallback;
 
 protected:
-	QFAArray<QFAEngineViewport*> Viewports;
+	std::vector<QFAEngineViewport*> Viewports;
 	// if window inside viewportHolder valude be false
 	bool RegularWindow = true;
 private:
@@ -225,7 +225,7 @@ public:
 	QFAViewport* GetViewport(size_t index);
 	inline size_t GetViewportCount()
 	{
-		return Viewports.Length();
+		return Viewports.size();
 	}
 
 

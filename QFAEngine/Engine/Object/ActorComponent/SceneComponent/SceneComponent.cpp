@@ -2,7 +2,7 @@
 #include "SceneComponent.h"
 #include <Object/Actor/Actor.h>
 #include <Object/World/World.h>
-QFAEngineClassOut(QSceneComponent, QFAClass::ObjectClasses::SceneComponent);
+QFAEngineClassOut(QSceneComponent);
 
 QSceneComponent::QSceneComponent()
 {
@@ -13,6 +13,17 @@ QSceneComponent::~QSceneComponent()
 {
 	for (unsigned int i = 0; i < (unsigned int)ListComponents.Length(); i++)
 		ListComponents[i]->Destroy();
+
+	if (ParentActor)
+	{		
+		if (Inseparable)
+			stopExecute("can't destroy it if Parent is QActor and this component Inseparable");
+
+		ParentActor->SetRootComponent(nullptr);
+	}
+	else if(ParentActorComponent)
+		ParentActorComponent->ForgetComponent(this);
+
 }
 
 void QSceneComponent::ChangeWorldPosition(const FVector position)

@@ -105,8 +105,8 @@ void QFAEditorMainWindow::CreateMainEdirorUI()
 
 void QFAEditorMainWindow::PrepareGameViewport()
 {
-	GameViewport = (QFAEditorViewportHolder*)new QFAViewportHolder();
-	Window->AddViewport(GameViewport);
+	GameViewport = (QFAEditorViewportHolder*)new QFAViewportHolder();	
+	Window->AddViewport(GameViewport);	
 	GameViewport->SetTop("30");
 	GameViewport->SetLeft("0");
 	GameViewport->SetHeight("70% - 30");
@@ -120,26 +120,8 @@ void QFAEditorMainWindow::PrepareGameViewport()
 	EditorCamera->SetActorPosition(FVector(-200, 0, 0));
 	EditorCamera->SetActorRotation(0);
 	EditorCamera->ActivateCamera(((QFAEditorWindow*)&GameViewport->HoldedWindow)->Viewports[0]);
-
 	((QEditorWorld*)Worlds[0])->SetEditorActor(EditorCamera);
-}
-
-void QFAEditorMainWindow::PrepareCallback()
-{	
-	Input = new QFAInput(Window);
-	Input->AddKeyPress(EKey::DELETE_KEY, "pressDelete", [this](EKey::Key key)
-		{
-			switch (Focus)
-			{
-				case QFAEditorMainWindow::FActorList:
-					//GameViewportInfo->ActorList->PressDelete(); 
-					break;
-				case QFAEditorMainWindow::FFileExplorer:
-					break;
-				default:
-					break;
-			}
-		});
+	CurentWorld = Worlds[0];
 }
 
 void QFAEditorMainWindow::AddActorToWorlds(QActor* actor, std::u32string actorName, size_t id, bool isCppClass)
@@ -168,13 +150,17 @@ void QFAEditorMainWindow::StartGame()
 {
 	RunButton->SetText(StopSymbol);
 	((QFAEditorWindow*)&GameViewport->HoldedWindow)->Viewports[0]->ChangeCamera(nullptr);
-	GameViewport->ChangeWindow();
+	GameViewport->ChangeWindow();	
+	CurentWorld = Worlds[1];
+	EditorCamera->ActiveInput(false);
+	((QFAEditorWindow*)&GameViewport->HoldedWindowGame)->Viewports[0]->Root.removeAllUnit();
+
 	for (size_t i = 0; i < ((QEditorWorld*)Worlds[0])->Actors.Length(); i++)
 	{	
 		QActor* actor = ((QEditorWorld*)Worlds[0])->Actors[i];
 		QObject* object = QFAGameCode::GetAPI()->CreateObject(
 			actor->GetClass()->GetId());
-		
+
 		if (object)
 		{
 			if (object->GetClass()->GetId() == QFAClass::ObjectClasses::StaticMeshActor)
@@ -190,7 +176,7 @@ void QFAEditorMainWindow::StartGame()
 
 	if (!((QFAEditorWindow*)&GameViewport->HoldedWindowGame)->Viewports[0]->CurentCamera)
 	{
-		ACameraEditor* ce = NewObject<ACameraEditor>();		
+		ACameraEditor* ce = NewObject<ACameraEditor>();
 		Worlds[1]->AddActor(ce);
 		ce->SetWindowForInput(Window);
 		ce->SetActorPosition(EditorCamera->GetActorPosition());
@@ -198,13 +184,17 @@ void QFAEditorMainWindow::StartGame()
 		ce->SetFov(EditorCamera->GetFov());
 		ce->SetViewDistance(EditorCamera->GetViewDistance());
 		ce->ActivateCamera(((QFAEditorWindow*)&GameViewport->HoldedWindowGame)->Viewports[0]);
-	}
+	}	
 }
 
 void QFAEditorMainWindow::EndGame()
-{
+{	
+	CurentWorld = Worlds[0];
+	EditorCamera->ActiveInput(true);
 	RunButton->SetText(PlaySymbol);
 	((QEditorWorld*)Worlds[1])->DestroyWorld(true);
+	((QFAEditorWindow*)&GameViewport->HoldedWindowGame)->Viewports[0]->CurentCamera = nullptr;
+	((QFAEditorWindow*)&GameViewport->HoldedWindowGame)->Viewports[0]->Root.removeAllUnit();
 
 	Worlds[1] = NewObject<QWorld>();
 	GameViewport->ChangeWindow();
@@ -275,7 +265,9 @@ void QFAEditorMainWindow::CreateInput()
 
 	Input->AddKeyRelease(EKey::DELETE_KEY, "delete_release", [this](EKey::Key key)
 		{
-			GameViewportInfo->PressedDelete();
+			QActor* actor = GameViewportInfo->PressedDelete();
+			if (actor->IsValid())
+				actor->Destroy();
 		});
 
 	Input->AddKeyRelease(EKey::S, "s_release", [this](EKey::Key key)
@@ -305,8 +297,6 @@ void QFAEditorMainWindow::CreateInput()
 				((QEditorWorld*)Worlds[0])->SetEditorActor(EditorCamera);
 			}
 		});
-
-	PrepareCallback();
 }
 
 void QFAEditorMainWindow::StartDragAndDrop(bool isCppClass, size_t id)

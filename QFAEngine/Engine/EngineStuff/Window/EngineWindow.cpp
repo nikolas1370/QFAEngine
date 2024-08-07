@@ -205,7 +205,7 @@ QFAEngineWindow::QFAEngineWindow()
 
 QFAEngineWindow::~QFAEngineWindow()
 {
-	for (size_t i = 0; i < Viewports.Length(); i++)
+	for (size_t i = 0; i < Viewports.size(); i++)
 		Viewports[i]->WindowRemoveMe();
 
 	delete UIEvent;
@@ -502,13 +502,13 @@ void QFAEngineWindow::recreateSwapChain()
 void QFAEngineWindow::AddViewport(QFAViewport* viewport)
 {
 	viewport->Window = (QFAWindow*)this;
-	Viewports.Add(viewport);
+	Viewports.push_back(viewport);
 	viewport->Settup(Width, Height);
 	viewport->WindowAddMe((QFAWindow*)this);
 
 	int activeViewportCount = 0;
 	for (size_t i = 0; i < Windows.size(); i++)
-		activeViewportCount += Windows[i]->Viewports.Length();
+		activeViewportCount += Windows[i]->Viewports.size();
 
 	if (ViewportStuff.size() < activeViewportCount)
 		CreateViewPortStuff();
@@ -516,16 +516,23 @@ void QFAEngineWindow::AddViewport(QFAViewport* viewport)
 
 void QFAEngineWindow::RemoveViewport(QFAViewport* viewport)
 {
-	if (Viewports.Length() == 1)
+	if (Viewports.size() == 1)
 		return;
 
-	if (Viewports.Remove(viewport))
-		viewport->WindowRemoveMe();
+	for (size_t i = 0; i < Viewports.size(); i++)
+	{
+		if (Viewports[i] == viewport)
+		{
+			Viewports.erase(Viewports.begin() + i);;
+			viewport->WindowRemoveMe();
+			break;
+		}
+	}
 }
 
 QFAViewport* QFAEngineWindow::GetViewport(size_t index)
 {
-	if (index < 0 || index >= Viewports.Length())
+	if (index >= Viewports.size())
 		return nullptr;
 	else
 		return (QFAViewport*)Viewports[index];
@@ -744,7 +751,7 @@ void QFAEngineWindow::RenderWindow(bool lastWindow)
 {
 	bool clear = true;
 	StartFrame();	
-	for (size_t i = 0; i < Viewports.Length(); i++)
+	for (size_t i = 0; i < Viewports.size(); i++)
 	{			
 #if QFA_EDITOR_ONLY		
 		if (Viewports[i]->RegularViewport)
@@ -752,7 +759,7 @@ void QFAEngineWindow::RenderWindow(bool lastWindow)
 		else
 		{			
 			QFAViewportHolder* viewHold = (QFAViewportHolder*)Viewports[i];
-			for (size_t j = 0; j < viewHold->CurentHoldedWindow->Viewports.Length(); j++)
+			for (size_t j = 0; j < viewHold->CurentHoldedWindow->Viewports.size(); j++)
 				RenderViewport(viewHold->CurentHoldedWindow->Viewports[j], i + j, clear);
 		}
 #else
@@ -840,7 +847,7 @@ void QFAEngineWindow::ProcessUIEvent()
 			regularWindow = false; // if window in FocusUnit not regular
 
 		// don't replase int because in "i" can be minus value 
-		for (int j = (int)Windows[i]->Viewports.Length() - 1; j >= 0; j--)
+		for (int j = (int)Windows[i]->Viewports.size() - 1; j >= 0; j--)
 		{
 			FVector2D viewPos = Windows[i]->Viewports[j]->GetPosition();
 			float xEnd = (float)(viewPos.X + Windows[i]->Viewports[j]->Width);
@@ -867,7 +874,7 @@ void QFAEngineWindow::CheckIfNeedResizeWindows()
 			Windows[i]->Width = Windows[i]->NewWidth;
 			Windows[i]->Height = Windows[i]->NewHeight;
 			Windows[i]->WindowSizeChanched = false;
-			for (int j = 0; j < Windows[i]->Viewports.Length(); j++)
+			for (int j = 0; j < Windows[i]->Viewports.size(); j++)
 				Windows[i]->Viewports[j]->Settup(Windows[i]->Width, Windows[i]->Height);
 		}
 	}	

@@ -2,7 +2,7 @@
 #include "Actor.h"
 #include <Object/World/World.h>
 #include <Object/ActorComponent/SceneComponent/SceneComponent.h>
-QFAEngineClassOut(QActor, QFAClass::ObjectClasses::Actor);
+QFAEngineClassOut(QActor);
 QActor::QActor()
 {
 
@@ -10,10 +10,24 @@ QActor::QActor()
 
 QActor::~QActor()
 {
-	RootComponent->Destroy();
+	if(RootComponent->IsValid())
+	{		
+		RootComponent->ParentActor = nullptr;
+		RootComponent->Destroy();
+		RootComponent = nullptr;
+	}
 
 	if (ActorWorld->IsValid())
 		ActorWorld->RemoveActor(this);
+}
+
+void QActor::SeparateRootComponent()
+{
+	if (RootComponent)
+	{
+		RootComponent->Inseparable = false;
+		SetRootComponent(nullptr);
+	}	
 }
 
 void QActor::SetActorPosition(const FVector& position)
@@ -73,10 +87,12 @@ FVector QActor::GetActorUpVector() const
 bool QActor::SetRootComponent(QSceneComponent* component, bool inseparable)
 {	
 	if (RootComponent->IsValid() && RootComponent->Inseparable)
+	{
+		stopExecute("can't change Inseparable RootComponent");
 		return false;
+	}
 
-	bool componentValide = component->IsValid();
-	if (!componentValide)
+	if (!component->IsValid())
 	{
 		if (RootComponent->IsValid())
 		{
@@ -89,8 +105,10 @@ bool QActor::SetRootComponent(QSceneComponent* component, bool inseparable)
 	}
 
 	if (component->Inseparable)
+	{
+		stopExecute("Inseparable Component can't change parent");
 		return false;
-
+	}
 
 	QSceneComponent* oldRootComponent = RootComponent;
 	if (RootComponent)

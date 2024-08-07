@@ -8,17 +8,17 @@ void QFAViewportHolder::Settup(int windowWidth, int windowHeight)
 	WindowHeight = windowHeight;
 	SettupInside(windowWidth, windowHeight);
 	CurentHoldedWindow->SetSize(Width, Height);	
-	for (size_t i = 0; i < CurentHoldedWindow->Viewports.Length(); i++)
+	for (size_t i = 0; i < CurentHoldedWindow->Viewports.size(); i++)
 		CurentHoldedWindow->Viewports[i]->SettupInside(Width, Height);
 }
 
 void QFAViewportHolder::ChangeWindow()
 {
-	if(CurentHoldedWindow == &HoldedWindow)
-		CurentHoldedWindow = &HoldedWindowGame;
-	else
+	if(CurentHoldedWindow == &HoldedWindowGame)
 		CurentHoldedWindow = &HoldedWindow;
-
+	else
+		CurentHoldedWindow = &HoldedWindowGame;
+		
 	Settup(WindowWidth, WindowHeight);	
 }
 
@@ -27,8 +27,8 @@ QFAViewportHolder::QFAViewportHolder()
 	RegularViewport = false;
 	HoldedWindow.Holder = this;
 	HoldedWindowGame.Holder = this;
-	QFAWindow::GameWindow = &HoldedWindowGame;
 	CurentHoldedWindow = &HoldedWindow;
+	QFAWindow::GameWindow = &HoldedWindowGame;
 }
 
 QFAViewportHolder::~QFAViewportHolder()

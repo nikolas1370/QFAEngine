@@ -295,9 +295,9 @@ bool QFAGameCode::LoadCode()
     HMODULE mod = LoadLibraryW(loadPath);
     if (mod)
     {
-        FARPROC Functions = (FARPROC)GetProcAddress(mod, "___QFAGAMECODEEXPORTFUNCTIONGETFUNCTIONS___");
+        auto Functions = (QFAGameCodeFunctions* (*)(QFAClass**))GetProcAddress(mod, "___QFAGAMECODEEXPORTFUNCTIONGETFUNCTIONS___");
         if (Functions)
-            SetAPI((QFAGameCodeFunctions*)Functions());
+            SetAPI(Functions(QFAClass::GetEngineClassList()));
         else
         {
             FreeLibrary(mod);

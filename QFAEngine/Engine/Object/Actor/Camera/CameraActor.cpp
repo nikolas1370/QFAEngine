@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "CameraActor.h"
 #include <EngineStuff/Window/EngineViewport.h>
-QFAEngineClassOut(ACameraActor, QFAClass::ObjectClasses::CameraActor);
+QFAEngineClassOut(ACameraActor);
 
 ACameraActor::ACameraActor()
 {
@@ -11,7 +11,8 @@ ACameraActor::ACameraActor()
 
 ACameraActor::~ACameraActor()
 {
-
+	
+	SetRootComponent(nullptr);
 }
 
 void ACameraActor::ActivateCamera(QFAEngineViewport* viewport)

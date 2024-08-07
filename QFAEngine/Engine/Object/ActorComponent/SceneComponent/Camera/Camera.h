@@ -5,12 +5,14 @@ class QFAOverlord;
 class QFAEngineViewport;
 class QWorld;
 class ACameraEditor;
+class ACameraActor;
 class QFAEXPORT QCameraComponent : public QSceneComponent
 {
-	QFAEngineClassIn();
+	QFAEngineClassIn(QCameraComponent);
 	friend QFAEngineWindow;
 	friend QFAOverlord;
 	friend QFAEngineViewport;
+	friend ACameraActor;
 	// Field of view 
 	float Fov = 45;
 	float ViewDistance = 100000;

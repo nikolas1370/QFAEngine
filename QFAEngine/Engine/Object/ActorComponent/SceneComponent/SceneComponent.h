@@ -6,7 +6,8 @@
 
 class QMeshBaseComponent;
 class QFAOverlord;
-
+class QWorld;
+class QFAEngineWindow;
 /*
 	relative position  // relative to parent
 	local position     // relative to Actore
@@ -14,22 +15,27 @@ class QFAOverlord;
 */
 class QFAEXPORT QSceneComponent : public QActorComponent
 {
-	QFAEngineClassIn();
+	QFAEngineClassIn(QSceneComponent);
 	friend QActor;
 	friend QSceneComponent;
 	friend QMeshBaseComponent;
 	friend QFAOverlord;
+	friend QWorld;
+	friend QFAEngineWindow;
 
+	// if parent of this unit is QActor
 	QActor* ParentActor = nullptr;
+	// if parent of this unit is QSceneComponent
 	QSceneComponent* ParentActorComponent = nullptr;
 	bool IRootComponent = false;
 
 	/*
-	can't be detached
-	will not detach
-*/
+		only if parent is QActor other case be ignored
+		can't be detached
+		will not detach
+	*/
 	bool Inseparable = false;
-
+	QFAArray<QSceneComponent*> ListComponents;
 protected:
 	// in vulkan format
 	FVector WorldPosition = FVector(0);
@@ -86,9 +92,6 @@ protected:
 
 	virtual void UpdateModelMatrix() {};
 public:
-
-	// remove to private
-	QFAArray<QSceneComponent*> ListComponents;
 
 	QSceneComponent(); 
 

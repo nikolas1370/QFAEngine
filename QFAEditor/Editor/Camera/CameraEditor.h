@@ -26,6 +26,11 @@ public:
 	{
 		Speed = speed;
 	}
+
+	inline void ActiveInput(bool activate)
+	{
+		Input.ActiveInput(activate);
+	}
 private:
 
 };

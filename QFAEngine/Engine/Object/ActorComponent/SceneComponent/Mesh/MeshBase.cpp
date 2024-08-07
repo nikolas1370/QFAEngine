@@ -32,7 +32,7 @@ std::vector<VkDescriptorSet> QMeshBaseComponent::ShadowDescriptorSets;
 std::vector<QMeshBaseComponent*> QMeshBaseComponent::MeshIdList;
 unsigned int QMeshBaseComponent::MaxMeshId;
 
-QFAEngineClassOut(QMeshBaseComponent, QFAClass::ObjectClasses::MeshBase);
+QFAEngineClassOut(QMeshBaseComponent);
 
 QFAMeshData::QFAMeshData(int vertexCount, int indexCount, int materialCount, int notNed)
 {	

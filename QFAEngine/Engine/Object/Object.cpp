@@ -2,10 +2,8 @@
 #include "Object.h"
 #include <Overlord/GameCode.h>
 
-QFAClass::ObjectClasses QObject::GetEngineClassId()
-{
-    return QFAClass::ObjectClasses::Object;
-}
+QFAClass* QObject::_QFAClassInfo;
+
 
 QObject::QObject()
 {
@@ -15,6 +13,11 @@ QObject::QObject()
 QObject::~QObject()
 {
     Valid = 0;
+}
+
+QFAClass* QObject::GetClass()
+{
+    return QObject::_QFAClassInfo;
 }
 
 
@@ -35,4 +38,13 @@ void QObject::Destroy()
     this->~QObject();
     free(this);
 #endif
+}
+
+
+QObject* NewObject(int classId)
+{
+    if (QFAGameCodeFunctions* funs = QFAEngineGameCode::GetAPI())
+        return funs->CreateObject(classId);
+    else
+        return nullptr;
 }

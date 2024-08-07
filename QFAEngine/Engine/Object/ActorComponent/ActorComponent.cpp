@@ -2,7 +2,7 @@
 #include <Object/Actor/Actor.h>
 #include "ActorComponent.h"
 #include <iostream>
-QFAEngineClassOut(QActorComponent, QFAClass::ObjectClasses::ActorComponent);
+QFAEngineClassOut(QActorComponent);
 
 QActorComponent::QActorComponent()
 {

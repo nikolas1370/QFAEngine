@@ -36,6 +36,7 @@ ACameraEditor::ACameraEditor()
 
 ACameraEditor::~ACameraEditor()
 {
+	SeparateRootComponent();
 }
 
 void ACameraEditor::SetWindowForInput(QFAEngineWindow* window)

@@ -122,21 +122,21 @@ void QFAEditorGameViewportInfo::AddActor(QActor* actor, std::u32string actorName
 	ActorAndTextList.push_back(sActor);
 }
 
-void QFAEditorGameViewportInfo::PressedDelete()
+QActor* QFAEditorGameViewportInfo::PressedDelete()
 {
 	QFAUIParent* unit = ActorList->GetSelectedUnit();
 	if (!unit || !ActorList->GetFocus())
-		return;
+		return nullptr;
 
 	for (size_t i = 0; i < ActorAndTextList.size(); i++)
 	{
 		if (ActorAndTextList[i].text == unit)
 		{
 			ActorList->RemoveUnit(ActorAndTextList[i].text);
-			delete ActorAndTextList[i].actor;
-			delete ActorAndTextList[i].text;			
+			QActor* actor = ActorAndTextList[i].actor;
+			delete ActorAndTextList[i].text;
 			ActorAndTextList.erase(ActorAndTextList.begin() + i);
-			return;
+			return actor;
 		}
 	}
 }

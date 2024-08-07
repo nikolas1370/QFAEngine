@@ -5,7 +5,7 @@
 class QFALevel;
 class QFAEXPORT AStaticMeshActor : public QActor
 {
-	QFAEngineClassIn();
+	QFAEngineClassIn(AStaticMeshActor);
 	friend QFALevel;
 	friend QFAClass;
 protected:

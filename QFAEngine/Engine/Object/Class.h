@@ -1,8 +1,8 @@
 #pragma once
 /*
-    compile Class.cpp in editor or gamecode module
+    compile Class.cpp in gamecode module
     if not compile linker be mad
-    every module(engine, editor, game code) have own list of classes
+    engine and game module have own list of classes
 
     use ___QFAGAMECODEEXPORTFUNCTIONGETFUNCTIONS___ if wanna have access to game classes (LoadLibraryW >> GetProcAddress)
 */
@@ -19,11 +19,11 @@ class QActorComponent;
                               template<typename T>\
                               friend QObject* NewObject(); \
                               private:
-
+class QFAClass;
 // use in .cpp 
 #define QFAClassOut(className) QFAClassInfo<className> className::_QFAClassInfo;
 
-extern "C" __declspec(dllexport) void* ___QFAGAMECODEEXPORTFUNCTIONGETFUNCTIONS___();
+extern "C" __declspec(dllexport) void* ___QFAGAMECODEEXPORTFUNCTIONGETFUNCTIONS___(QFAClass** engineClasses);
 // free engine calsses before FreeLibrary
 extern "C" __declspec(dllexport) void ___QFAGAMECODEEXPORTFUNCTIONFreeClasses___();
 
@@ -39,15 +39,17 @@ delete all QFAClass(QCI) from this module if hotreload
 
 
 */
+class QFAGameCode;
 class QFAOverlord;
 /*
     only this class and child class can change some inside
 */
 class QFAClass
 {
-    friend void* ___QFAGAMECODEEXPORTFUNCTIONGETFUNCTIONS___();
+    friend void* ___QFAGAMECODEEXPORTFUNCTIONGETFUNCTIONS___(QFAClass** engineClasses);
     friend void ___QFAGAMECODEEXPORTFUNCTIONFreeClasses___();
     friend QFAOverlord;
+    friend QFAGameCode;
 public:
     enum ObjectClasses : int // if create new engine object class not forget add in ObjectClasses and QFAClass::InitClasses
     { // id is index in QCI
@@ -65,7 +67,12 @@ public:
         DirectionLight,
         MAX
     };
-
+    static bool ClassInit ;
+#if In_Game_Module
+    static const bool GameModuleClass = true;
+#else
+    static const bool GameModuleClass = false;
+#endif
 protected:
     const char* ClassName;
     const char* ClassRawName;
@@ -92,15 +99,15 @@ private:
 
 
 protected:
-    // not forget call it before use QFAClass (in engine,  editor and game)
-    static void InitClasses();
+    static void InitClasses(QFAClass** engineClasses = nullptr);
     virtual QObject* CreateObjectInside() { return nullptr; };
     static QObject* CreateObject(size_t classId);
     static QObject* CreateObjectByName(const char* className);
     static void DeleteObject(QObject* object);
     static std::vector<QFAClass*>& GetGameClassList();
+    QFAEXPORT static QFAClass** GetEngineClassList();// export for editor
     static std::vector<QFAClass*>& GetClassList();
-
+    
 
 #if QFA_EDITOR_ONLY
     static std::vector<QObject*>& GetListObject(size_t classId);
@@ -159,7 +166,7 @@ public:
 template<typename T>
 class QFAClassInfo : public QFAClass
 {
-    friend void QFAClass::InitClasses();
+    friend void QFAClass::InitClasses(QFAClass** );
 private:
 #if QFA_EDITOR_ONLY
     QObject* CreateObjectInside() override
@@ -172,6 +179,7 @@ private:
     requires std::is_abstract<T>::value// requires canot be virtual
     QObject* COI()  // if class abstract object not created
     {  
+        stopExecute("abstract can't be created");
         return nullptr;
     }
 
@@ -182,10 +190,10 @@ private:
         QObject* object = (T*)malloc(sizeof(T));
         
         new (object) T();
+#if QFA_EDITOR_ONLY
         SetCompileIndex(object, ObjectList.size());
         ObjectList.push_back(object);   
 
-#if QFA_EDITOR_ONLY
         object->CreateInApi = true;
 #endif
 
@@ -248,9 +256,8 @@ struct QFAEXPORT QFAGameCodeFunctions
 };
 
 // used only in engine
-#define QFAEngineClassIn() private: QFAClass::ObjectClasses GetEngineClassId() override; public: QFAClass* GetClass() override { return QFAClass::GetClass(GetEngineClassId()); } private:
+#define QFAEngineClassIn(className) private: friend QFAClass; static QFAClass* _QFAClassInfo; public: QFAClass* GetClass() override;  private:
   
 // used only in engine
-
-#define QFAEngineClassOut(className, EngineClassId) QFAClass::ObjectClasses className::GetEngineClassId() { return EngineClassId; }
+#define QFAEngineClassOut(className) QFAClass* className::_QFAClassInfo; QFAClass* className::GetClass()  { return className::_QFAClassInfo; }
 

@@ -10,7 +10,7 @@ class QFAEngineWindow;
 class QFALevel;
 class QFAEXPORT QWorld : public QObject
 {
-	QFAEngineClassIn();
+	QFAEngineClassIn(QWorld);
 #if QFA_EDITOR_ONLY
 	friend QActor;// for QActor::ReplaceMe
 #endif 
