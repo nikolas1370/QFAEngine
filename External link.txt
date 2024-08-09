@@ -1,0 +1,5 @@
+https://vulkan.lunarg.com/
+https://www.glfw.org/download.html
+https://github.com/freetype/freetype
+https://github.com/nothings/stb
+https://icu.unicode.org/download

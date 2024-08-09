@@ -12,8 +12,6 @@ QObject::QObject()
 
 QObject::~QObject()
 {
-    std::cout << this << " QObject::~QObject()\n";
-
     Valid = 0;
 }
 

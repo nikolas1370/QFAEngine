@@ -102,13 +102,7 @@ StyleCopReport.xml
 *.spvf
 *.spvg
 *.spvc
-*.ttf
-*.qfa
 *.zip
-SomeImage/
-SomeModel/
-SomeFont/
-Content/
 RowCounter.exe
 External/
 # Chutzpah Test files

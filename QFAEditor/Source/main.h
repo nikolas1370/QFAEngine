@@ -89,9 +89,6 @@ public:
         viewport->ActivateCamera();
         Camera.SetLocalPosition(FVector(-200, 0, 0));
 
-        UIImage = new QFAUIImage(Image1 = QFAContentManager::GetImage(U"Content\\Jopa.qfa"));
-        //viewport->AddUnit(UIImage);
-         
         Input = new QFAUITextInput;
         Input->SetValue(U"some input text");
         viewport->AddUnit(Input);
@@ -105,7 +102,6 @@ public:
         
         QStaticMesh* mesh = NewObject<QStaticMesh>();
         mesh->SetMesh(QFAContentManager::GetMesh(U"Content\\Arrow.qfa"));
-        //mesh = new QStaticMesh(QFAContentManager::GetMesh(U"Content\\untitled.qfa"));
         if (!mesh)
             stopExecute("");
 

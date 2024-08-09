@@ -21,7 +21,7 @@ void QFAContentManager::LoadContent(std::u32string contentFolderPath, std::funct
 		stopExecute("");
 
 	if (!std::filesystem::exists(contentFolderPath) || !std::filesystem::is_directory(contentFolderPath))
-		stopExecute("Content folder not exist or not folder");
+		std::filesystem::create_directories(contentFolderPath);
 
 	QFAContentFolder mainFolder;
 	Folders.push_back(mainFolder);		// zero id(index)
