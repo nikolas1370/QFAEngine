@@ -20,6 +20,7 @@ class QFAUIList;
 class QFAText;
 class QFAUIBackground;
 class QFAUITextInput;
+class QFAUIGrid;
 
 class QFAEXPORT QFAUIParent : public QFAUIUnit
 {
@@ -33,7 +34,7 @@ class QFAEXPORT QFAUIParent : public QFAUIUnit
 	friend QFAText;
 	friend QFAUIBackground;
 	friend QFAUITextInput;
-
+	friend QFAUIGrid;
 public:
 	enum EOverflow : unsigned char
 	{
@@ -57,7 +58,8 @@ protected:
 	QFAImage* Image = nullptr;;
 	QFAColorF BackgroundColor;
 
-	
+	// call if child delete 
+	virtual void ChildUnderDelete(QFAUIUnit* child) {}
 
 	EOverflow Overflow = EOverflow::Visible;
 

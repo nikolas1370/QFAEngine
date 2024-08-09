@@ -4,6 +4,7 @@
 #include <EngineStuff/Window/EngineViewport.h>
 #include <EngineStuff/Window/UIEvent.h>
 #include <Tools/String.h>
+#include <UI/UIParent.h>
 
 QFAUIUnit::~QFAUIUnit()
 {
@@ -16,6 +17,9 @@ QFAUIUnit::~QFAUIUnit()
 
     if (Events.Funs)
         delete Events.Funs;
+
+    if (Parent)
+        Parent->ChildUnderDelete(this);
 }
 
 bool QFAUIUnit::IsMyParent(QFAUIParent* parent)

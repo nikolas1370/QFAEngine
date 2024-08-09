@@ -10,22 +10,15 @@
 #include <EngineStuff/Pipline/Pipline.h>
 #include <EngineStuff/Buffer/IndexBuffer.h>
 #include <EngineStuff/Buffer/VertexBuffer.h>
-struct VertexMaterial// 
-{
-	FVector Position;
-	FVector Normal;
-	FVector Color = FVector(1, 1, 1);
-	float Specular = 0;
-};
 
-struct SSVertexMaterial // structure input vertex Shader 
+struct SSVertexMaterial // input vertex Shader 
 {
 	FVector Position;
 	FVector Normal;
 	int MaterialIndex = 0;
 };
 
-struct Material // struct in fragment shader
+struct Material // input in fragment shader
 {
 	FVector Color = FVector(1, 1, 1);
 	float Specular = 0;
@@ -44,7 +37,7 @@ class QFAEXPORT QFAMeshData
 	friend QFALevel;
 	struct SMeshInfo
 	{
-		size_t FrameSize;
+		//size_t FrameSize;  // VerticesSize
 		size_t VertexCount;
 		size_t VerticesSize;
 		size_t UniqueIndexCount;
@@ -130,17 +123,17 @@ protected:
 
 	inline void SetMaterial(Material material, int index)
 	{
-		((Material*)&FramesData[Mi.FrameSize + sizeof(unsigned int) * Mi.IndexCount])[index] = material;
+		((Material*)&FramesData[Mi.VerticesSize + sizeof(unsigned int) * Mi.IndexCount])[index] = material;
 	}
 
 	inline Material* GetDefaultMaterials() const
 	{
-		return (Material*)&FramesData[Mi.FrameSize + sizeof(unsigned int) * Mi.IndexCount];
+		return (Material*)&FramesData[Mi.VerticesSize + sizeof(unsigned int) * Mi.IndexCount];
 	}
 
 #if QFA_EDITOR_ONLY
 	/*
-		in end delete this
+		this be deleted, not forget change it in QFAContentFile.file to meshData
 
 		need in QFAContentManager::AddFile
 	*/
@@ -153,7 +146,7 @@ public:
 	SMeshInfo GetMeshInfo() const;
 	inline unsigned int* GetIndexData() const
 	{
-		return (unsigned int*)&FramesData[Mi.FrameSize ];
+		return (unsigned int*)&FramesData[Mi.VerticesSize];
 	}
 
 	inline Material GetDefaultMaterial(size_t index) const

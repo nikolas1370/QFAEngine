@@ -19,7 +19,9 @@ namespace QFAUIType
 		TextInput = 7,
 		List = 8,
 		CustomUnit = 9,
-		Background = 10
+		Background = 10,
+		SelectUnit = 11,
+		Max
 	};
 }
 
@@ -31,6 +33,7 @@ namespace QFAEditorUIType
 		FileExplorer = 1,
 		ExplorerFolderUnit = 2,
 		FileViewUnit = 3,
+		Max
 	};
 }
 

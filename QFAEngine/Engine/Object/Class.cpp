@@ -73,10 +73,11 @@ void QFAClass::DeleteObject(QObject* object)
 
     size_t index = qClass->GetCompileIndex(object);
     object->~QObject();
-    free(object);
     qClass->ObjectList[index] = qClass->ObjectList.back();
     qClass->SetCompileIndex(qClass->ObjectList[index], index);
     qClass->ObjectList.pop_back();
+
+    free(object);
 
 #else    
 

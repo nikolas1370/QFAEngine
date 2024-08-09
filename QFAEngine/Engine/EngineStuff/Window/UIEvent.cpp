@@ -107,6 +107,9 @@ QFAUIEvent::QFAUIEvent(QFAEngineWindow* window, GLFWwindow* _glfWindow)
 QFAUIEvent::~QFAUIEvent()
 {
 	delete Input;
+	auto ite = std::find(Events.begin(), Events.end(), this);
+	if(ite != Events.end())
+		Events.erase(ite);
 }
 
 void QFAUIEvent::AddUnitToSortList(QFAUIUnit* unit)

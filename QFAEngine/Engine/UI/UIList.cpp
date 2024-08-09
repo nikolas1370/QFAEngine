@@ -12,6 +12,7 @@ QFAUIList::~QFAUIList()
 
 }
 
+
 void QFAUIList::WidthChanged(int oldValue)
 {
 	CalculateChildren(ChildCalculateType::EWidth);

@@ -39,7 +39,7 @@ protected:
 
 	float UpdateInnerHeight() override;
 	float UpdateInnerWidth() override;
-	
+
 	// if true last unit be have height or width like free space in list
 
 public:

@@ -3,30 +3,34 @@
 #include <Overlord/Time.h>
 #include <Tools/String.h>
 
-std::vector<QFAUISelectUnit*> QFAUISelectUnit::SelectUnitList;
-
-float QFAUISelectUnit::UpdateInnerHeight()
-{
-	std::cout << "UpdateInnerHeight\n";
-	return Height;
-}
-
-float QFAUISelectUnit::UpdateInnerWidth()
-{
-	return Width;
-}
-
-
 QFAUISelectUnit::QFAUISelectUnit()
 {
+	Type = QFAUIType::SelectUnit;
 	SelectUnitList.push_back(this);
 }
 
 QFAUISelectUnit::~QFAUISelectUnit()
 {
 	for (size_t i = 0; i < SelectUnitList.size(); i++)
+	{
 		if (SelectUnitList[i] == this)
+		{
 			SelectUnitList.erase(SelectUnitList.begin() + i);
+			break;
+		}
+	}
+}
+
+std::vector<QFAUISelectUnit*> QFAUISelectUnit::SelectUnitList;
+
+float QFAUISelectUnit::UpdateInnerHeight()
+{
+	return Height;
+}
+
+float QFAUISelectUnit::UpdateInnerWidth()
+{
+	return Width;
 }
 
 void QFAUISelectUnit::WidthChanged(int oldValue)
@@ -212,6 +216,12 @@ void QFAUISelectUnit::SetLeftMouseDown()
 			parent = parent->GetParent();
 		}
 	});	
+}
+
+void QFAUISelectUnit::ChildUnderDelete(QFAUIUnit* child)
+{
+	if (FocusUnit == child)
+		FocusUnit = nullptr;
 }
 
 void QFAUISelectUnit::WindowLeftMouseDown(QFAEngineWindow* window, QFAUIUnit* unitUnderFocus)

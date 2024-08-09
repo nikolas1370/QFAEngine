@@ -78,7 +78,7 @@ QFAContentManager::QFAContentFile QFAContentManager::WriteMesh(std::u32string fi
 	QFAFileSystem::OpenFile(filePath, &writeFile, false);
 	QFAFileSystem::AppendFile(&writeFile, &mi, sizeof(mi));
 
-	QFAFileSystem::AppendFile(&writeFile, mesh->GetFrameData(), mi.AmountData);
+	QFAFileSystem::AppendFile(&writeFile, mesh->GetFrameData(), mi.AmountData); 
 	QFAFileSystem::CloseFile(&writeFile);
 
 	cf.fileType = QFAFileTypes::EFTMesh;
@@ -247,8 +247,8 @@ void QFAContentManager::AddFile(size_t folderId, std::u32string filePath, QFAFil
 					break;
 				case QFAContentManager::EFTMesh:
 					((QFAMeshData*)confile.file)->UpdateMeshData((QFAMeshData*)file);
-					((QFAMeshData*)confile.file)->FIleid = confile.Id;
 					confile.file = file;
+					((QFAMeshData*)confile.file)->FIleid = confile.Id;
 					break;
 				case QFAContentManager::EFTImage:
 					((QFAImage*)confile.file)->UpdateImage((QFAImage*)file);

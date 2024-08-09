@@ -9,6 +9,7 @@ class QFAUIEvent;
 class QFAEXPORT QFAUISelectUnit abstract : public QFAParentHiddenChild
 {
 	friend QFAUIEvent;
+	friend QFAUIParent;
 
 	QFAUIScroll Scroll;
 	struct SelectUnitEvent
@@ -45,8 +46,11 @@ private:
 	void SetOutFocus();
 	void SetLeftMouseDown();
 
+	
 
 protected:
+	
+	void ChildUnderDelete(QFAUIUnit* child) override;
 
 	void SetScrollChild(QFAUIParentMultipleUnit* child);
 
@@ -74,6 +78,8 @@ public:
 	inline void RemoveUnit(QFAUIParent* unit)
 	{
 		SelectUnitChild->removeUnit(unit);
+		if (SelectedUnit == unit)
+			SelectedUnit = nullptr;
 	}
 
 	inline void RemoveAllUnit()
@@ -183,18 +189,3 @@ public:
 private:
 
 };
-
-
-
-/*
-* in void QFAEditorMainWindow::PrepareCallback()
-*
-	/*
-
-					remove in SelectUnit
-
-	
-		*/
-
-
-

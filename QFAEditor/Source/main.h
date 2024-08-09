@@ -129,6 +129,7 @@ public:
     ~QTest_ActorMinusOne()
     {
         delete UIImage;
+        mesh->Destroy();
         std::cout << "~QTest_ActorMinusOne "<< "\n";
     }
 

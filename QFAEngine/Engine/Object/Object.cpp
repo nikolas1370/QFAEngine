@@ -12,6 +12,8 @@ QObject::QObject()
 
 QObject::~QObject()
 {
+    std::cout << this << " QObject::~QObject()\n";
+
     Valid = 0;
 }
 
@@ -26,6 +28,7 @@ void QObject::Destroy()
 {
     if (!IsValid())
         return;
+
 #if QFA_EDITOR_ONLY
     if (CreateInApi)
         QFAEngineGameCode::GetAPI()->DeleteObject(this);

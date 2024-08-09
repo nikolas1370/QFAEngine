@@ -61,11 +61,10 @@ protected:
 	void HeightChanged(int oldValue = 0) override;
 	void TopChanged(int oldValue = 0) override;
 	void LeftChanged(int oldValue = 0) override;
-
 public:
 
 	 QFAUIGrid();
-	 ~QFAUIGrid() {};
+	 ~QFAUIGrid();
 
 
 	void SetColumnCount(unsigned int columnCount);

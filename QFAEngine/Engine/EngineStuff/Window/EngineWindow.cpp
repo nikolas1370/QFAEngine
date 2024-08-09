@@ -807,12 +807,13 @@ void QFAEngineWindow::PresentWindows()
 	
 	QueueSubmitPresent(finishSmiList); // submit all drawcall swapchain buffers
 	
+	int finishSmiIndex = 0;
 	for (size_t i = 0; i < Windows.size(); i++)
 	{
 		if (Windows[i]->minimized || !Windows[i]->RegularWindow)
 			continue;
 
-		Windows[i]->PresentFrame(finishSmiList[i]);
+		Windows[i]->PresentFrame(finishSmiList[finishSmiIndex++]);
 	}
 }
 
@@ -836,7 +837,7 @@ void QFAEngineWindow::ProcessUIEvent()
 
 			continue;
 		}
-	
+
 		if (Windows[i]->minimized)
 			continue;
 

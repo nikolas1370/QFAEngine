@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "UIParent.h"
+#include "SelectUnit.h"
 
 QFAUIParent::QFAUIParent()
 {
@@ -9,6 +10,9 @@ QFAUIParent::QFAUIParent()
 
 QFAUIParent::~QFAUIParent()
 {
+	if (Parent)
+		Parent->ChildUnderDelete(this);
+
 	BackgroundImage.Parent = nullptr;
 }
 

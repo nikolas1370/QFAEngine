@@ -6,6 +6,11 @@ QFAUIGrid::QFAUIGrid()
 	Type = QFAUIType::Grid;
 }
 
+QFAUIGrid::~QFAUIGrid()
+{
+
+}
+
 void QFAUIGrid::WidthChanged(int oldValue)
 {
 	ProcessChildPosition(ChildProcessType::EWidth);

@@ -44,6 +44,7 @@ class QFAGameCode : public QFAEngineGameCode
 	static const wchar_t* HotFolder_2Path;
 
 	static void* GameCodeModule;// GameCodeModule is HMODULE, don't wanna include windows.h
+	static QFAGameCodeFunctions* OldApi;
 	static void* OldGameCodeModule;	
 	static bool CompileInWork;
 

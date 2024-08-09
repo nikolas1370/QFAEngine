@@ -39,10 +39,8 @@ QFAMeshData::QFAMeshData(int vertexCount, int indexCount, int materialCount, int
 	Mi.MaterialCount = materialCount;
 	Mi.IndexCount = indexCount;
 	Mi.VertexCount = vertexCount;
-	Mi.VerticesSize = sizeof(VertexMaterial) * vertexCount;
-
-	Mi.FrameSize = sizeof(SSVertexMaterial) * vertexCount;
-	Mi.AmountData = Mi.FrameSize + (sizeof(unsigned int) * Mi.IndexCount) + (sizeof(Material) * materialCount);
+	Mi.VerticesSize = sizeof(SSVertexMaterial) * vertexCount;
+	Mi.AmountData = Mi.VerticesSize + (sizeof(unsigned int) * Mi.IndexCount) + (sizeof(Material) * materialCount);
 	FramesData = (char*)malloc(Mi.AmountData);
 }
 
@@ -50,7 +48,7 @@ QFAMeshData::QFAMeshData(SMeshInfo* mi, void* framesData, QFAFile* file)
 {
 	FramesData = (char*)framesData;
 	Mi = *mi;
-	QFile = file;
+	QFile = file; 
 }
 
 void QFAMeshData::CreateVertextIndexBuffer()

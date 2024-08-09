@@ -42,7 +42,7 @@ QFAVKBuffer::QFAVKBuffer(VkDeviceSize size, const void* data, bool inHost, VkBuf
         return;
  
     memcpy(MapData, data, static_cast<size_t>(size));
-}
+ }
 
 void QFAVKBuffer::CreateBufferInside(VkDeviceSize size, VkBufferUsageFlags usage)
 {// https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/usage_patterns.html
