@@ -27,18 +27,17 @@ QWorld* QFAEngineViewport::GetWorld()
 		return nullptr;
 }
 
-FVector2D QFAEngineViewport::GetPosition()
+FVector2D QFAEngineViewport::GetPositionRelativeRegularWindow()
 {
 #if QFA_EDITOR_ONLY
 	if (Window->RegularWindow)
-		return FVector2D(X , Y );
+		return FVector2D(X, Y);
 	else
 		return FVector2D(X + Window->Holder->X, Y + Window->Holder->Y);
 #else
-	return FVector2D(X , Y );
+	return FVector2D(X, Y);
 #endif
 }
-
 
 void QFAEngineViewport::WindowAddMe(QFAWindow* window)
 {
@@ -62,6 +61,8 @@ QFAEngineViewport::~QFAEngineViewport()
 {
 	 
 }
+
+
 
 inline void QFAEngineViewport::ActivateCamera()
 {

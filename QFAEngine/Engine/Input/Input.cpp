@@ -153,7 +153,10 @@ void QFAInput::MouseMove_callback(GLFWwindow* window, float xoffset, float yoffs
 
 void QFAInput::WindowCreated(QFAEngineWindow* window)
 {	
-	WindowList.push_back(window );
+	WindowList.push_back(window);
+	if (!window->RegularWindow) // return if not regular window
+		return;
+
 	glfwSetKeyCallback(window->glfWindow, [](GLFWwindow* _window, int key, int scancode, int action, int mods)
 		{
 			QFAInput::ProcessKey(_window, key, scancode, action, mods);
@@ -173,7 +176,6 @@ void QFAInput::WindowCreated(QFAEngineWindow* window)
 		{
 			QFAInput::MouseMove_callback(_window, (float)xpos, (float)ypos);
 		});
-
 }
 
 void QFAInput::WindowClosed(QFAEngineWindow* window)

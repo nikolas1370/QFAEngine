@@ -54,8 +54,17 @@ QFAUIEvent::QFAUIEvent(QFAEngineWindow* window, GLFWwindow* _glfWindow)
 		});
 
 	
-
-	glfwSetCharCallback(glfWindow, QFAUIEvent::CharCallback);
+	if(glfWindow) // if parent window si regular window
+		glfwSetCharCallback(glfWindow, QFAUIEvent::CharCallback);
+	else if(window->ParentWindow)
+	{
+		window->ParentWindow->AddCharCallback(window, [this](GLFWwindow* window, unsigned int codepoint)
+		{
+			if (TextInput->IsValid())
+				TextInput->AddChar(codepoint); 
+		});
+	}
+	
 	Input->AddKeyPress(EKey::LEFT, "left", [this](EKey::Key key)
 		{
 			if (this->TextInput->IsValid())
@@ -166,11 +175,11 @@ void QFAUIEvent::SortUIs(QFAViewportRoot* root)
 	}
 }
 
-void QFAUIEvent::NewFrame(QFAViewportRoot* root, float mousePosX, float mousePosY, double delta)
+void QFAUIEvent::NewFrame(QFAViewportRoot* root, float mousePosX, float mousePosY, double delta, bool regularWindow)
 {			
 	QFAUIUnit* unitUnderFocus = nullptr;
 	QFAUIScroll* scrollUnit = nullptr;
-	FindUnitUnderFocus(root, unitUnderFocus, scrollUnit, mousePosX, mousePosY);
+	FindUnitUnderFocus(root, unitUnderFocus, scrollUnit, mousePosX, mousePosY, regularWindow);
 
 	ScrollEvent(root, scrollUnit, delta);
 	FocusEvent(unitUnderFocus);
@@ -180,10 +189,17 @@ void QFAUIEvent::NewFrame(QFAViewportRoot* root, float mousePosX, float mousePos
 		TextInput->NewFrame(delta);
 }
 
-void QFAUIEvent::FindUnitUnderFocus(QFAViewportRoot* root, QFAUIUnit*& unitUnderFocus, QFAUIScroll*& scrollUnit, float mousePosX, float mousePosY)
+void QFAUIEvent::FindUnitUnderFocus(QFAViewportRoot* root, QFAUIUnit*& unitUnderFocus, QFAUIScroll*& scrollUnit, float mousePosX, float mousePosY, bool regularWindow)
 {
 	if (root)
 	{
+
+		//regularWindow not forget
+
+
+
+
+
 		SortUIs(root);
 		for (int i = SortUIUnits.Length() - 1; i >= 0 ; i--)
 		{
@@ -375,7 +391,7 @@ void QFAUIEvent::InputFocusEvent(QFAUIUnit* newUnitUnderFocus)
 	if (LeftMouseDown)
 	{
 		double x, y;
-		glfwGetCursorPos(glfWindow, &x, &y);
+		Window->GetMousePosition(x, y);
 		QFAUITextInput* oldInput = TextInput;
 		if (newUnitUnderFocus && newUnitUnderFocus->Type == QFAUIType::TextInput)
 		{			
@@ -394,10 +410,14 @@ void QFAUIEvent::CharCallback(GLFWwindow* window, unsigned int codepoint)
 {
 	for (size_t i = 0; i < Events.size(); i++)
 	{
-		if (Events[i]->glfWindow == window)
+		if (Events[i]->glfWindow == window && Events[i]->Window->RegularWindow)
 		{
 			if (Events[i]->TextInput->IsValid())
 				Events[i]->TextInput->AddChar(codepoint);
+
+			for (size_t j = 0; j < Events[i]->Window->WindowChildCallback.size(); j++)
+				if (Events[i]->Window->WindowChildCallback[j].callback)
+					Events[i]->Window->WindowChildCallback[j].callback(window, codepoint);
 
 			return;
 		}

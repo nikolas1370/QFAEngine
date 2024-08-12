@@ -230,7 +230,7 @@ void QFAEditorMainWindow::CreateInput()
 			double x, y;
 			if (Window->GetMousePosition(x, y))
 			{
-				FVector2D pos = GameViewport->GetPosition();
+				FVector2D pos = GameViewport->GetPositionRelativeRegularWindow();
 				FVector2D size = GameViewport->GetSize();
 				if (x >= pos.X && y >= pos.Y &&
 					x <= pos.X + size.X && y <= pos.Y + size.Y)

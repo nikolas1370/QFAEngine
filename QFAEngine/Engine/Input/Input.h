@@ -151,6 +151,7 @@ class QFAInputAxis1D;
 class QFAInputAxis2D;
 class QFAInputAxis3D;
 class QFAEngineWindow;
+class QFAUIEvent;
 /*
 	Event process before Tick
 */
@@ -319,15 +320,18 @@ class QFAEXPORT QFAInput
 	static void AddKeyToAxis3D(QFAInput* input, std::string axisId, EKey::Key key, FVector axisValue, std::string keyId);
 	static void RemoveKeyFromAxis3D(QFAInput* input, std::string axisId, std::string keyId);
 
+
 public:
 	/*
 		input attach to main window
 	*/
 	QFAInput();
+
 	/*
-		input attach to *window
+		input attach to *window (not use in game code)
 	*/
 	QFAInput(QFAEngineWindow* window);
+
 	~QFAInput();
 
 	void ChangeWindow(QFAEngineWindow* window);

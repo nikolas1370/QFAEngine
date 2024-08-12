@@ -117,7 +117,6 @@ void QFAOverlord::MainLoop()
     static double deltaAcum = 0;
     float timePassedAcum = 0;
 
-    //while ( Life)
     while (true)
     {   
         if (FrameStarted)
@@ -142,7 +141,6 @@ void QFAOverlord::MainLoop()
         QTime::CalcDeltaTime();
         glfwPollEvents();
         
-
 
         QFAInput::NewFrame((float)QTime::GetDeltaTime());
         QFAEngineWindow::ProcessUIEvent();

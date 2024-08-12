@@ -59,6 +59,7 @@ class QFAEXPORT QFAEngineWindow
 	friend QFAMeshData;
 	friend QFAViewport;
 	friend QFAEngineViewport;
+	friend QFAUIEvent;
 
 	struct SViewportSemi
 	{
@@ -82,6 +83,14 @@ class QFAEXPORT QFAEngineWindow
 		VkCommandBuffer comandBuffer;
 		SViewportBuffers buffers;
 	};
+
+	struct CharCallback
+	{
+		QFAEngineWindow* ChileWindow;
+		// in QFAUIEvent::CharCallback call it
+		std::function<void(GLFWwindow*, unsigned int)> callback;
+	};
+
 	const float shadowResolution = 2000;
 
 	static std::vector<QFAEngineWindow*> Windows;
@@ -156,6 +165,8 @@ protected:
 	std::vector<QFAEngineViewport*> Viewports;
 	// if window inside viewportHolder valude be false
 	bool RegularWindow = true;
+	QFAEngineWindow* ParentWindow = nullptr; // if windw not regular this be not 
+	std::vector<CharCallback> WindowChildCallback; // list not regular window
 private:
 	static void QueueSubmitPresent(std::vector<VkSemaphore>& listSemi);
 	// call after QFAEngineWindow::CheckIfNeedResizeWindows
@@ -163,6 +174,7 @@ private:
 	static void PresentWindows();
 	// call Overloed
 	static void ProcessUIEvent();
+	void ProcessUIEventInside();
 	// use after all render and present done, every frame
 	static void CheckIfNeedResizeWindows();
 	// call Overlord
@@ -199,10 +211,17 @@ private:
 	void AddUnit(QFAUIUnit* unit);	
 	
 
+	void AddChildWindow(QFAEngineWindow* win);
+	void RemoveChildWindow(QFAEngineWindow* childWin);
+	void AddCharCallback(QFAEngineWindow* childWin, std::function<void (GLFWwindow*, unsigned int)> callback);
+	
 
 	QFAEngineWindow(int width, int height, std::string name, bool inCenter = false, bool decorated = true, std::function<void()> closedFun = nullptr);
 protected:
+	// if this not regular window
 	QFAEngineWindow();
+
+	void InitNotRegularWindow(QFAEngineWindow* parentWidow);
 	
 	virtual ~QFAEngineWindow();
 

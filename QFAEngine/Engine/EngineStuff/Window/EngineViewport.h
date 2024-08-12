@@ -26,7 +26,7 @@ class QFAEXPORT QFAEngineViewport
 	friend QFAViewportHolder;
 	friend QFAWindow;
 	friend QStaticMesh;
-
+	friend QFAViewportRoot;
 public:
 	static const float MinMaxZIndexUI;
 
@@ -61,7 +61,7 @@ private:
 
 protected:
 	int Width = 1, Height = 1; // not use directly call GetPosition
-	int X, Y;// not use directly call GetPosition
+	int X, Y;// not use directly call GetPositionRelativeRegularWindow 
 
 	QFAWindow* Window;
 #if QFA_EDITOR_ONLY
@@ -86,6 +86,11 @@ protected:
 	QFAEngineViewport();
 	~QFAEngineViewport();
 
+	/*
+	* Need for render
+		if viewport set in not real window this method get real position relative real window
+	*/
+	FVector2D GetPositionRelativeRegularWindow();
 public:
 	void ActivateCamera();
 	void DeactivateCamera();
@@ -104,7 +109,10 @@ public:
 	void SetLeft(const char* left);
 
 
-	FVector2D GetPosition();
+	inline FVector2D GetPosition()
+	{
+		return FVector2D(X, Y);
+	}
 
 	inline void AddUnit(QFAUIUnit* unit)
 	{

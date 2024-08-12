@@ -43,15 +43,15 @@ class QFAUIEvent
 	static void CharCallback(GLFWwindow* window, unsigned int codepoint);
 	// call if QFAUIUnit delete
 	static void UnitUnderDelete(QFAUIUnit* deadUnit);
-
+	// if _glfWindow == null this set in not regular window
 	QFAUIEvent(QFAEngineWindow* window, GLFWwindow* _glfWindow);
 	~QFAUIEvent();
 	void AddUnitToSortList(QFAUIUnit* unit);
 	void SortUIs(QFAViewportRoot* root);
 
-	void NewFrame(QFAViewportRoot* root, float mousePosX, float mousePosY, double delta);
+	void NewFrame(QFAViewportRoot* root, float mousePosX, float mousePosY, double delta, bool regularWindow);
 
-	void FindUnitUnderFocus(QFAViewportRoot* root, QFAUIUnit*& unitUnderFocus, QFAUIScroll*& scrollUnit, float mousePosX, float mousePosY);
+	void FindUnitUnderFocus(QFAViewportRoot* root, QFAUIUnit*& unitUnderFocus, QFAUIScroll*& scrollUnit, float mousePosX, float mousePosY, bool regularWindow);
 
 	void ScrollEvent(QFAViewportRoot* root, QFAUIScroll* scrollUnit, double delta);
 	void FocusEvent(QFAUIUnit* unitUnderFocus);	

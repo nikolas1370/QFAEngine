@@ -71,9 +71,6 @@ class QTest_ActorMinusOne : public QActor
     QFAClassIn(QTest_ActorMinusOne);
     static bool Red;
 private:
-    QFAUIImage* UIImage;
-    QFAImage* Image1;
-    QFAImage* Image2;
 
     const float Time = 5.0f;
     float SumTime = 0.0f;
@@ -92,9 +89,24 @@ public:
         Input = new QFAUITextInput;
         Input->SetValue(U"some input text");
         viewport->AddUnit(Input);
-        Input->SetTop("0");
-        Input->SetLeft("0");
+        Input->SetTop("15");
+        Input->SetLeft("10");
         Input->SetBackgroundColor(QFAColor(255,0,0));
+
+        Input->Events.SetOutFocus([this]()
+            {
+                std::cout << "out\n";
+            });
+
+        Input->Events.SetInFocus([this](QFAUIUnit* unit)
+            {
+                std::cout << "in\n";
+            });
+
+        Input->Events.SetLeftMouseDown([](QFAUIUnit* unit)
+            {
+                std::cout << "SetLeftMouseDown\n";
+            });
 
         SetTick(false);
         Camera.SetRotation(0);
@@ -119,12 +131,13 @@ public:
 
     void Tick(float tick)
     {
-        std::cout << "Game module actor tick time = " << tick << "\n";
+        double x, y;
+        bool inWidow = QFAWindow::GetWindow()->GetMousePosition(x, y);
+        std::cout << "Game module actor tick time = " << (inWidow ? "Mouse in window " : "Mouse out window ") << x << " " << y << "\n";
     }
 
     ~QTest_ActorMinusOne()
     {
-        delete UIImage;
         mesh->Destroy();
         std::cout << "~QTest_ActorMinusOne "<< "\n";
     }

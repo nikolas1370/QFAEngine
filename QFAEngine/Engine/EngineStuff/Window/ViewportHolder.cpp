@@ -4,6 +4,9 @@
 
 void QFAViewportHolder::Settup(int windowWidth, int windowHeight)
 {
+	HoldedWindow.InitNotRegularWindow(Window);
+	HoldedWindowGame.InitNotRegularWindow(Window);
+
 	WindowWidth = windowWidth;
 	WindowHeight = windowHeight;
 	SettupInside(windowWidth, windowHeight);
@@ -23,7 +26,7 @@ void QFAViewportHolder::ChangeWindow()
 }
 
 QFAViewportHolder::QFAViewportHolder()
-{
+{	
 	RegularViewport = false;
 	HoldedWindow.Holder = this;
 	HoldedWindowGame.Holder = this;

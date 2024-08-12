@@ -197,10 +197,19 @@ QFAEngineWindow::QFAEngineWindow(int width, int height, std::string name, bool i
 	PickBuffer = new QFAVKBuffer(4, nullptr, true, VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 }
 
-
 QFAEngineWindow::QFAEngineWindow()
 {
 	Windows.push_back(this);
+
+}
+
+void QFAEngineWindow::InitNotRegularWindow(QFAEngineWindow* parentWidow)
+{	
+	ParentWindow = parentWidow;
+	ParentWindow->AddChildWindow(this);
+	QFAInput::WindowCreated(this);
+	glfWindow = parentWidow->glfWindow;// only for QFAInput
+	UIEvent = new QFAUIEvent(this, nullptr);
 }
 
 QFAEngineWindow::~QFAEngineWindow()
@@ -210,7 +219,11 @@ QFAEngineWindow::~QFAEngineWindow()
 
 	delete UIEvent;
 	QFAInput::WindowClosed(this);
-	glfwDestroyWindow(glfWindow);
+
+	if(RegularWindow)
+		glfwDestroyWindow(glfWindow);
+	else if (ParentWindow)
+		ParentWindow->RemoveChildWindow(this);	
 
 	if (ClosedFun)
 		ClosedFun();
@@ -257,7 +270,7 @@ void QFAEngineWindow::DrawUI(QFAEngineViewport* viewport, bool clear)
 
 
 	VkViewport vkViewport{};
-	FVector2D viewPos = viewport->GetPosition();
+	FVector2D viewPos = viewport->GetPositionRelativeRegularWindow();
 	vkViewport.x = viewPos.X;
 	vkViewport.y = viewPos.Y;
 	vkViewport.width = (float)viewport->Width;
@@ -354,6 +367,39 @@ void QFAEngineWindow::AddUnit(QFAUIUnit* unit)
 				AddUnit(parentMultiple->Children[i]);
 		}
 	}	
+}
+
+
+
+void QFAEngineWindow::AddChildWindow(QFAEngineWindow* win)
+{
+	WindowChildCallback.push_back({ win });
+}
+
+void QFAEngineWindow::RemoveChildWindow(QFAEngineWindow* childWin)
+{
+	for (size_t i = 0; i < WindowChildCallback.size(); i++)
+	{
+		if (WindowChildCallback[i].ChileWindow == childWin)
+		{
+			WindowChildCallback.erase(WindowChildCallback.begin() + i);
+			break;
+		}
+	}
+}
+
+void QFAEngineWindow::AddCharCallback(QFAEngineWindow* childWin, std::function<void(GLFWwindow*, unsigned int)> callback)
+{
+	for (size_t i = 0; i < WindowChildCallback.size(); i++)
+	{
+		if (WindowChildCallback[i].ChileWindow == childWin)
+		{
+			WindowChildCallback[i].callback = callback;
+			return;
+		}
+	}
+
+	stopExecute("before use this functin need add window by AddChildWindow ");
 }
 
 void QFAEngineWindow::ProcessGetMeshId()
@@ -503,8 +549,8 @@ void QFAEngineWindow::AddViewport(QFAViewport* viewport)
 {
 	viewport->Window = (QFAWindow*)this;
 	Viewports.push_back(viewport);
-	viewport->Settup(Width, Height);
 	viewport->WindowAddMe((QFAWindow*)this);
+	viewport->Settup(Width, Height);
 
 	int activeViewportCount = 0;
 	for (size_t i = 0; i < Windows.size(); i++)
@@ -544,43 +590,33 @@ bool QFAEngineWindow::GetMousePosition(double& x, double& y)
 	if (RegularWindow)
 	{
 #endif
-		if (CursorOnWindow)
-		{
-			glfwGetCursorPos(glfWindow, &x, &y);
-			if (x < 0 || y < 0)
-			{
-				x = 0;
-				y = 0;
-			}
-			else if (x >= Width || y >= Height)
-			{
-				x = Width - 1;
-				y = Height - 1;
-			}
-
-			return true;
-		}
-		else
-			return false;
+		glfwGetCursorPos(glfWindow, &x, &y);
+		return CursorOnWindow;
 #if QFA_EDITOR_ONLY
 	}
 	else
 	{
 		QFAWindow* win = (QFAWindow*)this;
-		double _x;
-		double _y;
-		if (!win->Holder->Window->GetMousePosition(_x, _y))
-			return false;
-
-		if (win->Holder->X <= _x && win->Holder->X + win->Holder->Width >= _x &&
-			win->Holder->Y <= _y && win->Holder->Y + win->Holder->Height >= _y)
+		if (!win->Holder->Window->GetMousePosition(x, y))
 		{
-			x = win->Holder->X - _x;
-			y = win->Holder->Y - _y;
+			x -= win->Holder->X;
+			y -= win->Holder->Y;
+			return false;
+		}
+
+		if (win->Holder->X <= x && win->Holder->X + win->Holder->Width >= x &&
+			win->Holder->Y <= y && win->Holder->Y + win->Holder->Height >= y)
+		{
+			x -= win->Holder->X;
+			y -= win->Holder->Y;
 			return true;
 		}
 		else
+		{
+			x -= win->Holder->X;
+			y -= win->Holder->Y;
 			return false;
+		}
 	}
 #endif
 }
@@ -821,48 +857,51 @@ void QFAEngineWindow::PresentWindows()
 void QFAEngineWindow::ProcessUIEvent()
 {	
 	for (size_t i = 0; i < Windows.size(); i++)
+		Windows[i]->ProcessUIEventInside();
+}
+
+void QFAEngineWindow::ProcessUIEventInside()
+{
+	if (!RegularWindow && !QFAEngineViewport::GetInGame())
+		return;
+
+	double x;
+	double y;
+	if (!GetMousePosition(x, y))
 	{
-		if (!Windows[i]->RegularWindow)
-			continue;
-
-		double x;
-		double y;
-		if (!Windows[i]->GetMousePosition(x, y))
-		{			
-			if (Windows[i]->UIEvent->FocusUnit)
-			{
-				Windows[i]->UIEvent->FocusUnit->NotifyOutFocus(false);
-				Windows[i]->UIEvent->FocusUnit = nullptr;
-			}
-
-			continue;
-		}
-
-		if (Windows[i]->minimized)
-			continue;
-
-		bool regularWindow;
-		if ((Windows[i]->UIEvent->FocusUnit && Windows[i]->UIEvent->FocusUnit->GetWindow() == Windows[i]) || !Windows[i]->UIEvent->FocusUnit) 
-			regularWindow = true;
-		else
-			regularWindow = false; // if window in FocusUnit not regular
-
-		// don't replase int because in "i" can be minus value 
-		for (int j = (int)Windows[i]->Viewports.size() - 1; j >= 0; j--)
+		if (UIEvent->FocusUnit)
 		{
-			FVector2D viewPos = Windows[i]->Viewports[j]->GetPosition();
-			float xEnd = (float)(viewPos.X + Windows[i]->Viewports[j]->Width);
-			float yEnd = (float)(viewPos.Y + Windows[i]->Viewports[j]->Height);
-			if (x >= viewPos.X && y >= viewPos.Y &&
-				x <= xEnd && y <= yEnd)
-			{
-				Windows[i]->UIEvent->NewFrame(&Windows[i]->Viewports[j]->Root, (float)x, (float)y, QTime::GetDeltaTime());
-				return;
-			}
+			UIEvent->FocusUnit->NotifyOutFocus(false);
+			UIEvent->FocusUnit = nullptr;
 		}
 
-		Windows[i]->UIEvent->NewFrame(nullptr, (float)x, (float)y, QTime::GetDeltaTime());
+		return;
 	}
+
+	if (minimized)
+		return;
+
+	bool regularWindow;
+	if ((UIEvent->FocusUnit && UIEvent->FocusUnit->GetWindow() == this) || !UIEvent->FocusUnit)
+		regularWindow = true;
+	else
+		regularWindow = false; // if window in FocusUnit not regular
+
+	// don't replase int because in "i" can be minus value 
+	for (int i = (int)Viewports.size() - 1; i >= 0; i--)
+	{
+		FVector2D viewPos = Viewports[i]->GetPosition();
+		float xEnd = (float)(viewPos.X + Viewports[i]->Width);
+		float yEnd = (float)(viewPos.Y + Viewports[i]->Height);
+		if (x >= viewPos.X && y >= viewPos.Y &&
+			x <= xEnd && y <= yEnd)
+		{
+			UIEvent->NewFrame(&Viewports[i]->Root, (float)x, (float)y, QTime::GetDeltaTime(), RegularWindow);
+			return;
+		}
+	}
+
+	UIEvent->NewFrame(nullptr, (float)x, (float)y, QTime::GetDeltaTime(), RegularWindow);
 }
 
 void QFAEngineWindow::CheckIfNeedResizeWindows()
@@ -955,7 +994,7 @@ void QFAEngineWindow::DrawActors(QFAEngineViewport* _viewport, bool clear)
 	vkCmdBindPipeline(CurentComandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, QMeshBaseComponent::Pipeline->GetPipeline());
 
 	VkViewport viewport{};
-	FVector2D viewPos = _viewport->GetPosition();
+	FVector2D viewPos = _viewport->GetPositionRelativeRegularWindow();
 	viewport.x = viewPos.X;
 	viewport.y = viewPos.Y;
 	viewport.width = (float)_viewport->Width;
