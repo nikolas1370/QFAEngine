@@ -131,7 +131,7 @@ QFALevel::QFALevel(std::u32string path)
 		QFAFileSystem::AppendFile(&file, Ss.GetStringInfoData(), StringInfosSize * sizeof(StringOffset));	
 		QFAFileSystem::AppendFile(&file, &StringInfosSize, sizeof(size_t));
 
-		QFAContentManager::QFAContentFolder& cf = QFAContentManager::GetFolder(U"Content");
+		QFAContentManager::QFAContentFolder& cf = QFAContentManager::GetFolder(std::filesystem::path(LevelPath).parent_path().u32string());
 		QFAContentManager::AddFile(cf.Id, LevelPath, QFAContentManager::QFAFileTypes::EFTLevel, this);
 
 		Ss.DeleteAll();

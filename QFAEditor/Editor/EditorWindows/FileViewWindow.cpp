@@ -20,13 +20,13 @@ QFAEditorFileViewWindow::QFAEditorFileViewWindow()
 		{
 			Closed = true;
 		});
-	DisplayImage = new QFAUIImage(nullptr, false);
-	Canvas = new QFAUICanvas;
-	TopListCanvas = new QFAUICanvas;
-	TopListScroll = new QFAUIScroll;
+	DisplayImage = NewUI<QFAUIImage>(nullptr, false);
+	Canvas = NewUI <QFAUICanvas>();
+	TopListCanvas = NewUI<QFAUICanvas>();
+	TopListScroll = NewUI<QFAUIScroll>();
 	TopListScroll->SetScrollType(QFAUIScroll::STHorizon);
 	TopListCanvas->AddUnit(TopListScroll);
-	TopList = new QFAUIList;	
+	TopList = NewUI<QFAUIList>();
 	TopListScroll->SetUnit(TopList);
 
 	TopList->SetListType(QFAUIList::EListType::LTHorizon);
@@ -60,16 +60,13 @@ QFAEditorFileViewWindow::QFAEditorFileViewWindow()
 
 QFAEditorFileViewWindow::~QFAEditorFileViewWindow()
 {
-
+	DisplayImage->Destroy();
+	Canvas->Destroy();
+	TopListCanvas->Destroy();
+	TopListScroll->Destroy();
+	TopList->Destroy();
 	/*
-	* 	QFAUICanvas* Canvas;
-	QFAUICanvas* TopListCanvas;
-
-	QFAUIList* TopList;
-	QFAUIScroll* TopListScroll;
-	* 
 		delete all Files
-	
 	*/
 }
 
@@ -106,7 +103,7 @@ void QFAEditorFileViewWindow::AddFile(size_t fileId)
 
 	if (Files.size() == CurentEnableFolderCount)
 	{
-		sfile.viewUnit = new QFAEditorUIFileViewUnit;
+		sfile.viewUnit = NewUI<QFAEditorUIFileViewUnit>();
 		sfile.viewUnit->SetZIndex(10);
 		Files.push_back(sfile);
 	}

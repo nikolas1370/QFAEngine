@@ -89,13 +89,13 @@ float QFAString::GetValue(const char* str, int percentValue, bool is_Size)
 
 	bool b = true;
 	for (int i = 0; i < ars.size() - 1; i++) // check if string have valide data
-	{
-		if (b)// i is value i+1 is Action
+	{ // 0 and even numbers is value, not even numbers is operation
+		if (b)
 		{
 			if (!(ars[i].Action == ValueAction::None && ars[i + 1].Action > ValueAction::None))
-				stopExecute("")
+				stopExecute("") // you can put wrong value like "100% -30" correct value be "100% - 30"
 		}
-		else// i is Action i+1 is value
+		else
 		{
 			if (!(ars[i].Action > ValueAction::None && ars[i + 1].Action == ValueAction::None))
 				stopExecute("")

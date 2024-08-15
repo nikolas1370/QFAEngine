@@ -58,7 +58,7 @@ void QFAInput::NewFrame(float delta)
 {
 	for (int i = 0; i < Inputs.size(); i++)
 	{
-		if (Inputs[i]->BlockInput || Inputs[i].Window->minimized)
+		if (Inputs[i]->BlockInput || Inputs[i].Window->minimized || Inputs[i].Window->ShouldClose())
 			continue;
 
 		for (int j = 0; j < Inputs[i]->KeyHoldList.size(); j++)

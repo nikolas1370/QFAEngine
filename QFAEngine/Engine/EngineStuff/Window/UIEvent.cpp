@@ -433,5 +433,20 @@ void QFAUIEvent::UnitUnderDelete(QFAUIUnit* deadUnit)
 			Events[i]->FocusUnit = nullptr;
 			return;
 		}
+		else if (Events[i]->LeftMouseUnit == deadUnit)
+		{
+			Events[i]->LeftMouseUnit = nullptr;
+			return;
+		}
+		else if (Events[i]->RightMouseUnit == deadUnit)
+		{
+			Events[i]->RightMouseUnit = nullptr;
+			return;
+		}
+		else if (Events[i]->TextInput == deadUnit)
+		{
+			Events[i]->TextInput = nullptr;
+			return;
+		}
 	}
 }

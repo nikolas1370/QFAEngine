@@ -1,10 +1,13 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "UIUnit.h"
 #include <UI/UIParentMultipleUnit.h>
 #include <EngineStuff/Window/EngineViewport.h>
 #include <EngineStuff/Window/UIEvent.h>
 #include <Tools/String.h>
 #include <UI/UIParent.h>
+std::vector<QFAUIUnit*> QFAUIUnit::ListNeedFree;
+std::vector<std::function<void(QFAUIUnit* unit)>> QFAUIUnit::EventWithParam;
+std::vector<std::function<void()>> QFAUIUnit::EventWithOutParam;
 
 QFAUIUnit::~QFAUIUnit()
 {
@@ -12,7 +15,6 @@ QFAUIUnit::~QFAUIUnit()
 	    if (Parent)
 		    Parent->RemoveUnitWithoutNotify(this);
 
-    UnitValid = false;
     QFAUIEvent::UnitUnderDelete(this);
 
     if (Events.Funs)
@@ -20,6 +22,18 @@ QFAUIUnit::~QFAUIUnit()
 
     if (Parent)
         Parent->ChildUnderDelete(this);
+}
+
+void QFAUIUnit::Destroy()
+{
+    if (IsValid())
+    {
+        if (CreateInHeap)
+            ListNeedFree.push_back(this);
+
+        this->~QFAUIUnit();
+        NeedFree = true;
+    }
 }
 
 bool QFAUIUnit::IsMyParent(QFAUIParent* parent)
@@ -71,6 +85,19 @@ QFAEngineWindow* QFAUIUnit::GetWindow()
         return nullptr;
 
     return viewport->GetWindow();
+}
+
+void QFAUIUnit::Init()
+{
+    ListNeedFree.reserve(100);
+}
+
+void QFAUIUnit::FreeUnits()
+{
+    for (size_t i = 0; i < ListNeedFree.size(); i++)
+        free(ListNeedFree[i]);
+
+    ListNeedFree.clear();
 }
 
 void QFAUIUnit::ProcessParentOverflow(UniformOverflow& param, QFAUIParent* parent)
@@ -132,25 +159,31 @@ float QFAUIUnit::ProcessParentOpacity(float childOpacity, QFAUIParent* parent)
 
 void QFAUIUnit::NotifyInFocus()
 {
+    EventWithParam.clear();
     QFAUIUnit* parent = this;
     while (true)
     {
         if (!parent)
-            return;
+            break;
 
         if (parent->Events.Funs && parent->Events.Funs->InFocus)
-            parent->Events.Funs->InFocus(this);
+            EventWithParam.push_back(parent->Events.Funs->InFocus);
 
         parent = parent->Parent;
     }
+
+    for (size_t i = 0; i < EventWithParam.size(); i++)
+        EventWithParam[i](this);
 }
 
 void QFAUIUnit::NotifyOutFocus(bool onlyOneUnit)
 {
+    EventWithOutParam.clear();
     if (onlyOneUnit)
     {
         if (this->Events.Funs &&  this->Events.Funs->OutFocus)
             this->Events.Funs->OutFocus();
+
         return;
     }
 
@@ -158,133 +191,168 @@ void QFAUIUnit::NotifyOutFocus(bool onlyOneUnit)
     while (true)
     {
         if (!parent)
-            return;
+            break;
 
         if (parent->Events.Funs && parent->Events.Funs->OutFocus)
-            parent->Events.Funs->OutFocus();
+            EventWithOutParam.push_back(parent->Events.Funs->OutFocus);
 
         parent = parent->Parent;
     }
+
+    for (size_t i = 0; i < EventWithOutParam.size(); i++)
+        EventWithOutParam[i]();
 }
 
 void QFAUIUnit::NotifyLeftMouseDown()
 {
+    EventWithParam.clear();
     QFAUIUnit* parent = this;
     while (true)
     {
         if (!parent)
-            return;
+            break;
 
         if (parent->Events.Funs && parent->Events.Funs->LeftMouseDown)
-            parent->Events.Funs->LeftMouseDown(this);
+            EventWithParam.push_back(parent->Events.Funs->LeftMouseDown);
 
         parent = parent->Parent;
     }
+
+    for (size_t i = 0; i < EventWithParam.size(); i++)
+        EventWithParam[i](this);
 }
 
 void QFAUIUnit::NotifyLeftMouseUp()
 {
+    EventWithParam.clear();
     QFAUIUnit* parent = this;
     while (true)
     {
         if (!parent)
-            return;
+            break;
 
         if (parent->Events.Funs && parent->Events.Funs->LeftMouseUp)
-            parent->Events.Funs->LeftMouseUp(this);
+            EventWithParam.push_back(parent->Events.Funs->LeftMouseUp);
 
         parent = parent->Parent;
     }
+
+    for (size_t i = 0; i < EventWithParam.size(); i++)
+        EventWithParam[i](this);
 }
 
 void QFAUIUnit::NotifyRightMouseDown()
 {
+    EventWithParam.clear();
     QFAUIUnit* parent = this;
     while (true)
     {
         if (!parent)
-            return;
+            break;
 
         if (parent->Events.Funs && parent->Events.Funs->RightMouseDown)
-            parent->Events.Funs->RightMouseDown(this);
+            EventWithParam.push_back(parent->Events.Funs->RightMouseDown);
 
         parent = parent->Parent;
     }
+
+    for (size_t i = 0; i < EventWithParam.size(); i++)
+        EventWithParam[i](this);
 }
 
 void QFAUIUnit::NotifyRightMouseUp()
 {
+    EventWithParam.clear();
     QFAUIUnit* parent = this;
     while (true)
     {
         if (!parent)
-            return;
+            break;
 
         if (parent->Events.Funs && parent->Events.Funs->RightMouseUp)
-            parent->Events.Funs->RightMouseUp(this);
+            EventWithParam.push_back(parent->Events.Funs->RightMouseUp);
 
         parent = parent->Parent;
     }
+
+    for (size_t i = 0; i < EventWithParam.size(); i++)
+        EventWithParam[i](this);
 }
 
 void QFAUIUnit::NotifyForwardMouseDown()
 {
+    EventWithParam.clear();
     QFAUIUnit* parent = this;
     while (true)
     {
         if (!parent)
-            return;
+            break;
 
         if (parent->Events.Funs && parent->Events.Funs->ForwardMouseDown)
-            parent->Events.Funs->ForwardMouseDown(this);
+            EventWithParam.push_back(parent->Events.Funs->ForwardMouseDown);
 
         parent = parent->Parent;
     }
+
+    for (size_t i = 0; i < EventWithParam.size(); i++)
+        EventWithParam[i](this);
 }
 
 void QFAUIUnit::NotifyBackwardMouseDown()
 {
+    EventWithParam.clear();
     QFAUIUnit* parent = this;
     while (true)
     {
         if (!parent)
-            return;
+            break;
 
-        if (parent->Events.Funs &&  parent->Events.Funs->BackwardMouseDown)
-            parent->Events.Funs->BackwardMouseDown(this);
+        if (parent->Events.Funs && parent->Events.Funs->BackwardMouseDown)
+            EventWithParam.push_back(parent->Events.Funs->BackwardMouseDown);
 
         parent = parent->Parent;
     }
+
+    for (size_t i = 0; i < EventWithParam.size(); i++)
+        EventWithParam[i](this);
 }
 
 void QFAUIUnit::NotifyLeftMouseDownUp()
 {
+    EventWithParam.clear();
     QFAUIUnit* parent = this;
     while (true)
     {
         if (!parent)
-            return;
+            break;
 
-        if (parent->Events.Funs &&  parent->Events.Funs->LeftMouseDownUp)
-            parent->Events.Funs->LeftMouseDownUp(this);
+        if (parent->Events.Funs && parent->Events.Funs->LeftMouseDownUp)
+            EventWithParam.push_back(parent->Events.Funs->LeftMouseDownUp);
 
         parent = parent->Parent;
     }
+
+    for (size_t i = 0; i < EventWithParam.size(); i++)
+        EventWithParam[i](this);
 }
 
 void QFAUIUnit::NotifyRightMouseDownUp()
 {
+    EventWithParam.clear(); 
     QFAUIUnit* parent = this;
     while (true)
     {
         if (!parent)
-            return;
+            break;
 
-        if (parent->Events.Funs &&  parent->Events.Funs->RightMouseDownUp)
-            parent->Events.Funs->RightMouseDownUp(this);
+        if (parent->Events.Funs && parent->Events.Funs->RightMouseDownUp)
+            EventWithParam.push_back(parent->Events.Funs->RightMouseDownUp);
 
         parent = parent->Parent;
     }
+
+    for (size_t i = 0; i < EventWithParam.size(); i++)
+        EventWithParam[i](this);
 }
 
 void QFAUIUnit::SetWidth(const char* width, bool parentSetWidthMinus)

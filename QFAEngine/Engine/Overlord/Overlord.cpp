@@ -61,10 +61,11 @@ bool QFAOverlord::Init(std::vector<QFAVKPipeline::SShaderData> shaderData, bool 
     FrameEnded = frameEnded;
 
     QTime::Init();    
+    QFAUIUnit::Init();
     QFAVKPipeline::SetShaderData(shaderData);
 
     if(createWindow)
-        new QFAEngineWindow(DefaultWidth, DefaultHeight, "QFA");
+        QFAEngineWindow::CreateEngineWindow(DefaultWidth, DefaultHeight, "QFAEditor");
 
     timecaps_tag ptc{};
     timeGetDevCaps(
@@ -120,36 +121,23 @@ void QFAOverlord::MainLoop()
     while (true)
     {   
         if (FrameStarted)
-            FrameStarted();
-
-        for (int i = QFAEngineWindow::Windows.size() - 1; i >= 0; i--)
-        {
-            if (QFAEngineWindow::Windows[i]->ShouldClose())
-            {
-                if (i == 0)
-                {
-                    QFAOverlord::EndLife();
-                    return;
-                }
-
-                delete QFAEngineWindow::Windows[i];
-                QFAEngineWindow::Windows.erase(QFAEngineWindow::Windows.begin() + i);
-            }
-        }
+            FrameStarted();       
    
         auto t = QTime::GetSystemTime();
         QTime::CalcDeltaTime();
         glfwPollEvents();
         
-
         QFAInput::NewFrame((float)QTime::GetDeltaTime());
         QFAEngineWindow::ProcessUIEvent();
-        QWorld::ProcessTicks();        
-
-
+        QWorld::ProcessTicks();
+        
         vkQueueWaitIdle(QFAVKLogicalDevice::GetGraphicsQueue());
+        if (CheckWindow()) // window and uiUnit need delete after all be rendered and processed
+            return;
+
+        QFAUIUnit::FreeUnits();
         QFAVKBuffer::ProcessTaskFromOtherThread();
-        QFAVKBuffer::DeleteNotNeedBuffer(); 
+        QFAVKBuffer::DeleteNotNeedBuffer();
         
         QFAEngineWindow::CheckIfNeedResizeWindows();
         QFAEngineWindow::ProcessGetMeshId();
@@ -175,6 +163,27 @@ void QFAOverlord::MainLoop()
         if (FpsLock && timePassed < FrameTime)
             QFASleep(FrameTime - timePassed);
     }
+}
+
+bool QFAOverlord::CheckWindow()
+{
+    for (int i = QFAEngineWindow::Windows.size() - 1; i >= 0; i--)
+    {
+        if (QFAEngineWindow::Windows[i]->ShouldClose())
+        {
+            if (i == 0)
+            {
+                QFAOverlord::EndLife();
+                return true;
+            }
+
+            QFAEngineWindow::Windows[i]->~QFAEngineWindow();
+            free(QFAEngineWindow::Windows[i]);
+            QFAEngineWindow::Windows.erase(QFAEngineWindow::Windows.begin() + i);
+        }
+    }
+
+    return false;
 }
 
 

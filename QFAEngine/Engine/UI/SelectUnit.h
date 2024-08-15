@@ -14,10 +14,10 @@ class QFAEXPORT QFAUISelectUnit abstract : public QFAParentHiddenChild
 	QFAUIScroll Scroll;
 	struct SelectUnitEvent
 	{
-		std::function<void(QFAUIParent* unit)> InFocus;
-		std::function<void()> OutFocus;
-		std::function<void(QFAUIParent* unitUnderCursore)> LeftMouseDown;
-		std::function<void(QFAUIParent* unitUnderCursore)> DobleClick; 
+		std::function<void(QFAUIParent* unit, void* extraData)> InFocus;
+		std::function<void(void* extraData)> OutFocus;
+		std::function<void(QFAUIParent* unitUnderCursore, void* extraData)> LeftMouseDown;
+		std::function<void(QFAUIParent* unitUnderCursore, void* extraData)> DobleClick;
 	};
 
 	static std::vector<QFAUISelectUnit*> SelectUnitList;
@@ -37,6 +37,7 @@ public:
 	QFAColor SelectColor = QFAColorF(0.5f, 0.5f, 0.5f, 1.0f);
 	QFAColor SelectLostFocusColor = QFAColorF(0.2f, 0.2f, 0.2f, 1.0f);
 
+	// user set it
 	SelectUnitEvent SelectEvent;
 
 private:
@@ -45,8 +46,6 @@ private:
 	void SetInFocus();
 	void SetOutFocus();
 	void SetLeftMouseDown();
-
-	
 
 protected:
 	
@@ -70,8 +69,9 @@ public:
 
 	~QFAUISelectUnit();
 
-	inline void AddUnit(QFAUIParent* unit)
+	inline void AddUnit(QFAUIParent* unit, void* extraData = nullptr)
 	{
+		unit->EngineData = extraData;
 		SelectUnitChild->AddUnit(unit);
 	}
 
@@ -82,9 +82,12 @@ public:
 			SelectedUnit = nullptr;
 	}
 
-	inline void RemoveAllUnit()
+	// delteUnits == false list of child unit clear, child units not delete
+	inline void RemoveAllUnit(bool delteUnits = false)
 	{
-		SelectUnitChild->removeAllUnit();
+		SelectUnitChild->removeAllUnit(delteUnits);
+		if (SelectedUnit)
+			SelectedUnit = nullptr;
 	}
 	
 	inline void SetScrollType(QFAUIScroll::EScrollTYpe type)

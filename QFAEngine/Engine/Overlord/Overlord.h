@@ -26,6 +26,7 @@ class QFAEXPORT QFAOverlord
 	static std::thread::id MainThreadId;
 
 	static void MainLoop();
+	static bool CheckWindow();
 public:
 	/*
 		start processing world 

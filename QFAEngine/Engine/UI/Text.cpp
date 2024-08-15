@@ -508,12 +508,6 @@ void QFAText::PrepareSymbolsToGpu()
     InnerWidth = maxRightSymbolPos - minLeftSymbolPos;
 }                
 
-
-void QFAText::Destroy()
-{
-    delete this;
-}
-
 void QFAText::SetText(std::u32string  text)
 {
     if (text.length() > CountGlyphInBuffer)

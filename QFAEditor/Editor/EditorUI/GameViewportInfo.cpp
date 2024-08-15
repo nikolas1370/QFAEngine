@@ -15,16 +15,16 @@
 
 QFAEditorGameViewportInfo::QFAEditorGameViewportInfo()
 {	
-	Canvas = new QFAUICanvas;
+	Canvas = NewUI<QFAUICanvas>();
 	AddHiddenChild(Canvas);
 
-	ActorList = new QFAUISelectList;
+	ActorList = NewUI<QFAUISelectList>();
 	ActorList->SetListType(QFAUIList::LTVertical);
 	ActorList->SetUnitHeight(25);
 	ActorList->FocusColor = InFocusUnitColor;
 	ActorList->SelectColor = SelectUnit;
 	ActorList->SelectLostFocusColor = SelectUnitNotFocus;
-	ActorList->SelectEvent.LeftMouseDown = [this](QFAUIParent* unit)
+	ActorList->SelectEvent.LeftMouseDown = [this](QFAUIParent* unit, void* extra)
 		{
 			if(!unit || unit == ActorList)
 			{
@@ -48,9 +48,9 @@ QFAEditorGameViewportInfo::QFAEditorGameViewportInfo()
 	ActorList->SetLeft("0");	
 	Canvas->AddUnit(ActorList);
 
-	ActorInfoList = new QFAUIList;
+	ActorInfoList = NewUI<QFAUIList>();
 	
-	ActorTransform = new QFAUIActorTransform;
+	ActorTransform = NewUI<QFAUIActorTransform>();
 	ActorInfoList->AddUnit(ActorTransform);
 	ActorInfoList->SetEnable(false);
 	
@@ -63,9 +63,9 @@ QFAEditorGameViewportInfo::QFAEditorGameViewportInfo()
 
 QFAEditorGameViewportInfo::~QFAEditorGameViewportInfo()
 {
-	delete Canvas;
-	delete ActorList;
-	delete ActorTransform;
+	Canvas->Destroy();
+	ActorList->Destroy();
+	ActorTransform->Destroy();
 }
 
 void QFAEditorGameViewportInfo::SelectActor(QActor* actor)
@@ -87,7 +87,7 @@ void QFAEditorGameViewportInfo::SelectActor(QActor* actor)
 
 void QFAEditorGameViewportInfo::AddActor(QActor* actor, std::u32string actorName, size_t id, bool isCppClass)
 {
-	QFATextBackground* text = new QFATextBackground;
+	QFATextBackground* text = NewUI<QFATextBackground>();
 	ActorList->AddUnit(text);
 	text->SetTextSize(20);
 
@@ -134,7 +134,7 @@ QActor* QFAEditorGameViewportInfo::PressedDelete()
 		{
 			ActorList->RemoveUnit(ActorAndTextList[i].text);
 			QActor* actor = ActorAndTextList[i].actor;
-			delete ActorAndTextList[i].text;
+			ActorAndTextList[i].text->Destroy();
 			ActorAndTextList.erase(ActorAndTextList.begin() + i);
 			return actor;
 		}

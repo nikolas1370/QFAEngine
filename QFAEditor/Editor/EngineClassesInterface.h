@@ -29,10 +29,12 @@ class QFAEditorMeshData : public QFAMeshData
 };
 
 class QFAEditorFileViewWindow;
+class QFAEditorOptionWindow;
 class QFAEditorWindow : public QFAWindow
 {
 	friend QFAEditorMainWindow;
 	friend QFAEditorFileViewWindow;
+	friend QFAEditorOptionWindow;
 };
 
 class QFAEditorViewportHolder : public QFAViewportHolder

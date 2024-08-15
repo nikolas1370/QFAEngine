@@ -34,7 +34,7 @@ private:
 	float  ValidFLoat = 0.0f;
 	int  ValidInt = 0;
 	ENumberType NumberType;
-
+	std::function<void()> TextChange;
 protected:
 	std::function<void(QFAUITextInput*)> OutFocusFun;
 	
@@ -95,4 +95,6 @@ public:
 	void SetValue(std::u32string value);
 
 	void SetOutFocusFun(std::function<void(QFAUITextInput*)> fun);
+	// if text was change fun be call
+	void SetTextChange(std::function<void()> fun);
 };

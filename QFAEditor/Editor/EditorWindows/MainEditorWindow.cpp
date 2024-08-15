@@ -44,14 +44,14 @@ QFAEditorMainWindow::QFAEditorMainWindow()
 
 QFAEditorMainWindow::~QFAEditorMainWindow()
 {
-	delete LoadCanvas;
-	delete Text;
-	delete LoadText;
+	LoadCanvas->Destroy();
+	Text->Destroy();
+	LoadText->Destroy();
 
 	if (WindowCanvas)
 	{
-		delete WindowCanvas;
-		delete FileExplorer;
+		WindowCanvas->Destroy();
+		FileExplorer->Destroy();
 		Worlds[0]->Destroy();
 		Worlds[1]->Destroy();
 	}
@@ -63,18 +63,18 @@ void QFAEditorMainWindow::CreateMainEdirorUI()
 	QFAEngineViewport* mainViewPort = Window->GetViewport(0);
 	mainViewPort->GetRoot()->removeAllUnit();
 
-	WindowCanvas = new QFAUICanvas;
+	WindowCanvas = NewUI<QFAUICanvas>();
 	WindowCanvas->SetWidth("100%");
 	WindowCanvas->SetHeight("100%");
 	mainViewPort->AddUnit(WindowCanvas);
 
-	TopInWindowCanvas = new QFAUICanvas;	
+	TopInWindowCanvas = NewUI<QFAUICanvas>();
 	WindowCanvas->AddUnit(TopInWindowCanvas);
 	TopInWindowCanvas->SetWidth("100%");
 	TopInWindowCanvas->SetHeight("30");
 	TopInWindowCanvas->SetBackgroundColor(QFAColor(36, 36, 36));
 
-	RunButton = new QFAText;
+	RunButton = NewUI<QFAText>();
 	TopInWindowCanvas->AddUnit(RunButton);
 	RunButton->SetTextSize(25);
 	RunButton->SetFont(QFAEditorMainWindow::GetIcomonFont());
@@ -83,13 +83,13 @@ void QFAEditorMainWindow::CreateMainEdirorUI()
 	RunButton->SetHeight("25");
 	SetRunButton();
 
-	FileExplorer = new QFAUIEditorFileExplorer(Window, QFAEditorMainWindow::StartDragAndDrop);	
+	FileExplorer = NewUI<QFAUIEditorFileExplorer>(Window, QFAEditorMainWindow::StartDragAndDrop);
 	FileExplorer->SetWidth("100%");
 	FileExplorer->SetHeight("30%");	
 	FileExplorer->SetTop("70%");
 	WindowCanvas->AddUnit(FileExplorer);
 	
-	GameViewportInfo = new QFAEditorGameViewportInfo;	
+	GameViewportInfo = NewUI<QFAEditorGameViewportInfo>();
 	GameViewportInfo->SetWidth("30%");
 	GameViewportInfo->SetHeight("70%");
 	GameViewportInfo->SetLeft("70%");
@@ -272,29 +272,25 @@ void QFAEditorMainWindow::CreateInput()
 
 	Input->AddKeyRelease(EKey::S, "s_release", [this](EKey::Key key)
 		{
-			if (LeftCTRLPress)
+			if (LeftCTRLPress && !OptionWindow)
 			{
-				if (!Level)
-					Level = new QFAEditorLevel(U"Content/Level.qfa");			
-
-				Level->SaveLevel(Worlds[0]);
-
-				/*--- next code for test ---*/
-				for (size_t i = 0; i < ((QEditorWorld*)Worlds[0])->Actors.Length(); i++)
-				{					
-					((QFAEditorActor*)((QEditorWorld*)Worlds[0])->Actors[i])->ActorWorld = nullptr;
-					QFAEngineGameCode::GetAPI()->DeleteObject(((QEditorWorld*)Worlds[0])->Actors[i]);
+				if (Level)
+				{
+					Level->SaveLevel(Worlds[0]);
+					return;
 				}
 
-				/*
-				
-				not forget change actor list when load level
-				
-				*/
-
-				Worlds[0]->DestroyWorld(false);					
-				Worlds[0] = Level->GetWorld();  
-				((QEditorWorld*)Worlds[0])->SetEditorActor(EditorCamera);
+				OptionWindow = new QFAEditorOptionWindow([this](std::u32string fileName)
+				{ // QFAEditorOptionWindow delete self not need delete here
+					Level = new QFAEditorLevel(fileName);
+					Level->SaveLevel(Worlds[0]);	
+					FileExplorer->UpdateFolderItemList();
+					OptionWindow = nullptr;
+				},
+				[this]()
+				{
+					OptionWindow = nullptr;
+				});
 			}
 		});
 }
@@ -375,12 +371,12 @@ void QFAEditorMainWindow::PickMesh(EKey::Key key)
 void QFAEditorMainWindow::CreateLoadUI()
 {
 	QFAEngineViewport* mainViewPort = ((QFAEditorWindow*)Window)->Viewports[0];
-	LoadCanvas = new QFAUICanvas;
-	TextList = new QFAUIList;
+	LoadCanvas = NewUI<QFAUICanvas>();
+	TextList = NewUI<QFAUIList>();
 	TextList->SetListType(QFAUIList::LTHorizonInner);
-	Text = new QFAText;
-	LoadText = new QFAText;
-	LoadText_2 = new QFAText;
+	Text = NewUI<QFAText>();
+	LoadText = NewUI<QFAText>();
+	LoadText_2 = NewUI<QFAText>();
 
 	LoadCanvas->AddUnit(TextList);
 	LoadCanvas->AddUnit(Text);

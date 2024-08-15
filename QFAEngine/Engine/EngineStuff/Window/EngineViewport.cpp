@@ -59,7 +59,7 @@ QFAEngineViewport::QFAEngineViewport()
 
 QFAEngineViewport::~QFAEngineViewport()
 {
-	 
+	Root.removeAllUnit(false);
 }
 
 

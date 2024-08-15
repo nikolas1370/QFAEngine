@@ -426,7 +426,6 @@ public:// std::u32string(&CppFileButtonIconCode, 1)
         return Color;
     }
 
-    void Destroy();
     void SetOverflowWrap(EOverflowWrap wrap);
     void SetTextAlign(ETextAlign aligh);
     bool SetFont(SFont* font);

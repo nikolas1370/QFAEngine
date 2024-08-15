@@ -61,13 +61,16 @@ class QFAEXPORT QFAEngineWindow
 	friend QFAEngineViewport;
 	friend QFAUIEvent;
 
+	static void* operator new[](size_t) = delete;
+	static void  operator delete  (void*) = delete;
+	static void  operator delete[](void*) = delete;
+
 	struct SViewportSemi
 	{
 		VkSemaphore Actor;
 		VkSemaphore ActorShadow;
 		VkSemaphore Ui;
 	};
-
 
 	struct SViewportBuffers
 	{   // this buffer attach to text/image pipline sets0 
@@ -94,7 +97,6 @@ class QFAEXPORT QFAEngineWindow
 	const float shadowResolution = 2000;
 
 	static std::vector<QFAEngineWindow*> Windows;
-
 
 	static QFAEngineWindow* CurentProcessWindow;
 	static QFAVKInstance* Instance;
@@ -180,11 +182,7 @@ private:
 	// call Overlord
 	static void RenderWindows();
 
-protected:
-	static QFAEngineWindow* CreateEngineWindow(int width, int height, std::string name, bool inCenter = false, bool decorated = true, std::function<void()> closedFun = nullptr)
-	{
-		return new QFAEngineWindow(width, height, name, inCenter, decorated, closedFun);
-	}
+
 
 private:
 	void StartFrame();
@@ -219,10 +217,12 @@ private:
 	QFAEngineWindow(int width, int height, std::string name, bool inCenter = false, bool decorated = true, std::function<void()> closedFun = nullptr);
 protected:
 	// if this not regular window
-	QFAEngineWindow();
+	QFAEngineWindow();	
+
+	void SetClosedFun(std::function<void()> fun);
 
 	void InitNotRegularWindow(QFAEngineWindow* parentWidow);
-	
+	// if need delete window use Close()
 	virtual ~QFAEngineWindow();
 
 	inline void SetDropFun(std::function<void(int path_count, const char* paths[])> fun)
@@ -238,6 +238,12 @@ protected:
 	
 public:
 
+	static QFAEngineWindow* CreateEngineWindow(const int width, const int height, const std::string name, const bool inCenter = false, const bool decorated = true, const std::function<void()> closedFun = nullptr)
+	{
+		QFAEngineWindow* win = (QFAEngineWindow*)malloc(sizeof(QFAEngineWindow));
+		return new (win) QFAEngineWindow(width, height, name, inCenter, decorated, closedFun);
+	}
+
 	void AddViewport(QFAViewport* viewport);
 	// can't delete last viewport
 	void RemoveViewport(QFAViewport* viewport);
@@ -247,7 +253,7 @@ public:
 		return Viewports.size();
 	}
 
-
+	// close and delete in next frame
 	inline void Close()
 	{
 		NeedClose = true;

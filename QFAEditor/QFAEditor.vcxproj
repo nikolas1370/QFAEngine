@@ -165,6 +165,7 @@
     <ClCompile Include="Editor\EditorUI\FileViewUnit.cpp" />
     <ClCompile Include="Editor\EditorUI\GameViewportInfo.cpp" />
     <ClCompile Include="Editor\EditorWindows\FileViewWindow.cpp" />
+    <ClCompile Include="Editor\EditorWindows\OptionWindow.cpp" />
     <ClCompile Include="Editor\GameCodeTool\GameCodeCompiler.cpp" />
     <ClCompile Include="Editor\epch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -177,6 +178,7 @@
     <ClInclude Include="Editor\Camera\CameraEditor.h" />
     <ClInclude Include="Editor\EditorFileStorage.h" />
     <ClInclude Include="Editor\EditorOverlord.h" />
+    <ClInclude Include="Editor\EditorWindows\OptionWindow.h" />
     <ClInclude Include="Editor\EngineClassesInterface.h" />
     <ClInclude Include="Editor\EditorUI\UIActorTransform.h" />
     <ClInclude Include="Editor\EditorUI\ExplorerFolderUnit.h" />

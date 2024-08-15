@@ -109,7 +109,7 @@ void QFAUISelectUnit::SetInFocus()
 		{
 			LastClickUnit = nullptr;
 			if (SelectEvent.InFocus)
-				SelectEvent.InFocus(this);
+				SelectEvent.InFocus(this, this->EngineData);
 
 			return;
 		}
@@ -129,7 +129,7 @@ void QFAUISelectUnit::SetInFocus()
 				}
 
 				if (SelectEvent.InFocus)
-					SelectEvent.InFocus((QFAUIParent*)parent);
+					SelectEvent.InFocus((QFAUIParent*)parent, parent->EngineData);
 
 				return;
 			}
@@ -143,14 +143,16 @@ void QFAUISelectUnit::SetOutFocus()
 {
 	Events.SetOutFocus([this]()
 	{
+		void* extraData = nullptr; 
 		if (FocusUnit)
 		{
+			extraData = FocusUnit->EngineData;
 			FocusUnit->SetBackgroundColor(QFAColor(0, 0, 0, 0));
 			FocusUnit = nullptr;
 		}
 
 		if (SelectEvent.OutFocus)
-			SelectEvent.OutFocus();
+			SelectEvent.OutFocus(extraData);
 	});
 }
 
@@ -169,7 +171,7 @@ void QFAUISelectUnit::SetLeftMouseDown()
 			}
 
 			if (SelectEvent.LeftMouseDown)
-				SelectEvent.LeftMouseDown(this);		
+				SelectEvent.LeftMouseDown(this, this->EngineData);
 			return;
 		}
 		
@@ -188,7 +190,7 @@ void QFAUISelectUnit::SetLeftMouseDown()
 				SelectedUnit = (QFAUIParent*)parent;
 				SelectedUnit->SetBackgroundColor(SelectColor);			
 				if (SelectEvent.LeftMouseDown)
-					SelectEvent.LeftMouseDown(SelectedUnit);
+					SelectEvent.LeftMouseDown(SelectedUnit, SelectedUnit->EngineData);
 
 				if (LastClickUnit)
 				{
@@ -196,7 +198,7 @@ void QFAUISelectUnit::SetLeftMouseDown()
 						SelectEvent.DobleClick && LastClickUnit == parent)
 					{
 						LastClickUnit = nullptr;
-						SelectEvent.DobleClick(SelectedUnit);
+						SelectEvent.DobleClick(SelectedUnit, SelectedUnit->EngineData);
 					}
 					else
 					{

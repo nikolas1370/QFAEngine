@@ -4,10 +4,12 @@
 class QFAEditorMainWindow;
 class QFAText;
 class QFAUIEditorFileExplorer;
+class QFAEditorOptionWindow;
 class QFAEditorExplorerFolderUnit : public QFAParentHiddenChild
 {
 	friend QFAEditorMainWindow;
 	friend QFAUIEditorFileExplorer;
+	friend QFAEditorOptionWindow;
 
 	static QFAImage* FolderImage;
 	static QFAImage* FileImage;

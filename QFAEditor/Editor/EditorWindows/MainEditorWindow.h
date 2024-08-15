@@ -5,6 +5,7 @@
 #include <Input/Input.h>
 #include <Object/World/World.h>
 #include <EngineClassesInterface.h>
+#include "OptionWindow.h"
 
 class QFAEngineWindow;
 class QFAUIEditorFileExplorer;
@@ -32,6 +33,7 @@ class QFAEditorMainWindow
 	static QFAEditorMainWindow* MainWindow;
 	static QFAText::SFont* Icomonfont;
 	
+	QFAEditorOptionWindow* OptionWindow = nullptr;
 
 	QFAEngineWindow* Window;
 	QFAEditorViewportHolder* GameViewport = nullptr;
@@ -46,9 +48,9 @@ class QFAEditorMainWindow
 	QFAText* RunButton = nullptr;
 
 	QFAUICanvas* WindowCanvas = nullptr;
-	QFAUIEditorFileExplorer* FileExplorer;
+	QFAUIEditorFileExplorer* FileExplorer = nullptr;
 
-	QFAEditorGameViewportInfo* GameViewportInfo;
+	QFAEditorGameViewportInfo* GameViewportInfo = nullptr;
 
 	static const char32_t StopSymbol = 59648;
 	static const char32_t PlaySymbol = 59649;

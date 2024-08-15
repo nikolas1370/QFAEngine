@@ -229,6 +229,11 @@ QFAEngineWindow::~QFAEngineWindow()
 		ClosedFun();
 }
 
+void QFAEngineWindow::SetClosedFun(std::function<void()> fun)
+{
+	ClosedFun = fun;
+}
+
 void QFAEngineWindow::createCommandBuffer()
 {
 	std::array<VkCommandBuffer,  1> comb;
@@ -368,8 +373,6 @@ void QFAEngineWindow::AddUnit(QFAUIUnit* unit)
 		}
 	}	
 }
-
-
 
 void QFAEngineWindow::AddChildWindow(QFAEngineWindow* win)
 {
@@ -857,7 +860,8 @@ void QFAEngineWindow::PresentWindows()
 void QFAEngineWindow::ProcessUIEvent()
 {	
 	for (size_t i = 0; i < Windows.size(); i++)
-		Windows[i]->ProcessUIEventInside();
+		if(!Windows[i]->ShouldClose())
+			Windows[i]->ProcessUIEventInside();
 }
 
 void QFAEngineWindow::ProcessUIEventInside()

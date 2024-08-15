@@ -13,7 +13,7 @@ QFAEditorExplorerFolderUnit::QFAEditorExplorerFolderUnit()
 {
 	Type = QFAUIType::CustomUnit;
 	EditorType = QFAEditorUIType::ExplorerFolderUnit;
-	Canvas = new QFAUICanvas;
+	Canvas = NewUI<QFAUICanvas>();
 	Canvas->SetOverflow(QFAUIParent::Hidden);
 	AddHiddenChild(Canvas);	
 
@@ -23,8 +23,8 @@ QFAEditorExplorerFolderUnit::QFAEditorExplorerFolderUnit()
 		FileImage = QFAEditorImage::CreateImage(U"SomeImage/file-text-icon-1360881626.png");
 	}
 
-	Icon = new QFAUIImage(nullptr);
-	UnitText = new QFAText;
+	Icon = NewUI<QFAUIImage>(nullptr);
+	UnitText = NewUI<QFAText>();
 	UnitText->SetTextSize(16);
 	UnitText->SetTextAlign(QFAText::TACenter);
 	UnitText->SetOverflowWrap(QFAText::OWWordBreak);
@@ -41,9 +41,10 @@ QFAEditorExplorerFolderUnit::QFAEditorExplorerFolderUnit()
 
 QFAEditorExplorerFolderUnit::~QFAEditorExplorerFolderUnit()
 {
+	UnitText->Destroy();
+	Icon->Destroy();
+	Canvas->Destroy();
 }
-
-
 
 void QFAEditorExplorerFolderUnit::MySlotChange(QFAUIUnit* unit)
 {

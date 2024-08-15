@@ -8,7 +8,7 @@ QFAEditorUIFileViewUnit::QFAEditorUIFileViewUnit()
 {
 	Type = QFAUIType::CustomUnit;
 	EditorType = QFAEditorUIType::FileViewUnit;
-	Text = new QFAText;
+	Text = NewUI<QFAText>();
 	Text->SetTextSize(20);
 	Text->SetOverflowWrap(QFAText::EOverflowWrap::OWNone);
 	AddHiddenChild(Text);	
@@ -17,7 +17,7 @@ QFAEditorUIFileViewUnit::QFAEditorUIFileViewUnit()
 
 QFAEditorUIFileViewUnit::~QFAEditorUIFileViewUnit()
 {
-	delete Text;
+	Text->Destroy();
 }
 
 void QFAEditorUIFileViewUnit::Enable(bool enable)

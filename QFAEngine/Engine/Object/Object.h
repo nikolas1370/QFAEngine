@@ -10,7 +10,7 @@ T* NewObject()
 	static_assert(std::is_base_of<QObject, T>::value, "class T must inherited from base QObject");	
 	T* t = (T*)malloc(sizeof(T));	
 	if (!t)
-		return nullptr;
+		stopExecute("cannot malloc");		
 
 	return new (t) T();
 }

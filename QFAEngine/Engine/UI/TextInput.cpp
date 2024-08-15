@@ -8,7 +8,7 @@ char QFAUITextInput::convertStr[21];
 QFAUITextInput::QFAUITextInput(ENumberType numberT)
 {
 	Type = QFAUIType::TextInput;
-	Text = new QFAText;	
+	Text = NewUI<QFAText>();
 
 	Text->Parent = this;
 	Text->Text.pen = 0;
@@ -29,6 +29,7 @@ QFAUITextInput::QFAUITextInput(ENumberType numberT)
 QFAUITextInput::~QFAUITextInput()
 {
 	Text->Parent = nullptr;
+	Text->Destroy();
 }
 
 
@@ -82,6 +83,11 @@ void QFAUITextInput::SetValue(std::u32string value)
 void QFAUITextInput::SetOutFocusFun(std::function<void(QFAUITextInput*)> fun)
 {
 	OutFocusFun = fun;
+}
+
+void QFAUITextInput::SetTextChange(std::function<void()> fun)
+{
+	TextChange = fun;
 }
 
 void QFAUITextInput::WidthChanged(int oldValue)
@@ -259,11 +265,10 @@ void QFAUITextInput::AddChar(unsigned int charCode)
 	Text->ProcessText(); // before UpdateUnitOffset need re proces text, otherwise GetPenPosition return error value
 	UpdateUnitOffset();
 		
-	
-
-
 	PenTime = MaxPenTime;
 	Text->Text.CanSeePen = true;
+	if (TextChange)
+		TextChange();
 }
 
 void QFAUITextInput::RemoveChar()
@@ -283,11 +288,12 @@ void QFAUITextInput::RemoveChar()
 		Text->CountSymbolForRender = 0;
 		Text->TextMetadata.Clear();
 	}
-
 	
 	UpdateUnitOffset(true);
 	PenTime = MaxPenTime;
 	Text->Text.CanSeePen = true;
+	if (TextChange)
+		TextChange();
 }
 
 void QFAUITextInput::PenLeft()

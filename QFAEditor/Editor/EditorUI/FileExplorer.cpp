@@ -42,18 +42,29 @@ QFAUIEditorFileExplorer::QFAUIEditorFileExplorer(QFAEngineWindow *window, std::f
 
 QFAUIEditorFileExplorer::~QFAUIEditorFileExplorer()
 {
+	FileExplorerTop->Destroy();
+	BackButton->Destroy();
+	ForwardButton->Destroy();
+	PathTextScroll->Destroy();
+	PathText->Destroy();
+	FileExplorerMiddle->Destroy();
+	SelectGrid->Destroy();
+	FileExplorerBottom->Destroy();
+	ExplorerButton->Destroy();
+	CppButton->Destroy();
+	CppCanvas->Destroy();
 }
 
 void QFAUIEditorFileExplorer::CreateTop()
 {
-	FileExplorerTop = new QFAUIList;
+	FileExplorerTop = NewUI<QFAUIList>();
 	FileExplorerTop->SetWidth("100%");
 	FileExplorerTop->SetHeight("25");
 	FileExplorerTop->SetListType(QFAUIList::LTHorizon);
 	FileExplorerTop->SetUnitWidth(25); 
 
-	BackButton = new QFAText;
-	ForwardButton = new QFAText;
+	BackButton = NewUI<QFAText>();
+	ForwardButton = NewUI<QFAText>();
 	BackButton->SetFont(QFAEditorMainWindow::GetIcomonFont());
 	ForwardButton->SetFont(QFAEditorMainWindow::GetIcomonFont());
 	ForwardButton->SetText(ForwardButtonIconCode);
@@ -66,12 +77,12 @@ void QFAUIEditorFileExplorer::CreateTop()
 	ForwardButton->SetTextColor(ButoonOffColor);
 	
 
-	PathTextScroll = new QFAUIScroll; 
+	PathTextScroll = NewUI<QFAUIScroll>();
 	PathTextScroll->SetWidth("100% - 50"); // 50 == FileExplorerTop->SetUnitWidth for SetUnitWidth + ForwardButton
 	PathTextScroll->SetHeight("100%");
 	PathTextScroll->SetScrollType(QFAUIScroll::STHorizon);
 
-	PathText = new QFAText;
+	PathText = NewUI<QFAText>();
 	PathTextScroll->SetUnit(PathText);
 	PathText->SetTextSize(18);	
 	PathText->SetOverflowWrap(QFAText::OWNone);
@@ -87,12 +98,12 @@ void QFAUIEditorFileExplorer::CreateTop()
 
 void QFAUIEditorFileExplorer::CreateMiddle()
 {
-	FileExplorerMiddle = new QFAUICanvas;
+	FileExplorerMiddle = NewUI<QFAUICanvas>();
 	FileExplorerMiddle->SetWidth("100%");
 	FileExplorerMiddle->SetHeight("100% - 30 - 30");// (30 top) - (30 bottom)
 	FileExplorerMiddle->SetTop("30");
 
-	SelectGrid = new QFAUISelectGrid;
+	SelectGrid = NewUI<QFAUISelectGrid>();
 
 	SelectGrid->SetScrollType(QFAUIScroll::STVertical);
 	SelectGrid->SetPositionType(QFAUIGrid::UPTAuto);
@@ -107,12 +118,12 @@ void QFAUIEditorFileExplorer::CreateMiddle()
 	SelectGrid->SetHeight("100%");
 	FileExplorerMiddle->AddUnit(SelectGrid);
 
-	SelectGrid->SelectEvent.LeftMouseDown = ([this](QFAUIParent* unit)
+	SelectGrid->SelectEvent.LeftMouseDown = ([this](QFAUIParent* unit, void* extra)
 		{
 			NotifyMainEditorWindowDrag((QFAEditorExplorerFolderUnit*)unit);
 		});
 
-	SelectGrid->SelectEvent.DobleClick = ([this](QFAUIParent* unit)
+	SelectGrid->SelectEvent.DobleClick = ([this](QFAUIParent* unit, void* extra)
 		{
 			for (size_t i = 0; i < FolderUnitList.size(); i++)
 			{
@@ -162,7 +173,7 @@ void QFAUIEditorFileExplorer::CreateMiddle()
 
 void QFAUIEditorFileExplorer::CreateBottom()
 {
-	FileExplorerBottom = new QFAUIList;
+	FileExplorerBottom = NewUI<QFAUIList>();
 	FileExplorerBottom->SetWidth("100%");
 	FileExplorerBottom->SetHeight("30");
 	FileExplorerBottom->SetTop("100% - 30");
@@ -170,8 +181,8 @@ void QFAUIEditorFileExplorer::CreateBottom()
 	FileExplorerBottom->SetListType(QFAUIList::LTHorizon);
 	FileExplorerBottom->SetUnitWidth(25);
 
-	ExplorerButton = new QFAText;	
-	CppButton = new QFAText;
+	ExplorerButton = NewUI<QFAText>();
+	CppButton = NewUI<QFAText>();
 	CppButton->SetLeft("20");
 	ExplorerButton->SetLeft("10");
 	ExplorerButton->SetFont(QFAEditorMainWindow::GetIcomonFont());
@@ -197,10 +208,10 @@ void QFAUIEditorFileExplorer::CreateBottom()
 
 void QFAUIEditorFileExplorer::CreateCppTop()
 {
-	CppCanvas = new QFAUICanvas;
+	CppCanvas = NewUI<QFAUICanvas>();
 	CppCanvas->SetWidth("100%");
 	CppCanvas->SetHeight("100% - 30"); // 30 FileExplorerBottom.height
-	CppItemList = new QFAUISelectGrid;
+	CppItemList = NewUI<QFAUISelectGrid>();
 
 	CppItemList->SetScrollType(QFAUIScroll::STVertical);
 	CppItemList->SetPositionType(QFAUIGrid::UPTAuto);
@@ -218,7 +229,7 @@ void QFAUIEditorFileExplorer::CreateCppTop()
 	CppCanvas->SetEnable(false);
 	AddHiddenChild(CppCanvas);
 
-	CppItemList->SelectEvent.LeftMouseDown = ([this](QFAUIParent* unit)
+	CppItemList->SelectEvent.LeftMouseDown = ([this](QFAUIParent* unit, void* extra)
 		{
 			NotifyMainEditorWindowDrag((QFAEditorExplorerFolderUnit*)unit);
 		});
@@ -233,7 +244,7 @@ void QFAUIEditorFileExplorer::UpdateFolderItemList()
 	for (size_t i = 0; i < folderContents.size(); i++)
 	{
 		if (folderUnitInUse == FolderUnitList.size())
-			FolderUnitList.push_back(new QFAEditorExplorerFolderUnit);
+			FolderUnitList.push_back(NewUI<QFAEditorExplorerFolderUnit>());
 
 		SelectGrid->AddUnit(FolderUnitList[folderUnitInUse]);
 		FolderUnitList[folderUnitInUse]->ChangeImage(folderContents[i].IsFolder);
@@ -254,7 +265,7 @@ void QFAUIEditorFileExplorer::UpdateCppItemList()
 	for (size_t i = 0; i < classList.size(); i++)
 	{
 		if (CppUnitInUse == CppUnitList.size())
-			CppUnitList.push_back(new QFAEditorExplorerFolderUnit);
+			CppUnitList.push_back(NewUI<QFAEditorExplorerFolderUnit>());
 		
 		CppItemList->AddUnit(CppUnitList[CppUnitInUse]);
 		CppUnitList[CppUnitInUse]->ChangeImage(false);

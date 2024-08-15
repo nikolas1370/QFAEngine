@@ -36,7 +36,7 @@ public:
 
 	void AddUnit(QFAUIUnit* unit);
 	void removeUnit(QFAUIUnit* unit);
-	void removeAllUnit();
+	void removeAllUnit(bool delteUnits = false);
 	inline size_t GetUnitCount()
 	{
 		return Children.Length();

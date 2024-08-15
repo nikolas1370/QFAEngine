@@ -37,6 +37,20 @@ namespace QFAEditorUIType
 	};
 }
 
+class QFAUIUnit;
+template<typename T>
+T* NewUI(auto... args)
+{
+	static_assert(std::is_base_of<QFAUIUnit, T>::value, "class T must inherited from base QFAUIUnit");
+	T* unit = (T*)malloc(sizeof(T));
+	if (!unit)
+		stopExecute("cannot malloc");
+
+	unit->CreateInHeap = true;
+	return new (unit) T(args...);
+}
+
+class QFAOverlord;
 class QFAEngineViewport;
 class QFAEngineWindow;
 class QFAUIParentMultipleUnit;
@@ -68,6 +82,13 @@ class QFAEXPORT QFAUIUnit
 	friend QFAUIParent;
 	friend QFAUIBackground;
 	friend QFAUISelectUnit;
+	friend QFAOverlord;
+	template<typename T>
+	friend T* NewUI(auto... args);
+
+	static void* operator new[](size_t) = delete;
+	static void  operator delete  (void*) = delete;
+	static void  operator delete[](void*) = delete;
 
 	struct EventFunctions
 	{		
@@ -82,7 +103,7 @@ class QFAEXPORT QFAUIUnit
 		std::function<void(QFAUIUnit* unit)> ForwardMouseDown;
 		std::function<void(QFAUIUnit* unit)> BackwardMouseDown;
 		bool InUse = false; // not need right now
-	};
+	};	
 
 protected:
 	struct UniformOverflow
@@ -152,11 +173,24 @@ public:
 		void SetRightMouseDownUp(std::function<void(QFAUIUnit* unit)> fun);
 	};
 
+	
+
 protected:
 	const char* StrTop = nullptr;
 	const char* StrLeft = nullptr;
 	const char* StrWidth = nullptr;
 	const char* StrHeight = nullptr;
+
+private:
+	static std::vector<QFAUIUnit*> ListNeedFree;
+	static std::vector<std::function<void(QFAUIUnit* unit)>> EventWithParam;
+	static std::vector<std::function<void()>> EventWithOutParam;
+
+	bool NeedFree = false; // if true before render this be free
+	bool CreateInHeap = false;
+
+protected:
+	void* EngineData = nullptr;
 
 	int Width = 300;
 	int Height = 120;
@@ -188,13 +222,18 @@ protected:
 	bool IsRoot = false;
 	bool IsEnable = true;
 	bool CanBeParent = false; // set it if unit parent class
-	bool UnitValid = true;
 	bool ParentSetWidthMinus, ParentSetHeightMinus; // set in SetWidth SetHeight	
 	bool CanRender = false;
 
 public:
 	std::string UnitName;
 	UnitEvents Events;
+	// if user wanna store some extra data
+	void* UserData = nullptr;
+
+private:
+	static void Init();
+	static void FreeUnits();
 
 protected:
 
@@ -231,10 +270,6 @@ protected:
 	void ProcessParentOverflow(UniformOverflow& param, QFAUIParent* parent);
 	float ProcessParentOpacity(float childOpacity, QFAUIParent* parent);
 
-
-
-
-protected:
 	/*
 						Notify this unit and all parents of infocus event
 							call FunInFocus
@@ -279,7 +314,7 @@ public:
 
 	bool IsValid()
 	{
-		return this && UnitValid;
+		return this && !NeedFree;
 	}
 
 	virtual ~QFAUIUnit();
@@ -316,14 +351,8 @@ public:
 		IsEnable = enable;
 	}
 
-	inline void Destroy()
-	{
-		if (IsValid())
-		{
-			UnitValid = false;
-			delete this;
-		}
-	}
+	virtual void Destroy() final;
+
 
 	inline void SetOpacity(float opacity)
 	{

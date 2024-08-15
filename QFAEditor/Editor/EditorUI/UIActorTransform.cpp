@@ -11,7 +11,7 @@ QFAUIActorTransform* QFAUIActorTransform::ActorTransform;
 
 QFAUIActorTransform::QFAUIActorTransform()
 {	
-	Canvas = new QFAUICanvas;
+	Canvas = NewUI<QFAUICanvas>();
 	
 	struct SSlot
 	{
@@ -33,7 +33,7 @@ QFAUIActorTransform::QFAUIActorTransform()
 	QFAUITextInput* input;
 	for (size_t i = 0; i < Inputs.size(); i++)
 	{
-		input = new QFAUITextInput(QFAUITextInput::ENumberType::Float);
+		input = NewUI<QFAUITextInput>(QFAUITextInput::ENumberType::Float);
 		input->SetTextSize(20);
 		input->SetTextColor(255);
 		input->SetOutFocusFun(QFAUIActorTransform::InputOut);
@@ -54,9 +54,9 @@ QFAUIActorTransform::QFAUIActorTransform()
 QFAUIActorTransform::~QFAUIActorTransform()
 {
 	for (size_t i = 0; i < Inputs.size(); i++)
-		delete Inputs[i];
+		Inputs[i]->Destroy();
 
-	delete Canvas;
+	Canvas->Destroy();
 }
 
 void QFAUIActorTransform::MySlotChange(QFAUIUnit* unit)

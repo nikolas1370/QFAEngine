@@ -57,6 +57,9 @@
     <ClCompile Include="Editor\epch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Editor\EditorWindows\OptionWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor\ShaderCompiler\ShaderCompiler.h">
@@ -102,6 +105,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Editor\EngineClassesInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorWindows\OptionWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
