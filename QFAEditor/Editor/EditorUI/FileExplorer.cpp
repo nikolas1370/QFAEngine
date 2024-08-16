@@ -12,15 +12,15 @@
 #include <Overlord/Time.h>
 #include <filesystem>
 #include <EditorWindows/FileViewWindow.h>
-#include <EditorFileStorage.h>
 #include "../GameCodeTool/GameCodeCompiler.h"
 #include <Tools/String.h>
 #include <UI/SelectUnit.h>
-#include <EngineClassesInterface.h>
 
-QFAUIEditorFileExplorer::QFAUIEditorFileExplorer(QFAEngineWindow *window, std::function <void(bool isCppClass, size_t fileId)> dragFun)
+
+QFAUIEditorFileExplorer::QFAUIEditorFileExplorer(QFAEngineWindow *window, std::function <void(bool isCppClass, size_t fileId)> dragFun, std::function <void(QFAEditorFileStorage::QFAContentFile& cf)> levelLoad)
 {
 	DragFun = dragFun;
+	LevelLoad = levelLoad;
 	Window = window;
 	Type = QFAUIType::CustomUnit;
 	EditorType = QFAEditorUIType::FileExplorer;
@@ -141,10 +141,7 @@ void QFAUIEditorFileExplorer::CreateMiddle()
 							stopExecute("");
 
 						if (cf.fileType == QFAContentManager::QFAFileTypes::EFTLevel)
-						{
-							std::cout << "Level load\n";
-							return; // write load level
-						}
+							return LevelLoad(cf);
 
 						if (FileViewWindow)
 						{

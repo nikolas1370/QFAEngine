@@ -53,6 +53,7 @@ class QFAEditorGameViewportInfo : public QFAParentHiddenChild
 	void AddActor(QActor* actor, std::u32string actorName, size_t id, bool isCppClass);
 	// return index in actor list
 	QActor* PressedDelete();
+	void RemoveAll();
 
 
 protected:

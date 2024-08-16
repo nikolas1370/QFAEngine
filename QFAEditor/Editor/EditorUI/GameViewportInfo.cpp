@@ -88,7 +88,7 @@ void QFAEditorGameViewportInfo::SelectActor(QActor* actor)
 void QFAEditorGameViewportInfo::AddActor(QActor* actor, std::u32string actorName, size_t id, bool isCppClass)
 {
 	QFATextBackground* text = NewUI<QFATextBackground>();
-	ActorList->AddUnit(text);
+	ActorList->AddUnit(text, actor);
 	text->SetTextSize(20);
 
 	size_t count = 0;
@@ -139,6 +139,12 @@ QActor* QFAEditorGameViewportInfo::PressedDelete()
 			return actor;
 		}
 	}
+}
+
+void QFAEditorGameViewportInfo::RemoveAll()
+{
+	ActorList->RemoveAllUnit(true);
+	ActorAndTextList.clear();
 }
 
 

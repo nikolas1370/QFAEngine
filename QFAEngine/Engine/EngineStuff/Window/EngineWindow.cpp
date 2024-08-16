@@ -1,4 +1,5 @@
 ﻿#include "pch.h"
+
 #include <Object/ActorComponent/SceneComponent/Camera/Camera.h>
 #include <Overlord/Time.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
@@ -428,6 +429,11 @@ void QFAEngineWindow::ProcessGetMeshId()
 void QFAEngineWindow::GetMeshUnderCursore(std::function<void(QMeshBaseComponent*)> callback)
 {
 	GetMeshCallback = callback;
+}
+
+void QFAEngineWindow::SetWindowTitle(const char* winName)
+{
+	glfwSetWindowTitle(glfWindow, winName);
 }
 
 void QFAEngineWindow::StartUIRenderViewPort(QFAEngineViewport* viewport)

@@ -279,4 +279,6 @@ public:
 	
 	*/
 	void GetMeshUnderCursore(std::function<void(QMeshBaseComponent*)> callback);
+
+	void SetWindowTitle(const char* winName);
 };

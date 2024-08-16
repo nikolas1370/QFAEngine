@@ -18,6 +18,7 @@
 #include <UI/TextInput.h>
 #include <EngineClassesInterface.h>
 
+#include <unicode/unistr.h>
 QFAEditorMainWindow* QFAEditorMainWindow::MainWindow = nullptr;
 QFAText::SFont* QFAEditorMainWindow::Icomonfont = nullptr;
 QFAEditorMainWindow::QFAEditorMainWindow()
@@ -39,7 +40,7 @@ QFAEditorMainWindow::QFAEditorMainWindow()
 
 	QFAText::LoadFont("SomeFont/icomoon.ttf", QFAEditorMainWindow::Icomonfont);
 
-	MainWindow->CreateLoadUI();
+	MainWindow->CreateLoadUI();	
 }
 
 QFAEditorMainWindow::~QFAEditorMainWindow()
@@ -83,7 +84,25 @@ void QFAEditorMainWindow::CreateMainEdirorUI()
 	RunButton->SetHeight("25");
 	SetRunButton();
 
-	FileExplorer = NewUI<QFAUIEditorFileExplorer>(Window, QFAEditorMainWindow::StartDragAndDrop);
+	FileExplorer = NewUI<QFAUIEditorFileExplorer>(Window, QFAEditorMainWindow::StartDragAndDrop,
+	[this](QFAEditorFileStorage::QFAContentFile& cf)
+	{
+		Worlds[0]->Destroy();
+		Worlds[0] = ((QFALevel*)cf.file)->GetWorld();
+		((QEditorWorld*)Worlds[0])->SetEditorActor(EditorCamera);
+		CurentWorld = Worlds[0];
+		ChangeTitle(cf.path);
+		// RemoveAll
+		GameViewportInfo->RemoveAll();
+		
+		QEditorWorld* world = ((QEditorWorld*)Worlds[0]);
+		for (size_t i = 0; i < world->Actors.Length(); i++)
+		{ // rework in future
+			GameViewportInfo->AddActor(world->Actors[i], QFAString::CharsTo32Chars(world->Actors[i]->GetClass()->GetName()), world->Actors[i]->GetClass()->GetId(), false);
+		}
+		
+	});
+
 	FileExplorer->SetWidth("100%");
 	FileExplorer->SetHeight("30%");	
 	FileExplorer->SetTop("70%");
@@ -201,6 +220,16 @@ void QFAEditorMainWindow::EndGame()
 	EditorCamera->ActivateCamera(((QFAEditorWindow*)&GameViewport->HoldedWindow)->Viewports[0]);
 }
 
+void QFAEditorMainWindow::ChangeTitle(std::u32string levelPAth)
+{
+	std::u32string windowTitle = std::u32string(U"GFAEngine ") +
+		std::filesystem::path(levelPAth).replace_extension().filename().u32string();
+
+	std::string utf8;
+	icu::UnicodeString ucs = icu::UnicodeString::fromUTF32((UChar32*)windowTitle.c_str(), -1); // return UTF-16
+	Window->SetWindowTitle(ucs.toUTF8String(utf8).c_str());
+}
+
 void QFAEditorMainWindow::CreateInput()
 {	
 	((QFAEditorWindow*)Window)->SetDropFun([this](int path_count, const char* paths[])
@@ -208,7 +237,7 @@ void QFAEditorMainWindow::CreateInput()
 			if (WindowCanvas)
 				FileExplorer->DropFiles(path_count, paths);
 		});
-
+	
 	Input = new QFAInput(Window);
 	Input->AddKeyRelease(EKey::MOUSE_LEFT, "lmbU", [this](EKey::Key key)
 		{
@@ -279,13 +308,14 @@ void QFAEditorMainWindow::CreateInput()
 					Level->SaveLevel(Worlds[0]);
 					return;
 				}
-
+				
 				OptionWindow = new QFAEditorOptionWindow([this](std::u32string fileName)
 				{ // QFAEditorOptionWindow delete self not need delete here
 					Level = new QFAEditorLevel(fileName);
 					Level->SaveLevel(Worlds[0]);	
 					FileExplorer->UpdateFolderItemList();
-					OptionWindow = nullptr;
+					OptionWindow = nullptr;					
+					ChangeTitle(fileName);
 				},
 				[this]()
 				{

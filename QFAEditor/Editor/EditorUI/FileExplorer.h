@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <UI/UIParentHiddenChild.h>
 #include <Tools/File/FileSystem.h>
+#include <EditorFileStorage.h>
 
 class QFAUIList;
 class QFAUICanvas;
@@ -67,7 +68,7 @@ class QFAUIEditorFileExplorer : public QFAParentHiddenChild
 	QFAEditorExplorerFolderUnit* FolderItemListInFocusUnit = nullptr;
 	QFAEditorExplorerFolderUnit* FolderItemListSelectUnit = nullptr;
 	QFAEditorFileViewWindow* FileViewWindow = nullptr;
-
+	std::function <void(QFAEditorFileStorage::QFAContentFile& )> LevelLoad;
 protected:
 	QFAEngineWindow* Window;
 
@@ -101,7 +102,7 @@ protected:
 	void LeftChanged(int oldValue = 0) override;
 
 public:
-	QFAUIEditorFileExplorer(QFAEngineWindow* window, std::function <void (bool isCppClass, size_t id)> dragFun);
+	QFAUIEditorFileExplorer(QFAEngineWindow* window, std::function <void (bool isCppClass, size_t id)> dragFun, std::function <void(QFAEditorFileStorage::QFAContentFile& cf)> levelLoad);
 	~QFAUIEditorFileExplorer();
 
 

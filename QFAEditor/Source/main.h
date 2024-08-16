@@ -86,7 +86,7 @@ public:
         viewport->ActivateCamera();
         Camera.SetLocalPosition(FVector(-200, 0, 0));
 
-        Input = new QFAUITextInput;
+        Input = NewUI<QFAUITextInput>();
         Input->SetValue(U"some input text");
         viewport->AddUnit(Input);
         Input->SetTop("15");
@@ -139,6 +139,7 @@ public:
     ~QTest_ActorMinusOne()
     {
         mesh->Destroy();
+        Input->Destroy();
         std::cout << "~QTest_ActorMinusOne "<< "\n";
     }
 

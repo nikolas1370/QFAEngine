@@ -78,6 +78,8 @@ class QFAEditorMainWindow
 	void SetRunButton();
 	void StartGame();
 	void EndGame();
+
+	void ChangeTitle(std::u32string levelPAth);
 public:
 	inline static QFAText::SFont* GetIcomonFont()
 	{
