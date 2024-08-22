@@ -192,6 +192,7 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Audio\Audio.cpp" />
     <ClCompile Include="Engine\EngineStuff\Window\ViewportHolder.cpp" />
     <ClCompile Include="Engine\Math\Math.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
@@ -272,6 +273,7 @@
     <ClCompile Include="Engine\Window\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Audio\Audio.h" />
     <ClInclude Include="Engine\EngineStuff\Window\ViewportHolder.h" />
     <ClInclude Include="Engine\Object\ActorComponent\ActorComponent.h" />
     <ClInclude Include="Engine\Object\Actor\Camera\CameraActor.h" />

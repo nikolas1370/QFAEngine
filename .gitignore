@@ -368,3 +368,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/QFAEditor/videoplayback.wav
+/QFAEditor/videoplayback_2.wav

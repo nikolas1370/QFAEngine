@@ -35,6 +35,8 @@ std::function<void()> QFAOverlord::FrameEnded;
 
 std::thread::id QFAOverlord::MainThreadId;
 
+#include <Audio/Audio.h>
+
 bool QFAOverlord::StartLife()
 {
 	if (Life || !isInit)
@@ -47,9 +49,19 @@ bool QFAOverlord::StartLife()
 	Life = true;
     std::cout << "Engine load time " << (QTime::GetTime() / 10000) << '\n';
     QFAClass::InitClasses();
+    /*-------------*/
+    // audio test
+    QFAAudio* audio = new QFAAudio(L"./videoplayback.wav");
+    audio->Play();
+
+    QFAAudio* audio2 = new QFAAudio(L"./videoplayback_2.wav");
+    audio2->Play();
+
+    /*-------------*/
 	QFAOverlord::MainLoop();
 	return true;
 }
+
 
 
 bool QFAOverlord::Init(std::vector<QFAVKPipeline::SShaderData> shaderData, bool createWindow, std::function<void()> frameStarted, std::function<void()> frameEnded)
