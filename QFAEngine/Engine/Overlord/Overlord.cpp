@@ -51,18 +51,21 @@ bool QFAOverlord::StartLife()
     QFAClass::InitClasses();
     /*-------------*/
     // audio test
-    QFAAudio* audio = new QFAAudio(L"./videoplayback.wav");
+    
+    QFAAudio* audio = new QFAAudio(U"./videoplayback.wav", true);
     audio->Play();
+    audio->SetVolume(0.5);
+    
 
-    QFAAudio* audio2 = new QFAAudio(L"./videoplayback_2.wav");
+    QFAAudio* audio2 = new QFAAudio(U"./videoplayback_2_cut.wav", false);
+    audio2->SetRepeat(true);
+    //QFAAudio* audio2 = new QFAAudio(U"./videoplayback_2.wav", true);
+
     audio2->Play();
-
     /*-------------*/
 	QFAOverlord::MainLoop();
 	return true;
 }
-
-
 
 bool QFAOverlord::Init(std::vector<QFAVKPipeline::SShaderData> shaderData, bool createWindow, std::function<void()> frameStarted, std::function<void()> frameEnded)
 {

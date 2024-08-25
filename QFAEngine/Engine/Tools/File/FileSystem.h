@@ -7,7 +7,14 @@
 class QFAFileSystem;
 class QFAOverlord;
 
-
+enum QFileResult
+{
+	QFRSuccess = 0,
+	QFRFileNotExists,
+	QFRCannotOpenFile,
+	QFRFileNotOpen,
+	QFREndFileReached
+};
 
 class QFAEXPORT QFAFile
 {
@@ -77,8 +84,7 @@ public:
 	}
 
 	inline std::u32string GetPath()
-	{
-		
+	{		
 		return path;
 	}
 
@@ -87,7 +93,48 @@ public:
 	inline std::wstring GetPathWString();
 };
 
+class QFAEXPORT QFAFileReadStream
+{
+	std::u32string Path;
+	std::ifstream OpenFileIN; // QFileResult
+	size_t FileSize = 0;
 
+public:
+	QFAFileReadStream();
+	~QFAFileReadStream();
+	QFileResult Open(const std::u32string& filePAth);
+	inline void Close()
+	{
+		OpenFileIN.close();
+	}
+	inline bool IsOpen() 
+	{ 
+		return OpenFileIN.is_open();
+	}
+	/*
+		if notReadFrom > 0 file not be read after notReadFrom bytes
+			example
+			SetFilePointer(10);
+			Read(100, somePtr , amountByteWasRead, 80);
+			in somePtr be writed only 70 bytes
+	*/
+	QFileResult Read(const size_t count, const void* data, size_t& amountByteWasRead, const size_t notReadFrom = 0);
+	inline void SetFilePointer(const size_t pos)
+	{
+		if (OpenFileIN.is_open())			
+			OpenFileIN.seekg(pos);
+	}
+
+	inline size_t GetFilePointer()
+	{
+		return (OpenFileIN.is_open() ? (size_t)OpenFileIN.tellg(): 0);
+	}
+
+	inline size_t GetFileSize()
+	{
+		return FileSize;
+	}
+};
 
 // FindFirstChangeNotification https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-findfirstchangenotificationa?redirectedfrom=MSDN
 class QFAEXPORT QFAFileSystem

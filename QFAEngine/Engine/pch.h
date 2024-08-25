@@ -9,4 +9,5 @@
 #include <optional>
 #include <fstream>
 #include <filesystem>
+#include <xaudio2.h>
 #include <UI/Text.h>

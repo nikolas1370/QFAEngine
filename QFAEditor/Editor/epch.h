@@ -10,3 +10,4 @@
 #include <fstream>
 #include <filesystem>
 #include <EngineClassesInterface.h>
+#include <xaudio2.h>

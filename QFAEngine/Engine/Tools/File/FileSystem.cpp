@@ -222,3 +222,59 @@ bool QFAFileSystem::GetFolderContents(std::u32string path, std::vector<FolderUni
 	return true;
 }
 
+QFAFileReadStream::QFAFileReadStream()
+{
+}
+
+QFAFileReadStream::~QFAFileReadStream()
+{
+	OpenFileIN.close();
+}
+
+QFileResult QFAFileReadStream::Open(const std::u32string& filePAth)
+{
+	Path = filePAth;
+	if(!std::filesystem::exists(Path))
+		return QFileResult::QFRFileNotExists;
+
+	OpenFileIN.open(Path, std::ios::in | std::ios::binary | std::ios::ate);
+	if (!OpenFileIN.is_open())
+		return QFileResult::QFRCannotOpenFile;
+
+	OpenFileIN.seekg(0, std::ios::end);// pointer in end file 
+	FileSize = OpenFileIN.tellg(); // get size
+	OpenFileIN.seekg(0, std::ios::beg); // in start
+	return QFileResult::QFRSuccess;
+}
+
+QFileResult QFAFileReadStream::Read(const size_t count, const void* data, size_t& countByteWasRead, const size_t notReadFrom)
+{
+	if (!OpenFileIN.is_open())
+		return QFileResult::QFRFileNotOpen;
+
+	size_t needReed;
+	if (notReadFrom > 0)
+	{
+		size_t position = OpenFileIN.tellg();
+		if (notReadFrom >= position + count)
+			needReed = count;
+		else if(position > notReadFrom)
+		{
+			countByteWasRead = 0;
+			return QFileResult::QFREndFileReached;		
+		}
+		else
+			needReed = notReadFrom - position;
+	}
+	else
+		needReed = count;
+	
+	OpenFileIN.read((char*)data, needReed);
+	countByteWasRead = OpenFileIN.gcount();
+	if(countByteWasRead == needReed)
+		return QFileResult::QFRSuccess;
+	else
+		return QFileResult::QFREndFileReached;	
+}
+
+
