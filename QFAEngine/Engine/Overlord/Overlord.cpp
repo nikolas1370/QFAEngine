@@ -49,20 +49,7 @@ bool QFAOverlord::StartLife()
 	Life = true;
     std::cout << "Engine load time " << (QTime::GetTime() / 10000) << '\n';
     QFAClass::InitClasses();
-    /*-------------*/
-    // audio test
-    
-    QFAAudio* audio = new QFAAudio(U"./videoplayback.wav", true);
-    audio->Play();
-    audio->SetVolume(0.5);
-    
 
-    QFAAudio* audio2 = new QFAAudio(U"./videoplayback_2_cut.wav", false);
-    audio2->SetRepeat(true);
-    //QFAAudio* audio2 = new QFAAudio(U"./videoplayback_2.wav", true);
-
-    audio2->Play();
-    /*-------------*/
 	QFAOverlord::MainLoop();
 	return true;
 }
@@ -133,10 +120,20 @@ void QFAOverlord::MainLoop()
     static double deltaAcum = 0;
     float timePassedAcum = 0;
 
+    //QFAAudio* audio = new QFAAudio(U"./videoplayback.wav", true);
+    QFAAudio* audio = new QFAAudio(U"./videoplayback_2_cut.wav", true);
+    
+    audio->Play();
+    audio->SetVolume(0.5);
+    audio->SetTime(4000);
+
     while (true)
     {   
+        audio->SetRepeat(true);
+        std::cout << audio->GetTime() / 1000.0 << " S\n";
+
         if (FrameStarted)
-            FrameStarted();       
+            FrameStarted();
    
         auto t = QTime::GetSystemTime();
         QTime::CalcDeltaTime();

@@ -68,12 +68,17 @@ class QFAEXPORT QFAAudio
 	bool IsAudioStream;
 	size_t DataSize;
 	size_t DataOffset; // offset from start file; use if IsAudioStream == true	
-	bool Repeat = false;
+	bool Repeat = false;	
+	size_t MaxTime = 0;// in millisecond
+	double FrameTime = 0.0; // in millisecond
+	bool AudioPlay = false;
+	size_t PlayStartFrom = 0; // Play Start From this Sample(frame) need for GetTime if use SetTime
+	unsigned char FrameSize;// in 2 channel with sample 2 byte be Frame be 4 bytes
+
 
 	bool GetWavInfo();
 	void LoadWholeFile();
 	void LoadStreamFile(XAUDIO2_BUFFER& buffer);
-	void FillBuffer(XAUDIO2_BUFFER& buffer, const size_t amountDataInbuffer);
 	void BufferEnd();
 public:
 	// if isAudioStream == false all file be store in memory
@@ -83,7 +88,7 @@ public:
 
 	void Play();
 	void Stop();
-	void SetRepeat(bool repeat)
+	void SetRepeat(const bool repeat)
 	{
 		Repeat = repeat;
 	}
@@ -94,4 +99,19 @@ public:
 	}
 
 	void SetVolume(const float volume);
+
+	// get length of audio in ms
+	inline size_t GetMaxTime()
+	{
+		return MaxTime;
+	}
+	// get curent play time in ms
+	size_t GetTime();
+	// set curent play time in ms
+	void SetTime(const size_t millisecond);
+
+	inline bool IsPlay()
+	{
+		return AudioPlay;
+	}
 };

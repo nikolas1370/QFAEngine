@@ -37,11 +37,10 @@ QFAAudio::QFAAudio(const std::u32string& fileName, bool isAudioStream, size_t bu
 	FileName = fileName;        
     // CoInitializeEx(nullptr, COINIT_MULTITHREADED); // First, you need to have initialized COM. If you're using C++/WinRT, then it's taken care of. If you're not certain that your environment has already initialized COM, then you can call CoInitializeEx as long as you check the return value.
     // if use CoInitializeEx not forget use CoUninitialize();
-    HRESULT hr;
 
     if(!XAudio2) // init QFAAudio
     {
-        hr = XAudio2Create(&XAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR); // To create an instance of the XAudio2 engine, call the XAudio2Create function. That will give you a pointer to an IXAudio2 interface, and it's a good idea to store that in a class data member. In this snippet we're using a C++/WinRT smart pointer, but you could use a raw pointer if necessary.
+        HRESULT hr = XAudio2Create(&XAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR); // To create an instance of the XAudio2 engine, call the XAudio2Create function. That will give you a pointer to an IXAudio2 interface, and it's a good idea to store that in a class data member. In this snippet we're using a C++/WinRT smart pointer, but you could use a raw pointer if necessary.
         if (FAILED(hr))
             stopExecute("");
 
@@ -50,11 +49,6 @@ QFAAudio::QFAAudio(const std::u32string& fileName, bool isAudioStream, size_t bu
     }
     
     if (!GetWavInfo())
-        stopExecute("");
-
-    hr = XAudio2->CreateSourceVoice(&XAudio2SourceVoice, (WAVEFORMATEX*)&Wfx, 0, XAUDIO2_DEFAULT_FREQ_RATIO, &VoiceCallback);
-    VoiceCallback.QAudio = this;
-    if (FAILED(hr))
         stopExecute("");
 
     if (IsAudioStream)
@@ -79,30 +73,31 @@ QFAAudio::~QFAAudio()
 
 void QFAAudio::Play()
 {
+    if (!XAudio2SourceVoice)
+        SetTime(0);
+
     XAUDIO2_VOICE_STATE pVoiceState;
     XAudio2SourceVoice->GetState(&pVoiceState);
     if (pVoiceState.BuffersQueued == 0)
-    {
-        if (IsAudioStream)
-        {
-            FileStream.SetFilePointer(DataOffset);
-            LoadStreamFile(Buffers[0]);
-            LoadStreamFile(Buffers[1]);
-        }
-        else
-            LoadWholeFile();
-    }
+        SetTime(0);
 
     HRESULT hr = XAudio2SourceVoice->Start(0);
     if (FAILED(hr))
         stopExecute("");
+
+    AudioPlay = true;
 }
 
 void QFAAudio::Stop()
 {
+    if (!XAudio2SourceVoice)
+        SetTime(0);
+
     HRESULT hr = XAudio2SourceVoice->Stop(0);
     if (FAILED(hr))
         stopExecute("");
+
+    AudioPlay = false;
 }
 
 void QFAAudio::SetVolume(const float volume)
@@ -110,12 +105,148 @@ void QFAAudio::SetVolume(const float volume)
     XAudio2SourceVoice->SetVolume(volume);
 }
 
+size_t QFAAudio::GetTime()
+{
+    XAUDIO2_VOICE_STATE pVoiceState;
+    XAudio2SourceVoice->GetState(&pVoiceState);
+    return (size_t)((double)(pVoiceState.SamplesPlayed + PlayStartFrom) * FrameTime);
+}
+
+void QFAAudio::BufferEnd()
+{
+    XAUDIO2_VOICE_STATE pVoiceState;
+    (UseFirstBuffer ? Buffers[0] : Buffers[1]).LoopBegin = 0;
+    if (IsAudioStream)
+    {
+        LoadStreamFile(UseFirstBuffer ? Buffers[0] : Buffers[1]);
+        XAudio2SourceVoice->GetState(&pVoiceState);
+        if (Repeat && !pVoiceState.BuffersQueued) // if voice buffer void
+        {
+            PlayStartFrom = 0;
+            SetTime(0);
+        }
+        else if(!pVoiceState.BuffersQueued)
+        {
+            AudioPlay = false;
+            PlayStartFrom = 0;
+        }
+        else
+            UseFirstBuffer = !UseFirstBuffer;
+
+        return;
+    }
+    else if (Repeat)
+    {
+        PlayStartFrom = 0;
+        SetTime(0);
+        return;
+    }
+
+    XAudio2SourceVoice->GetState(&pVoiceState);
+    if (!pVoiceState.BuffersQueued)
+    {
+        PlayStartFrom = 0;
+        AudioPlay = false;
+    }
+}
+
+void QFAAudio::SetTime(const size_t millisecond)
+{
+    size_t sampelOffset = (size_t)((double)millisecond / FrameTime);
+    UseFirstBuffer = true;
+    if (XAudio2SourceVoice)
+    {
+        XAUDIO2_VOICE_STATE pVoiceState;
+        XAudio2SourceVoice->GetState(&pVoiceState);
+        if (pVoiceState.BuffersQueued)
+        {
+            XAudio2SourceVoice->DestroyVoice();
+            HRESULT hr = XAudio2->CreateSourceVoice(&XAudio2SourceVoice, (WAVEFORMATEX*)&Wfx, 0, XAUDIO2_DEFAULT_FREQ_RATIO, &VoiceCallback);            
+            if (FAILED(hr))
+                stopExecute("");
+
+            VoiceCallback.QAudio = this;
+            if (AudioPlay)
+            {
+                XAudio2SourceVoice->Start(0);
+                if (FAILED(hr))
+                    stopExecute("");
+            }
+        }
+    }
+    else
+    {
+        HRESULT hr = XAudio2->CreateSourceVoice(&XAudio2SourceVoice, (WAVEFORMATEX*)&Wfx, 0, XAUDIO2_DEFAULT_FREQ_RATIO, &VoiceCallback);
+        VoiceCallback.QAudio = this;
+        if (FAILED(hr))
+            stopExecute("");
+    }
+
+    PlayStartFrom = sampelOffset;
+    if (IsAudioStream)
+    {
+        Buffers[0].PlayBegin = 0;
+        Buffers[1].PlayBegin = 0;
+        FileStream.SetFilePointer(DataOffset + PlayStartFrom * FrameSize);
+        LoadStreamFile(Buffers[0]);
+        LoadStreamFile(Buffers[1]);
+    }
+    else
+    {                      
+        LoadWholeFile();
+        Buffers[0].PlayBegin = PlayStartFrom;
+        HRESULT hr = XAudio2SourceVoice->SubmitSourceBuffer(&Buffers[0]);
+        if (FAILED(hr))
+            stopExecute("");
+    }
+}
+
+void QFAAudio::LoadStreamFile(XAUDIO2_BUFFER& buffer)
+{
+    size_t countRead = 0;
+    FileStream.Read(MaxBuffersize, buffer.pAudioData, countRead, DataOffset + DataSize);
+    buffer.AudioBytes = countRead;
+    if (countRead == 0)
+        return;
+    else if (FileStream.GetFilePointer() - DataOffset >= DataSize) // if reach end of audio data       
+        buffer.Flags = XAUDIO2_END_OF_STREAM; // if set this SourceVoice reset sampel counter
+    else
+        buffer.Flags = 0;
+
+    HRESULT hr = XAudio2SourceVoice->SubmitSourceBuffer(&buffer);
+    if (FAILED(hr))
+        stopExecute("");
+}
+
+void QFAAudio::LoadWholeFile()
+{    
+    if (FIle.GetData())
+        return;
+
+    QFAFileSystem::LoadFile(FileName, &FIle);
+    Buffers[0].AudioBytes = DataSize;
+    Buffers[0].pAudioData = ((BYTE*)FIle.GetData()) + DataOffset;
+    Buffers[0].Flags = XAUDIO2_END_OF_STREAM;
+}
+
+QFAAudio::VoiceCallback::VoiceCallback()
+{
+    hBufferEndEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+}
+
+QFAAudio::VoiceCallback::~VoiceCallback()
+{
+    CloseHandle(hBufferEndEvent);
+}
+
+void QFAAudio::VoiceCallback::OnBufferEnd(void* pBufferContext)
+{    
+    QAudio->BufferEnd();
+}
+
 bool QFAAudio::GetWavInfo()
 {   // https://learn.microsoft.com/en-us/windows/win32/xaudio2/resource-interchange-file-format--riff-?redirectedfrom=MSDN
     // http://soundfile.sapp.org/doc/WaveFormat/    
-    if (QFAFileSystem::LoadFile(FileName, &FIle))
-        stopExecute("cannot load");
-
     typedef unsigned chunkId_t;
     typedef unsigned subChunkId_t;
     struct SWavHead
@@ -132,13 +263,12 @@ bool QFAAudio::GetWavInfo()
     };
 
     FileStream.Open(FileName);
-    
-    //char data[50] = {0};
+
     char data[50];
     size_t ss;
     SWavHead wav;
-    FileStream.Read(sizeof(SWavHead), &wav, ss);    
-    
+    FileStream.Read(sizeof(SWavHead), &wav, ss);
+
     if (wav.ChunkId != fourccRIFF)
         stopExecute("Not Riff file");
 
@@ -176,102 +306,9 @@ bool QFAAudio::GetWavInfo()
 
     if (!fmtFound || !dataFound)
         stopExecute("not fount some");
-    
+
+    MaxTime = (size_t)((double)DataSize / (double)Wfx.Format.nAvgBytesPerSec * 1000.0);
+    FrameTime = 1.0 / ((double)Wfx.Format.nSamplesPerSec / 1000.0);
+    FrameSize = Wfx.Format.nChannels * (Wfx.Format.wBitsPerSample / 8);
     return true;
-}
-
-void QFAAudio::LoadStreamFile(XAUDIO2_BUFFER& buffer)
-{
-    size_t countRead = 0;
-    FileStream.Read(MaxBuffersize, buffer.pAudioData, countRead, DataOffset + DataSize);
-    if (countRead == 0)
-    {
-        if (Repeat)
-        {
-            FillBuffer(buffer, 0);
-            buffer.AudioBytes = MaxBuffersize;
-        }
-        else
-            return;
-    }
-    else if(MaxBuffersize != countRead)
-    {
-        if (Repeat)
-        {
-            FillBuffer(buffer, countRead);
-            buffer.AudioBytes = MaxBuffersize;
-        }
-        else 
-        {
-            buffer.Flags = XAUDIO2_END_OF_STREAM;
-            buffer.AudioBytes = countRead; 
-        }
-    }    
-    else 
-    { 
-        if (!Repeat && FileStream.GetFilePointer() - DataOffset >= DataSize) // if reach end of audio data       
-            buffer.Flags = XAUDIO2_END_OF_STREAM;
-
-        buffer.AudioBytes = MaxBuffersize;
-    }
-
-    HRESULT hr = XAudio2SourceVoice->SubmitSourceBuffer(&buffer);
-    if (FAILED(hr))
-        stopExecute("");
-}
-
-void QFAAudio::FillBuffer(XAUDIO2_BUFFER& buffer, size_t amountDataInbuffer)
-{
-    size_t amountDataInBuffer = amountDataInbuffer;
-    size_t countRead = 0;
-    while (true) // if audio data size less than MaxBuffersize
-    {// loop work until whole buffer be filled
-        if (amountDataInBuffer >= MaxBuffersize) 
-            break;
-
-        FileStream.SetFilePointer(DataOffset);
-        FileStream.Read(MaxBuffersize - amountDataInBuffer, buffer.pAudioData + amountDataInBuffer, countRead, DataOffset + DataSize);
-        amountDataInBuffer += countRead;
-    }
-}
-
-void QFAAudio::BufferEnd()
-{    
-    if(IsAudioStream)
-    {
-        LoadStreamFile(UseFirstBuffer ? Buffers[0] : Buffers[1]);
-        UseFirstBuffer = !UseFirstBuffer;
-    }
-    else if (Repeat)
-    {   
-        HRESULT hr = XAudio2SourceVoice->SubmitSourceBuffer(&Buffers[0]);
-        if (FAILED(hr))
-            stopExecute("");
-    }
-}
-
-void QFAAudio::LoadWholeFile()
-{
-    QFAFileSystem::LoadFile(FileName, &FIle);
-    Buffers[0].AudioBytes = DataSize;
-    Buffers[0].pAudioData = ((BYTE*)FIle.GetData()) + DataOffset;
-    Buffers[0].Flags = XAUDIO2_END_OF_STREAM;
-    HRESULT hr = XAudio2SourceVoice->SubmitSourceBuffer(&Buffers[0]);
-    if (FAILED(hr))
-        stopExecute("");
-}
-
-QFAAudio::VoiceCallback::VoiceCallback()
-{
-    hBufferEndEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-}
-
-QFAAudio::VoiceCallback::~VoiceCallback()
-{
-    CloseHandle(hBufferEndEvent);
-}
-
-void QFAAudio::VoiceCallback::OnBufferEnd(void* pBufferContext)
-{    
-    QAudio->BufferEnd();
 }
