@@ -59,7 +59,7 @@ public:
 		return outStr;
 	}
 
-	static std::string U32stringToString(std::u32string& str)
+	static std::string U32stringToString(const std::u32string& str)
 	{
 		std::string outStr;
 		outStr.resize(str.size());

@@ -125,6 +125,14 @@ public:
 			OpenFileIN.seekg(pos);
 	}
 
+	inline void SetFilePointerToEnd()
+	{
+		if (OpenFileIN.is_open())
+			OpenFileIN.seekg(0, std::ios::end);
+	}
+
+	// 	file->openFileIN.seekg(0, std::ios::beg);
+
 	inline size_t GetFilePointer()
 	{
 		return (OpenFileIN.is_open() ? (size_t)OpenFileIN.tellg(): 0);

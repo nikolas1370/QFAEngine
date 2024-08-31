@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Overlord.h"
 #include <EngineStuff/Window/EngineWindow.h>
 #include <Object/World/World.h>
@@ -121,16 +121,22 @@ void QFAOverlord::MainLoop()
     float timePassedAcum = 0;
 
     //QFAAudio* audio = new QFAAudio(U"./videoplayback.wav", true);
-    QFAAudio* audio = new QFAAudio(U"./videoplayback_2_cut.wav", true);
+    QFAAudio* audio = new QFAAudio(
+        U"./videoplayback_2_cut.wav", true);
+
+    
+    
+    audio->SetVolume(0.5);
     
     audio->Play();
-    audio->SetVolume(0.5);
-    audio->SetTime(4000);
+    audio->SetStartTime(4000);
+    audio->SetTime(5000);
+    audio->SetEndTime(6000);
 
+    audio->SetRepeat(true);
     while (true)
     {   
-        audio->SetRepeat(true);
-        std::cout << audio->GetTime() / 1000.0 << " S\n";
+        std::cout << audio->GetTime() / 1000.0 << " \n";
 
         if (FrameStarted)
             FrameStarted();
