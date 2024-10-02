@@ -120,20 +120,18 @@ void QFAOverlord::MainLoop()
     static double deltaAcum = 0;
     float timePassedAcum = 0;
 
-    //QFAAudio* audio = new QFAAudio(U"./videoplayback.wav", true);
     QFAAudio* audio = new QFAAudio(
-        U"./videoplayback_2_cut.wav", true);
+        U"videoplayback_2_cut.mp3", false); 
 
-    
-    
-    audio->SetVolume(0.5);
-    
+    audio->SetVolume(0.9);
     audio->Play();
-    audio->SetStartTime(4000);
-    audio->SetTime(5000);
-    audio->SetEndTime(6000);
-
     audio->SetRepeat(true);
+
+    audio->SetStartTime(1000); 
+    audio->SetEndTime(6000);
+    audio->SetTime(5000);
+    
+    
     while (true)
     {   
         std::cout << audio->GetTime() / 1000.0 << " \n";

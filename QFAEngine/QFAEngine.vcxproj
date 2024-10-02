@@ -74,7 +74,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Assimp\include;$(SolutionDir)External\freetype2.13.2\include;$(SolutionDir)External\glfw-3.4.bin.WIN64\include;$(SolutionDir)QFAEngine/Engine;C:\VulkanSDK\1.3.280.0\Include;$(SolutionDir)External\stb;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Assimp\include;$(SolutionDir)External\freetype2.13.2\include;$(SolutionDir)External\glfw-3.4.bin.WIN64\include;$(SolutionDir)QFAEngine/Engine;C:\VulkanSDK\1.3.280.0\Include;$(SolutionDir)External\stb;C:\Users\Jahi\Desktop\QFAEngine\External\minimp3;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>C:\Assimp\include;$(SolutionDir)External\freetype2.13.2\include;$(SolutionDir)External\glfw-3.4.bin.WIN64\include;$(SolutionDir)QFAEngine/Engine;C:\VulkanSDK\1.3.280.0\Include;$(SolutionDir)External\stb;$(IncludePath)</IncludePath>

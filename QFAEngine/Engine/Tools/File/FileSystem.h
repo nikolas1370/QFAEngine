@@ -122,16 +122,20 @@ public:
 	inline void SetFilePointer(const size_t pos)
 	{
 		if (OpenFileIN.is_open())			
+		{
+			OpenFileIN.clear(); // if file reach to end(eofbit), seekg not work
 			OpenFileIN.seekg(pos);
+		}
 	}
 
 	inline void SetFilePointerToEnd()
 	{
 		if (OpenFileIN.is_open())
+		{
+			OpenFileIN.clear();
 			OpenFileIN.seekg(0, std::ios::end);
+		}
 	}
-
-	// 	file->openFileIN.seekg(0, std::ios::beg);
 
 	inline size_t GetFilePointer()
 	{

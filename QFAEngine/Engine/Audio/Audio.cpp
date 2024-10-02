@@ -2,16 +2,15 @@
 #include "Audio.h"
 IXAudio2* QFAAudio::XAudio2 = nullptr;
 IXAudio2MasteringVoice* QFAAudio::XAudio2MasteringVoice = nullptr;
-
+using std::cout;
 
 QFAAudio::QFAAudio(const std::u32string& fileName, bool isAudioStream, const size_t bufferSize)
-{
+{    
+    Loader.ParentAudio = this;
     // CoInitializeEx(nullptr, COINIT_MULTITHREADED); // First, you need to have initialized COM. If you're using C++/WinRT, then it's taken care of. If you're not certain that your environment has already initialized COM, then you can call CoInitializeEx as long as you check the return value.
     // if use CoInitializeEx not forget use CoUninitialize();
     if (Loader.OpenFile(fileName, isAudioStream, bufferSize))
         stopExecute("");
-
-    EndFrame = Loader.CountFrame - 1;
 
     if(!XAudio2) // init QFAAudio
     {
@@ -52,7 +51,7 @@ size_t QFAAudio::GetTime()
 {
     XAUDIO2_VOICE_STATE pVoiceState;
     XAudio2SourceVoice->GetState(&pVoiceState);
-    return (size_t)((double)(pVoiceState.SamplesPlayed + PlayStartFrom) * Loader.FrameTime);
+    return (size_t)((double)(pVoiceState.SamplesPlayed + Loader.PlayStartFrom) * Loader.FrameTime);
 }
 
 void QFAAudio::Stop()
@@ -92,9 +91,16 @@ void QFAAudio::Play()
     AudioPlay = true;
 }
 
-
 void QFAAudio::SetTime(size_t millisecond)
 {
+    if (millisecond >= Loader.EndReadFrame * Loader.FrameTime)
+    {
+        if (Repeat)
+            millisecond = Loader.NeedStartFrom * Loader.FrameTime;
+        else
+            return;
+    }
+
     XAUDIO2_VOICE_STATE pVoiceState;
     XAudio2SourceVoice->GetState(&pVoiceState);
     if (pVoiceState.BuffersQueued)
@@ -109,21 +115,10 @@ void QFAAudio::SetTime(size_t millisecond)
         }
     }
 
-    size_t msFrame = millisecond / Loader.FrameTime;
-    if (msFrame < StartFrame)
-        millisecond = (size_t)((double)StartFrame * Loader.FrameTime);
-    else if (msFrame >= EndFrame)
-    {
-        if (Repeat)
-            millisecond = (size_t)((double)StartFrame * Loader.FrameTime);
-        else
-            return;
-    }
-
     XAUDIO2_BUFFER& buffer = ReadBuffer(false, millisecond);
     if (!buffer.AudioBytes)
         return;
-    
+         
     HRESULT hr = XAudio2SourceVoice->SubmitSourceBuffer(&buffer);
     if (FAILED(hr))
         stopExecute("");
@@ -132,79 +127,24 @@ void QFAAudio::SetTime(size_t millisecond)
 XAUDIO2_BUFFER& QFAAudio::ReadBuffer(bool next, size_t millisecond)
 {    
     XAUDIO2_BUFFER& buffer  = next ? Loader.Read() : Loader.ReadFrom(millisecond);
-    if (!buffer.AudioBytes || CheckBufferEnd(buffer))
+    if (!buffer.AudioBytes)
     {        
         if (Repeat)
-        {
-            buffer = Loader.ReadFrom(StartFrame * Loader.FrameTime);
-            CheckBufferEnd(buffer);
-            PlayStartFrom = StartFrame;
-        }
+            buffer = Loader.ReadFrom(0);
         else 
         {
-            Loader.StreamToEnd();
-            PlayStartFrom = 0;
             AudioPlay = false;
             XAudio2SourceVoice->Stop();
         }
     }
-    else if(!next)
-        PlayStartFrom = millisecond / Loader.FrameTime;
 
     return buffer;
-}
-
-bool QFAAudio::CheckBufferEnd(XAUDIO2_BUFFER& buffer)
-{
-    size_t curentFrame = GetCurentFrame();
-    if (curentFrame >= EndFrame)
-        return true;
-    else if (curentFrame + buffer.AudioBytes / Loader.FrameSize >= EndFrame)
-        buffer.Flags = XAUDIO2_END_OF_STREAM;
-
-    return false;
 }
 
 void QFAAudio::BufferEnd()
 {
     AudioPlay = false;
     Play();
-}
-
-void QFAAudio::SetStartTime(size_t millisecond)
-{
-    size_t frameOffset = (size_t)((double)millisecond / Loader.FrameTime);
-    if (frameOffset >= EndFrame)
-        return;
-
-    size_t curentFrame = GetCurentFrame();
-    StartFrame = (size_t)((double)millisecond / Loader.FrameTime);
-    if (frameOffset > curentFrame)
-        SetTime(millisecond);
-    else
-    {
-        XAUDIO2_VOICE_STATE pVoiceState;
-        XAudio2SourceVoice->GetState(&pVoiceState);
-        SetTime((double)pVoiceState.SamplesPlayed * Loader.FrameTime + (double)PlayStartFrom * Loader.FrameTime);
-    }
-}
-
-void QFAAudio::SetEndTime(size_t millisecond)
-{
-    size_t frameOffset = (size_t)((double)millisecond / Loader.FrameTime);
-    if (frameOffset <= StartFrame)
-        return;
-
-    size_t curentFrame = GetCurentFrame();
-    EndFrame = (size_t)((double)millisecond / Loader.FrameTime);
-    if (frameOffset <= curentFrame)
-        SetTime(millisecond);
-    else
-    {
-        XAUDIO2_VOICE_STATE pVoiceState;
-        XAudio2SourceVoice->GetState(&pVoiceState);
-        SetTime((double)pVoiceState.SamplesPlayed * Loader.FrameTime + (double)PlayStartFrom * Loader.FrameTime);
-    }
 }
 
 QFAAudio::VoiceCallback::VoiceCallback()

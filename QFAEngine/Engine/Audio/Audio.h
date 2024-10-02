@@ -62,12 +62,13 @@ class QFAEXPORT QFAAudio
 
 
 	bool AudioPlay = false;
-	size_t PlayStartFrom = 0; // Play Start From this Sample(frame) need for GetTime if use SetTime
+	
 	bool Repeat = false;
 
+	/*
 	size_t StartFrame = 0; // set in SetStartTime
 	size_t EndFrame = 0;   // set in SetEndTime 
-
+	*/
 
 	void BufferEnd();
 	void RecreateVoice();
@@ -77,7 +78,6 @@ class QFAEXPORT QFAAudio
 		return (size_t)((double)GetTime() / Loader.FrameTime);
 	}
 
-	bool CheckBufferEnd(XAUDIO2_BUFFER& buffer);
 public:
 	// if isAudioStream == false all file be store in memory
 	// if isAudioStream == true buffer be have size bufferSize
@@ -104,14 +104,12 @@ public:
 	}
 	/*
 		get curent play time in millisecond
-		can give time more than set in SetEndTime to 150 millisecond
 	*/
 	size_t GetTime();
 	/*
 		set curent play time in millisecond
 		if millisecond < SetStartTime audio be play from SetStartTime
-		if millisecond > SetEndTime and Repeat == true play from SetStartTime if not ignore
-
+		if millisecond >= SetEndTime and Repeat == true play from SetStartTime if not ignore
 	*/
 	void SetTime(size_t millisecond);
 
@@ -125,11 +123,19 @@ public:
 		if current time < millisecond time will set in millisecond
 		if millisecond >= SetEndTime value be ignored
 	*/
-	void SetStartTime(size_t millisecond);
+	inline void SetStartTime(size_t millisecond)
+	{
+		Loader.SetStartTime(millisecond);
+	}
+	
 
 	/*	
 		Audio end play in millisecond
-		if millisecond <= SetStartTime value be ignored		
+		if millisecond <= SetStartTime value be ignored
 	*/
-	void SetEndTime(size_t millisecond);
+	inline void SetEndTime(size_t millisecond)
+	{
+		Loader.SetEndTime(millisecond);
+	}
+	
 };
