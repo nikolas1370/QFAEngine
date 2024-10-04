@@ -17,6 +17,7 @@ QFAVKPipeline::QFAVKPipeline(QFAPipelineCreateInfo& PipInfo)
     VkShaderModule vertShaderModule{};    
     VkShaderModule fragShaderModule{};
     VkPipelineShaderStageCreateInfo shaderStages[2];
+    shaderStages[0].flags = shaderStages[1].flags = 0;
     
     if (PipInfo.DescriptorSetLayoutCount > MaxDescriptorSetLayoutCount)
         stopExecute("QFAPipelineCreateInfo::DescriptorSetLayoutCount >  MaxDescriptorSetLayoutCount. Need increase QFAVKPipeline::MaxDescriptorSetLayoutCount");
@@ -239,7 +240,12 @@ QFAVKPipeline::QFAVKPipeline(QFAPipelineCreateInfo& PipInfo)
     depthStencil.back = PipInfo.DepthStencil.Back;
 
     pipelineInfo.pDepthStencilState = &depthStencil;
-
+    /*
+    validation layer: Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-flags-parameter ] | MessageID = 0x17e5c82f 
+    | vkCreateGraphicsPipelines(): pCreateInfos[0].pStages[0].flags contains flag bits (0x10) which are not recognized members of
+    VkPipelineShaderStageCreateFlagBits. The Vulkan spec states: flags must be a valid combination of VkPipelineShaderStageCreateFlagBits
+    values (https://vulkan.lunarg.com/doc/view/1.3.290.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-flags-parameter)
+    */
     if (vkCreateGraphicsPipelines(QFAVKLogicalDevice::GetDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS)
         stopExecute("failed to create graphics pipeline!");
 

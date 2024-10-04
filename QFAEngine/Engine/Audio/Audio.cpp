@@ -128,7 +128,7 @@ XAUDIO2_BUFFER& QFAAudio::ReadBuffer(bool next, size_t millisecond)
 {    
     XAUDIO2_BUFFER& buffer  = next ? Loader.Read() : Loader.ReadFrom(millisecond);
     if (!buffer.AudioBytes)
-    {        
+    {
         if (Repeat)
             buffer = Loader.ReadFrom(0);
         else 

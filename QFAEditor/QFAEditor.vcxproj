@@ -76,7 +76,7 @@
     <IncludePath>C:\VulkanSDK\1.3.280.0\Include;C:\Assimp\include;$(SolutionDir)QFAEditor\Editor;$(SolutionDir)External\glfw-3.4.bin.WIN64\include;$(VC_IncludePath);$(SolutionDir)QFAEngine;$(WindowsSDK_IncludePath);$(SolutionDir)QFAEngine\Engine;$(SolutionDir)External\glfw-3.4\include;$(SolutionDir)External\icu4c-74_2\include;$(SolutionDir)External\stb;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\VulkanSDK\1.3.280.0\Include;C:\Assimp\include;$(SolutionDir)QFAEditor\Editor;$(SolutionDir)External\glfw-3.4.bin.WIN64\include;$(VC_IncludePath);$(SolutionDir)QFAEngine;$(WindowsSDK_IncludePath);$(SolutionDir)QFAEngine\Engine;$(SolutionDir)External\glfw-3.4\include;$(SolutionDir)External\icu4c-74_2\include;$(SolutionDir)External\stb;$(IncludePath)</IncludePath>
+    <IncludePath>C:\VulkanSDK\1.3.290.0\Include;$(SolutionDir)External\Assimp\include;$(SolutionDir)QFAEditor\Editor;$(SolutionDir)External\glfw-3.4.bin.WIN64\include;$(VC_IncludePath);$(SolutionDir)QFAEngine;$(WindowsSDK_IncludePath);$(SolutionDir)QFAEngine\Engine;$(SolutionDir)External\glfw-3.4\include;$(SolutionDir)External\icu4c-74_2\include;$(SolutionDir)External\stb;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -122,8 +122,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.280.0\Lib;$(SolutionDir)x64\Debug;$(SolutionDir)External\Shaderc\lib;C:\Assimp\lib\x64;$(SolutionDir)External\freetype-master 2.13.2\objs\x64\Debug;$(SolutionDir)External\icu4c-74_2\lib64</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);QFAEngine.lib;shaderc_sharedd.lib;icuuc.lib;assimp-vc143-mt.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.290.0\Lib;$(SolutionDir)x64\Debug;$(SolutionDir)External\Shaderc\lib;$(SolutionDir)External\Assimp\lib\x64;$(SolutionDir)External\freetype-master 2.13.2\objs\x64\Debug;$(SolutionDir)External\icu4c-74_2\lib64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);QFAEngine.lib;shaderc_shared.lib;icuuc.lib;assimp-vc143-mt.lib</AdditionalDependencies>
     </Link>
     <ProjectReference>
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>

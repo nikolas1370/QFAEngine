@@ -74,7 +74,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Assimp\include;$(SolutionDir)External\freetype2.13.2\include;$(SolutionDir)External\glfw-3.4.bin.WIN64\include;$(SolutionDir)QFAEngine/Engine;C:\VulkanSDK\1.3.280.0\Include;$(SolutionDir)External\stb;C:\Users\Jahi\Desktop\QFAEngine\External\minimp3;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)External\Assimp\include;$(SolutionDir)External\freetype2.13.2\include;$(SolutionDir)External\glfw-3.4.bin.WIN64\include;$(SolutionDir)QFAEngine/Engine;C:\VulkanSDK\1.3.290.0\Include;$(SolutionDir)External\stb;$(SolutionDir)External\minimp3;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>C:\Assimp\include;$(SolutionDir)External\freetype2.13.2\include;$(SolutionDir)External\glfw-3.4.bin.WIN64\include;$(SolutionDir)QFAEngine/Engine;C:\VulkanSDK\1.3.280.0\Include;$(SolutionDir)External\stb;$(IncludePath)</IncludePath>
@@ -136,7 +136,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\Jahi\Desktop\QFAEngine\External\freetype2.13.2\objs\x64\Debug;$(SolutionDir)External\glfw-3.4.bin.WIN64\lib-vc2022;C:\VulkanSDK\1.3.280.0\Lib;$(SolutionDir)External\freetype-master 2.13.2\objs\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)External\freetype2.13.2\objs\x64\Debug;$(SolutionDir)External\glfw-3.4.bin.WIN64\lib-vc2022;C:\VulkanSDK\1.3.290.0\Lib;$(SolutionDir)External\freetype-master 2.13.2\objs\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>vulkan-1.lib;glfw3.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OptimizeReferences>false</OptimizeReferences>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>

@@ -1,6 +1,6 @@
-Write engine for fun.
+All file need for this project <a href="https://github.com/nikolas1370/QFAEngineExternal">here</a>
 
-ctrl + s save level // but load level not work in editor<br>
+ctrl + s save level<br>
 ctrl + b compile cpp file in Source, status of compilation show in console and editor frozen in compile time.
 
 left mouse down on game viewport and camera turn and move

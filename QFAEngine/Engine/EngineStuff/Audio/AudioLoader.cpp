@@ -100,7 +100,7 @@ XAUDIO2_BUFFER& QFAAudioLoader::ReadFrom(size_t millisecond)
         StreamToEnd();
         return Buffers[2];
     }
-
+    
     size_t startMs = (size_t)((double)NeedStartFrom * FrameTime);
     if (millisecond < startMs)
         millisecond = startMs;
@@ -112,9 +112,25 @@ XAUDIO2_BUFFER& QFAAudioLoader::ReadFrom(size_t millisecond)
         return Buffers[2];
     }
     
-    ReadFrames = (size_t)((double)millisecond / FrameTime);
-    PlayStartFrom = ReadFrames;
-    return Read();
+    PlayStartFrom = (size_t)((double)millisecond / FrameTime);
+    const UINT32 maxSkipFrame = 2000;
+    UINT32 playBegin;
+    if (PlayStartFrom > maxSkipFrame)
+    {
+        playBegin = maxSkipFrame;
+        ReadFrames = PlayStartFrom - maxSkipFrame;
+    }
+    else
+    {        
+        ReadFrames = 0;
+        playBegin = PlayStartFrom;
+    }
+    
+    XAUDIO2_BUFFER& buff = Read();
+    if (AType == AudioType::Mp3)
+        buff.PlayBegin = playBegin;  // this is bug fix but it's lame.
+
+    return buff;
 }
 
 XAUDIO2_BUFFER& QFAAudioLoader::Read()
@@ -125,7 +141,7 @@ XAUDIO2_BUFFER& QFAAudioLoader::Read()
         return Buffers[2];
     }
 
-    XAUDIO2_BUFFER& buff = GetBuffer(ReadFrames); // 25344
+    XAUDIO2_BUFFER& buff = GetBuffer(ReadFrames);
     ReadFrames += buff.AudioBytes / FrameSize;
     return buff;
 }
@@ -208,15 +224,16 @@ XAUDIO2_BUFFER& QFAAudioLoader::GetBufferMp3(const size_t frame, const char* inp
         needDecodeMp3Frame = tem;
     }
 
-    size_t countMp3FrameRead = frame / CountFrameInMp3Frame; 
+    size_t countMp3FrameRead = frame / CountFrameInMp3Frame;  
     const size_t startCountMp3FrameRead = countMp3FrameRead;
     for (size_t i = 0; i < needDecodeMp3Frame; i++)
     {
         if (!FindMp3Frame(countMp3FrameRead, offset, notNeed) || offset >= Mp3FileSize)
             break;
-        
-        int mp3Size = offset + MaxMp3FrameSize > Mp3FileSize ? Mp3FileSize - offset : MaxMp3FrameSize;      
+
+        int mp3Size = offset + MaxMp3FrameSize * MaxAmountFrameInFramesBlock > Mp3FileSize ? Mp3FileSize - offset : MaxMp3FrameSize * MaxAmountFrameInFramesBlock;
         offset -= fileOffset;
+
         const int frameCount = DecodeMp3(inputBuffer + offset, mp3Size, Buffers[1].pAudioData + outOffset);
         countMp3FrameRead++;
 
@@ -229,15 +246,21 @@ XAUDIO2_BUFFER& QFAAudioLoader::GetBufferMp3(const size_t frame, const char* inp
         }
     }
 
-    if (needSetEnd)
+    tem = ReadFrames + outOffset / FrameSize;
+    if (needSetEnd || tem > EndReadFrame)
+    {
         buf.Flags = XAUDIO2_END_OF_STREAM;
+        buf.AudioBytes = outOffset - (tem - EndReadFrame) * FrameSize;
+    }
     else
+    {
         buf.Flags = 0;
-
+        buf.AudioBytes = outOffset;
+    }
+    
     buf.PlayLength = 0;
     buf.PlayBegin = 0;
     buf.pAudioData = Buffers[1].pAudioData;
-    buf.AudioBytes = outOffset;
     return buf;
 }
 
@@ -283,7 +306,9 @@ void QFAAudioLoader::SetStartTime(size_t millisecond)
 
     NeedStartFrom = millisecond / FrameTime;    
     if (curentTime < millisecond)
-        ParentAudio->SetTime(millisecond);    
+    {
+        ParentAudio->SetTime(millisecond);
+    }
 }
 
 void QFAAudioLoader::SetEndTime(size_t millisecond)
@@ -516,12 +541,14 @@ bool QFAAudioLoader::FindMp3Frame(const int index, size_t& offset, size_t& milli
 int QFAAudioLoader::DecodeMp3(const void* mp3, const int mp3Bytes, const void* outFrames)
 {
     static mp3dec_t decls = { 0 };
-    mp3dec_frame_info_t info;
+    static mp3dec_frame_info_t info;
+    static std::mutex decodeMp3Mut;
+    decodeMp3Mut.lock();
     int suc = mp3dec_decode_frame(&decls, (uint8_t*)mp3, mp3Bytes, (mp3d_sample_t*)outFrames, &info);
     if (suc == 0) // some time mp3dec_decode_frame can not work need try twice
-    {
         suc = mp3dec_decode_frame(&decls, (uint8_t*)mp3, mp3Bytes, (mp3d_sample_t*)outFrames, &info);
-    }
 
-    return hdr_frame_samples(decls.header);
+    int ret = hdr_frame_samples(decls.header);
+    decodeMp3Mut.unlock();
+    return ret;
 }
