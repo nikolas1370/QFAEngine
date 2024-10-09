@@ -5,7 +5,6 @@
 class QFAEngineWindow;
 class ACameraEditor : public ACameraActor
 {
-
 	FVector InputAxis = 0.0f;
 	FVector2D MouseAxis = 0.0f;
 	bool MosePress = false;

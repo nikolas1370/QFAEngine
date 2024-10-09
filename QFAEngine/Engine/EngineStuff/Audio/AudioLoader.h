@@ -4,13 +4,15 @@
 #include <vector>
 #include <array>
 class QFAAudio;
-class QFAAudioLoader // only for QFAAudio
+class QFAAudio3D;
+class QFAEXPORT QFAAudioLoader // only for QFAAudio
 {// load and extract audio
 	/*
 		amount samples in frame equal numper of channels
 		mp3Frame != frame
 	*/
 	friend QFAAudio;
+	friend QFAAudio3D;
 	static const unsigned char MaxAmountFrameInFramesBlock = 10;
 	enum OpenStatus
 	{
@@ -114,6 +116,7 @@ class QFAAudioLoader // only for QFAAudio
 	QFAAudioLoader() {}
 	~QFAAudioLoader();	
 	OpenStatus OpenFile(const std::u32string& fileName, bool isAudioStream, const size_t bufferSize);
+	void Delete();
 	void AllocMemory();
 	OpenStatus GetWavInfo();
 	bool GetMp3Info();

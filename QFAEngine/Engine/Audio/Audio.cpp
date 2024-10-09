@@ -6,13 +6,40 @@ using std::cout;
 
 QFAAudio::QFAAudio(const std::u32string& fileName, bool isAudioStream, const size_t bufferSize)
 {    
+    SetAudio(fileName, isAudioStream, bufferSize);
+
+}
+
+QFAAudio::QFAAudio()
+{
+
+}
+
+QFAAudio::~QFAAudio()
+{
+    if (XAudio2SourceVoice)
+        XAudio2SourceVoice->DestroyVoice();
+}
+
+void QFAAudio::SetAudio(const std::u32string& fileName, bool isAudioStream, const size_t bufferSize)
+{
+    Loader.Delete();
     Loader.ParentAudio = this;
     // CoInitializeEx(nullptr, COINIT_MULTITHREADED); // First, you need to have initialized COM. If you're using C++/WinRT, then it's taken care of. If you're not certain that your environment has already initialized COM, then you can call CoInitializeEx as long as you check the return value.
     // if use CoInitializeEx not forget use CoUninitialize();
-    if (Loader.OpenFile(fileName, isAudioStream, bufferSize))
-        stopExecute("");
+    if (QFAAudioLoader::OpenStatus stat = Loader.OpenFile(fileName, isAudioStream, bufferSize))
+        stopExecute(stat);
 
-    if(!XAudio2) // init QFAAudio
+    Init();
+    HRESULT hr = XAudio2->CreateSourceVoice(&XAudio2SourceVoice, (WAVEFORMATEX*)&Loader.Wfx, 0, XAUDIO2_DEFAULT_FREQ_RATIO, &VoiceCallback);
+    VoiceCallback.QAudio = this;
+    if (FAILED(hr))
+        stopExecute(hr);
+}
+
+void QFAAudio::Init()
+{
+    if (!XAudio2) // init QFAAudio
     {
         HRESULT hr = XAudio2Create(&XAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR); // To create an instance of the XAudio2 engine, call the XAudio2Create function. That will give you a pointer to an IXAudio2 interface, and it's a good idea to store that in a class data member. In this snippet we're using a C++/WinRT smart pointer, but you could use a raw pointer if necessary.
         if (FAILED(hr))
@@ -21,17 +48,14 @@ QFAAudio::QFAAudio(const std::u32string& fileName, bool isAudioStream, const siz
         // Next, to create what's known as a mastering voice, call the IXAudio2::CreateMasteringVoice method. That will give you a pointer to an IXAudio2MasteringVoice interface. A mastering voices encapsulates an audio device. It's the ultimate destination for all audio that passes through an audio graph.
         XAudio2->CreateMasteringVoice(&XAudio2MasteringVoice);
     }
-
-    HRESULT hr = XAudio2->CreateSourceVoice(&XAudio2SourceVoice, (WAVEFORMATEX*)&Loader.Wfx, 0, XAUDIO2_DEFAULT_FREQ_RATIO, &VoiceCallback);
-    VoiceCallback.QAudio = this;
-    if (FAILED(hr))
-        stopExecute("");
 }
 
-QFAAudio::~QFAAudio()
+DWORD QFAAudio::GetChannelMask()
 {
-    if(XAudio2SourceVoice)
-        XAudio2SourceVoice->DestroyVoice();
+    DWORD dwChannelMask;
+    XAudio2MasteringVoice->GetChannelMask(&dwChannelMask);
+    
+    return dwChannelMask;
 }
 
 void QFAAudio::SetVolume(const float volume) 

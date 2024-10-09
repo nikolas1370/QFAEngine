@@ -2,8 +2,10 @@
 #include <Tools/Stuff.h>
 #include <EngineStuff/Audio/AudioLoader.h>
 
+class QFAAudio3D;
 class QFAEXPORT QFAAudio
 {
+	friend QFAAudio3D;
 	class VoiceCallback : public IXAudio2VoiceCallback
 	{
 	public:
@@ -21,6 +23,7 @@ class QFAEXPORT QFAAudio
 		void OnLoopEnd(void* pBufferContext) override {    }
 		void OnVoiceError(void* pBufferContext, HRESULT Error) override { }
 	};
+	
 	friend VoiceCallback;
 
 
@@ -54,6 +57,7 @@ class QFAEXPORT QFAAudio
 
 	// A mastering voice is used to represent the audio output device.
 	static IXAudio2MasteringVoice* XAudio2MasteringVoice;
+	/// onen audio one IXAudio2SourceVoice
 	IXAudio2SourceVoice* XAudio2SourceVoice = nullptr;
 
 	VoiceCallback VoiceCallback;
@@ -64,11 +68,8 @@ class QFAEXPORT QFAAudio
 	bool AudioPlay = false;
 	
 	bool Repeat = false;
-
-	/*
-	size_t StartFrame = 0; // set in SetStartTime
-	size_t EndFrame = 0;   // set in SetEndTime 
-	*/
+	static void Init();
+	static DWORD GetChannelMask();
 
 	void BufferEnd();
 	void RecreateVoice();
@@ -82,7 +83,9 @@ public:
 	// if isAudioStream == false all file be store in memory
 	// if isAudioStream == true buffer be have size bufferSize
 	QFAAudio(const std::u32string& fileName, bool isAudioStream, const size_t bufferSize = 102400);// 100kb
+	QFAAudio();
 	~QFAAudio();
+	void SetAudio(const std::u32string& fileName, bool isAudioStream, const size_t bufferSize = 102400);
 	void Play();
 	void Stop();
 	void SetRepeat(const bool repeat)

@@ -114,27 +114,15 @@ std::thread::id QFAOverlord::GetMainThreadId()
     return MainThreadId;
 }
 
+
 void QFAOverlord::MainLoop()
 {
     static int count = 0;
     static double deltaAcum = 0;
     float timePassedAcum = 0;
 
-    QFAAudio* audio = new QFAAudio(
-        U"videoplayback_2_cut.mp3", true);         
-
-    audio->SetVolume(0.9);
-    audio->Play();
-    audio->SetRepeat(true);
-
-    audio->SetStartTime(1000); 
-    audio->SetEndTime(2000);
-    audio->SetTime(1500);
-
     while (true)
-    {   
-        std::cout << audio->GetTime() / 1000.0 << " \n";
-
+    {          
         if (FrameStarted)
             FrameStarted();
    
