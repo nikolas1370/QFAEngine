@@ -90,7 +90,12 @@ void QFAAudioLoader::Delete()
     if (!FileName.empty())
     {
         FileName.clear();
-        free((void*)Buffers[0].pAudioData);
+
+        if(AType == AudioType::Mp3)
+            free((void*)Decls);
+        else
+            free((void*)Buffers[0].pAudioData);
+
         if (IsAudioStream)
             FileStream.Close();
     }
@@ -148,7 +153,7 @@ XAUDIO2_BUFFER& QFAAudioLoader::Read()
     }
 
     XAUDIO2_BUFFER& buff = GetBuffer(ReadFrames);
-    ReadFrames += buff.AudioBytes / FrameSize;
+    ReadFrames += buff.AudioBytes / FrameSize;    
     return buff;
 }
 
@@ -175,12 +180,14 @@ void QFAAudioLoader::AllocMemory()
         Mp3FileSize = stream.GetFileSize();
         if (IsAudioStream)
         {
-            Buffers[0].pAudioData = (BYTE*)malloc(MaxMp3Buffersize + MaxBuffersize);
+            Decls = (mp3dec_t*)malloc(sizeof(*Decls) + MaxMp3Buffersize + MaxBuffersize);
+            Buffers[0].pAudioData = (BYTE*)Decls + sizeof(*Decls);
             Buffers[1].pAudioData = Buffers[0].pAudioData + MaxMp3Buffersize;
         }
         else
         {
-            Buffers[0].pAudioData = (BYTE*)malloc(stream.GetFileSize() + MaxBuffersize);
+            Decls = (mp3dec_t*)malloc(sizeof(*Decls) + stream.GetFileSize() + MaxBuffersize);
+            Buffers[0].pAudioData = (BYTE*)Decls + sizeof(*Decls);
             Buffers[1].pAudioData = Buffers[0].pAudioData + stream.GetFileSize();
             size_t count;
             stream.Read(stream.GetFileSize(), Buffers[0].pAudioData, count);
@@ -546,77 +553,17 @@ bool QFAAudioLoader::FindMp3Frame(const int index, size_t& offset, size_t& milli
 
 int QFAAudioLoader::DecodeMp3(const void* mp3, const int mp3Bytes, const void* outFrames)
 {
-    static mp3dec_t decls = { 0 };
-    static mp3dec_frame_info_t info;
+    mp3dec_frame_info_t info;
     static std::mutex decodeMp3Mut;
     decodeMp3Mut.lock();
-    int suc = mp3dec_decode_frame(&decls, (uint8_t*)mp3, mp3Bytes, (mp3d_sample_t*)outFrames, &info);
+    int suc = mp3dec_decode_frame(Decls, (uint8_t*)mp3, mp3Bytes, (mp3d_sample_t*)outFrames, &info);
     if (suc == 0) // some time mp3dec_decode_frame can not work need try twice
-        suc = mp3dec_decode_frame(&decls, (uint8_t*)mp3, mp3Bytes, (mp3d_sample_t*)outFrames, &info);
+    {
+        suc = mp3dec_decode_frame(Decls, (uint8_t*)mp3, mp3Bytes, (mp3d_sample_t*)outFrames, &info);
+        if (suc == 0)
+            suc = hdr_frame_samples(Decls->header);
+    }
 
-    int ret = hdr_frame_samples(decls.header);
     decodeMp3Mut.unlock();
-    return ret;
+    return suc;
 }
-
-/*
-    Audio.SetAudio(fileName, isAudioStream, bufferSize);
-    Init();
-
-
-
-
-    X3DAUDIO_LISTENER Listener = {}; // https://learn.microsoft.com/en-us/windows/win32/api/x3daudio/ns-x3daudio-x3daudio_listener
-
-
-    X3DAUDIO_EMITTER Emitter = {};//https://learn.microsoft.com/en-us/windows/win32/api/x3daudio/ns-x3daudio-x3daudio_emitter
-    Emitter.ChannelCount = 2;
-    Emitter.CurveDistanceScaler = Emitter.DopplerScaler = 1.0f;
-
-    float azimuths[4] = {-1,0 , 1, 0};
-    // next set if ChannelCount greater than 1
-    Emitter.pChannelAzimuths = azimuths; //  left microphone is at (−1,0), right microphone is at (+1,0)
-    Emitter.ChannelRadius = 0.0f;
-
-    Listener.OrientFront = X3DAUDIO_VECTOR{ 1, 0, 0 };
-    Listener.OrientTop = X3DAUDIO_VECTOR{ 0, 0, 1 };
-    Listener.Position = X3DAUDIO_VECTOR{ 0,0,0 };
-    Listener.Velocity = X3DAUDIO_VECTOR{ 0,0,0 };
-
-    Emitter.OrientFront = X3DAUDIO_VECTOR{ 1, 0, 0 };
-    Emitter.OrientTop = X3DAUDIO_VECTOR{ 0, 0, 1 };
-    Emitter.Position = X3DAUDIO_VECTOR{ 1000,1000,1000 };
-    Emitter.Velocity = X3DAUDIO_VECTOR{ 10000,100000,0 };
-
-
-    // Call X3DAudioCalculate to calculate new settings for the voices.
-    X3DAUDIO_DSP_SETTINGS DSPSettings; // зроби як в прикладі
-    FLOAT32* matrix = new FLOAT32[2]; // deviceDetails.OutputFormat.Format.nChannels
-    DSPSettings.SrcChannelCount = 1;
-    DSPSettings.DstChannelCount = 2; // deviceDetails.OutputFormat.Format.nChannels
-    DSPSettings.pMatrixCoefficients = matrix;
-
-    X3DAudioCalculate(QFAAudio3D::X3DInstance, &Listener, &Emitter,
-        X3DAUDIO_CALCULATE_MATRIX | X3DAUDIO_CALCULATE_DOPPLER | X3DAUDIO_CALCULATE_LPF_DIRECT | X3DAUDIO_CALCULATE_REVERB,
-        &DSPSettings);
-
-
-    //IXAudio2SourceVoice < IXAudio2Voice
-    //Audio.XAudio2SourceVoice->SetOutputMatrix(Audio.XAudio2MasteringVoice, 1, deviceDetails.OutputFormat.Format.nChannels, DSPSettings.pMatrixCoefficients)
-    //Use IXAudio2Voice::SetOutputMatrix and IXAudio2SourceVoice::SetFrequencyRatio to apply the volume and pitch values to the source voice.
-    Audio.XAudio2SourceVoice->SetOutputMatrix(Audio.XAudio2MasteringVoice, 1, 2, DSPSettings.pMatrixCoefficients);
-    Audio.XAudio2SourceVoice->SetFrequencyRatio(DSPSettings.DopplerFactor);
-
-    //Use IXAudio2Voice::SetOutputMatrix to apply the calculated reverb level to the submix voice.
-    //pSFXSourceVoice->SetOutputMatrix(pSubmixVoice, 1, 1, &DSPSettings.ReverbLevel);
-
-    //Use IXAudio2Voice::SetFilterParameters to apply the calculated low pass filter direct coefficient to the source voice.
-    XAUDIO2_FILTER_PARAMETERS FilterParameters = { LowPassFilter, 2.0f * sinf(X3DAUDIO_PI / 6.0f * DSPSettings.LPFDirectCoefficient), 1.0f };
-    Audio.XAudio2SourceVoice->SetFilterParameters(&FilterParameters);
-
-        //SetFrequencyRatio
-    //std::cout << "lox\n";
-    //stopExecute("")
-    Audio.Play();
-
-*/

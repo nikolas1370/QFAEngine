@@ -3,6 +3,9 @@
 #include <Tools/File/FileSystem.h>
 #include <vector>
 #include <array>
+
+// remove
+#include "minimp3_ex.h"
 class QFAAudio;
 class QFAAudio3D;
 class QFAEXPORT QFAAudioLoader // only for QFAAudio
@@ -53,9 +56,9 @@ class QFAEXPORT QFAAudioLoader // only for QFAAudio
 	*/
 	static uint8_t Mp3Buffer[Mp3BufferSize]; //store part of mp3 file	
 	std::vector<Mp3FramesBlock> FramesBlock;
+	mp3dec_t* Decls = nullptr;
 	unsigned char LastBlockSize = 0; // last block(in FramesBlock) have this number mp3Frame
 	int CountFrameInMp3Frame = 0; // use in mp3
-
 
 	AudioType AType = UndefinedAudioType;
 
