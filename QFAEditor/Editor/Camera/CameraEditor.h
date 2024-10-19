@@ -21,6 +21,7 @@ public:
 	{
 		return Speed;
 	}
+
 	inline void SetSpeed(float speed)
 	{
 		Speed = speed;

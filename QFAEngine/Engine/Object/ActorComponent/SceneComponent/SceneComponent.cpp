@@ -26,6 +26,12 @@ QSceneComponent::~QSceneComponent()
 
 }
 
+void QSceneComponent::ParentChanged()
+{
+	for (size_t i = 0; i < ListComponents.Length(); i++)
+		ListComponents[i]->ParentChanged();
+} 
+
 void QSceneComponent::ChangeWorldPosition(const FVector position)
 {
 	if (IRootComponent)
@@ -34,7 +40,7 @@ void QSceneComponent::ChangeWorldPosition(const FVector position)
 		RelativePosition = 0;
 		AccumulateScale = FVector(1);
 		WorldPosition = position.ConvertToVulkanCoordinate();
-		
+		UpdatePosition();
 		for (unsigned int i = 0; i < (unsigned int)ListComponents.Length(); i++)
 			if (ListComponents[i]->IsValid())
 				ListComponents[i]->UpdateWorldPositionScale(true);
@@ -46,7 +52,7 @@ void QSceneComponent::ChangeWorldPosition(const FVector position)
 		RelativePosition = RelativePosition.ReversScale(AccumulateScale);
 		//invers RotationMatrix rotate finally position to pure relative position(pure = not scale and rotate)
 		RelativePosition = FVector(glm::inverse(ParentActorComponent->RotationMatrix) * RelativePosition.ConvertToVulkanCoordinate().GetGLMVector()).ConvertFromVulkanCoordinate();
-
+		UpdatePosition();
 		for (int i = 0; i < ListComponents.Length(); i++)
 			if (ListComponents[i]->IsValid())
 				ListComponents[i]->UpdateWorldPositionScale(true);
@@ -64,13 +70,14 @@ void QSceneComponent::ChangeLocalPosition(const FVector position)
 	QActor* temA = GetActor();
 	if (!temA->IsValid())
 		return;
+
 	AccumulateScale = ParentActorComponent->AccumulateScale * ParentActorComponent->Scale;
 	WorldPosition = (position + temA->GetActorPosition()).ConvertToVulkanCoordinate();
 	RelativePosition = (WorldPosition - ParentActorComponent->WorldPosition).ConvertFromVulkanCoordinate();
 	RelativePosition = RelativePosition.ReversScale(ParentActorComponent->AccumulateScale * ParentActorComponent->Scale);
 	//invers RotationMatrix rotate finally position to pure relative position(pure = not scale and rotate)
 	RelativePosition = FVector(glm::inverse(ParentActorComponent->RotationMatrix) * RelativePosition.ConvertToVulkanCoordinate().GetGLMVector()).ConvertFromVulkanCoordinate();
-
+	UpdatePosition();
 	for (int i = 0; i < ListComponents.Length(); i++)
 		if (ListComponents[i]->IsValid())
 			ListComponents[i]->UpdateWorldPositionScale(true);
@@ -150,6 +157,8 @@ void QSceneComponent::UpdateWorldPositionScale(bool onlyPosition)
 	WorldPosition = ParentActorComponent->WorldPosition + FVector(ass);
 	if (NeedUpdateMatrix && !onlyPosition)
 		UpdateModelMatrix();
+	else 
+		UpdatePosition();
 
 	for (int i = 0; i < ListComponents.Length(); i++)
 		if (ListComponents[i]->IsValid())
@@ -253,6 +262,7 @@ void QSceneComponent::AttachComponent(QSceneComponent* component, bool inseparab
 
 	component->UpdateWorldPositionScale(false);
 	component->ChangedParentRotation();
+	component->ParentChanged();
 }
 
 bool QSceneComponent::ForgetComponent(QSceneComponent* component)
@@ -263,6 +273,7 @@ bool QSceneComponent::ForgetComponent(QSceneComponent* component)
 	if (ListComponents.Remove(component))
 	{
 		component->ParentActorComponent = nullptr;
+		component->ParentChanged();
 		return true;
 	}
 	else

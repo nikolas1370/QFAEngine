@@ -50,7 +50,12 @@ private:
 	*/
 	void ReplaceMe(QObject* newActor) override;
 #endif 
+
+	void WasAddToWorld();
+	void WasRemoveFromWorld();
+
 protected:
+	// can use QSuper::Tick(); if wanna.
 	virtual void Tick(float deltaTime) {};
 	// set RootComponent->Inseparable = false
 	void SeparateRootComponent();

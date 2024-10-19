@@ -1,6 +1,7 @@
 #pragma once
 #include <Tools/Stuff.h>
 #include <EngineStuff/Audio/AudioLoader.h>
+#include <mutex>
 
 class QFAAudio3D;
 class QFAEXPORT QFAAudio
@@ -29,7 +30,7 @@ class QFAEXPORT QFAAudio
 
 	// The IXAudio2 interface is the core of the XAudio2 engine.
 	static IXAudio2* XAudio2; //can create multiple XAudio2
-
+	static std::mutex AudioMut;
 	/*
 		Voices are the objects XAudio2 use to process, 
 		to manipulate, and to play audio data. 
@@ -61,10 +62,6 @@ class QFAEXPORT QFAAudio
 	IXAudio2SourceVoice* XAudio2SourceVoice = nullptr;
 
 	VoiceCallback VoiceCallback;
-
-
-
-
 	bool AudioPlay = false;
 	
 	bool Repeat = false;

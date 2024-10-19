@@ -1,8 +1,10 @@
 #include <Object/Class.cpp>
 #include "main.h"
 
-bool QTest_ActorMinusOne::Red = true;
 
 QFAClassOut(Test)
 QFAClassOut(QTest_ActorMinusOne)
-QFAClassOut(QTest_Actor)
+// if move in someCode be "Class not based on Actor\n" in spawn
+QFAClassOut(ACameraEditor);
+QFAClassOut(SomeCode)
+//QFAClassOut(QTest_Actor)

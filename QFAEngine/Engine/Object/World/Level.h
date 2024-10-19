@@ -111,6 +111,7 @@ class QFAEXPORT QFALevel
 
 protected:		
 	std::u32string LevelPath;
+	QWorld* GetWorld(bool silence);
 
 private:
 	void WriteStartFile(size_t AmountActor, QFAFile* file);

@@ -13,6 +13,10 @@ class QFAEXPORT QCameraComponent : public QSceneComponent
 	friend QFAOverlord;
 	friend QFAEngineViewport;
 	friend ACameraActor;
+	friend QWorld;
+	// only main camera csn hear audio
+	static QCameraComponent* MainCamera;
+
 	// Field of view 
 	float Fov = 45;
 	float ViewDistance = 100000;
@@ -25,10 +29,18 @@ class QFAEXPORT QCameraComponent : public QSceneComponent
 	QFAEngineViewport* Viewport = nullptr;
 
 	bool IsActive = true;
+	bool CanPlayAudio = true;
+
+	void UpdatePosition() final;
+protected:
+	static void ZerosMainCamera();
+
 public:
 
 	void Activate();
-	void Deactivate();
+	void Deactivate();	
+	// Activate == true enable audio for this camera disable for old main
+	void ActivateAudio(bool Activate = true);
 	QCameraComponent()
 	{
 	
@@ -37,21 +49,16 @@ public:
 
 	~QCameraComponent();
 
-	void UpdateModelMatrix() override;
+	void UpdateModelMatrix() final;
 	
-	/* 
-	
-	rewrite because it is now child node
 
-
-	*/
-	virtual FVector GetForwardVector() const final;
-	virtual FVector GetRightVector() const final;
-	virtual FVector GetUpVector() const final;
+	FVector GetForwardVector() const final;
+	FVector GetRightVector() const final;
+	FVector GetUpVector() const final;
 
 	void SetFov(float fov);
 	void SetViewDistance(float viewDistance);
-	inline float GetFov()
+	inline float GetFov() 
 	{
 		return Fov;
 	}
@@ -65,5 +72,7 @@ public:
 	{
 		return IsActive;
 	}
+
+	static QCameraComponent* GetMainCamera();
 };
 

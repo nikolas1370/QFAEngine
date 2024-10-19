@@ -54,17 +54,18 @@ public:
     enum ObjectClasses : int // if create new engine object class not forget add in ObjectClasses and QFAClass::InitClasses
     { // id is index in QCI
         Undefined = -1,
-        Object,
-        Actor,
-        ActorComponent,
-        SceneComponent,
-        StaticMeshActor,
-        CameraActor,
-        CameraComponent,
-        MeshBase,
-        StaticMesh,
-        World,
-        DirectionLight,
+        Object = 0,
+        Actor = 1,
+        ActorComponent = 2,
+        SceneComponent = 3,
+        StaticMeshActor = 4,
+        CameraActor = 5,
+        CameraComponent = 6,
+        MeshBase = 7,
+        StaticMesh = 8,
+        World = 9,
+        DirectionLight = 10,
+        AudioSceneComponent = 11,
         MAX
     };
     static bool ClassInit ;
@@ -123,8 +124,13 @@ public:
     static size_t GetGameClassCount();
     static size_t GetEngineClassCount();
     static size_t GetClassCount();
-    // game class start from ObjectClasses::MAX index
+    
+    /*
+        game class start from ObjectClasses::MAX index
+        do not delete QFAClass
+    */
     static QFAClass* GetClass(int classId);
+    // do not delete QFAClass
     static QFAClass* GetClass(QObject* object);
 
 protected:

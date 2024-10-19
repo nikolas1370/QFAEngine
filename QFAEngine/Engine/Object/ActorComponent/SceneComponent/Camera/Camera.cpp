@@ -5,27 +5,8 @@
 #include <Object/World/World.h>
 #include <Object/Actor/Actor.h>
 QFAEngineClassOut(QCameraComponent);
-void QCameraComponent::Activate()
-{
-	if (!IsValid())
-		return;
 
-	if(Viewport)
-		Viewport->CameraChangeParameter(1);
-
-	IsActive = true;	
-}
-
-void QCameraComponent::Deactivate()
-{
-	if (!IsValid())
-		return;
-
-	if (Viewport)
-		Viewport->CameraChangeParameter(2);
-
-	IsActive = false;
-}
+QCameraComponent* QCameraComponent::MainCamera = nullptr;
 
 QCameraComponent::QCameraComponent(float fov, float viewDistance)
 {
@@ -38,6 +19,79 @@ QCameraComponent::~QCameraComponent()
 {
 	if (Viewport)
 		Viewport->ChangeCamera(nullptr);
+
+	if (QCameraComponent::MainCamera == this)
+	{
+		QCameraComponent::MainCamera = nullptr;
+		if (QWorld* camWorld = GetWorld())
+			camWorld->NewAudioActive(this);
+	}
+}
+
+void QCameraComponent::UpdatePosition()
+{
+	if (this && QCameraComponent::MainCamera == this)
+		if (QWorld* camWorld = GetWorld())
+			for (size_t i = 0; i < camWorld->AudioComponents.size(); i++)
+				camWorld->AudioComponents[i].AudioComponent->UpdateEmitterListenerParameters();
+}
+
+void QCameraComponent::ZerosMainCamera()
+{
+	QCameraComponent::MainCamera = nullptr;
+}
+
+void QCameraComponent::Activate()
+{
+	if (!IsValid())
+		return;
+
+	if (Viewport)
+		Viewport->CameraChangeParameter(1);
+
+	IsActive = true;	
+	if (CanPlayAudio && (!QCameraComponent::MainCamera || !QCameraComponent::MainCamera->Viewport))
+		ActivateAudio(true);
+	else if(QCameraComponent::MainCamera)
+	{
+		QCameraComponent* old = QCameraComponent::MainCamera;
+		old = nullptr;
+		QCameraComponent::MainCamera = nullptr;
+		old->GetWorld()->NewAudioActive(old);
+	}
+}
+
+void QCameraComponent::Deactivate()
+{
+	if (!IsValid())
+		return;
+
+	if (Viewport)
+		Viewport->CameraChangeParameter(2);
+
+	IsActive = false;
+	if (QCameraComponent::MainCamera == this)
+	{
+		QCameraComponent::MainCamera = nullptr;
+		if (QWorld* camWorld = GetWorld())
+			camWorld->NewAudioActive(this);
+	}
+}
+
+void QCameraComponent::ActivateAudio(bool activate)
+{
+	if (!this)
+		return;
+
+	CanPlayAudio = activate;
+	QCameraComponent* old = QCameraComponent::MainCamera;
+	if (activate)
+		QCameraComponent::MainCamera = this;
+	else
+		QCameraComponent::MainCamera = nullptr;
+
+	if(QWorld* world = GetWorld())
+		world->NewAudioActive(old);
 }
 
 void QCameraComponent::UpdateModelMatrix()
@@ -59,7 +113,8 @@ void QCameraComponent::UpdateModelMatrix()
 	cameraRotationMatrex = Math::DefauldMatrix3;
 	cameraRotationMatrex = Math::rotateMatrix3(cameraRotationMatrex, glm::radians(FinallyRotation.X), glm::vec3(0.0f, 0.0f, 1.0f));
 	cameraRotationMatrex = Math::rotateMatrix3(cameraRotationMatrex, glm::radians((FinallyRotation.Y) * -1), glm::vec3(1.f, 0.f, 0.f));
-	cameraRotationMatrex = Math::rotateMatrix3(cameraRotationMatrex, glm::radians((FinallyRotation.Z)), glm::vec3(0.0f, -1.0f, 0.0f));
+	cameraRotationMatrex = Math::rotateMatrix3(cameraRotationMatrex, glm::radians((FinallyRotation.Z)), glm::vec3(0.0f, -1.0f, 0.0f));	
+	UpdatePosition();	
 }
 
 FVector QCameraComponent::GetForwardVector() const
@@ -103,5 +158,10 @@ void QCameraComponent::SetFov(float fov)
 void QCameraComponent::SetViewDistance(float viewDistance)
 {
 	ViewDistance = viewDistance;
+}
+
+QCameraComponent* QCameraComponent::GetMainCamera()
+{
+	return MainCamera;
 }
 

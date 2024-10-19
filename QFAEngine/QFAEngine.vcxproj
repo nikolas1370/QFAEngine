@@ -201,6 +201,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Engine\Object\ActorComponent\ActorComponent.cpp" />
+    <ClCompile Include="Engine\Object\ActorComponent\SceneComponent\AudioSceneComponent.cpp" />
     <ClCompile Include="Engine\Object\Actor\Camera\CameraActor.cpp" />
     <ClCompile Include="Engine\Object\Actor\StaticMeshActor.cpp" />
     <ClCompile Include="Engine\Object\Class.cpp">
@@ -280,6 +281,7 @@
     <ClInclude Include="Engine\EngineStuff\Audio\AudioLoader.h" />
     <ClInclude Include="Engine\EngineStuff\Window\ViewportHolder.h" />
     <ClInclude Include="Engine\Object\ActorComponent\ActorComponent.h" />
+    <ClInclude Include="Engine\Object\ActorComponent\SceneComponent\AudioSceneComponent.h" />
     <ClInclude Include="Engine\Object\Actor\Camera\CameraActor.h" />
     <ClInclude Include="Engine\Object\Actor\StaticMeshActor.h" />
     <ClInclude Include="Engine\Object\Class.h" />

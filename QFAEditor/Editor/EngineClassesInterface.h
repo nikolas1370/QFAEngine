@@ -10,6 +10,7 @@
 #include <UI/UIList.h>
 #include <UI/UIImage.h>
 #include <Object/Actor/StaticMeshActor.h>
+#include <Object/ActorComponent/SceneComponent/Camera/Camera.h>
 
 class QFAEditorFileStorage;
 class QFAEditorExplorerFolderUnit;
@@ -102,6 +103,11 @@ class QEditorStaticMesh : public QStaticMesh
 };
 
 class QEditorWorld : public QWorld
+{
+	friend QFAEditorMainWindow;
+};
+
+class QEditorCameraComponent : public QCameraComponent
 {
 	friend QFAEditorMainWindow;
 };

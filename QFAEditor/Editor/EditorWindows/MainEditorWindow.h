@@ -74,6 +74,7 @@ class QFAEditorMainWindow
 
 	static void StartDragAndDrop(bool isCppClass, size_t id);
 	static void EndDragAndDrop(EKey::Key key);
+	void LoadLevel(QFAEditorFileStorage::QFAContentFile& cf);
 
 	void SetRunButton();
 	void StartGame();

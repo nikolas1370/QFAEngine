@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "Audio.h"
 IXAudio2* QFAAudio::XAudio2 = nullptr;
+std::mutex QFAAudio::AudioMut;
 IXAudio2MasteringVoice* QFAAudio::XAudio2MasteringVoice = nullptr;
 using std::cout;
 
@@ -73,6 +74,7 @@ void QFAAudio::RecreateVoice()
 
 size_t QFAAudio::GetTime()
 {
+    std::lock_guard<std::mutex> mutGuard(AudioMut);
     XAUDIO2_VOICE_STATE pVoiceState;
     XAudio2SourceVoice->GetState(&pVoiceState);
     return (size_t)((double)(pVoiceState.SamplesPlayed + Loader.PlayStartFrom) * Loader.FrameTime);
@@ -83,6 +85,7 @@ void QFAAudio::Stop()
     if (!XAudio2SourceVoice)
         return;
 
+    std::lock_guard<std::mutex> mutGuard(AudioMut);
     HRESULT hr = XAudio2SourceVoice->Stop(0);
     if (FAILED(hr))
         stopExecute("");
@@ -92,6 +95,7 @@ void QFAAudio::Stop()
 
 void QFAAudio::Play()
 {
+    std::lock_guard<std::mutex> mutGuard(AudioMut);
     if (AudioPlay)
         return;
 
@@ -117,6 +121,7 @@ void QFAAudio::Play()
 
 void QFAAudio::SetTime(size_t millisecond)
 {
+    std::lock_guard<std::mutex> mutGuard(AudioMut);
     if (millisecond >= Loader.EndReadFrame * Loader.FrameTime)
     {
         if (Repeat)

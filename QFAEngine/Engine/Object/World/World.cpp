@@ -8,52 +8,41 @@
 #include <Tools/String.h>
 QFAArray<QWorld*> QWorld::Worlds;
 QFAEngineClassOut(QWorld);
+
+QWorld::QWorld()
+{
+	Worlds.Add(this);
+}
+
+QWorld::~QWorld()
+{
+	StopAndClearAudio(); // need if not used QWorld::DestroyWorld
+	Worlds.Remove(this);
+}
+
 void QWorld::ProcessTicks()
 {	
-	//std::cout << "Start\n";
-	float delta = (float)QTime::GetDeltaTime();
-	for (size_t i = 0; i < Worlds.Length(); i++) // search active world		
-	{// world active if at least one viewport connect		
-		if (!Worlds[i]->GetEnable())
+	const float delta = (float)QTime::GetDeltaTime();
+	for (size_t i = 0; i < Worlds.Length(); i++) 
+	{
+		if (Worlds[i]->GetEnable())
 		{
-			if (Worlds[i]->EditorActor->IsValid() && Worlds[i]->EditorActor->CanTick)
+			for (int j = 0; j < Worlds[i]->Actors.Length(); j++)
 			{
-				Worlds[i]->EditorActor->Tick(delta);
-				ProcessSceneComponentTick(Worlds[i]->EditorActor->RootComponent);
+				if (Worlds[i]->Actors[j]->IsValid() && Worlds[i]->Actors[j]->CanTick)
+				{
+					Worlds[i]->Actors[j]->Tick(delta);
+					ProcessSceneComponentTick(Worlds[i]->Actors[j]->RootComponent);
+				}
 			}
 			
 			continue; 
 		}
 
-		bool worldProcess = false; // viewport connect to world by camera
-		for (size_t j = 0; j < QFAEngineWindow::Windows.size(); j++)
+		if (Worlds[i]->EditorActor->IsValid() && Worlds[i]->EditorActor->CanTick)
 		{
-			if ( QFAEngineWindow::Windows[j]->ShouldClose() ||
-				!QFAEngineWindow::Windows[j]->ProcessTickIfWindowsMinimized && QFAEngineWindow::Windows[j]->minimized)
-				continue;
-
-			for (size_t k = 0; k < QFAEngineWindow::Windows[j]->Viewports.size(); k++)
-			{
-				if (QFAEngineWindow::Windows[j]->Viewports[k]->GetWorld() == Worlds[i])
-				{
-					for (int o = 0; o < Worlds[i]->Actors.Length(); o++)
-					{						
-						if (Worlds[i]->Actors[o]->IsValid() && Worlds[i]->Actors[o]->CanTick)
-						{							
-							Worlds[i]->Actors[o]->Tick(delta);
-							ProcessSceneComponentTick(Worlds[i]->Actors[o]->RootComponent);
-							worldProcess = true;
-							break;
-						}
-					}
-
-					if (worldProcess)
-						break;
-				}
-			}
-
-			if (worldProcess)
-				break;
+			Worlds[i]->EditorActor->Tick(delta);
+			ProcessSceneComponentTick(Worlds[i]->EditorActor->RootComponent);
 		}
 	}
 }
@@ -63,23 +52,13 @@ void QWorld::ProcessSceneComponentTick(QSceneComponent* component)
 	if (!component->IsValid())
 		return;
 
-	float delta = (float)QTime::GetDeltaTime();
+	const float delta = (float)QTime::GetDeltaTime();
 	if (component->CanTick)
 		component->TickComponent(delta);
 
 	for (int i = 0; i < component->ListComponents.Length(); i++)
 		if (component->ListComponents[i]->IsValid())
 			ProcessSceneComponentTick(component->ListComponents[i]);
-}
-
-QWorld::QWorld()
-{
-	Worlds.Add(this);
-}
-
-QWorld::~QWorld()
-{
-	Worlds.Remove(this);
 }
 
 void QWorld::AddActor(QActor* actor)
@@ -96,6 +75,8 @@ void QWorld::AddActor(QActor* actor)
 	actor->SetActorPosition(actor->Position);
 	actor->SetActorRotation(actor->Rotation);
 	actor->SetActorScale(actor->Scale);
+	SearchAndAddAudioInList(actor->RootComponent);
+	actor->WasAddToWorld();
 }
 
 void QWorld::RemoveActor(QActor* actor)
@@ -106,7 +87,41 @@ void QWorld::RemoveActor(QActor* actor)
 	actor->ActorWorld = nullptr;
 	Actors.RemoveAt(actor->WorldIndex);
 	Actors[actor->WorldIndex]->WorldIndex = actor->WorldIndex;
+
+	SearchAndDeleteAudioInList(actor->RootComponent);
+	actor->WasRemoveFromWorld();
 }
+
+void QWorld::SearchAndAddAudioInList(QSceneComponent* scene)
+{
+	if (!scene->IsValid())
+		return;
+
+	for (size_t i = 0; i < scene->ListComponents.Length(); i++)
+	{
+		if (scene->ListComponents[i]->GetClass()->GetId() == QFAClass::ObjectClasses::AudioSceneComponent)
+		{
+			QWorld::SearchAndAddAudioInList(scene->ListComponents[i]);
+			AddAudio((QAudioSceneComponent*)scene->ListComponents[i]);
+		}
+	}
+}
+
+void QWorld::SearchAndDeleteAudioInList(QSceneComponent* scene)
+{
+	if (!scene->IsValid())
+		return;
+
+	for (size_t i = 0; i < scene->ListComponents.Length(); i++)
+	{
+		if (scene->ListComponents[i]->GetClass()->GetId() == QFAClass::ObjectClasses::AudioSceneComponent)
+		{
+			SearchAndDeleteAudioInList(scene->ListComponents[i]);
+			RemoveAudio((QAudioSceneComponent*)scene->ListComponents[i]);
+		}
+	}
+}
+
 
 #if QFA_EDITOR_ONLY
 
@@ -128,14 +143,67 @@ void QWorld::RemoveActor(QActor* actor)
 		EditorActor = actor;
 	}
 
-
 #endif
 
 void QWorld::DestroyWorld(bool deleteAllActor)
 {
+	StopAndClearAudio();	
 	if (deleteAllActor)
-		for (size_t i = 0; i < Actors.Length(); i++)
+		for (int i = Actors.Length() - 1; i >= 0; i--)
 			Actors[i]->Destroy();
 
 	Destroy();
+}
+
+void QWorld::AddAudio(QAudioSceneComponent* audio)
+{
+	if (!audio)
+		return;
+
+	for (size_t i = 0; i < AudioComponents.size(); i++)
+		if (AudioComponents[i].AudioComponent == audio)
+			return;
+
+	audio->UpdateEmitterListenerParameters();
+	AudioComponents.push_back({ audio });
+	if (audio->ShouldPlay)
+		audio->Play();
+}
+
+void QWorld::RemoveAudio(QAudioSceneComponent* audio)
+{
+	if (!audio)
+		return;
+
+	for (size_t i = 0; i < AudioComponents.size(); i++)
+	{
+		if (AudioComponents[i].AudioComponent == audio)
+		{
+			AudioComponents[i].AudioComponent->StopEngine();
+			AudioComponents.erase(AudioComponents.begin() + i);
+			return;
+		}
+	}
+}
+
+void QWorld::NewAudioActive(QCameraComponent* oldCamera)
+{
+	if (!this)
+		return;
+
+	if (QCameraComponent::MainCamera)
+		if (QWorld* camWorld = QCameraComponent::MainCamera->GetWorld())
+			if (this == camWorld)
+				return;
+
+	for (size_t i = 0; i < AudioComponents.size(); i++)
+		AudioComponents[i].AudioComponent->StopEngine();
+}
+
+void QWorld::StopAndClearAudio()
+{
+	for (size_t i = 0; i < AudioComponents.size(); i++)
+		AudioComponents[i].AudioComponent->StopEngine();
+
+	AudioComponents.clear();
 }

@@ -4,6 +4,13 @@
 #include <vector>
 #include "Class.h"
 
+#if true
+	#define QSuper __super // for vs
+#else
+	#define QSuper(NearestQBaseClass) NearestQBaseClass // for other
+#endif 
+
+
 template<typename T>
 T* NewObject()
 {		
@@ -31,8 +38,6 @@ class QFAEXPORT QObject
 
 	static const unsigned int ValidNumber = 167031;
 	unsigned int Valid = ValidNumber;
-	// need for QFAClass
-	//QFAClass* Class = nullptr;
 
 	// not delete operator new because with new call constructor in NewObject
 	static void* operator new[](size_t) = delete;

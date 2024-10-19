@@ -1,13 +1,16 @@
-#pragma once
+﻿#pragma once
 #include <Object/Object.h>
 #include <Object/World/DirectionLight/DirectionLight.h>
 #include <Tools/Array.h>
+#include <Object/ActorComponent/SceneComponent/AudioSceneComponent.h>
+#include <Math/Vector.h>
 class QActor;
 class QFAOverlord;
 class QFAEngineViewport;
 class QSceneComponent;
 class QFAEngineWindow;
 class QFALevel;
+class QCameraComponent;
 class QFAEXPORT QWorld : public QObject
 {
 	QFAEngineClassIn(QWorld);
@@ -20,19 +23,33 @@ class QFAEXPORT QWorld : public QObject
 	friend QFAEngineViewport;
 	friend QFAEngineWindow;
 	friend QFALevel;
+	friend QAudioSceneComponent;
+	friend QCameraComponent;
+
+	struct SAudio
+	{
+		QAudioSceneComponent* AudioComponent;
+		FVector LastAudioLocation = {}; 
+	};
+
+	std::vector<SAudio> AudioComponents;
 
 protected:
 	QDirectionLight DirectionLight;
+	
 	static QFAArray<QWorld*> Worlds;
-	bool IsActive = true;
+	QActor* EditorActor = nullptr;
+	QFAArray<QActor*> Actors;
 
 	/*
-		if Enable == false tick provces in EditorActor
-	
+		if true QActor::Tick() be called in all Actors
+		otherwise call EditorActor->Tick()
 	*/
-	QActor* EditorActor = nullptr;
 	bool Enable = true;
-	QFAArray<QActor*> Actors;
+	bool IsActive = true;
+	// if true QAudioSceneComponent can't play need for editor
+	bool SilenceWorld = false;
+
 
 	static void ProcessTicks();
 	static void ProcessSceneComponentTick(QSceneComponent* component);
@@ -41,6 +58,20 @@ protected:
 	
 #endif 
 	
+	// QAudioSceneComponent call it if parent component change and parent live in this world
+	void AddAudio(QAudioSceneComponent* audio);
+	// QAudioSceneComponent call it if parent component change or parent not exist
+	void RemoveAudio(QAudioSceneComponent* audio);
+	
+	/*
+		call in QCameraComponent::ActivateAudio
+		New Audio set in QCameraComponent::MainCamera
+	*/
+	void NewAudioActive(QCameraComponent* oldCamera);
+	void StopAndClearAudio();
+	void SearchAndAddAudioInList(QSceneComponent* scene);
+	void SearchAndDeleteAudioInList(QSceneComponent* scene);
+
 public:
 
 	QWorld();
@@ -69,5 +100,5 @@ public:
 		return Actors.Length();
 	}
 
-	void DestroyWorld(bool deleteAllActor = true);
+	virtual void DestroyWorld(bool deleteAllActor = true) final;
 };

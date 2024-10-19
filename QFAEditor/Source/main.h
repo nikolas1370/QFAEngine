@@ -5,6 +5,8 @@
 #include <Overlord/ContentManager.h>
 #include <UI/TextInput.h>
 
+#include "SomeCode.h"
+
 #define InGameModule
 
 class Test : public QObject
@@ -62,53 +64,27 @@ public:
 };
 */
 
+#include <Object/ActorComponent/SceneComponent/AudioSceneComponent.h>
 
-#include <EngineStuff/Window/EngineWindow.h>
-#include <Window/Viewport.h>
-#include <UI/UIImage.h>
 class QTest_ActorMinusOne : public QActor
 {
     QFAClassIn(QTest_ActorMinusOne);
-    static bool Red;
-private:
+
+    QAudioSceneComponent audio; 
 
     const float Time = 5.0f;
     float SumTime = 0.0f;
     bool SetImage1 = true;
     QCameraComponent Camera = QCameraComponent(45.0f, 1000);
     QStaticMesh* mesh = nullptr;
-    QFAUITextInput* Input;
 public:
     QTest_ActorMinusOne()
     {        
-        QFAViewport* viewport = QFAWindow::GetWindow()->GetViewport(0);
-        viewport->ChangeCamera(&Camera);
-        viewport->ActivateCamera();
+
         Camera.SetLocalPosition(FVector(-200, 0, 0));
 
-        Input = NewUI<QFAUITextInput>();
-        Input->SetValue(U"some input text");
-        viewport->AddUnit(Input);
-        Input->SetTop("15");
-        Input->SetLeft("10");
-        Input->SetBackgroundColor(QFAColor(255,0,0));
 
-        Input->Events.SetOutFocus([this]()
-            {
-                std::cout << "out\n";
-            });
-
-        Input->Events.SetInFocus([this](QFAUIUnit* unit)
-            {
-                std::cout << "in\n";
-            });
-
-        Input->Events.SetLeftMouseDown([](QFAUIUnit* unit)
-            {
-                std::cout << "SetLeftMouseDown\n";
-            });
-
-        SetTick(false);
+        SetTick(true);
         Camera.SetRotation(0);
 
         
@@ -117,46 +93,45 @@ public:
         if (!mesh)
             stopExecute("");
 
-        if (Red)
-            mesh->SetMaterial(Material(FVector(255, 0, 0), 0), 0);
-        else
-            mesh->SetMaterial(Material(FVector(0, 0, 255), 0), 0);
-
         SetRootComponent(mesh);
         mesh->AttachComponent(&Camera);
         SetActorPosition(0);
+        audio.SetAudio(U"videoplayback_2.mp3", true);
+        audio.SetRepeat(true);
 
-        Red = !Red;
+        
+        std::cout << GetClass()->GetName() << "\n";
+        mesh->AttachComponent(&audio);
+        Camera.ActivateAudio(true);
+        audio.Play(); 
+
+        
     }
 
     void Tick(float tick)
     {
-        double x, y;
-        bool inWidow = QFAWindow::GetWindow()->GetMousePosition(x, y);
-        std::cout << "Game module actor tick time = " << (inWidow ? "Mouse in window " : "Mouse out window ") << x << " " << y << "\n";
+
     }
 
     ~QTest_ActorMinusOne()
     {
         mesh->Destroy();
-        Input->Destroy();
         std::cout << "~QTest_ActorMinusOne "<< "\n";
     }
 
 
 
 };
-
+/*
 
 class QTest_Actor : public QActor
 {
     QFAClassIn(QTest_Actor)
 private:
-    
 public:
     QTest_Actor()
     {
-        
+
     }
 
     ~QTest_Actor()
@@ -165,5 +140,5 @@ public:
     }
 
 };
-
+*/
 

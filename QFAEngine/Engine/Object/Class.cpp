@@ -180,6 +180,13 @@ size_t QFAClass::GetClassCount()
     }
 
 
+#define SetEngineClass(engineClassName, engineClassId, baseOn)      \
+    QCI[engineClassId] = new QFAClassInfo<engineClassName>(true);   \
+    QCI[engineClassId]->ClassId = engineClassId;                    \
+    QCI[engineClassId]->BaseOn = baseOn;                            \
+    QCI[engineClassId]->EngineClass = engineClassId;                \
+    engineClassName::_QFAClassInfo = QCI[engineClassId];
+
 void QFAClass::InitClasses(QFAClass** engineClasses)
 {
     if (QFAClass::ClassInit)
@@ -203,71 +210,20 @@ void QFAClass::InitClasses(QFAClass** engineClasses)
         QCI[i] = engineClasses[i];
 
 #else
-    QCI[ObjectClasses::Object] = new QFAClassInfo<QObject>(true);
-    QCI[ObjectClasses::Object]->ClassId = ObjectClasses::Object;
-    QCI[ObjectClasses::Object]->BaseOn = ObjectClasses::Undefined;
-    QCI[ObjectClasses::Object]->EngineClass = ObjectClasses::Object;
-    QObject::_QFAClassInfo = QCI[ObjectClasses::Object];
 
-    QCI[ObjectClasses::Actor] = new QFAClassInfo<QActor>(true);
-    QCI[ObjectClasses::Actor]->ClassId = ObjectClasses::Actor;
-    QCI[ObjectClasses::Actor]->BaseOn = ObjectClasses::Object;
-    QCI[ObjectClasses::Actor]->EngineClass = ObjectClasses::Actor;
-    QActor::_QFAClassInfo = QCI[ObjectClasses::Actor];
+    SetEngineClass(QObject,              ObjectClasses::Object,              ObjectClasses::Undefined);
+    SetEngineClass(QActor,               ObjectClasses::Actor,               ObjectClasses::Object);
+    SetEngineClass(QActorComponent,      ObjectClasses::ActorComponent,      ObjectClasses::Object);
+    SetEngineClass(QSceneComponent,      ObjectClasses::SceneComponent,      ObjectClasses::ActorComponent);
+    SetEngineClass(AStaticMeshActor,     ObjectClasses::StaticMeshActor,     ObjectClasses::Actor);
+    SetEngineClass(ACameraActor,         ObjectClasses::CameraActor,         ObjectClasses::Actor);
+    SetEngineClass(QCameraComponent,     ObjectClasses::CameraComponent,     ObjectClasses::SceneComponent);
+    SetEngineClass(QMeshBaseComponent,   ObjectClasses::MeshBase,            ObjectClasses::SceneComponent);
+    SetEngineClass(QStaticMesh,          ObjectClasses::StaticMesh,          ObjectClasses::MeshBase);    
+    SetEngineClass(QWorld,               ObjectClasses::World,               ObjectClasses::Object);
+    SetEngineClass(QDirectionLight,      ObjectClasses::DirectionLight,      ObjectClasses::Object);
+    SetEngineClass(QAudioSceneComponent, ObjectClasses::AudioSceneComponent, ObjectClasses::SceneComponent);
 
-    QCI[ObjectClasses::ActorComponent] = new QFAClassInfo<QActorComponent>(true);
-    QCI[ObjectClasses::ActorComponent]->ClassId = ObjectClasses::ActorComponent;
-    QCI[ObjectClasses::ActorComponent]->BaseOn = ObjectClasses::Object;
-    QCI[ObjectClasses::ActorComponent]->EngineClass = ObjectClasses::ActorComponent;
-    QActorComponent::_QFAClassInfo = QCI[ObjectClasses::ActorComponent];
-
-    QCI[ObjectClasses::SceneComponent] = new QFAClassInfo<QSceneComponent>(true);
-    QCI[ObjectClasses::SceneComponent]->ClassId = ObjectClasses::SceneComponent;
-    QCI[ObjectClasses::SceneComponent]->BaseOn = ObjectClasses::ActorComponent;
-    QCI[ObjectClasses::SceneComponent]->EngineClass = ObjectClasses::SceneComponent;
-    QSceneComponent::_QFAClassInfo = QCI[ObjectClasses::SceneComponent];
-
-    QCI[ObjectClasses::StaticMeshActor] = new QFAClassInfo<AStaticMeshActor>(true);
-    QCI[ObjectClasses::StaticMeshActor]->ClassId = ObjectClasses::StaticMeshActor;
-    QCI[ObjectClasses::StaticMeshActor]->BaseOn = ObjectClasses::Actor;
-    QCI[ObjectClasses::StaticMeshActor]->EngineClass = ObjectClasses::StaticMeshActor;
-    AStaticMeshActor::_QFAClassInfo = QCI[ObjectClasses::StaticMeshActor];
-
-    QCI[ObjectClasses::CameraActor] = new QFAClassInfo<ACameraActor>(true);
-    QCI[ObjectClasses::CameraActor]->ClassId = ObjectClasses::CameraActor;
-    QCI[ObjectClasses::CameraActor]->BaseOn = ObjectClasses::Actor;
-    QCI[ObjectClasses::CameraActor]->EngineClass = ObjectClasses::CameraActor;
-    ACameraActor::_QFAClassInfo = QCI[ObjectClasses::CameraActor];
-
-    QCI[ObjectClasses::CameraComponent] = new QFAClassInfo<QCameraComponent>(true);
-    QCI[ObjectClasses::CameraComponent]->ClassId = ObjectClasses::CameraComponent;
-    QCI[ObjectClasses::CameraComponent]->BaseOn = ObjectClasses::SceneComponent;
-    QCI[ObjectClasses::CameraComponent]->EngineClass = ObjectClasses::CameraComponent;
-    QCameraComponent::_QFAClassInfo = QCI[ObjectClasses::CameraComponent];
-
-    QCI[ObjectClasses::MeshBase] = new QFAClassInfo<QMeshBaseComponent>(true);
-    QCI[ObjectClasses::MeshBase]->ClassId = ObjectClasses::MeshBase;
-    QCI[ObjectClasses::MeshBase]->BaseOn = ObjectClasses::SceneComponent;
-    QCI[ObjectClasses::MeshBase]->EngineClass = ObjectClasses::MeshBase;
-    QMeshBaseComponent::_QFAClassInfo = QCI[ObjectClasses::MeshBase];
-
-    QCI[ObjectClasses::StaticMesh] = new QFAClassInfo<QStaticMesh>(true);
-    QCI[ObjectClasses::StaticMesh]->ClassId = ObjectClasses::StaticMesh;
-    QCI[ObjectClasses::StaticMesh]->BaseOn = ObjectClasses::MeshBase;
-    QCI[ObjectClasses::StaticMesh]->EngineClass = ObjectClasses::StaticMesh;
-    QStaticMesh::_QFAClassInfo = QCI[ObjectClasses::StaticMesh];
-
-    QCI[ObjectClasses::World] = new QFAClassInfo<QWorld>(true);
-    QCI[ObjectClasses::World]->ClassId = ObjectClasses::World;
-    QCI[ObjectClasses::World]->BaseOn = ObjectClasses::Object;
-    QCI[ObjectClasses::World]->EngineClass = ObjectClasses::World;
-    QWorld::_QFAClassInfo = QCI[ObjectClasses::World];
-
-    QCI[ObjectClasses::DirectionLight] = new QFAClassInfo<QDirectionLight>(true);
-    QCI[ObjectClasses::DirectionLight]->ClassId = ObjectClasses::DirectionLight;
-    QCI[ObjectClasses::DirectionLight]->BaseOn = ObjectClasses::Object;
-    QCI[ObjectClasses::DirectionLight]->EngineClass = ObjectClasses::DirectionLight;
-    QDirectionLight::_QFAClassInfo = QCI[ObjectClasses::DirectionLight];
 #endif
 }
 

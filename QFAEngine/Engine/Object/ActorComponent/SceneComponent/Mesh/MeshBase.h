@@ -295,7 +295,7 @@ protected:
 	static void StartFrameViewpoet(glm::mat4& viewPortProjection, glm::mat3& cameraRotationMatrix, glm::mat4& directionLightMatrix);
 
 private:
-	void UpdateModelMatrix() override;
+	void UpdateModelMatrix() final;
 	inline Material* GetMaterials() const
 	{
 		return (Materials ? Materials : Mf->GetDefaultMaterials());

@@ -81,6 +81,19 @@ private:
 		return RelativePosition * AccumulateScale;
 	}
 protected:
+	// only for QCameraComponent
+	virtual void UpdatePosition() {}
+	virtual void UpdateModelMatrix() {}
+	/*
+		necessary use QSuper::ParentChanged(); inside of overide method(first row). Without work not properly
+		
+		call if 
+			component parents was change/remove
+			actor be change/remove
+			actor change/remove world 
+	*/
+	virtual void ParentChanged();
+
 	/*
 	* call inside QSceneComponent and from some child
 	*/
@@ -90,7 +103,6 @@ protected:
 	void ChangeRotation(const FVector rotation);	
 	void ChangeScale(const FVector scale);
 
-	virtual void UpdateModelMatrix() {};
 public:
 
 	QSceneComponent(); 
@@ -115,7 +127,7 @@ public:
 	*   if component has not parent the position not set
 	*	if component has parent but not conect to QActorTree position set incorrectly		 
 	*/
-	 inline void SetWorldPosition(const FVector position)
+	inline void SetWorldPosition(const FVector position)
 	{
 		ChangeWorldPosition(position);
 	}
@@ -130,7 +142,7 @@ public:
 	*   if component has not parent the position not set
 	*	if component has parent but not conect to QActor tree position set incorrectly		 
 	*/
-	 inline void SetLocalPosition(const FVector position)
+	inline void SetLocalPosition(const FVector position)
 	{
 		ChangeLocalPosition(position);
 	}
@@ -141,7 +153,7 @@ public:
 	*	if component is RootComponent the position doesn't set
 	*   if component has not parent the position not set
 	*/
-	 inline void SetRelativePosition(const FVector position)
+	inline void SetRelativePosition(const FVector position)
 	{
 		ChangeRelativePosition(position);
 	}
@@ -152,7 +164,7 @@ public:
 	}
 
 	
-	 inline void SetRotation(const FVector rotation)
+	inline void SetRotation(const FVector rotation)
 	{
 		ChangeRotation(rotation);
 	}

@@ -46,6 +46,7 @@ public:
 	{
 		Audio.Stop();
 	}
+
 	inline void SetRepeat(const bool repeat)
 	{
 		Audio.SetRepeat(repeat);

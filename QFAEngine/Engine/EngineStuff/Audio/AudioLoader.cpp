@@ -179,15 +179,15 @@ void QFAAudioLoader::AllocMemory()
         stream.Open(FileName);
         Mp3FileSize = stream.GetFileSize();
         if (IsAudioStream)
-        {
-            Decls = (mp3dec_t*)malloc(sizeof(*Decls) + MaxMp3Buffersize + MaxBuffersize);
-            Buffers[0].pAudioData = (BYTE*)Decls + sizeof(*Decls);
+        { // Decls + MaxMp3Buffersize + MaxBuffersize
+            Decls = malloc(sizeof(mp3dec_t) + MaxMp3Buffersize + MaxBuffersize);
+            Buffers[0].pAudioData = (BYTE*)Decls + sizeof(mp3dec_t); 
             Buffers[1].pAudioData = Buffers[0].pAudioData + MaxMp3Buffersize;
         }
         else
         {
-            Decls = (mp3dec_t*)malloc(sizeof(*Decls) + stream.GetFileSize() + MaxBuffersize);
-            Buffers[0].pAudioData = (BYTE*)Decls + sizeof(*Decls);
+            Decls = malloc(sizeof(mp3dec_t) + stream.GetFileSize() + MaxBuffersize);
+            Buffers[0].pAudioData = (BYTE*)Decls + sizeof(mp3dec_t);
             Buffers[1].pAudioData = Buffers[0].pAudioData + stream.GetFileSize();
             size_t count;
             stream.Read(stream.GetFileSize(), Buffers[0].pAudioData, count);
@@ -554,16 +554,13 @@ bool QFAAudioLoader::FindMp3Frame(const int index, size_t& offset, size_t& milli
 int QFAAudioLoader::DecodeMp3(const void* mp3, const int mp3Bytes, const void* outFrames)
 {
     mp3dec_frame_info_t info;
-    static std::mutex decodeMp3Mut;
-    decodeMp3Mut.lock();
-    int suc = mp3dec_decode_frame(Decls, (uint8_t*)mp3, mp3Bytes, (mp3d_sample_t*)outFrames, &info);
+    int suc = mp3dec_decode_frame((mp3dec_t*)Decls, (uint8_t*)mp3, mp3Bytes, (mp3d_sample_t*)outFrames, &info);
     if (suc == 0) // some time mp3dec_decode_frame can not work need try twice
     {
-        suc = mp3dec_decode_frame(Decls, (uint8_t*)mp3, mp3Bytes, (mp3d_sample_t*)outFrames, &info);
+        suc = mp3dec_decode_frame((mp3dec_t*)Decls, (uint8_t*)mp3, mp3Bytes, (mp3d_sample_t*)outFrames, &info);
         if (suc == 0)
-            suc = hdr_frame_samples(Decls->header);
+            suc = hdr_frame_samples(((mp3dec_t*)Decls)->header);
     }
 
-    decodeMp3Mut.unlock();
     return suc;
 }

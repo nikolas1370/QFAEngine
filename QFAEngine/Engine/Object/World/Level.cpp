@@ -141,8 +141,8 @@ QFALevel::QFALevel(std::u32string path)
 	
 #endif
 
-QWorld* QFALevel::GetWorld()
-{	
+QWorld* QFALevel::GetWorld(bool silence)
+{
 	if (!LevelPath.size())
 		return nullptr;
 
@@ -154,9 +154,12 @@ QWorld* QFALevel::GetWorld()
 	SActor* actorList = (SActor*)(fileStart + sizeof(QFAContentManager::QFAFileOnDisk) + sizeof(size_t));
 	StringOffset* si = (StringOffset*)(fileStart + File.GetFileSize() - (sizeof(StringOffset) * amountString) - sizeof(size_t));
 
-	PathClassList.resize(amountString);	
+	PathClassList.resize(amountString);
 
 	QWorld* world = NewObject<QWorld>();
+	if(silence)
+		world->SilenceWorld = true;
+
 	world->Actors.Reserve(amountActor);
 	QFAGameCodeFunctions* gApi = QFAEngineGameCode::GetAPI();
 	if (!gApi)
@@ -166,31 +169,31 @@ QWorld* QFALevel::GetWorld()
 	{
 		QActor* actor = nullptr;
 		if (actorList[i].MeshPathIndex) // actor is AStaticMeshActor
-		{ 
+		{
 			actor = (QActor*)gApi->CreateObject(QFAClass::ObjectClasses::StaticMeshActor);
-			if(!actor)
+			if (!actor)
 				stopExecute("")
 
-			AStaticMeshActor* sAMesh = (AStaticMeshActor*)actor;
+				AStaticMeshActor* sAMesh = (AStaticMeshActor*)actor;
 
 			QFAMeshData* meshData = nullptr;
 			if (PathClassList[actorList[i].MeshPathIndex]) // if hawe fileId
-			{		
+			{
 				QFAContentManager::QFAContentFile& cf = QFAContentManager::GetFile(PathClassList[actorList[i].MeshPathIndex]);
 				meshData = (QFAMeshData*)cf.file;
 			}
-			else 
+			else
 			{
 				char32_t* meshPath = (char32_t*)(fileStart + si[actorList[i].MeshPathIndex]);
 				std::u32string lox(meshPath);
 				meshData = QFAContentManager::GetMesh(lox);
 				PathClassList[actorList[i].MeshPathIndex] = meshData->FIleid;
 			}
-			
+
 			sAMesh->SetMesh(meshData);
 		}
-		else 
-		{ 
+		else
+		{
 			if (PathClassList[actorList[i].ActorClassNameIndex]) // if have classId
 			{
 				actor = (QActor*)QFAEngineGameCode::GetAPI()->CreateObject(PathClassList[actorList[i].ActorClassNameIndex]);
@@ -200,13 +203,13 @@ QWorld* QFALevel::GetWorld()
 			else
 			{
 				char32_t* className = (char32_t*)(fileStart + si[actorList[i].ActorClassNameIndex]);
-				std::u32string classNameU32(className);								
+				std::u32string classNameU32(className);
 				actor = (QActor*)QFAEngineGameCode::GetAPI()->CreateObjectByName(QFAString::U32stringToString(classNameU32).c_str());
 				if (!actor)
 					stopExecute("");
 
 				PathClassList[actorList[i].ActorClassNameIndex] = actor->GetClass()->GetId();
-			}			
+			}
 		}
 
 		if (actorList[i].ActorNameIndex)// if actor name be redacted in editor
@@ -230,6 +233,11 @@ QWorld* QFALevel::GetWorld()
 
 	PathClassList.clear();
 	return world;
+}
+
+QWorld* QFALevel::GetWorld()
+{	
+	return GetWorld(false);
 }
 
 void QFALevel::SuperString::Push(std::u32string &str, unsigned int stringOffset)

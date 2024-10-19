@@ -98,6 +98,7 @@ bool QActor::SetRootComponent(QSceneComponent* component, bool inseparable)
 		{
 			RootComponent->IRootComponent = false;
 			RootComponent->ParentActor = nullptr;
+			RootComponent->ParentChanged();
 		}
 		
 		RootComponent = nullptr;
@@ -115,18 +116,14 @@ bool QActor::SetRootComponent(QSceneComponent* component, bool inseparable)
 	{
 		RootComponent->IRootComponent = false;
 		RootComponent->ParentActor = nullptr;			
+		RootComponent->ParentChanged();
 	}
 
 	if (component->ParentActor->IsValid())
-	{
 		component->ParentActor->SetRootComponent(nullptr);
-		
-	}
 	else if (component->ParentActorComponent->IsValid())
-	{
-		component->ParentActorComponent->ForgetComponent(component);		
-	}	
-	
+		component->ParentActorComponent->ForgetComponent(component);
+
 	RootComponent = component;	
 	RootComponent->IRootComponent = true;
 	RootComponent->Inseparable = inseparable;
@@ -134,10 +131,9 @@ bool QActor::SetRootComponent(QSceneComponent* component, bool inseparable)
 	RootComponent->SetWorldPosition(Position);
 	RootComponent->SetRotation(Rotation);
 	RootComponent->SetScale(Scale);
+	RootComponent->ParentChanged();
 	return true;
 }
-
-
 
 #if QFA_EDITOR_ONLY
 
@@ -156,4 +152,17 @@ void QActor::ReplaceMe(QObject* newActor)
 		actor->SetActorScale(Scale);
 	}
 }
+
 #endif 
+
+void QActor::WasAddToWorld()
+{
+	if(RootComponent)
+		RootComponent->ParentChanged();
+}
+
+void QActor::WasRemoveFromWorld()
+{
+	if (RootComponent)
+		RootComponent->ParentChanged();
+}

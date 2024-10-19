@@ -143,7 +143,6 @@ class QFAEXPORT QFAEngineWindow
 
 	uint32_t imageIndex; // next image in sqp shain
 	bool minimized = false;
-	bool ProcessTickIfWindowsMinimized = false;
 	QFAPresentImage* PresentImage;
 
 	// Depth bias (and slope) are used to avoid shadowing artifacts
@@ -231,11 +230,6 @@ protected:
 	}
 	bool ShouldClose();
 
-	inline void SetProcessTickIfWindowsMinimized(bool processTickIfWindowsMinimized)
-	{
-		ProcessTickIfWindowsMinimized = processTickIfWindowsMinimized;
-	}
-	
 public:
 
 	static QFAEngineWindow* CreateEngineWindow(const int width, const int height, const std::string name, const bool inCenter = false, const bool decorated = true, const std::function<void()> closedFun = nullptr)
