@@ -9,7 +9,7 @@
 #include <Overlord/Overlord.h>
 #include <EditorUI/ExplorerFolderUnit.h>
 #include <UI/UIList.h>
-#include <Camera/CameraEditor.h>
+#include <Object/Actor/Camera/FlyingCamera.h>
 #include <EditorFileStorage.h>
 #include <Object/Actor/StaticMeshActor.h>
 #include <EditorUI/GameViewportInfo.h>
@@ -119,7 +119,7 @@ void QFAEditorMainWindow::PrepareGameViewport()
 	Worlds[1] = NewObject<QWorld>();
 	Worlds[0]->SetEnable(false);
 	((QEditorWorld*)Worlds[0])->SilenceWorld = true;
-	EditorCamera = NewObject<ACameraEditor>();	
+	EditorCamera = NewObject<AFlyingCamera>();
 	EditorCamera->SetTick(false);
 	EditorCamera->SetActorPosition(FVector(-200, 0, 0));
 	EditorCamera->SetActorRotation(0);
@@ -182,7 +182,7 @@ void QFAEditorMainWindow::StartGame()
 	
 	if (!((QFAEditorWindow*)&GameViewport->HoldedWindowGame)->Viewports[0]->CurentCamera)
 	{
-		ACameraEditor* ce = NewObject<ACameraEditor>();
+		AFlyingCamera* ce = NewObject<AFlyingCamera>();
 		Worlds[1]->AddActor(ce);
 		ce->SetWindowForInput(Window);
 		ce->SetActorPosition(EditorCamera->GetActorPosition());

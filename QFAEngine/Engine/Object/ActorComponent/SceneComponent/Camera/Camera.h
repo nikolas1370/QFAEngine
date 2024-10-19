@@ -4,7 +4,7 @@ class QFAEngineWindow;
 class QFAOverlord;
 class QFAEngineViewport;
 class QWorld;
-class ACameraEditor;
+class AFlyingCamera;
 class ACameraActor;
 class QFAEXPORT QCameraComponent : public QSceneComponent
 {
