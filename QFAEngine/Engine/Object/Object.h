@@ -32,9 +32,10 @@ class QFAEXPORT QObject
 	friend QFAClass;
 	template<typename T>
 	friend class QFAClassInfo;
-	friend QFAEditorGameViewportInfo;
+	friend QFAEditorGameViewportInfo;	
 	template<typename T>
 	friend T* NewObject();
+
 
 	static const unsigned int ValidNumber = 167031;
 	unsigned int Valid = ValidNumber;
@@ -53,8 +54,14 @@ class QFAEXPORT QObject
 	bool CreateInApi = false;
 #endif // QFAEDITORONLY
 protected:
-
+	/*----- QFACLASS -----*/
 	std::u32string Name;
+	static QFAClass* GetClassStatic();
+	static QFAClass* GetParentClass() { return nullptr; }
+public:
+
+	virtual QFAClass* GetClass();
+	/*----- QC END -----*/
 
 private:
 
@@ -85,11 +92,6 @@ protected:
 */
 	virtual ~QObject();
 public:
-
-	virtual QFAClass* GetClass();
-	
-
-	
 
 	inline bool IsValid()
 	{

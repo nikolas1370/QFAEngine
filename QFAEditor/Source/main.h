@@ -11,7 +11,7 @@
 
 class Test : public QObject
 {
-    QFAClassIn(Test)    
+    QFACLASS(Test)
 private:
     
 public:
@@ -29,7 +29,7 @@ public:
 #include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
 class QTest_ActorMinusOne : public QActor
 {
-    QFAClassIn(QTest_ActorMinusOne);
+    QFACLASS(QTest_ActorMinusOne);
     static bool Red;
 
 private:
@@ -68,7 +68,7 @@ public:
 
 class QTest_ActorMinusOne : public QActor
 {
-    QFAClassIn(QTest_ActorMinusOne);
+    QFACLASS(QTest_ActorMinusOne);
 
     QAudioSceneComponent audio; 
 
@@ -126,7 +126,7 @@ public:
 
 class QTest_Actor : public QActor
 {
-    QFAClassIn(QTest_Actor)
+    QFACLASS(QTest_Actor)
 private:
 public:
     QTest_Actor()

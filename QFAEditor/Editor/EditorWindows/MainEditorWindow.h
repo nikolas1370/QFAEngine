@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <UI/Text.h>
 #include <EditorFileStorage.h>
 #include <GameCodeTool/GameCodeCompiler.h>
@@ -12,7 +12,7 @@ class QFAUIEditorFileExplorer;
 class QFAUICanvas;
 class QFAEditorOverlord;
 class QFAUIList;
-class ACameraEditor;
+class AFlyingCamera;
 class QFAEditorGameViewportInfo;
 class QFAViewportHolder;
 class QFAEditorMainWindow
@@ -68,7 +68,7 @@ class QFAEditorMainWindow
 	*/
 	std::array<QWorld*, 2> Worlds;
 	QWorld* CurentWorld = nullptr;
-	ACameraEditor* EditorCamera = nullptr;
+	AFlyingCamera* EditorCamera = nullptr;
 
 	QFAEditorLevel* Level = nullptr;
 

@@ -9,6 +9,7 @@
 #include <Object/ActorComponent/SceneComponent/Camera/Camera.h>
 #include <Object/World/World.h>
 #include <Object/World/DirectionLight/DirectionLight.h>
+#include <Object/Actor/Camera/FlyingCamera.h>
 
 bool QFAClass::ClassInit = false;
 std::vector<QFAClass*> QFAClass::QCI;
@@ -118,8 +119,6 @@ QFAClass* QFAClass::GetClass(QObject* object)
     return object->GetClass();
 }
 
-
-
 size_t QFAClass::GetGameClassCount()
 {
     return QCI.size() - ObjectClasses::MAX;
@@ -167,26 +166,26 @@ size_t QFAClass::GetClassCount()
         return &QFCFs;
     }
 
-    void ___QFAGAMECODEEXPORTFUNCTIONFreeClasses___()
-    {
-        if (!QFAClass::QCI.size())
-            return;
+void ___QFAGAMECODEEXPORTFUNCTIONFreeClasses___()
+{
+    if (!QFAClass::QCI.size())
+        return;
         
 #if QFA_EDITOR_ONLY
-        QFAClass::QCIOnlyGameClass.clear();    
+    QFAClass::QCIOnlyGameClass.clear();    
 
 #endif    
-        QFAClass::QCI.clear();
-    }
+    QFAClass::QCI.clear();
+}
 
 
-#define SetEngineClass(engineClassName, engineClassId, baseOn)      \
+#define SetEngineClass(engineClassName, engineClassId)              \
     QCI[engineClassId] = new QFAClassInfo<engineClassName>(true);   \
     QCI[engineClassId]->ClassId = engineClassId;                    \
-    QCI[engineClassId]->BaseOn = baseOn;                            \
     QCI[engineClassId]->EngineClass = engineClassId;                \
     engineClassName::_QFAClassInfo = QCI[engineClassId];
 
+    
 void QFAClass::InitClasses(QFAClass** engineClasses)
 {
     if (QFAClass::ClassInit)
@@ -198,32 +197,37 @@ void QFAClass::InitClasses(QFAClass** engineClasses)
         QFAEngineClassIn()
         QFAEngineClassOut()
     */
-#if QFA_EDITOR_ONLY
+#if QFA_EDITOR_ONLY && In_Game_Module
     for (size_t i = ObjectClasses::MAX; i < QCI.size(); i++)
         QCIOnlyGameClass.push_back(QCI[i]);
 
 #endif    
 
-    
 #if In_Game_Module
     for (size_t i = 0; i < ObjectClasses::MAX; i++)
         QCI[i] = engineClasses[i];
 
+    // build class parent child tree
+    for (size_t i = 1; i < QCI.size(); i++)
+        QCI[i]->SetParent();
+
 #else
 
-    SetEngineClass(QObject,              ObjectClasses::Object,              ObjectClasses::Undefined);
-    SetEngineClass(QActor,               ObjectClasses::Actor,               ObjectClasses::Object);
-    SetEngineClass(QActorComponent,      ObjectClasses::ActorComponent,      ObjectClasses::Object);
-    SetEngineClass(QSceneComponent,      ObjectClasses::SceneComponent,      ObjectClasses::ActorComponent);
-    SetEngineClass(AStaticMeshActor,     ObjectClasses::StaticMeshActor,     ObjectClasses::Actor);
-    SetEngineClass(ACameraActor,         ObjectClasses::CameraActor,         ObjectClasses::Actor);
-    SetEngineClass(QCameraComponent,     ObjectClasses::CameraComponent,     ObjectClasses::SceneComponent);
-    SetEngineClass(QMeshBaseComponent,   ObjectClasses::MeshBase,            ObjectClasses::SceneComponent);
-    SetEngineClass(QStaticMesh,          ObjectClasses::StaticMesh,          ObjectClasses::MeshBase);    
-    SetEngineClass(QWorld,               ObjectClasses::World,               ObjectClasses::Object);
-    SetEngineClass(QDirectionLight,      ObjectClasses::DirectionLight,      ObjectClasses::Object);
-    SetEngineClass(QAudioSceneComponent, ObjectClasses::AudioSceneComponent, ObjectClasses::SceneComponent);
+    SetEngineClass(QObject,              ObjectClasses::Object);
+    SetEngineClass(QActor,               ObjectClasses::Actor);
+    SetEngineClass(QActorComponent,      ObjectClasses::ActorComponent);
+    SetEngineClass(QSceneComponent,      ObjectClasses::SceneComponent);
+    SetEngineClass(AStaticMeshActor,     ObjectClasses::StaticMeshActor);
+    SetEngineClass(ACameraActor,         ObjectClasses::CameraActor);
+    SetEngineClass(QCameraComponent,     ObjectClasses::CameraComponent);
+    SetEngineClass(QMeshBaseComponent,   ObjectClasses::MeshBase);
+    SetEngineClass(QStaticMesh,          ObjectClasses::StaticMesh);
+    SetEngineClass(QWorld,               ObjectClasses::World);
+    SetEngineClass(QDirectionLight,      ObjectClasses::DirectionLight);
+    SetEngineClass(QAudioSceneComponent, ObjectClasses::AudioSceneComponent);
+    SetEngineClass(AFlyingCamera,        ObjectClasses::FlyingCamera);
 
 #endif
+
 }
 

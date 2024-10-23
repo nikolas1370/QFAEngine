@@ -5,6 +5,11 @@
 QFAClass* QObject::_QFAClassInfo;
 
 
+QFAClass* QObject::GetClassStatic()
+{
+    return QObject::_QFAClassInfo;
+}
+
 QObject::QObject()
 {
     

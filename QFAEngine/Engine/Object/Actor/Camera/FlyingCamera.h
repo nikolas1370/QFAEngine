@@ -1,28 +1,13 @@
 #pragma once
 #include <Window/Viewport.h>
 #include <Window/Window.h>
-
 #include <Object/Actor/Camera/CameraActor.h>
 #include <Input/Input.h>
 
-class SomeCode : public QActor
-{
-    QFACLASS(SomeCode)
-private:
-    
-public:
-    SomeCode();
-    ~SomeCode();
-    int  l;
-}; 
-
-
-
-
 class QFAEngineWindow;
-class ACameraEditor : public ACameraActor
+class QFAEXPORT AFlyingCamera : public ACameraActor
 {
-    QFACLASS(ACameraEditor)
+    QFAEngineClassIn(AFlyingCamera)
     FVector InputAxis = 0.0f;
     FVector2D MouseAxis = 0.0f;
     bool MosePress = false;
@@ -31,8 +16,8 @@ class ACameraEditor : public ACameraActor
 protected:
     void Tick(float delta) override;
 public:
-    ACameraEditor();
-    ~ACameraEditor();
+    AFlyingCamera();
+    ~AFlyingCamera();
 
     void SetWindowForInput(QFAEngineWindow* window);
     inline float GetSpeed()

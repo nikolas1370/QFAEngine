@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 /*
     compile Class.cpp in gamecode module
     if not compile linker be mad
@@ -12,33 +12,26 @@
 class QObject;
 class QActor;
 class QActorComponent;
+class QSceneComponent;
 // use inside QObject class  and put in start class before all other stuff
-#define QFAClassIn(className) static QFAClassInfo<className> _QFAClassInfo;\
-                              public:\
-                              virtual QFAClass* GetClass() {return &className::_QFAClassInfo;};\
-                              template<typename T>\
-                              friend QObject* NewObject(); \
-                              private:
-class QFAClass;
-// use in .cpp 
-#define QFAClassOut(className) QFAClassInfo<className> className::_QFAClassInfo;
+#define QFACLASS(className)                                           \
+    inline static QFAClassInfo<className> _QFAClassInfo;              \
+    static QFAClass* GetClassStatic() {return &className::_QFAClassInfo;} \
+    static QFAClass* GetParentClass() {return __super::GetClassStatic();}  \
+public:                                                               \
+    virtual QFAClass* GetClass() {return &className::_QFAClassInfo;}; \
+    template<typename T>                                              \
+    friend QObject* NewObject();    \
+    friend QFAClassInfo;                                                  \
+private:
 
+
+class QFAClass;
 extern "C" __declspec(dllexport) void* ___QFAGAMECODEEXPORTFUNCTIONGETFUNCTIONS___(QFAClass** engineClasses);
 // free engine calsses before FreeLibrary
 extern "C" __declspec(dllexport) void ___QFAGAMECODEEXPORTFUNCTIONFreeClasses___();
 
 class GameCodeCompiler;
-
-
-/*
-
-
-
-
-delete all QFAClass(QCI) from this module if hotreload
-
-
-*/
 class QFAGameCode;
 class QFAOverlord;
 /*
@@ -66,6 +59,7 @@ public:
         World = 9,
         DirectionLight = 10,
         AudioSceneComponent = 11,
+        FlyingCamera = 12,
         MAX
     };
     static bool ClassInit ;
@@ -74,10 +68,15 @@ public:
 #else
     static const bool GameModuleClass = false;
 #endif
+
+    QObject* TemObject = nullptr;
+
 protected:
     const char* ClassName;
     const char* ClassRawName;
     bool IsAbstract;
+    QFAClass* ParentClass = nullptr;
+    std::vector<QFAClass*> ChildrenList;
 
     // first ObjectClasses::MAX classes is engine class
     static std::vector<QFAClass*> QCI;
@@ -92,13 +91,12 @@ protected:
         this id temporary, can change between compilations
     */
     ObjectClasses ClassId = ObjectClasses::Undefined;
-    ObjectClasses BaseOn = ObjectClasses::Undefined;
-    ObjectClasses EngineClass = ObjectClasses::Undefined; // if Undefined this not engine class
-
-
-private:
-
-
+    // can be only Object, Actor, ActorComponent and SceneComponent (Undefined for QObject)
+    ObjectClasses BaseOn = ObjectClasses::Undefined; 
+    // if Undefined this not engine class
+    ObjectClasses EngineClass = ObjectClasses::Undefined; 
+private:    
+    
 protected:
     static void InitClasses(QFAClass** engineClasses = nullptr);
     virtual QObject* CreateObjectInside() { return nullptr; };
@@ -108,7 +106,11 @@ protected:
     static std::vector<QFAClass*>& GetGameClassList();
     QFAEXPORT static QFAClass** GetEngineClassList();// export for editor
     static std::vector<QFAClass*>& GetClassList();
-    
+    virtual void SetParent() = 0;
+    static void AddChild(QFAClass* parent, QFAClass* child)
+    {
+        parent->ChildrenList.push_back(child);
+    }
 
 #if QFA_EDITOR_ONLY
     static std::vector<QObject*>& GetListObject(size_t classId);
@@ -166,14 +168,35 @@ public:
     {
         return IsAbstract;
     }
-};
 
+    inline QFAClass* GetParentClass()
+    {
+        return ParentClass;
+    }    
+
+    inline QFAClass* GetChildClass(size_t index)
+    {
+        return ChildrenList[index];
+    }
+
+    inline size_t GetChildClassAmount()
+    {
+        return ChildrenList.size();
+    }
+
+    void GetChildrenClasses(std::vector<QFAClass*>& out)
+    {
+        for (size_t i = 0; i < ChildrenList.size(); i++)
+            out.push_back(ChildrenList[i]);
+    }
+};
 
 template<typename T>
 class QFAClassInfo : public QFAClass
 {
     friend void QFAClass::InitClasses(QFAClass** );
-private:
+    friend QObject;
+
 #if QFA_EDITOR_ONLY
     QObject* CreateObjectInside() override
     {
@@ -216,9 +239,26 @@ private:
 #endif
     QFAClassInfo(bool insideUsage)
     {
+        static_assert(std::is_base_of<QObject, T>::value, "class " __FUNCTION__" must inherited from base QObject");
+        if (std::is_base_of<QActor, T>::value)
+            BaseOn = ObjectClasses::Actor;
+        else if (std::is_base_of<QSceneComponent, T>::value)
+            BaseOn = ObjectClasses::SceneComponent;
+        else if (std::is_base_of<QActorComponent, T>::value)
+            BaseOn = ObjectClasses::ActorComponent;
+        else
+            BaseOn = ObjectClasses::Object;
+
         ClassName = typeid(T).name();
         ClassRawName = typeid(T).raw_name();
         IsAbstract = std::is_abstract<T>::value;
+    }
+
+    void SetParent() override
+    {
+        ParentClass = T::GetParentClass();
+        if (ParentClass)
+            QFAClass::AddChild(ParentClass, this);
     }
 
 public:
@@ -229,13 +269,14 @@ public:
             BaseOn = ObjectClasses::Actor;
         else if (std::is_base_of<QActorComponent, T>::value)
             BaseOn = ObjectClasses::ActorComponent;
+        else if (std::is_base_of<QSceneComponent, T>::value)
+            BaseOn = ObjectClasses::SceneComponent;
         else
             BaseOn = ObjectClasses::Object;
-
-        IsAbstract = std::is_abstract<T>::value;
+        
         ClassName = typeid(T).name();
         ClassRawName = typeid(T).raw_name();
-
+        IsAbstract = std::is_abstract<T>::value;
         ClassId = (ObjectClasses)QCI.size();
         QCI.push_back(this);
     }
@@ -261,9 +302,31 @@ struct QFAEXPORT QFAGameCodeFunctions
 #endif
 };
 
-// used only in engine
-#define QFAEngineClassIn(className) private: friend QFAClass; static QFAClass* _QFAClassInfo; public: QFAClass* GetClass() override;  private:
+/*--- only for engine ---*/
+
+/*
+    if add new engine class need add in QFAClass::InitClasses
+    and in QFAClass::ObjectClasses.
+    used only in engine
+*/
+#define QFAEngineClassIn(EngineClassName) \
+private: \
+    friend QFAClass; \
+    friend QFAClassInfo;    \
+    static QFAClass* _QFAClassInfo;/* _QFAClassInfo need store in engine side */\
+protected:\
+    static QFAClass* GetParentClass() { return __super::GetClassStatic(); }  \
+    static QFAClass* GetClassStatic();\
+public: \
+    QFAClass* GetClass() override;\
+private:
   
-// used only in engine
-#define QFAEngineClassOut(className) QFAClass* className::_QFAClassInfo; QFAClass* className::GetClass()  { return className::_QFAClassInfo; }
+#define QFAEngineClassOut(EngineClassName)\
+    QFAClass* EngineClassName::_QFAClassInfo;\
+    QFAClass* EngineClassName::GetClass() \
+    { return EngineClassName::_QFAClassInfo; }\
+    QFAClass* EngineClassName::GetClassStatic()\
+    { return EngineClassName::_QFAClassInfo; };
+
+
 

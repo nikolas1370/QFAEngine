@@ -42,9 +42,6 @@
     <ClCompile Include="Editor\EditorFileStorage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Editor\Camera\CameraEditor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Editor\EditorUI\GameViewportInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -84,9 +81,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Editor\EditorFileStorage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\Camera\CameraEditor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Editor\ModelLoader.h">

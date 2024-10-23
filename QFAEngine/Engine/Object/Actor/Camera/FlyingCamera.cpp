@@ -1,27 +1,22 @@
-#include "SomeCode.h"
-#include <iostream>
+#include "pch.h"
+#include "FlyingCamera.h"
 
-
-
-SomeCode::SomeCode()
+QFAEngineClassOut(AFlyingCamera)
+AFlyingCamera::AFlyingCamera()
 {
-    std::cout << "SomeCode constructor\n" ;
-}
-
-SomeCode::~SomeCode()
-{
-    std::cout << "~SomeCode destructor\n" ;
-}
-
-/*-------------*/
-
-
-ACameraEditor::ACameraEditor()
-{
+    // set up movement events
     QFAInputAxis3D ax = Input.CreateAxis3D("move", [this](FVector axis)
         {
             this->InputAxis = axis;
         });
+    // all value be added and send in ax
+    // if wanna delte key use ax.RemoveKey
+    ax.AddKey(EKey::W, FVector(1, 0, 0), "forward");
+    ax.AddKey(EKey::S, FVector(-1, 0, 0), "backward");
+    ax.AddKey(EKey::A, FVector(0, -1, 0), "left");
+    ax.AddKey(EKey::D, FVector(0, 1, 0), "right");
+    ax.AddKey(EKey::SPACE, FVector(0, 0, 1), "up");
+    ax.AddKey(EKey::LEFT_CONTROL, FVector(0, 0, -1), "down");
 
     Input.SetMouseMoveAxis([this](FVector2D axis)
         {
@@ -38,42 +33,28 @@ ACameraEditor::ACameraEditor()
             this->MosePress = false;
         });
 
-    SetTick(true);
-
-    ax.AddKey(EKey::W, FVector(1, 0, 0), "forward");
-    ax.AddKey(EKey::S, FVector(-1, 0, 0), "backward");
-    ax.AddKey(EKey::A, FVector(0, -1, 0), "left");
-    ax.AddKey(EKey::D, FVector(0, 1, 0), "right");
-    ax.AddKey(EKey::SPACE, FVector(0, 0, 1), "up");
-    ax.AddKey(EKey::LEFT_CONTROL, FVector(0, 0, -1), "down");
     Camera.Activate();
-    Camera.SetLocalPosition(FVector(-100, 0, 0));
-    Camera.SetRotation(0);
 
+    QFAWindow* window = QFAWindow::GetWindow();
+    QFAViewport* viewport = window->GetViewport(0);
+    ActivateCamera(viewport); // attached camera to viewport
 
-    ActivateCamera(QFAWindow::GetWindow()->GetViewport(0));
-
-    QFAClass* myClass = GetClass();
-    QFAClass* parentClass = myClass->GetParentClass();
-
-    std::cout << "My name " << myClass->GetName() << ". Paren name " << parentClass->GetName() << "\n";
-
+    SetTick(true);
 }
 
-ACameraEditor::~ACameraEditor()
+AFlyingCamera::~AFlyingCamera()
 {
     SeparateRootComponent();
-    std::cout << "~ACameraEditor " << "\n";
 }
 
-void ACameraEditor::SetWindowForInput(QFAEngineWindow* window)
+void AFlyingCamera::SetWindowForInput(QFAEngineWindow* window)
 {
     Input.ChangeWindow(window);
 }
 
-
-void ACameraEditor::Tick(float delta)
+void AFlyingCamera::Tick(float delta)
 {
+    QSuper::Tick(delta);
     if (!Camera.GetStatus())
         return;
 
@@ -91,7 +72,6 @@ void ACameraEditor::Tick(float delta)
         SetActorRotation(rot);
         MouseAxis = FVector2D(0);
     }
-
 
     SetActorPosition((GetActorForwardVector() * InputAxis.X + GetActorRightVector() * InputAxis.Y + GetActorUpVector() * InputAxis.Z).Normalize() * delta * Speed + GetActorPosition());
 }

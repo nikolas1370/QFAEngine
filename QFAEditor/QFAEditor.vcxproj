@@ -156,7 +156,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Editor\Camera\CameraEditor.cpp" />
     <ClCompile Include="Editor\EditorFileStorage.cpp" />
     <ClCompile Include="Editor\EditorOverlord.cpp" />
     <ClCompile Include="Editor\EditorUI\UIActorTransform.cpp" />
@@ -175,7 +174,6 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Editor\Camera\CameraEditor.h" />
     <ClInclude Include="Editor\EditorFileStorage.h" />
     <ClInclude Include="Editor\EditorOverlord.h" />
     <ClInclude Include="Editor\EditorWindows\OptionWindow.h" />

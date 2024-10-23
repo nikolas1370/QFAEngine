@@ -4,7 +4,7 @@
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
 #include <Object/Actor/Actor.h>
-#include <Camera/CameraEditor.h>
+#include <Object/Actor/Camera/FlyingCamera.h>
 #include <EditorFileStorage.h>
 #include <Overlord/ContentManager.h>
 #include <EngineClassesInterface.h>
@@ -36,7 +36,7 @@ class QFAEditorFileViewWindow // this window display QFAfile
 
 	bool Closed = false;
 	QFAEngineWindow* Window;
-	ACameraEditor Camera;
+	AFlyingCamera Camera;
 	QWorld World;
 	QActor Actor;
 	QStaticMesh Mesh;
