@@ -27,8 +27,9 @@ private:
 
 
 class QFAClass;
+// Engine call after load gamelib
 extern "C" __declspec(dllexport) void* ___QFAGAMECODEEXPORTFUNCTIONGETFUNCTIONS___(QFAClass** engineClasses);
-// free engine calsses before FreeLibrary
+// free gamelib before FreeLibrary
 extern "C" __declspec(dllexport) void ___QFAGAMECODEEXPORTFUNCTIONFreeClasses___();
 
 class GameCodeCompiler;

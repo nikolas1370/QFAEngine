@@ -14,6 +14,8 @@ class Test : public QObject
     QFACLASS(Test)
 private:
     
+    
+
 public:
     Test()
     {

@@ -8,6 +8,7 @@
 #include "UIParent.h"
 #include <EngineStuff/vk/TextureSampler.h>
 #include <Tools/String.h>
+#include <EngineStuff/EngineTextLocalization.h>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H  
@@ -72,6 +73,8 @@ void QFAText::Init(VkRenderPass renderPass, VkCommandPool commandPool_)
 QFAText::~QFAText()
 {
     delete vertexBufer;
+    if(TextLocal)
+        TextLocal->RemoveMe(this);
 }
 
 
@@ -508,7 +511,12 @@ void QFAText::PrepareSymbolsToGpu()
     InnerWidth = maxRightSymbolPos - minLeftSymbolPos;
 }                
 
-void QFAText::SetText(std::u32string  text)
+void QFAText::SetText(char32_t symbol)
+{
+    SetText(std::u32string(&symbol, 1));
+}
+
+void QFAText::SetText(const std::u32string& text)
 {
     if (text.length() > CountGlyphInBuffer)
     {
@@ -523,11 +531,34 @@ void QFAText::SetText(std::u32string  text)
 
     if (FontHeight == -1)
         SetTextSize(defaultTextSize);
+
+    if (TextLocal)
+    {
+        TextLocal->RemoveMe(this);
+        TextLocal = nullptr;
+    }
 }
 
-void QFAText::SetText(char32_t symbol)
+void QFAText::SetText(QFAEngineTextLocalization* text)
 {
-    SetText(std::u32string(&symbol, 1));
+    if (!text)
+        return;
+    
+    SetText(text->GetCurentString());
+    TextLocal = text;
+    TextLocal->AddMe(this);
+}
+
+void QFAText::TextLocalizationChange()
+{
+    if (TextLocal)
+    {
+        const std::u32string& str = TextLocal->GetCurentString();
+        QFAEngineTextLocalization* text = TextLocal; // don't remove
+        TextLocal = nullptr;// in SetText(const std::u32string& text)   be called TextLocal->RemoveMe 
+        SetText(str); 
+        TextLocal = text;
+    }
 }
 
 void QFAText::SetInputText(char32_t* pText, size_t pTextSize, size_t maxSize)

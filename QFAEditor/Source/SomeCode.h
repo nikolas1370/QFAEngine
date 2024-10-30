@@ -4,6 +4,7 @@
 
 #include <Object/Actor/Camera/CameraActor.h>
 #include <Input/Input.h>
+#include <UI/TextLocalization.h>
 
 class SomeCode : public QActor
 {
@@ -28,6 +29,8 @@ class ACameraEditor : public ACameraActor
     bool MosePress = false;
     QFAInput Input;
     float Speed = 1000;
+
+    LOCALTEXT(Hedgehog, "Hedgehog")
 protected:
     void Tick(float delta) override;
 public:

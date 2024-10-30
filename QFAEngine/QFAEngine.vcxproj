@@ -195,6 +195,7 @@
     <ClCompile Include="Engine\Audio\Audio.cpp" />
     <ClCompile Include="Engine\Audio\Audio3D.cpp" />
     <ClCompile Include="Engine\EngineStuff\Audio\AudioLoader.cpp" />
+    <ClCompile Include="Engine\EngineStuff\EngineTextLocalization.cpp" />
     <ClCompile Include="Engine\EngineStuff\Window\ViewportHolder.cpp" />
     <ClCompile Include="Engine\Math\Math.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
@@ -280,6 +281,7 @@
     <ClInclude Include="Engine\Audio\Audio.h" />
     <ClInclude Include="Engine\Audio\Audio3D.h" />
     <ClInclude Include="Engine\EngineStuff\Audio\AudioLoader.h" />
+    <ClInclude Include="Engine\EngineStuff\EngineTextLocalization.h" />
     <ClInclude Include="Engine\EngineStuff\Window\ViewportHolder.h" />
     <ClInclude Include="Engine\Object\ActorComponent\ActorComponent.h" />
     <ClInclude Include="Engine\Object\ActorComponent\SceneComponent\AudioSceneComponent.h" />
@@ -309,6 +311,7 @@
     <ClInclude Include="Engine\UI\Scroll.h" />
     <ClInclude Include="Engine\UI\SelectUnit.h" />
     <ClInclude Include="Engine\UI\TextInput.h" />
+    <ClInclude Include="Engine\UI\TextLocalization.h" />
     <ClInclude Include="Engine\UI\UIImage.h" />
     <ClInclude Include="Engine\UI\RenderUnit.h" />
     <ClInclude Include="Engine\UI\Text.h" />

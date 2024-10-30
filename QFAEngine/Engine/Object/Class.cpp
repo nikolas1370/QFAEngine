@@ -20,7 +20,6 @@ QFAGameCodeFunctions QFCFs;
 
 QObject* QFAClass::CreateObject(size_t classId)
 {
-
 #if In_Game_Module
     
 #else
@@ -152,19 +151,20 @@ size_t QFAClass::GetClassCount()
 
 #endif 
 
-    extern "C" void* ___QFAGAMECODEEXPORTFUNCTIONGETFUNCTIONS___(QFAClass** engineClasses)
-    {
-        QFAClass::InitClasses(engineClasses);
-        QFCFs.CreateObject = &QFAClass::CreateObject;
-        QFCFs.CreateObjectByName = &QFAClass::CreateObjectByName;
-        QFCFs.DeleteObject = &QFAClass::DeleteObject;
-        QFCFs.GetGameClassList = &QFAClass::GetGameClassList;
-        QFCFs.GetClassList = &QFAClass::GetClassList;
+extern "C" void* ___QFAGAMECODEEXPORTFUNCTIONGETFUNCTIONS___(QFAClass** engineClasses)
+{
+    // inside call QFATextLocalization::SetTextList
+    QFAClass::InitClasses(engineClasses);    
+    QFCFs.CreateObject = &QFAClass::CreateObject;
+    QFCFs.CreateObjectByName = &QFAClass::CreateObjectByName;
+    QFCFs.DeleteObject = &QFAClass::DeleteObject;
+    QFCFs.GetGameClassList = &QFAClass::GetGameClassList;
+    QFCFs.GetClassList = &QFAClass::GetClassList;
 #if QFA_EDITOR_ONLY
-        QFCFs.GetGameObjectList = &QFAClass::GetListObject;
+    QFCFs.GetGameObjectList = &QFAClass::GetListObject;
 #endif
-        return &QFCFs;
-    }
+   return &QFCFs;
+}
 
 void ___QFAGAMECODEEXPORTFUNCTIONFreeClasses___()
 {
@@ -209,9 +209,11 @@ void QFAClass::InitClasses(QFAClass** engineClasses)
 
     // build class parent child tree
     for (size_t i = 1; i < QCI.size(); i++)
-        QCI[i]->SetParent();
+        QCI[i]->SetParent();    
 
 #else
+
+
 
     SetEngineClass(QObject,              ObjectClasses::Object);
     SetEngineClass(QActor,               ObjectClasses::Actor);

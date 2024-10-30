@@ -11,9 +11,21 @@
 #include <UI/UIImage.h>
 #include <Object/Actor/StaticMeshActor.h>
 #include <Object/ActorComponent/SceneComponent/Camera/Camera.h>
+#include <EngineStuff/EngineTextLocalization.h>
 
+class QFAGameCode;
 class QFAEditorFileStorage;
 class QFAEditorExplorerFolderUnit;
+class QFAEditorMainWindow;
+class QFAModelLoader;
+class QFAEditorFileViewWindow;
+class QFAEditorOptionWindow;
+class QFAEditorMainWindow;
+class QFAEditorOverlord;
+class QFAEditorUIFileViewUnit;
+class QFAUIActorTransform;
+class QFAUIEditorFileExplorer;
+class QFAEditorGameViewportInfo;
 
 class QFAEditorImage : public QFAImage
 {
@@ -21,16 +33,14 @@ class QFAEditorImage : public QFAImage
 	friend QFAEditorFileStorage;
 };
 
-class QFAEditorMainWindow;
-class QFAModelLoader;
+
 class QFAEditorMeshData : public QFAMeshData
 {
 	friend QFAEditorMainWindow;
 	friend QFAModelLoader;
 };
 
-class QFAEditorFileViewWindow;
-class QFAEditorOptionWindow;
+
 class QFAEditorWindow : public QFAWindow
 {
 	friend QFAEditorMainWindow;
@@ -43,7 +53,7 @@ class QFAEditorViewportHolder : public QFAViewportHolder
 	friend QFAEditorMainWindow;
 };
 
-class QFAEditorMainWindow;
+
 class QFAEditorLevel : public QFALevel
 {
 	friend QFAEditorMainWindow;
@@ -53,7 +63,6 @@ class QFAEditorLevel : public QFALevel
 	}
 };
 
-class QFAEditorOverlord;
 
 class QFAEgitorClass : public QFAClass
 {
@@ -64,16 +73,14 @@ class QFAEditorActor : public QActor
 {
 	friend QFAEditorMainWindow;
 };
-class QFAEditorUIFileViewUnit;
+
 
 class QFAEditorText : public QFAText
 {
 	friend QFAEditorUIFileViewUnit;
 };
 
-class QFAUIActorTransform;
-class QFAUIEditorFileExplorer;
-class QFAEditorGameViewportInfo;
+
 class QFAEditorCanvas : public QFAUICanvas
 {
 	friend QFAUIActorTransform;
@@ -110,4 +117,9 @@ class QEditorWorld : public QWorld
 class QEditorCameraComponent : public QCameraComponent
 {
 	friend QFAEditorMainWindow;
+};
+
+class QFAEditorLocalization : public QFAEngineLocalization
+{
+	friend QFAGameCode;
 };

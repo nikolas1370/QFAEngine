@@ -8,6 +8,7 @@
 #include <Tools/Color.h>
 #include "UIParentHiddenChild.h"
 
+
 /* ttf type */
 typedef unsigned long  FT_ULong;
 struct FT_LibraryRec;
@@ -29,6 +30,7 @@ class QFAVKTextureSampler;
 class QFAUITextInput;
 class QFAUIScroll;
 class QFATextBackground;
+class QFAEngineTextLocalization;
 class QFAEXPORT QFAText : public QFAUIRenderUnit
 {
     friend QFAEngineViewport;
@@ -38,6 +40,7 @@ class QFAEXPORT QFAText : public QFAUIRenderUnit
     friend QFAUITextInput;
     friend QFAUIScroll;
     friend QFATextBackground;
+    friend QFAEngineTextLocalization;
     struct SGlyphAtlasListRow
     {
         unsigned int x = 0;// when start new Glyph in pixel
@@ -150,7 +153,7 @@ protected:
         unsigned int pen = 0; // carriage
 
         SText() {}
-        SText(std::u32string& string)
+        SText(const std::u32string& string)
         {
             text = string;
         }
@@ -335,6 +338,7 @@ private:
     unsigned int FontHeight = -1;// curent text height
     unsigned int CountGlyphInGUP = 100;
     unsigned int CountSymbolForRender = 0; // replase to TextMetadata.size()
+    QFAEngineTextLocalization* TextLocal = nullptr;
 
 protected:
     SText Text;
@@ -374,7 +378,8 @@ private:
     void Render(VkCommandBuffer comandebuffer) override;
     void RenderPen(VkCommandBuffer comandebuffer);
     QFAVKPipeline* GetPipeline() override;
-
+    // in QFATextLocalization  call
+    void TextLocalizationChange();
 protected:
     /*
         in position not include position_x and position_y
@@ -392,8 +397,13 @@ public:// std::u32string(&CppFileButtonIconCode, 1)
     QFAText();
     ~QFAText();
 
-    void SetText(std::u32string  text);
-    void SetText(char32_t symbol);
+    void SetText(const char32_t symbol);
+    void SetText(const std::u32string& text);    
+    void SetText(QFAEngineTextLocalization* text);
+    inline void SetText(QFAEngineTextLocalization& text)
+    {
+        SetText(&text);
+    }
 
     void SetTextSize(unsigned int height);
     

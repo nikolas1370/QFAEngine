@@ -8,6 +8,7 @@
 #include <EngineStuff/VulkanSuff.h>
 #include <Object/Actor/Actor.h>
 #include <Object/Class.h>
+#include <EngineStuff/EngineTextLocalization.h>
 
 
 QFAGameCode::DllFile QFAGameCode::CurentDllFile = QFAGameCode::DllFile::None;
@@ -291,6 +292,8 @@ bool QFAGameCode::LoadCode()
         {
             OldApi = GetAPI();
             SetAPI(Functions(QFAClass::GetEngineClassList()));
+            auto LocalFunction = (QFAEngineLocalization * (*)())GetProcAddress(mod, "___QFAEngineGetLocalizationInstance___");
+            QFAEditorLocalization::SetLocalizationInstance(LocalFunction());
         }
         else
         {

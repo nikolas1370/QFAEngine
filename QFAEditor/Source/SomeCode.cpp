@@ -1,6 +1,6 @@
-#include "SomeCode.h"
+﻿#include "SomeCode.h"
 #include <iostream>
-
+#include <UI/Text.h>
 
 
 SomeCode::SomeCode()
@@ -14,7 +14,6 @@ SomeCode::~SomeCode()
 }
 
 /*-------------*/
-
 
 ACameraEditor::ACameraEditor()
 {
@@ -50,14 +49,29 @@ ACameraEditor::ACameraEditor()
     Camera.SetLocalPosition(FVector(-100, 0, 0));
     Camera.SetRotation(0);
 
+    auto vierwport = QFAWindow::GetWindow()->GetViewport(0);
+    ActivateCamera(vierwport);
+    
+    QFAText* text = NewUI<QFAText>();
+    QFAText* text2 = NewUI<QFAText>();
+    QFAText* text3 = NewUI<QFAText>();
+    vierwport->AddUnit(text);
+    vierwport->AddUnit(text2);
+    vierwport->AddUnit(text3);
+    QFATextLocalization* plan = new QFATextLocalization("plankton", U"Plankton");
+    text->SetText(Hedgehog);
+    text2->SetText(plan);
+    
+    text->SetLeft("0");
+    text->SetTop("0");
+    text2->SetLeft("0");
+    text2->SetTop("30px");
 
-    ActivateCamera(QFAWindow::GetWindow()->GetViewport(0));
-
-    QFAClass* myClass = GetClass();
-    QFAClass* parentClass = myClass->GetParentClass();
-
-    std::cout << "My name " << myClass->GetName() << ". Paren name " << parentClass->GetName() << "\n";
-
+    QFALocalization* local = QFALocalization::GetLocalizationInstance();
+    local->AddLanguage("ua", U"Українська"); 
+    
+    Hedgehog.SetTextFor("ua", U"Їжачок");
+    plan->SetTextFor("ua", U"План Z");
 }
 
 ACameraEditor::~ACameraEditor()
@@ -74,6 +88,19 @@ void ACameraEditor::SetWindowForInput(QFAEngineWindow* window)
 
 void ACameraEditor::Tick(float delta)
 {
+    static float t = 0;
+    static bool defLan = false;
+
+    t += delta;
+    if (t > 2) // change local after 2 second
+    {
+        t = 0;
+        QFALocalization* local = QFALocalization::GetLocalizationInstance();
+        local->ChangeLanguage(defLan ? "eng" : "ua");
+        std::cout << "change to " << (defLan ? "eng" : "ua") << " \n";
+        defLan = !defLan;
+    }
+
     if (!Camera.GetStatus())
         return;
 
@@ -91,7 +118,6 @@ void ACameraEditor::Tick(float delta)
         SetActorRotation(rot);
         MouseAxis = FVector2D(0);
     }
-
 
     SetActorPosition((GetActorForwardVector() * InputAxis.X + GetActorRightVector() * InputAxis.Y + GetActorUpVector() * InputAxis.Z).Normalize() * delta * Speed + GetActorPosition());
 }
