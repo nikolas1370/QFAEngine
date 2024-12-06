@@ -139,9 +139,6 @@ void QFAEditorMainWindow::SetRunButton()
 {
 	RunButton->Events.SetLeftMouseDownUp([this](QFAUIUnit* unit)
 	{		
-		if (QFAGameCode::CompileInWork)
-			return;
-		
 		bool inGame = QFAEngineViewport::GetInGame();
 		QFAEngineViewport::SetInGame(!QFAEngineViewport::GetInGame());
 		if (inGame)
@@ -160,16 +157,15 @@ void QFAEditorMainWindow::StartGame()
 	CurentWorld = Worlds[1];
 	EditorCamera->ActiveInput(false);
 	((QFAEditorWindow*)&GameViewport->HoldedWindowGame)->Viewports[0]->Root.removeAllUnit();
-
 	for (size_t i = 0; i < ((QEditorWorld*)Worlds[0])->Actors.Length(); i++)
 	{	
 		QActor* actor = ((QEditorWorld*)Worlds[0])->Actors[i];
-		QObject* object = QFAGameCode::GetAPI()->CreateObject(
+		QObject* object = QFAEngineClassInstance::GetGameClassInstance()->CreateObject(
 			actor->GetClass()->GetId());
 
 		if (object)
 		{
-			if (object->GetClass()->GetId() == QFAClass::ObjectClasses::StaticMeshActor)
+			if (object->GetClass()->GetId() == QFAObjectClasses::QOCStaticMeshActor)
 				if (QFAMeshData* md = ((AEditorStaticMeshActor*)actor)->Mesh.GetMeshData())
 					((AStaticMeshActor*)object)->SetMesh(md);
 			
@@ -274,12 +270,6 @@ void QFAEditorMainWindow::CreateInput()
 			LeftCTRLPress = false;
 		});
 
-	Input->AddKeyPress(EKey::B, "LEFT_CONTROL", [this](EKey::Key key)
-		{
-			if (!QFAEngineViewport::GetInGame() && LeftCTRLPress && !QFAGameCode::CompileInWork)
-				QFAGameCode::CompileGameCode([](QFAGameCode::CompileStatus status) {});
-		});
-
 	Input->AddKeyRelease(EKey::DELETE_KEY, "delete_release", [this](EKey::Key key)
 		{
 			QActor* actor = GameViewportInfo->PressedDelete();
@@ -338,13 +328,14 @@ void QFAEditorMainWindow::EndDragAndDrop(EKey::Key key)
 		if (x >= viewportX && y >= viewportY &&
 			x <= viewportWidth && y <= viewportHeight)
 		{
+			QFAClassInstance* instance = (QFAClassInstance*)QFAEngineClassInstance::GetGameClassInstance();
+			if (!instance)
+				return;
+
 			if (MainWindow->IsCppClass)
 			{
-				if (!QFAGameCode::GetAPI())
-					return;
-
-				QFAClass* newObjectClass = (QFAGameCode::GetAPI()->GetClassList()[id]);
-				if (newObjectClass->GetBaseOn() == QFAClass::ObjectClasses::Actor)
+				QFAClass* newObjectClass = instance->GetClassList()[id];
+				if (newObjectClass->GetBaseOn() == QFAObjectClasses::QOCActor)
 				{											
 					QActor* newActor = (QActor*)NewObject(newObjectClass->GetId());
 					newActor->SetActorPosition(0);
@@ -353,7 +344,8 @@ void QFAEditorMainWindow::EndDragAndDrop(EKey::Key key)
 						newObjectClass->GetId(), true);					
 				}
 				else
-					std::cout << "Class not based on Actor\n";
+					std::cout << "Class not based on Actor \"" << newObjectClass->GetName() << "\" id=" << newObjectClass->GetId() << "\n";
+
 			}
 			else
 			{				
@@ -362,7 +354,8 @@ void QFAEditorMainWindow::EndDragAndDrop(EKey::Key key)
 					return;
 				else if (ef.fileType == QFAEditorFileStorage::QFAFileTypes::EFTMesh)
 				{					 
-					AStaticMeshActor* staticActor = (AStaticMeshActor*)(QFAGameCode::GetAPI()->CreateObject(QFAClass::ObjectClasses::StaticMeshActor));
+
+					AStaticMeshActor* staticActor = (AStaticMeshActor*)(instance->CreateObject(QFAObjectClasses::QOCStaticMeshActor));
 
 					staticActor->GetClass()->GetId();
 					staticActor->SetActorPosition(0);

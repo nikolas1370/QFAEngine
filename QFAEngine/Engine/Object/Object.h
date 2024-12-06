@@ -2,7 +2,6 @@
 #include <Tools/Stuff.h>
 #include <string>
 #include <vector>
-#include "Class.h"
 
 #if true
 	#define QSuper __super // for vs
@@ -10,26 +9,16 @@
 	#define QSuper(NearestQBaseClass) NearestQBaseClass // for other
 #endif 
 
-
-template<typename T>
-T* NewObject()
-{		
-	static_assert(std::is_base_of<QObject, T>::value, "class T must inherited from base QObject");	
-	T* t = (T*)malloc(sizeof(T));	
-	if (!t)
-		stopExecute("cannot malloc");		
-
-	return new (t) T();
-}
-
-QFAEXPORT QObject* NewObject(int classId);
-
 class QFAEditorGameViewportInfo;
 class QFAClass;
 class QFAGameCode;
+class QFAClassInstance;
+class QFAEngineClassInstance;
 class QFAEXPORT QObject
 {
 	friend QFAClass;
+	friend QFAClassInstance;
+	friend QFAEngineClassInstance;
 	template<typename T>
 	friend class QFAClassInfo;
 	friend QFAEditorGameViewportInfo;	
@@ -48,8 +37,7 @@ class QFAEXPORT QObject
 
 #if QFA_EDITOR_ONLY
     friend QFAGameCode;
-	// index in QFAClassInfo::ObjectListInside
-	size_t CompileIndex;	
+
 	// true if object be creatre with api in editor
 	bool CreateInApi = false;
 #endif // QFAEDITORONLY
@@ -110,3 +98,17 @@ public:
 		return Name;
 	}
 };
+
+
+template<typename T>
+T* NewObject()
+{
+	static_assert(std::is_base_of<QObject, T>::value, "class T must inherited from base QObject");
+	T* t = (T*)malloc(sizeof(T));
+	if (!t)
+		stopExecute("cannot malloc");
+
+	return new (t) T();
+}
+
+QFAEXPORT QObject* NewObject(int classId);

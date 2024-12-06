@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #define QFAEXPORT __declspec(dllexport)
 
 #define stopExecute(message) {\

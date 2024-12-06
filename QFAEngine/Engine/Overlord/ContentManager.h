@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <functional>
 #include <string>
 #include <Tools/Stuff.h>
 #include <Tools/File/FileSystem.h>

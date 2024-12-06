@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 #include "Object.h"
-#include <Overlord/GameCode.h>
+#include <Object/Class.h> // don't move in .h
 
 QFAClass* QObject::_QFAClassInfo;
 
@@ -25,16 +25,14 @@ QFAClass* QObject::GetClass()
     return QObject::_QFAClassInfo;
 }
 
-
-
 void QObject::Destroy()
 {
     if (!IsValid())
         return;
 
 #if QFA_EDITOR_ONLY
-    if (CreateInApi)
-        QFAEngineGameCode::GetAPI()->DeleteObject(this);
+    if (CreateInApi)        
+        QFAEngineClassInstance::GetGameClassInstance()->DeleteObject(this);
     else
     {
         this->~QObject();
@@ -48,9 +46,17 @@ void QObject::Destroy()
 
 
 QObject* NewObject(int classId)
-{
-    if (QFAGameCodeFunctions* funs = QFAEngineGameCode::GetAPI())
-        return funs->CreateObject(classId);
+{    
+    if (QFAClassInstance* instance = QFAClassInstance::GetClassInstance())
+        return instance->CreateObject(classId);
     else
         return nullptr;
 }
+
+/*
+#if In_Game_Module
+    if (QFAClassInstance* instance = QFAClassInstance::GetClassInstance())
+#else
+    if (QFAEngineClassInstance* instance = QFAEngineClassInstance::GetGameClassInstance())
+#endif // In_Game_Module
+*/

@@ -1,14 +1,14 @@
 #pragma once	
 #include <Object/Object.h>
 #include <Math/Vector.h>
-
+#include <EngineStuff/EngineClass.h>
 class QFAShaderProgram;
 class QFAEngineViewport;
 class QFAEngineWindow;
 
 class QFAEXPORT QDirectionLight : public QObject
 {
-	QFAEngineClassIn(QDirectionLight);
+	QFAEngineClassIn(QDirectionLight)
 	friend QFAEngineViewport;
 	friend QFAEngineWindow;
 

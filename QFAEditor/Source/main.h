@@ -4,7 +4,7 @@
 #include "../../QFAEngine/Engine/Object/Actor/Actor.h"
 #include <Overlord/ContentManager.h>
 #include <UI/TextInput.h>
-
+#include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
 #include "SomeCode.h"
 
 #define InGameModule
@@ -101,7 +101,6 @@ public:
         audio.SetAudio(U"videoplayback_2.mp3", true);
         audio.SetRepeat(true);
 
-        
         std::cout << GetClass()->GetName() << "\n";
         mesh->AttachComponent(&audio);
         Camera.ActivateAudio(true);

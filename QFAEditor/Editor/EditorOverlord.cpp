@@ -61,7 +61,7 @@ void QFAEditorOverlord::PrepareToWork()
     */
 
     LoadText = U"Load Game code";
-    QFAGameCode::LoadCode();  
+    QFAGameCode::LoadCode();
     LoadText = U"Load file : ";
     QFAEditorFileStorage::LoadContent(U"Content", [](std::u32string string)
     {

@@ -1,6 +1,6 @@
 #pragma once
 #include <Object/Object.h>
-
+#include <EngineStuff/EngineClass.h>
 #include "Math/Vector.h"
 class Render;
 class QWorld;

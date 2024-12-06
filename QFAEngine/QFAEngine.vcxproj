@@ -195,6 +195,7 @@
     <ClCompile Include="Engine\Audio\Audio.cpp" />
     <ClCompile Include="Engine\Audio\Audio3D.cpp" />
     <ClCompile Include="Engine\EngineStuff\Audio\AudioLoader.cpp" />
+    <ClCompile Include="Engine\EngineStuff\EngineClass.cpp" />
     <ClCompile Include="Engine\EngineStuff\EngineTextLocalization.cpp" />
     <ClCompile Include="Engine\EngineStuff\Window\ViewportHolder.cpp" />
     <ClCompile Include="Engine\Math\Math.cpp">
@@ -206,9 +207,6 @@
     <ClCompile Include="Engine\Object\Actor\Camera\CameraActor.cpp" />
     <ClCompile Include="Engine\Object\Actor\Camera\FlyingCamera.cpp" />
     <ClCompile Include="Engine\Object\Actor\StaticMeshActor.cpp" />
-    <ClCompile Include="Engine\Object\Class.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="Engine\Object\World\DirectionLight\DirectionLight.cpp" />
     <ClCompile Include="Engine\Object\ActorComponent\SceneComponent\SceneComponent.cpp" />
     <ClCompile Include="Engine\Object\ActorComponent\SceneComponent\Camera\Camera.cpp" />
@@ -222,7 +220,6 @@
     <ClCompile Include="Engine\Object\World\World.cpp" />
     <ClCompile Include="Engine\Input\Input.cpp" />
     <ClCompile Include="Engine\Overlord\ContentManager.cpp" />
-    <ClCompile Include="Engine\Overlord\GameCode.cpp" />
     <ClCompile Include="Engine\Overlord\Overlord.cpp" />
     <ClCompile Include="Engine\EngineStuff\Framebuffer\MeshFrameBuffer.cpp" />
     <ClCompile Include="Engine\EngineStuff\Framebuffer\ShadowFrameBuffer.cpp" />
@@ -281,6 +278,7 @@
     <ClInclude Include="Engine\Audio\Audio.h" />
     <ClInclude Include="Engine\Audio\Audio3D.h" />
     <ClInclude Include="Engine\EngineStuff\Audio\AudioLoader.h" />
+    <ClInclude Include="Engine\EngineStuff\EngineClass.h" />
     <ClInclude Include="Engine\EngineStuff\EngineTextLocalization.h" />
     <ClInclude Include="Engine\EngineStuff\Window\ViewportHolder.h" />
     <ClInclude Include="Engine\Object\ActorComponent\ActorComponent.h" />
@@ -299,7 +297,6 @@
     <ClInclude Include="Engine\Object\World\World.h" />
     <ClInclude Include="Engine\Input\Input.h" />
     <ClInclude Include="Engine\Overlord\ContentManager.h" />
-    <ClInclude Include="Engine\Overlord\GameCode.h" />
     <ClInclude Include="Engine\Overlord\Overlord.h" />
     <ClInclude Include="Engine\EngineStuff\Framebuffer\MeshFrameBuffer.h" />
     <ClInclude Include="Engine\EngineStuff\Framebuffer\ShadowFrameBuffer.h" />

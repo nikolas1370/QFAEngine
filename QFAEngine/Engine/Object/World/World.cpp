@@ -6,6 +6,7 @@
 #include <EngineStuff/Window/EngineViewport.h>
 #include <EngineStuff/Window/EngineWindow.h>
 #include <Tools/String.h>
+#include <Object/Class.h>
 QFAArray<QWorld*> QWorld::Worlds;
 QFAEngineClassOut(QWorld);
 
@@ -99,7 +100,7 @@ void QWorld::SearchAndAddAudioInList(QSceneComponent* scene)
 
 	for (size_t i = 0; i < scene->ListComponents.Length(); i++)
 	{
-		if (scene->ListComponents[i]->GetClass()->GetId() == QFAClass::ObjectClasses::AudioSceneComponent)
+		if (scene->ListComponents[i]->GetClass()->GetId() == QFAObjectClasses::QOCAudioSceneComponent)
 		{
 			QWorld::SearchAndAddAudioInList(scene->ListComponents[i]);
 			AddAudio((QAudioSceneComponent*)scene->ListComponents[i]);
@@ -114,7 +115,7 @@ void QWorld::SearchAndDeleteAudioInList(QSceneComponent* scene)
 
 	for (size_t i = 0; i < scene->ListComponents.Length(); i++)
 	{
-		if (scene->ListComponents[i]->GetClass()->GetId() == QFAClass::ObjectClasses::AudioSceneComponent)
+		if (scene->ListComponents[i]->GetClass()->GetId() == QFAObjectClasses::QOCAudioSceneComponent)
 		{
 			SearchAndDeleteAudioInList(scene->ListComponents[i]);
 			RemoveAudio((QAudioSceneComponent*)scene->ListComponents[i]);

@@ -252,14 +252,15 @@ void QFAUIEditorFileExplorer::UpdateFolderItemList()
 
 void QFAUIEditorFileExplorer::UpdateCppItemList()
 {
-	if (!QFAGameCode::GetAPI())
+	QFAClassInstance* instance = (QFAClassInstance*)QFAEngineClassInstance::GetGameClassInstance();
+	if (!instance)
 		return;
 
-	std::vector<QFAClass*>& classList = QFAGameCode::GetAPI()->GetGameClassList();
+	std::vector<QFAClass*>& classList = instance->GetClassList();
 	CppItemList->RemoveAllUnit();
 	CppUnitInUse = 0;
 	
-	for (size_t i = 0; i < classList.size(); i++)
+	for (int i = QFAObjectClasses::QOCMAX; i < classList.size(); i++)
 	{
 		if (CppUnitInUse == CppUnitList.size())
 			CppUnitList.push_back(NewUI<QFAEditorExplorerFolderUnit>());
@@ -420,7 +421,8 @@ void QFAUIEditorFileExplorer::NotifyMainEditorWindowDrag(QFAEditorExplorerFolder
 	} 
 	else
 	{
-		std::vector<QFAClass*>& classList = QFAGameCode::GetAPI()->GetGameClassList();
+		std::vector<QFAClass*>& classList = ((QFAClassInstance*)QFAEngineClassInstance::GetGameClassInstance())->GetGameClassList();
+		// need put in QFAEditorExplorerFolderUnit(*unit) class id and don't search here
 		for (size_t i = 0; i < CppUnitInUse; i++)
 			if (CppUnitList[i] == unit)
 				return DragFun(true, classList[i]->GetId());

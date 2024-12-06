@@ -12,6 +12,7 @@
 #include <Object/Actor/StaticMeshActor.h>
 #include <Object/ActorComponent/SceneComponent/Camera/Camera.h>
 #include <EngineStuff/EngineTextLocalization.h>
+#include <Object/Class.h>
 
 class QFAGameCode;
 class QFAEditorFileStorage;
@@ -120,6 +121,11 @@ class QEditorCameraComponent : public QCameraComponent
 };
 
 class QFAEditorLocalization : public QFAEngineLocalization
+{
+	friend QFAGameCode;
+};
+
+class QFAEditorClassInstance : public QFAClassInstance
 {
 	friend QFAGameCode;
 };

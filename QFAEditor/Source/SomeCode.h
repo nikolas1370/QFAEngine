@@ -5,11 +5,11 @@
 #include <Object/Actor/Camera/CameraActor.h>
 #include <Input/Input.h>
 #include <UI/TextLocalization.h>
+#include <Object/Class.h>
 
 class SomeCode : public QActor
 {
     QFACLASS(SomeCode)
-private:
     
 public:
     SomeCode();

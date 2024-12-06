@@ -15,6 +15,7 @@
 #include <EngineStuff/vk/LogicalDevice.h>
 #include <GLFW/glfw3.h>
 #include <Overlord/ContentManager.h>
+#include <Object/Class.h>
 
 #pragma comment(lib, "Winmm.lib")  // for timeBeginPeriod , timeEndPeriod
 
@@ -48,8 +49,8 @@ bool QFAOverlord::StartLife()
     
 	Life = true;
     std::cout << "Engine load time " << (QTime::GetTime() / 10000) << '\n';
-    QFAClass::InitClasses();
-
+    QFAEngineClassInstance::InitClassesEngine();
+    
 	QFAOverlord::MainLoop();
 	return true;
 }

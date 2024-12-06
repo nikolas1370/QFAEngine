@@ -104,5 +104,8 @@
     <ClInclude Include="Editor\EditorWindows\OptionWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="EditorApiFunction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

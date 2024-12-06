@@ -5,7 +5,7 @@
 #include <Tools/String.h>
 #include <Object/Actor/StaticMeshActor.h>
 #include <Overlord/ContentManager.h>
-#include <Overlord/GameCode.h>
+#include <Object/Class.h>
 
 std::vector<QFALevel::StringOffset> QFALevel::SuperString::StringInfos;
 
@@ -81,7 +81,7 @@ QFALevel::QFALevel(std::u32string path)
 			}
 
 			size_t index;
-			if (world->Actors[i]->GetClass()->GetId() == QFAClass::ObjectClasses::StaticMeshActor) 
+			if (world->Actors[i]->GetClass()->GetId() == QFAObjectClasses::QOCStaticMeshActor)
 			{// if actor StaticMeshActor
 				index = FindMeshPath(((AStaticMeshActor*)world->Actors[i])->Mesh.GetMeshDataFileId());
 				if (index)
@@ -161,8 +161,9 @@ QWorld* QFALevel::GetWorld(bool silence)
 		world->SilenceWorld = true;
 
 	world->Actors.Reserve(amountActor);
-	QFAGameCodeFunctions* gApi = QFAEngineGameCode::GetAPI();
-	if (!gApi)
+	
+	QFAEngineClassInstance* instance = QFAEngineClassInstance::GetGameClassInstance();
+	if (!instance)
 		stopExecute("");
 
 	for (size_t i = 0; i < amountActor; i++)
@@ -170,7 +171,7 @@ QWorld* QFALevel::GetWorld(bool silence)
 		QActor* actor = nullptr;
 		if (actorList[i].MeshPathIndex) // actor is AStaticMeshActor
 		{
-			actor = (QActor*)gApi->CreateObject(QFAClass::ObjectClasses::StaticMeshActor);
+			actor = (QActor*)instance->CreateObject(QFAObjectClasses::QOCStaticMeshActor);
 			if (!actor)
 				stopExecute("")
 
@@ -196,7 +197,8 @@ QWorld* QFALevel::GetWorld(bool silence)
 		{
 			if (PathClassList[actorList[i].ActorClassNameIndex]) // if have classId
 			{
-				actor = (QActor*)QFAEngineGameCode::GetAPI()->CreateObject(PathClassList[actorList[i].ActorClassNameIndex]);
+				
+				actor = (QActor*)QFAEngineClassInstance::GetGameClassInstance()->CreateObject(PathClassList[actorList[i].ActorClassNameIndex]);
 				if (!actor)
 					stopExecute("");
 			}
@@ -204,7 +206,7 @@ QWorld* QFALevel::GetWorld(bool silence)
 			{
 				char32_t* className = (char32_t*)(fileStart + si[actorList[i].ActorClassNameIndex]);
 				std::u32string classNameU32(className);
-				actor = (QActor*)QFAEngineGameCode::GetAPI()->CreateObjectByName(QFAString::U32stringToString(classNameU32).c_str());
+				actor = (QActor*)QFAEngineClassInstance::GetGameClassInstance()->CreateObjectByName(QFAString::U32stringToString(classNameU32).c_str());
 				if (!actor)
 					stopExecute("");
 
