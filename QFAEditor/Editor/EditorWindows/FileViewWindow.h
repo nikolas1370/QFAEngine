@@ -6,7 +6,7 @@
 #include <Object/Actor/Actor.h>
 #include <Object/Actor/Camera/FlyingCamera.h>
 #include <EditorFileStorage.h>
-#include <Overlord/ContentManager.h>
+#include <Core//ContentManager.h>
 #include <EngineClassesInterface.h>
 
 class QFAEngineWindow;

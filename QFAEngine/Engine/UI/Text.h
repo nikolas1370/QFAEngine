@@ -1,9 +1,9 @@
 #pragma once
 
 #include <Math/Vector.h>
-#include <EngineStuff/Buffer/VKBuffer.h>
+#include <Core/EngineStuff/Buffer/VKBuffer.h>
 #include <UI/RenderUnit.h>
-#include <EngineStuff/Window/EngineWindow.h>
+#include <Core/EngineStuff/Window/EngineWindow.h>
 #include <Tools/Array.h>
 #include <Tools/Color.h>
 #include "UIParentHiddenChild.h"
@@ -276,6 +276,14 @@ public:
         SFont(){}
     };
 
+    struct SLoadFont
+    {
+        const char* fontPath;
+        SFont* outFont;
+        std::u32string* familyName;
+        std::u32string* styleName;
+    };
+
     enum ELoadFontResult
     {
         LRFSucceed = 0,
@@ -284,8 +292,7 @@ public:
         LRFFontFamilyNameNotFound = 3,// if ib font FamilyName == null, not return if in familyName not void
         LRFFontStyleNameNotFound = 4,// if ib font StyleName == null, not return if in styleName not void
         LRFPathWasNull = 5,
-        LRFFreeTypeError = 6, //Could not init FreeType Library
-        LRFEngineNotInit = 7 // if LoadFont called before Engine was initialized and first window be created
+        LRFFreeTypeError = 6
     };
 
 private:
@@ -301,7 +308,7 @@ private:
     static const int GlyphAtlasWidth = 1000;
     static QFAVKPipeline* Pipeline;
     static QFAVKPipeline* OldPipeline;
-    static unsigned int CountGlyphInBuffer;
+    static unsigned int CountGlyphInBuffer;    
 
     /*
         use for all non textinput text
@@ -324,6 +331,7 @@ private:
     static int maxTextInframe;
     static int NumberTextInFrame;
     static const int MinNumberTextInFrame = 1;// zero index reserv fore pen set
+    static std::vector<SLoadFont> LoadFontList;
 
 protected:
     static VkDescriptorSet PenDescriptorSet;
@@ -361,7 +369,11 @@ private:
     static void CreateTextParameterSet();
     static void RecreateTextParameterSet(VkBuffer buffer, VkBuffer VertexBuffer);
 
-public:
+public:    
+    /*
+        QFAText::SFont* font;
+        QFAText::LoadFont("EngineFiles/Fonts/Roboto-Regular.ttf", font);
+    */
     static ELoadFontResult LoadFont(const char* fontPath, SFont*& outFont, std::u32string* familyName = nullptr, std::u32string* styleName = nullptr);
     static SFont* GetFont(size_t index);
     static SFont* GetFont(std::u32string familyName, std::u32string styleName);

@@ -4,7 +4,7 @@
 #include <assimp/postprocess.h>     
 #include <assimp/material.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/StaticMesh.h>
-#include <EngineStuff/VulkanSuff.h>
+#include <Core/EngineStuff/VulkanSuff.h>
 #include <EngineClassesInterface.h>
 
 class QFAModelLoader

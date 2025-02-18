@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Camera.h"
-#include <Overlord/Overlord.h>
-#include <EngineStuff/Window/EngineViewport.h>
+#include <Core/QFA.h>
+#include <Core/EngineStuff/Window/EngineViewport.h>
 #include <Object/World/World.h>
 #include <Object/Actor/Actor.h>
 QFAEngineClassOut(QCameraComponent);

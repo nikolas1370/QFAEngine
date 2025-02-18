@@ -4,12 +4,12 @@
 
 #include <vulkan/vulkan_core.h>
 #include <array>
-#include <EngineStuff/Window/EngineWindow.h>
-#include <EngineStuff/vk/TextureSampler.h>
-#include <EngineStuff/vk/ImageView.h>
-#include <EngineStuff/Pipline/Pipline.h>
-#include <EngineStuff/Buffer/IndexBuffer.h>
-#include <EngineStuff/Buffer/VertexBuffer.h>
+#include <Core/EngineStuff/Window/EngineWindow.h>
+#include <Core/EngineStuff/vk/TextureSampler.h>
+#include <Core/EngineStuff/vk/ImageView.h>
+#include <Core/EngineStuff/Pipline/Pipline.h>
+#include <Core/EngineStuff/Buffer/IndexBuffer.h>
+#include <Core/EngineStuff/Buffer/VertexBuffer.h>
 
 struct SSVertexMaterial // input vertex Shader 
 {

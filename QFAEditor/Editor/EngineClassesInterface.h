@@ -1,8 +1,8 @@
 #pragma once
-#include <EngineStuff/Image.h>
+#include <Core/EngineStuff/Image.h>
 #include <Object/ActorComponent/SceneComponent/Mesh/MeshBase.h>
-#include <Window/Window.h>
-#include <EngineStuff/Window/ViewportHolder.h>
+#include <Core/Window/Window.h>
+#include <Core/EngineStuff/Window/ViewportHolder.h>
 #include <Object/World/Level.h>
 #include <Object/Actor/Actor.h>
 #include <UI/Text.h>
@@ -11,7 +11,7 @@
 #include <UI/UIImage.h>
 #include <Object/Actor/StaticMeshActor.h>
 #include <Object/ActorComponent/SceneComponent/Camera/Camera.h>
-#include <EngineStuff/EngineTextLocalization.h>
+#include <Core/EngineStuff/EngineTextLocalization.h>
 #include <Object/Class.h>
 
 class QFAGameCode;

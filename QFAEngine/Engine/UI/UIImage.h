@@ -1,11 +1,11 @@
 #pragma once
-#include <EngineStuff/VulkanSuff.h>
+#include <Core/EngineStuff/VulkanSuff.h>
 #include <Tools/Array.h>
 #include <Math/Vector.h>
 #include <UI/RenderUnit.h>
-#include <EngineStuff/Buffer/VKBuffer.h>
+#include <Core/EngineStuff/Buffer/VKBuffer.h>
 #include <Tools/Color.h>
-#include <EngineStuff/Image.h>
+#include <Core/EngineStuff/Image.h>
 
 
 /* ttf type */

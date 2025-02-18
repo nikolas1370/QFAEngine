@@ -1,11 +1,11 @@
 ﻿#include "pch.h"
 #include "MeshBase.h"
 #include <Object/Actor/Actor.h>
-#include <EngineStuff/vk/LogicalDevice.h>
-#include <EngineStuff/VulkanSuff.h>
-#include <EngineStuff/Buffer/VKBuffer.h>
-#include <EngineStuff/Pipline/Pipline.h>
-#include <EngineStuff/Buffer/VertexBuffer.h>
+#include <Core/EngineStuff/vk/LogicalDevice.h>
+#include <Core/EngineStuff/VulkanSuff.h>
+#include <Core/EngineStuff/Buffer/VKBuffer.h>
+#include <Core/EngineStuff/Pipline/Pipline.h>
+#include <Core/EngineStuff/Buffer/VertexBuffer.h>
 #include <Tools/File/FileSystem.h>
 QMeshBaseComponent::SShaderDirLight QMeshBaseComponent::ShaderDL;
 

@@ -137,7 +137,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)External\freetype2.13.2\objs\x64\Debug;$(SolutionDir)External\glfw-3.4.bin.WIN64\lib-vc2022;C:\VulkanSDK\1.3.290.0\Lib;$(SolutionDir)External\freetype-master 2.13.2\objs\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;freetype.lib;XAudio2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;freetype.lib;XAudio2.lib;shaderc_shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OptimizeReferences>false</OptimizeReferences>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
     </Link>
@@ -194,10 +194,11 @@
   <ItemGroup>
     <ClCompile Include="Engine\Audio\Audio.cpp" />
     <ClCompile Include="Engine\Audio\Audio3D.cpp" />
-    <ClCompile Include="Engine\EngineStuff\Audio\AudioLoader.cpp" />
-    <ClCompile Include="Engine\EngineStuff\EngineClass.cpp" />
-    <ClCompile Include="Engine\EngineStuff\EngineTextLocalization.cpp" />
-    <ClCompile Include="Engine\EngineStuff\Window\ViewportHolder.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\Audio\AudioLoader.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\EngineClass.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\EngineTextLocalization.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\ShaderCompiler.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\Window\ViewportHolder.cpp" />
     <ClCompile Include="Engine\Math\Math.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -219,12 +220,12 @@
     <ClCompile Include="Engine\Object\World\Level.cpp" />
     <ClCompile Include="Engine\Object\World\World.cpp" />
     <ClCompile Include="Engine\Input\Input.cpp" />
-    <ClCompile Include="Engine\Overlord\ContentManager.cpp" />
-    <ClCompile Include="Engine\Overlord\Overlord.cpp" />
-    <ClCompile Include="Engine\EngineStuff\Framebuffer\MeshFrameBuffer.cpp" />
-    <ClCompile Include="Engine\EngineStuff\Framebuffer\ShadowFrameBuffer.cpp" />
-    <ClCompile Include="Engine\EngineStuff\Pipline\Pipline.cpp" />
-    <ClCompile Include="Engine\EngineStuff\RenderPass\RenderPassSwapChain.cpp" />
+    <ClCompile Include="Engine\Core\ContentManager.cpp" />
+    <ClCompile Include="Engine\Core\QFA.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\Framebuffer\MeshFrameBuffer.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\Framebuffer\ShadowFrameBuffer.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\Pipline\Pipline.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\RenderPass\RenderPassSwapChain.cpp" />
     <ClCompile Include="Engine\Tools\String.cpp" />
     <ClCompile Include="Engine\UI\Background.cpp" />
     <ClCompile Include="Engine\UI\Canvas.cpp" />
@@ -235,34 +236,34 @@
     <ClCompile Include="Engine\UI\UIImage.cpp" />
     <ClCompile Include="Engine\UI\RenderUnit.cpp" />
     <ClCompile Include="Engine\UI\Text.cpp" />
-    <ClCompile Include="Engine\Overlord\Time.cpp" />
-    <ClCompile Include="Engine\EngineStuff\Buffer\IndexBuffer.cpp" />
+    <ClCompile Include="Engine\Core\Time.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\Buffer\IndexBuffer.cpp" />
     <ClCompile Include="Engine\UI\UIList.cpp" />
     <ClCompile Include="Engine\UI\UIParent.cpp" />
     <ClCompile Include="Engine\UI\UIParentHiddenChild.cpp" />
     <ClCompile Include="Engine\UI\UIParentMultipleUnit.cpp" />
     <ClCompile Include="Engine\UI\UIParentOneUnit.cpp" />
     <ClCompile Include="Engine\UI\UIUnit.cpp" />
-    <ClCompile Include="Engine\EngineStuff\vk\LogicalDevice.cpp" />
-    <ClCompile Include="Engine\EngineStuff\vk\PhysicalDevice.cpp" />
-    <ClCompile Include="Engine\EngineStuff\RenderPass\RenderPassDepth.cpp" />
-    <ClCompile Include="Engine\EngineStuff\RenderPass\MeshRenderPass.cpp" />
-    <ClCompile Include="Engine\EngineStuff\vk\PresentImage.cpp" />
-    <ClCompile Include="Engine\EngineStuff\vk\SwapChain.cpp" />
-    <ClCompile Include="Engine\EngineStuff\RenderPass\TextRenderPass.cpp" />
-    <ClCompile Include="Engine\EngineStuff\Image.cpp" />
-    <ClCompile Include="Engine\EngineStuff\vk\ImageView.cpp" />
-    <ClCompile Include="Engine\EngineStuff\vk\TextureSampler.cpp" />
-    <ClCompile Include="Engine\EngineStuff\Buffer\VertexBuffer.cpp" />
-    <ClCompile Include="Engine\EngineStuff\Buffer\VKBuffer.cpp" />
-    <ClCompile Include="Engine\EngineStuff\vk\VKInstance.cpp" />
-    <ClCompile Include="Engine\EngineStuff\Window\QFAViewportRoot.cpp" />
-    <ClCompile Include="Engine\EngineStuff\Window\UIEvent.cpp" />
-    <ClCompile Include="Engine\EngineStuff\Window\EngineViewport.cpp" />
-    <ClCompile Include="Engine\EngineStuff\Window\EngineWindow.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\vk\LogicalDevice.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\vk\PhysicalDevice.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\RenderPass\RenderPassDepth.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\RenderPass\MeshRenderPass.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\vk\PresentImage.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\vk\SwapChain.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\RenderPass\TextRenderPass.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\Image.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\vk\ImageView.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\vk\TextureSampler.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\Buffer\VertexBuffer.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\Buffer\VKBuffer.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\vk\VKInstance.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\Window\QFAViewportRoot.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\Window\UIEvent.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\Window\EngineViewport.cpp" />
+    <ClCompile Include="Engine\Core\EngineStuff\Window\EngineWindow.cpp" />
     <ClCompile Include="Engine\Tools\File\FileSystem.cpp" />
     <ClCompile Include="Engine\Tools\Stuff.cpp" />
-    <ClCompile Include="Engine\EngineStuff\VulkanStuff.cpp">
+    <ClCompile Include="Engine\Core\EngineStuff\VulkanStuff.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -271,16 +272,17 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Engine\Window\Viewport.cpp" />
-    <ClCompile Include="Engine\Window\Window.cpp" />
+    <ClCompile Include="Engine\Core\Window\Viewport.cpp" />
+    <ClCompile Include="Engine\Core\Window\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Audio\Audio.h" />
     <ClInclude Include="Engine\Audio\Audio3D.h" />
-    <ClInclude Include="Engine\EngineStuff\Audio\AudioLoader.h" />
-    <ClInclude Include="Engine\EngineStuff\EngineClass.h" />
-    <ClInclude Include="Engine\EngineStuff\EngineTextLocalization.h" />
-    <ClInclude Include="Engine\EngineStuff\Window\ViewportHolder.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\Audio\AudioLoader.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\EngineClass.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\EngineTextLocalization.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\ShaderCompiler.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\Window\ViewportHolder.h" />
     <ClInclude Include="Engine\Object\ActorComponent\ActorComponent.h" />
     <ClInclude Include="Engine\Object\ActorComponent\SceneComponent\AudioSceneComponent.h" />
     <ClInclude Include="Engine\Object\Actor\Camera\CameraActor.h" />
@@ -296,12 +298,12 @@
     <ClInclude Include="Engine\Object\World\Level.h" />
     <ClInclude Include="Engine\Object\World\World.h" />
     <ClInclude Include="Engine\Input\Input.h" />
-    <ClInclude Include="Engine\Overlord\ContentManager.h" />
-    <ClInclude Include="Engine\Overlord\Overlord.h" />
-    <ClInclude Include="Engine\EngineStuff\Framebuffer\MeshFrameBuffer.h" />
-    <ClInclude Include="Engine\EngineStuff\Framebuffer\ShadowFrameBuffer.h" />
-    <ClInclude Include="Engine\EngineStuff\Pipline\Pipline.h" />
-    <ClInclude Include="Engine\EngineStuff\RenderPass\RenderPassSwapChain.h" />
+    <ClInclude Include="Engine\Core\ContentManager.h" />
+    <ClInclude Include="Engine\Core\QFA.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\Framebuffer\MeshFrameBuffer.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\Framebuffer\ShadowFrameBuffer.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\Pipline\Pipline.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\RenderPass\RenderPassSwapChain.h" />
     <ClInclude Include="Engine\UI\Background.h" />
     <ClInclude Include="Engine\UI\Canvas.h" />
     <ClInclude Include="Engine\UI\Grid.h" />
@@ -312,39 +314,39 @@
     <ClInclude Include="Engine\UI\UIImage.h" />
     <ClInclude Include="Engine\UI\RenderUnit.h" />
     <ClInclude Include="Engine\UI\Text.h" />
-    <ClInclude Include="Engine\Overlord\Time.h" />
+    <ClInclude Include="Engine\Core\Time.h" />
     <ClInclude Include="Engine\UI\UIList.h" />
     <ClInclude Include="Engine\UI\UIParent.h" />
     <ClInclude Include="Engine\UI\UIParentHiddenChild.h" />
     <ClInclude Include="Engine\UI\UIParentMultipleUnit.h" />
     <ClInclude Include="Engine\UI\UIParentOneUnit.h" />
     <ClInclude Include="Engine\UI\UIUnit.h" />
-    <ClInclude Include="Engine\EngineStuff\Buffer\IndexBuffer.h" />
-    <ClInclude Include="Engine\EngineStuff\vk\LogicalDevice.h" />
-    <ClInclude Include="Engine\EngineStuff\vk\PhysicalDevice.h" />
-    <ClInclude Include="Engine\EngineStuff\RenderPass\RenderPassDepth.h" />
-    <ClInclude Include="Engine\EngineStuff\RenderPass\MeshRenderPass.h" />
-    <ClInclude Include="Engine\EngineStuff\vk\PresentImage.h" />
-    <ClInclude Include="Engine\EngineStuff\vk\QueueFamilies.h" />
-    <ClInclude Include="Engine\EngineStuff\vk\SwapChain.h" />
-    <ClInclude Include="Engine\EngineStuff\RenderPass\TextRenderPass.h" />
-    <ClInclude Include="Engine\EngineStuff\Image.h" />
-    <ClInclude Include="Engine\EngineStuff\vk\ImageView.h" />
-    <ClInclude Include="Engine\EngineStuff\vk\TextureSampler.h" />
-    <ClInclude Include="Engine\EngineStuff\Buffer\VertexBuffer.h" />
-    <ClInclude Include="Engine\EngineStuff\Buffer\VKBuffer.h" />
-    <ClInclude Include="Engine\EngineStuff\vk\VKInstance.h" />
-    <ClInclude Include="Engine\EngineStuff\vk\VKStruct.h" />
-    <ClInclude Include="Engine\EngineStuff\Window\QFAViewportRoot.h" />
-    <ClInclude Include="Engine\EngineStuff\Window\UIEvent.h" />
-    <ClInclude Include="Engine\EngineStuff\Window\EngineViewport.h" />
-    <ClInclude Include="Engine\EngineStuff\Window\EngineWindow.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\Buffer\IndexBuffer.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\vk\LogicalDevice.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\vk\PhysicalDevice.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\RenderPass\RenderPassDepth.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\RenderPass\MeshRenderPass.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\vk\PresentImage.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\vk\QueueFamilies.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\vk\SwapChain.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\RenderPass\TextRenderPass.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\Image.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\vk\ImageView.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\vk\TextureSampler.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\Buffer\VertexBuffer.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\Buffer\VKBuffer.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\vk\VKInstance.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\vk\VKStruct.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\Window\QFAViewportRoot.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\Window\UIEvent.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\Window\EngineViewport.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\Window\EngineWindow.h" />
     <ClInclude Include="Engine\Tools\Array.h" />
     <ClInclude Include="Engine\Tools\Color.h" />
     <ClInclude Include="Engine\Tools\File\FileSystem.h" />
     <ClInclude Include="Engine\Tools\String.h" />
     <ClInclude Include="Engine\Tools\Stuff.h" />
-    <ClInclude Include="Engine\EngineStuff\VulkanSuff.h" />
+    <ClInclude Include="Engine\Core\EngineStuff\VulkanSuff.h" />
     <ClInclude Include="Engine\Math\Math.h" />
     <ClInclude Include="Engine\Math\Vector.h" />
     <ClInclude Include="Engine\Math\Vector2D.h" />
@@ -352,8 +354,8 @@
     <ClInclude Include="Engine\Tools\Debug\OpenGlStuff.h" />
     <ClInclude Include="Engine\Object\Actor\Actor.h" />
     <ClInclude Include="Engine\pch.h" />
-    <ClInclude Include="Engine\Window\Viewport.h" />
-    <ClInclude Include="Engine\Window\Window.h" />
+    <ClInclude Include="Engine\Core\Window\Viewport.h" />
+    <ClInclude Include="Engine\Core\Window\Window.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\DirectionLightShadow\Fragment.shader" />

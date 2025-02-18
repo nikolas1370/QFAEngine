@@ -1,14 +1,14 @@
 ﻿#include "pch.h"
 #include "UIImage.h"
 #include <iostream>
-#include <EngineStuff/vk/LogicalDevice.h>
-#include <EngineStuff/Image.h>
-#include <EngineStuff/Buffer/VertexBuffer.h>
+#include <Core/EngineStuff/vk/LogicalDevice.h>
+#include <Core/EngineStuff/Image.h>
+#include <Core/EngineStuff/Buffer/VertexBuffer.h>
 
-#include <EngineStuff/vk/ImageView.h>
-#include <EngineStuff/vk/TextureSampler.h>
-#include <EngineStuff/Pipline/Pipline.h>
-#include <EngineStuff/Window/EngineWindow.h>
+#include <Core/EngineStuff/vk/ImageView.h>
+#include <Core/EngineStuff/vk/TextureSampler.h>
+#include <Core/EngineStuff/Pipline/Pipline.h>
+#include <Core/EngineStuff/Window/EngineWindow.h>
 #include <Tools/String.h>
 
 VkDescriptorImageInfo QFAUIImage::imageInfo;

@@ -1,10 +1,10 @@
 ﻿#include "pch.h"
 #include "World.h"
 #include <Object/Actor/Actor.h>
-#include <Overlord/Overlord.h>
-#include <Overlord/Time.h>
-#include <EngineStuff/Window/EngineViewport.h>
-#include <EngineStuff/Window/EngineWindow.h>
+#include <Core/QFA.h>
+#include <Core/Time.h>
+#include <Core/EngineStuff/Window/EngineViewport.h>
+#include <Core/EngineStuff/Window/EngineWindow.h>
 #include <Tools/String.h>
 #include <Object/Class.h>
 QFAArray<QWorld*> QWorld::Worlds;

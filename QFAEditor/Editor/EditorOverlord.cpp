@@ -1,22 +1,18 @@
 ﻿#include "epch.h"
 #include "EditorOverlord.h"
 
-#include <Overlord/Time.h>
-#include <Overlord/Overlord.h>
+#include <Core/Time.h>
+#include <Core/QFA.h>
 #include <UI/Text.h>
 #include <EditorWindows/MainEditorWindow.h>
 #include <EditorFileStorage.h>
 #include <GameCodeTool/GameCodeCompiler.h>
-
-QFAShaderCompiler QFAEditorOverlord::compiler;
-
 
 bool QFAEditorOverlord::InitializationDon = false;
 std::u32string QFAEditorOverlord::LoadText;
 QFAEditorMainWindow* QFAEditorOverlord::MainWindow;
 bool QFAEditorOverlord::IsInit = false;
 QFAEditorFileStorage QFAEditorOverlord::Storage;
-
 
 void QFAEditorOverlord::StartLife()
 {  
@@ -25,41 +21,29 @@ void QFAEditorOverlord::StartLife()
     else
         IsInit = true;
 
-    Init();
+    QFAWindowParameter wcp;
+    wcp.name = "QFAEditor";
+    wcp.height = 200;
+    wcp.width = 500;
+    wcp.inCenter = true;
+    wcp.decorated = false;
+
+    QFAOverlord::Init(wcp, U"EngineFiles/Shaders/", "EngineFiles/Fonts/Roboto-Regular.ttf");
+    
+    MainWindow = new QFAEditorMainWindow;
+
+    MainWindow->SetWindow(QFAEditorWindow::GetMainWindows());
+
     std::jthread LoadThread(QFAEditorOverlord::PrepareToWork);
-    QFAOverlord::StartLife();
+
+    QFAOverlord::StartLife(QFAEditorOverlord::StartFrame, QFAEditorOverlord::EndFrame);
 
     delete MainWindow;
-    compiler.EndLife();
     QFAEditorFileStorage::EndLife();
-}
-
-
-
-void QFAEditorOverlord::Init()
-{
-    /*
-        this need to get time compiling shaders 
-    */
-    QTime::Init();
-    compiler.ProcessShaders();
-    QFAOverlord::Init(compiler.ShaderData, false, QFAEditorOverlord::StartFrame, QFAEditorOverlord::EndFrame);
-
-    MainWindow = new QFAEditorMainWindow;    
 }
 
 void QFAEditorOverlord::PrepareToWork()
 {
-
-    /*
-    
-    std::lock_guard
-    
-    отут
-    
-    
-    */
-
     LoadText = U"Load Game code";
     QFAGameCode::LoadCode();
     LoadText = U"Load file : ";
@@ -84,5 +68,3 @@ void QFAEditorOverlord::EndFrame()
 
 
 }
-
-

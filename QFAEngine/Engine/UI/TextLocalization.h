@@ -1,6 +1,6 @@
 ﻿#pragma once
 // this file only for game module
-#include <EngineStuff/EngineTextLocalization.h>
+#include <Core/EngineStuff/EngineTextLocalization.h>
 #include <string>
 #include <vector>
 

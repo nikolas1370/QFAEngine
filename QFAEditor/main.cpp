@@ -3,6 +3,11 @@
 
 int main()
 { 
+    /*
+    
+    need replase to QFAOverlord::Init
+    
+    */
     QFAEditorOverlord::StartLife();
     return 0;
 }

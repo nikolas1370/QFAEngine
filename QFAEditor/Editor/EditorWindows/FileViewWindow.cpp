@@ -1,6 +1,6 @@
 ﻿#include "epch.h"
 #include "FileViewWindow.h"
-#include <EngineStuff/Window/EngineWindow.h>
+#include <Core/EngineStuff/Window/EngineWindow.h>
 #include <Object/World/World.h>
 #include <UI/UIImage.h>
 #include <UI/Canvas.h>	
@@ -8,8 +8,8 @@
 #include "UI/Scroll.h"	 
 #include <EditorUI/FileViewUnit.h>
 #include <Tools/File/FileSystem.h>
-#include <EngineStuff/Image.h>
-#include <EngineStuff/Window/EngineViewport.h>
+#include <Core/EngineStuff/Image.h>
+#include <Core/EngineStuff/Window/EngineViewport.h>
 #include <filesystem>
 #include <EngineClassesInterface.h>
 

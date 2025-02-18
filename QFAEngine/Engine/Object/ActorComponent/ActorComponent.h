@@ -1,6 +1,6 @@
 #pragma once
 #include <Object/Object.h>
-#include <EngineStuff/EngineClass.h>
+#include <Core/EngineStuff/EngineClass.h>
 class QWorld;
 class QActor;
 /*

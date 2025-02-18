@@ -5,10 +5,10 @@
 #include <Windows.h> 
 #include <iostream>
 #include <processthreadsapi.h>
-#include <EngineStuff/VulkanSuff.h>
+#include <Core/EngineStuff/VulkanSuff.h>
 #include <Object/Actor/Actor.h>
 #include <Object/Class.h>
-#include <EngineStuff/EngineTextLocalization.h>
+#include <Core/EngineStuff/EngineTextLocalization.h>
 
 // pdb file need for visual studio EDI https://learn.microsoft.com/en-us/visualstudio/debugger/specify-symbol-dot-pdb-and-source-files-in-the-visual-studio-debugger?view=vs-2022
 const wchar_t* QFAGameCode::LoadDllPath = L"GameCode.dll";

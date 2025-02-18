@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 #include "TextInput.h"
-#include "EngineStuff/Buffer/VertexBuffer.h"
+#include <Core/EngineStuff/Buffer/VertexBuffer.h>
 #include <Tools/String.h>
 
 char QFAUITextInput::convertStr[21];

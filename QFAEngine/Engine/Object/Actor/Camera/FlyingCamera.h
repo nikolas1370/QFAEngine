@@ -1,6 +1,6 @@
 #pragma once
-#include <Window/Viewport.h>
-#include <Window/Window.h>
+#include <Core/Window/Viewport.h>
+#include <Core/Window/Window.h>
 #include <Object/Actor/Camera/CameraActor.h>
 #include <Input/Input.h>
 

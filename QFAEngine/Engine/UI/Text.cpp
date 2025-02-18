@@ -1,14 +1,14 @@
 ﻿#include "pch.h"
 #include "Text.h"
-#include <EngineStuff/vk/LogicalDevice.h>
-#include <EngineStuff/Image.h>
-#include <EngineStuff/Buffer/VertexBuffer.h>
+#include <Core/EngineStuff/vk/LogicalDevice.h>
+#include <Core/EngineStuff/Image.h>
+#include <Core/EngineStuff/Buffer/VertexBuffer.h>
 #include <UI/UIParentMultipleUnit.h>
-#include <EngineStuff/Pipline/Pipline.h>
+#include <Core/EngineStuff/Pipline/Pipline.h>
 #include "UIParent.h"
-#include <EngineStuff/vk/TextureSampler.h>
+#include <Core/EngineStuff/vk/TextureSampler.h>
 #include <Tools/String.h>
-#include <EngineStuff/EngineTextLocalization.h>
+#include <Core/EngineStuff/EngineTextLocalization.h>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H  
@@ -43,8 +43,7 @@ unsigned int QFAText::MaxAttlas = 10;
 int QFAText::NumberTextInFrame;
 int QFAText::maxTextInframe = 0;
 VkDescriptorSet QFAText::PenDescriptorSet;
-
-
+std::vector<QFAText::SLoadFont> QFAText::LoadFontList;
 
 QFAText::QFAText()
 {
@@ -62,6 +61,16 @@ void QFAText::Init(VkRenderPass renderPass, VkCommandPool commandPool_)
     AtlassSampler = new QFAVKTextureSampler();
     
     CreatePipeline();
+    if (!LoadFontList.size())
+        stopExecute("need use QFAText::LoadFont before")
+    else
+    { // if LoadFont be call before QFAText::Init font be add here    
+        for (size_t i = 0; i < LoadFontList.size(); i++)
+            if (QFAText::ELoadFontResult res = LoadFont(LoadFontList[i].fontPath, LoadFontList[i].outFont, LoadFontList[i].familyName, LoadFontList[i].styleName))
+                stopExecute("Font not load"); // need display name error and font name
+
+        LoadFontList.clear();
+    }
 
     QFAText::GlyphInfoData = (GlyphShader*)malloc(sizeof(GlyphShader) * QFAText::CountGlyphInBuffer);
     PenVertexBufer = new QFAVKVertexBuffer(sizeof(GlyphShader), nullptr, commandPool);
@@ -676,7 +685,10 @@ void QFAText::RenderPen(VkCommandBuffer comandebuffer)
 QFAText::ELoadFontResult QFAText::LoadFont(const char* fontPath, SFont*& outFont, std::u32string* familyName, std::u32string* styleName)
 {
     if (!Pipeline)
-        return ELoadFontResult::LRFEngineNotInit;
+    {
+        LoadFontList.push_back(SLoadFont{ fontPath, outFont , familyName, styleName });
+        return ELoadFontResult::LRFSucceed;
+    }
     
     if (!fontPath)
         return ELoadFontResult::LRFPathWasNull;
@@ -694,7 +706,6 @@ QFAText::ELoadFontResult QFAText::LoadFont(const char* fontPath, SFont*& outFont
 
     if (!font->face->style_name && styleName)
         return ELoadFontResult::LRFFontStyleNameNotFound;
-
     
     if (familyName)
         font->familyName = *familyName;

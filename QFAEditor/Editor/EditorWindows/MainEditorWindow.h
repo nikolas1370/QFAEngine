@@ -100,7 +100,7 @@ private:
 	void AddActorToWorlds(QActor* actor, std::u32string actorName, size_t id, bool isCppClass);
 
 	void CreateInput();
-
+	void SetWindow(QFAEngineWindow* win);
 public:
 	QFAEditorMainWindow();
 	~QFAEditorMainWindow();

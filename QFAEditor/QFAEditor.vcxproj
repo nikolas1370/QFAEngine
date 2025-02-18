@@ -122,8 +122,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.290.0\Lib;$(SolutionDir)x64\Debug;$(SolutionDir)External\Shaderc\lib;$(SolutionDir)External\Assimp\lib\x64;$(SolutionDir)External\freetype-master 2.13.2\objs\x64\Debug;$(SolutionDir)External\icu4c-74_2\lib64</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);QFAEngine.lib;shaderc_shared.lib;icuuc.lib;assimp-vc143-mt.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.290.0\Lib;$(SolutionDir)x64\Debug;$(SolutionDir)External\Assimp\lib\x64;$(SolutionDir)External\freetype-master 2.13.2\objs\x64\Debug;$(SolutionDir)External\icu4c-74_2\lib64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);QFAEngine.lib;icuuc.lib;assimp-vc143-mt.lib</AdditionalDependencies>
     </Link>
     <ProjectReference>
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
@@ -169,7 +169,6 @@
     <ClCompile Include="Editor\epch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Editor\ShaderCompiler\ShaderCompiler.cpp" />
     <ClCompile Include="Editor\EditorWindows\MainEditorWindow.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
@@ -188,7 +187,6 @@
     <ClInclude Include="Editor\GameCodeTool\GameCodeCompiler.h" />
     <ClInclude Include="Editor\ModelLoader.h" />
     <ClInclude Include="Editor\epch.h" />
-    <ClInclude Include="Editor\ShaderCompiler\ShaderCompiler.h" />
     <ClInclude Include="Editor\EditorWindows\MainEditorWindow.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

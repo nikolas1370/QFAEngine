@@ -1,7 +1,7 @@
 #pragma once	
 #include <Object/Object.h>
 #include <Math/Vector.h>
-#include <EngineStuff/EngineClass.h>
+#include <Core/EngineStuff/EngineClass.h>
 class QFAShaderProgram;
 class QFAEngineViewport;
 class QFAEngineWindow;

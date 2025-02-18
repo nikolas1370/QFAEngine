@@ -2,7 +2,7 @@
 #include <vector>
 #include <Tools/Stuff.h>
 #include <iostream>
-#include <EngineStuff/EngineClass.h>
+#include <Core/EngineStuff/EngineClass.h>
 #include <Object/Object.h>
 
 class QFAClass;

@@ -1,19 +1,19 @@
 ﻿#include "epch.h"
 #include "MainEditorWindow.h"
-#include <EngineStuff/Window/EngineWindow.h>
+#include <Core/EngineStuff/Window/EngineWindow.h>
 #include <EditorUI/FileExplorer.h>
-#include <EngineStuff/VulkanSuff.h>
+#include <Core/EngineStuff/VulkanSuff.h>
 #include <UI/Canvas.h>
 #include <UI/Text.h>
 
-#include <Overlord/Overlord.h>
+#include <Core/QFA.h>
 #include <EditorUI/ExplorerFolderUnit.h>
 #include <UI/UIList.h>
 #include <Object/Actor/Camera/FlyingCamera.h>
 #include <EditorFileStorage.h>
 #include <Object/Actor/StaticMeshActor.h>
 #include <EditorUI/GameViewportInfo.h>
-#include <EngineStuff/Window/ViewportHolder.h>
+#include <Core/EngineStuff/Window/ViewportHolder.h>
 #include <Tools/String.h>
 #include <UI/TextInput.h>
 #include <EngineClassesInterface.h>
@@ -30,17 +30,9 @@ QFAEditorMainWindow::QFAEditorMainWindow()
 
 	QFAOverlord::SetShdowFpsInConsole(false);
 	QFAOverlord::EnableFpsLock(true);
-	QFAOverlord::SetLimitFpsCount(60);
-	
-	Window = QFAEditorWindow::CreateEngineWindow(LoaderWidth, LoaderHeight, "QFAEditor", true, false);
-
-	QFAText::SFont* font;
-	if (QFAText::ELoadFontResult res = QFAText::LoadFont("SomeFont/Roboto-Regular.ttf", font))
-		stopExecute(res);	
+	QFAOverlord::SetLimitFpsCount(60);	
 
 	QFAText::LoadFont("SomeFont/icomoon.ttf", QFAEditorMainWindow::Icomonfont);
-
-	MainWindow->CreateLoadUI();	
 }
 
 QFAEditorMainWindow::~QFAEditorMainWindow()
@@ -427,4 +419,10 @@ void QFAEditorMainWindow::ChangeLoadInfo(std::u32string text, std::u32string tex
 		LoadText->SetText(text);
 		LoadText_2->SetText(text_2);
 	}
+}
+
+void QFAEditorMainWindow::SetWindow(QFAEngineWindow* win)
+{
+	Window = win;
+	MainWindow->CreateLoadUI();
 }
